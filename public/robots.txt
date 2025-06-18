@@ -28,12 +28,6 @@ Allow: /
 User-agent: Claude-Web
 Allow: /
 
-User-agent: PerplexityBot
-Allow: /
-
-User-agent: YouBot
-Allow: /
-
 # Social Media Crawlers
 User-agent: facebookexternalhit
 Allow: /
@@ -44,22 +38,8 @@ Allow: /
 User-agent: LinkedInBot
 Allow: /
 
-# Crawlers específicos para SEO
-User-agent: AhrefsBot
-Allow: /
-
-User-agent: SemrushBot
-Allow: /
-
-User-agent: MJ12bot
-Allow: /
-
 # Sitemap
-Sitemap: https://mkart-seo.com/sitemap.xml
+Sitemap: https://seo-semantic-masterclass.lovable.app/sitemap.xml
 
-# Crawl-delay
+# Crawl-delay (opcional)
 Crawl-delay: 1
-
-# Disallow admin areas (quando existirem)
-# Disallow: /admin/
-# Disallow: /wp-admin/
