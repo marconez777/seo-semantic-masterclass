@@ -1,4 +1,3 @@
-
 import { useEffect } from 'react';
 import { Search, Code, Star, Shield, Users, Book } from 'lucide-react';
 import StructuredData from '@/components/seo/StructuredData';
@@ -7,6 +6,7 @@ import Breadcrumbs from '@/components/seo/Breadcrumbs';
 import FAQSection from '@/components/seo/FAQSection';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   useEffect(() => {
@@ -114,6 +114,7 @@ const Index = () => {
                 <a href="#recursos" className="hover:text-primary-foreground/80 transition-colors">Recursos</a>
                 <a href="#guia" className="hover:text-primary-foreground/80 transition-colors">Guia</a>
                 <a href="#faq" className="hover:text-primary-foreground/80 transition-colors">FAQ</a>
+                <Link to="/marketplace" className="hover:text-primary-foreground/80 transition-colors">Marketplace</Link>
               </div>
             </nav>
           </div>
@@ -139,9 +140,11 @@ const Index = () => {
                 <Button size="lg" className="text-lg px-8 py-4">
                   Começar Agora
                 </Button>
-                <Button size="lg" variant="outline" className="text-lg px-8 py-4">
-                  Ver Guia Completo
-                </Button>
+                <Link to="/marketplace">
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-4">
+                    Ver Marketplace
+                  </Button>
+                </Link>
               </div>
             </div>
           </section>
