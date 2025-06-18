@@ -101,7 +101,7 @@ const FilterSidebar = () => {
   };
 
   return (
-    <aside className="w-80 bg-white border-r border-gray-200 h-full overflow-y-auto">
+    <aside className="w-80 bg-white border-r border-gray-200 h-full overflow-y-auto flex-shrink-0">
       <div className="p-6">
         <h2 className="text-lg font-semibold text-gray-900 mb-6">Filtros</h2>
         
@@ -110,7 +110,7 @@ const FilterSidebar = () => {
             <div key={section.title} className="border-b border-gray-100 pb-4">
               <button
                 onClick={() => toggleSection(index)}
-                className="flex items-center justify-between w-full text-left py-2"
+                className="flex items-center justify-between w-full text-left py-2 hover:text-blue-600 transition-colors"
               >
                 <h3 className="font-medium text-gray-900">{section.title}</h3>
                 {section.isOpen ? (
@@ -123,7 +123,7 @@ const FilterSidebar = () => {
               {section.isOpen && (
                 <div className="mt-3 space-y-2 max-h-48 overflow-y-auto">
                   {section.items.map((item) => (
-                    <label key={item.name} className="flex items-center space-x-3 cursor-pointer">
+                    <label key={item.name} className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 p-1 rounded">
                       <input
                         type="checkbox"
                         className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"

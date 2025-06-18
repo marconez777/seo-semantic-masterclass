@@ -2,6 +2,7 @@
 import { useParams, useLocation } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import SitesTable from '@/components/layout/SitesTable';
+import FilterSidebar from '@/components/layout/FilterSidebar';
 import SEOHead from '@/components/seo/SEOHead';
 
 const CategoryPage = () => {
@@ -28,6 +29,20 @@ const CategoryPage = () => {
         description: 'Publicações patrocinadas em sites de alta autoridade para aumentar visibilidade e gerar tráfego qualificado.',
         h1: 'Publicação Patrocinada',
         content: 'Amplifique o alcance do seu conteúdo através de publicações estratégicas em sites de alta relevância.'
+      }
+    },
+    'link-building': {
+      'do-follow': {
+        title: 'Links DoFollow - Link Building Premium | MK Art SEO',
+        description: 'Links DoFollow de alta qualidade para transferir autoridade e melhorar seu ranking nos buscadores.',
+        h1: 'Links DoFollow Premium',
+        content: 'Construa autoridade real com links DoFollow de sites de alta qualidade e relevância para seu nicho.'
+      },
+      'no-follow': {
+        title: 'Links NoFollow - Diversificação de Link Profile | MK Art SEO',
+        description: 'Links NoFollow estratégicos para criar um perfil de links natural e diversificado.',
+        h1: 'Links NoFollow Estratégicos',
+        content: 'Mantenha um perfil de links natural com nossa seleção de links NoFollow de qualidade.'
       }
     },
     'nichos': {
@@ -80,13 +95,17 @@ const CategoryPage = () => {
         type="service"
       />
       
-      <PageLayout breadcrumbItems={breadcrumbItems}>
+      <PageLayout breadcrumbItems={breadcrumbItems} showSidebar={false}>
         <div className="bg-white min-h-full">
           <div className="p-6 border-b border-gray-200">
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{data.h1}</h1>
             <p className="text-lg text-gray-600 max-w-3xl">{data.content}</p>
           </div>
-          <SitesTable />
+          
+          <div className="flex">
+            <FilterSidebar />
+            <SitesTable />
+          </div>
         </div>
       </PageLayout>
     </>

@@ -22,7 +22,7 @@ const PageLayout = ({ children, breadcrumbItems, showSidebar = true }: PageLayou
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex min-h-screen">
           {showSidebar && <ServicesSidebar />}
-          <main className={showSidebar ? "flex-1" : "w-full"} role="main">
+          <main className="flex-1" role="main">
             {children}
           </main>
         </div>
