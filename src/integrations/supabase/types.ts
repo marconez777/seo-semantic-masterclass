@@ -14,7 +14,112 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      backlinks: {
+        Row: {
+          categoria: string
+          criado_em: string
+          da: number
+          dr: number
+          id: string
+          site_url: string
+          trafego_mensal: number
+          valor: number
+        }
+        Insert: {
+          categoria: string
+          criado_em?: string
+          da: number
+          dr: number
+          id?: string
+          site_url: string
+          trafego_mensal: number
+          valor: number
+        }
+        Update: {
+          categoria?: string
+          criado_em?: string
+          da?: number
+          dr?: number
+          id?: string
+          site_url?: string
+          trafego_mensal?: number
+          valor?: number
+        }
+        Relationships: []
+      }
+      favoritos: {
+        Row: {
+          backlink_id: string
+          criado_em: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          backlink_id: string
+          criado_em?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          backlink_id?: string
+          criado_em?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favoritos_backlink_id_fkey"
+            columns: ["backlink_id"]
+            isOneToOne: false
+            referencedRelation: "backlinks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedidos: {
+        Row: {
+          backlink_id: string
+          criado_em: string
+          id: string
+          link_publicacao: string | null
+          pagamento_status: string
+          publicacao_status: string
+          texto_ancora: string
+          url_destino: string
+          user_id: string
+        }
+        Insert: {
+          backlink_id: string
+          criado_em?: string
+          id?: string
+          link_publicacao?: string | null
+          pagamento_status?: string
+          publicacao_status?: string
+          texto_ancora: string
+          url_destino: string
+          user_id: string
+        }
+        Update: {
+          backlink_id?: string
+          criado_em?: string
+          id?: string
+          link_publicacao?: string | null
+          pagamento_status?: string
+          publicacao_status?: string
+          texto_ancora?: string
+          url_destino?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_backlink_id_fkey"
+            columns: ["backlink_id"]
+            isOneToOne: false
+            referencedRelation: "backlinks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
