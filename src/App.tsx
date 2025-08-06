@@ -10,6 +10,7 @@ import AgenciaBacklinks from "./pages/AgenciaBacklinks";
 import ConsultoriaSeo from "./pages/ConsultoriaSeo";
 import ComprarBacklinks from "./pages/ComprarBacklinks";
 import Auth from "./pages/Auth";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 const queryClient = new QueryClient();
 
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/consultoria-de-seo-backlinks" element={<ConsultoriaSeo />} />
           <Route path="/comprar-backlinks" element={<ComprarBacklinks />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/payment-success" element={<PaymentSuccess />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

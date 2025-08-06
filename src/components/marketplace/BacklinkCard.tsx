@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
 import { useNavigate } from "react-router-dom";
+import PurchaseModal from "./PurchaseModal";
 
 type Backlink = Database['public']['Tables']['backlinks']['Row'];
 
@@ -18,6 +19,7 @@ const BacklinkCard = ({ backlink }: BacklinkCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [loading, setLoading] = useState(false);
   const [user, setUser] = useState<any>(null);
+  const [showPurchaseModal, setShowPurchaseModal] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -163,11 +165,7 @@ const BacklinkCard = ({ backlink }: BacklinkCardProps) => {
       return;
     }
 
-    // TODO: Implement purchase modal
-    toast({
-      title: "Em desenvolvimento",
-      description: "O modal de compra será implementado na próxima etapa."
-    });
+    setShowPurchaseModal(true);
   };
 
   return (
@@ -237,6 +235,12 @@ const BacklinkCard = ({ backlink }: BacklinkCardProps) => {
           Comprar Backlink
         </Button>
       </CardContent>
+      
+      <PurchaseModal 
+        isOpen={showPurchaseModal}
+        onClose={() => setShowPurchaseModal(false)}
+        backlink={backlink}
+      />
     </Card>
   );
 };
