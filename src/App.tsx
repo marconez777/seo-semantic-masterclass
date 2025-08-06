@@ -9,6 +9,7 @@ import Contact from "./pages/Contact";
 import AgenciaBacklinks from "./pages/AgenciaBacklinks";
 import ConsultoriaSeo from "./pages/ConsultoriaSeo";
 import ComprarBacklinks from "./pages/ComprarBacklinks";
+import ComprarBacklinksCategoria from "./pages/ComprarBacklinksCategoria";
 import Auth from "./pages/Auth";
 import PaymentSuccess from "./pages/PaymentSuccess";
 import Dashboard from "./pages/Dashboard";
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/agencia-de-backlinks" element={<AgenciaBacklinks />} />
           <Route path="/consultoria-de-seo-backlinks" element={<ConsultoriaSeo />} />
           <Route path="/comprar-backlinks" element={<ComprarBacklinks />} />
+          <Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
           <Route path="/painel" element={<Dashboard />} />

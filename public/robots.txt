@@ -39,7 +39,7 @@ User-agent: LinkedInBot
 Allow: /
 
 # Sitemap
-Sitemap: https://seo-semantic-masterclass.lovable.app/sitemap.xml
+Sitemap: https://mkart.com.br/sitemap.xml
 
 # Crawl-delay (opcional)
 Crawl-delay: 1

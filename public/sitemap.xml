@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Página Principal -->
+  <url>
+    <loc>https://mkart.com.br/</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Páginas Institucionais -->
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/agencia-backlinks</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/consultoria-seo</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/contact</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- Categorias de Backlinks -->
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-saude</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-direito</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-marketing</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-financas</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-tecnologia</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-educacao</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-varejo</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-imobiliario</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-turismo</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-alimentacao</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-esportes</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://mkart.com.br/comprar-backlinks-entretenimento</loc>
+    <lastmod>2025-08-06</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+</urlset>

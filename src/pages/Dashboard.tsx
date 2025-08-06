@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import StructuredData from "@/components/seo/StructuredData";
+import SEOHead from "@/components/seo/SEOHead";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PurchasesTab from "@/components/dashboard/PurchasesTab";
 import FavoritesTab from "@/components/dashboard/FavoritesTab";
@@ -64,6 +65,11 @@ const Dashboard = () => {
 
   return (
     <>
+      <SEOHead
+        title="Meu Painel - MK Art SEO"
+        description="Acompanhe suas compras de backlinks e gerencie seus favoritos."
+        noindex={true}
+      />
       <StructuredData type="website" data={pageData} />
       <Header />
       

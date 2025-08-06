@@ -1,5 +1,6 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/seo/SEOHead";
 import StructuredData from "@/components/seo/StructuredData";
 import BacklinkListing from "@/components/marketplace/BacklinkListing";
 
@@ -12,6 +13,12 @@ const ComprarBacklinks = () => {
 
   return (
     <>
+      <SEOHead
+        title="Comprar Backlinks de Qualidade | Sites com Alta Autoridade e Tráfego - MK Art SEO"
+        description="Compre backlinks de sites com alta autoridade. Catálogo com centenas de opções organizadas por categoria e métricas transparentes. DR alto, tráfego real."
+        canonicalUrl="https://mkart.com.br/comprar-backlinks"
+        keywords="comprar backlinks, backlinks de qualidade, SEO, link building, autoridade, DR, DA"
+      />
       <StructuredData type="website" data={pageData} />
       <Header />
       

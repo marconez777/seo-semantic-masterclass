@@ -8,6 +8,7 @@ import FAQSection from "@/components/seo/FAQSection";
 import NewsletterSection from "@/components/sections/NewsletterSection";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import SEOHead from "@/components/seo/SEOHead";
 import StructuredData from "@/components/seo/StructuredData";
 
 const Index = () => {
@@ -49,6 +50,12 @@ const Index = () => {
 
   return (
     <>
+      <SEOHead
+        title="MK Art SEO - Comprar Backlinks de Qualidade | Agência Especializada"
+        description="Compre backlinks de sites com alta autoridade. Agência especializada em link building com catálogo de centenas de sites verificados. Resultados garantidos."
+        canonicalUrl="https://mkart.com.br/"
+        keywords="comprar backlinks, agencia seo, link building, backlinks qualidade, autoridade, DR, DA, SEO"
+      />
       <StructuredData type="organization" data={organizationData} />
       <StructuredData type="website" data={websiteData} />
       
