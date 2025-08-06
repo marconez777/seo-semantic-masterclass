@@ -53,7 +53,7 @@ const PaymentSuccess = () => {
             
             <div className="space-y-4">
               <a
-                href="/dashboard"
+                href="/painel"
                 className="inline-flex items-center px-6 py-3 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
               >
                 Ver Meus Pedidos

@@ -11,6 +11,7 @@ import ConsultoriaSeo from "./pages/ConsultoriaSeo";
 import ComprarBacklinks from "./pages/ComprarBacklinks";
 import Auth from "./pages/Auth";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import Dashboard from "./pages/Dashboard";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
           <Route path="/comprar-backlinks" element={<ComprarBacklinks />} />
           <Route path="/auth" element={<Auth />} />
           <Route path="/payment-success" element={<PaymentSuccess />} />
+          <Route path="/painel" element={<Dashboard />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
