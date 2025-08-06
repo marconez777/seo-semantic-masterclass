@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import BacklinkCard from "./BacklinkCard";
+import BacklinkTable from "./BacklinkTable";
 import BacklinkFilters from "./BacklinkFilters";
 import { Database } from "@/integrations/supabase/types";
 
@@ -102,16 +102,15 @@ const BacklinkListing = () => {
       <div className="lg:col-span-3">
         {filteredBacklinks.length === 0 ? (
           <div className="text-center py-12">
+            <h3 className="text-xl font-semibold text-foreground mb-2">
+              Nenhum site encontrado
+            </h3>
             <p className="text-muted-foreground">
-              Nenhum backlink encontrado com os filtros aplicados.
+              Tente ajustar os filtros para encontrar mais opções.
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredBacklinks.map((backlink) => (
-              <BacklinkCard key={backlink.id} backlink={backlink} />
-            ))}
-          </div>
+          <BacklinkTable backlinks={filteredBacklinks} />
         )}
       </div>
     </div>

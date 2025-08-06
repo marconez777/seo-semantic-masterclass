@@ -6,7 +6,7 @@ import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/seo/SEOHead";
 import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-import BacklinkCard from "@/components/marketplace/BacklinkCard";
+import BacklinkTable from "@/components/marketplace/BacklinkTable";
 import CategoryBacklinkFilters from "@/components/marketplace/CategoryBacklinkFilters";
 
 interface Backlink {
@@ -207,14 +207,7 @@ const ComprarBacklinksCategoria = () => {
                 </p>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredBacklinks.map((backlink) => (
-                  <BacklinkCard 
-                    key={backlink.id} 
-                    backlink={backlink}
-                  />
-                ))}
-              </div>
+              <BacklinkTable backlinks={filteredBacklinks} />
             )}
 
             <section className="mt-16 prose prose-lg max-w-none text-muted-foreground">
