@@ -84,7 +84,9 @@ export type Database = {
           link_publicacao: string | null
           pagamento_status: string
           publicacao_status: string
+          stripe_session_id: string | null
           texto_ancora: string
+          updated_at: string | null
           url_destino: string
           user_id: string
         }
@@ -95,7 +97,9 @@ export type Database = {
           link_publicacao?: string | null
           pagamento_status?: string
           publicacao_status?: string
+          stripe_session_id?: string | null
           texto_ancora: string
+          updated_at?: string | null
           url_destino: string
           user_id: string
         }
@@ -106,7 +110,9 @@ export type Database = {
           link_publicacao?: string | null
           pagamento_status?: string
           publicacao_status?: string
+          stripe_session_id?: string | null
           texto_ancora?: string
+          updated_at?: string | null
           url_destino?: string
           user_id?: string
         }
