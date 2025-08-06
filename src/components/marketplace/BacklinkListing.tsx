@@ -14,7 +14,9 @@ const BacklinkListing = () => {
     categoria: '',
     minDR: 0,
     maxPrice: 1000,
-    minTraffic: 0
+    minTraffic: 0,
+    selectedDRRanges: [] as string[],
+    selectedCategories: [] as string[]
   });
 
   useEffect(() => {
@@ -44,6 +46,24 @@ const BacklinkListing = () => {
   const applyFilters = () => {
     let filtered = [...backlinks];
 
+    // Apply DR range filters
+    if (filters.selectedDRRanges && filters.selectedDRRanges.length > 0) {
+      filtered = filtered.filter(link => {
+        return filters.selectedDRRanges.some(range => {
+          const [min, max] = range.split(' a ').map(num => parseInt(num));
+          return link.dr >= min && link.dr <= max;
+        });
+      });
+    }
+
+    // Apply category filters
+    if (filters.selectedCategories && filters.selectedCategories.length > 0) {
+      filtered = filtered.filter(link => 
+        filters.selectedCategories.includes(link.categoria)
+      );
+    }
+
+    // Legacy filters (keeping for backward compatibility)
     if (filters.categoria) {
       filtered = filtered.filter(link => 
         link.categoria.toLowerCase().includes(filters.categoria.toLowerCase())
