@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -17,8 +17,39 @@ interface BacklinkCardProps {
 const BacklinkCard = ({ backlink }: BacklinkCardProps) => {
   const [isFavorited, setIsFavorited] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [user, setUser] = useState<any>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    checkUser();
+    checkIfFavorited();
+  }, []);
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    setUser(user);
+  };
+
+  const checkIfFavorited = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .from('favoritos')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('backlink_id', backlink.id)
+        .single();
+
+      if (!error && data) {
+        setIsFavorited(true);
+      }
+    } catch (error) {
+      // Not favorited
+    }
+  };
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -45,15 +76,25 @@ const BacklinkCard = ({ backlink }: BacklinkCardProps) => {
   };
 
   const handleFavorite = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
     if (!user) {
+      // Save current URL for redirect after login
+      localStorage.setItem('redirect_after_login', window.location.pathname);
       toast({
         title: "Login necessário",
-        description: "Você precisa estar logado para favoritar backlinks.",
+        description: "Você precisa estar logado para realizar esta ação. Faça login ou crie uma conta gratuita.",
         variant: "destructive"
       });
       navigate('/auth');
+      return;
+    }
+
+    // Check if email is confirmed
+    if (!user.email_confirmed_at) {
+      toast({
+        title: "Email não confirmado",
+        description: "Você precisa confirmar seu email antes de favoritar backlinks. Verifique sua caixa de entrada.",
+        variant: "destructive"
+      });
       return;
     }
 
@@ -100,22 +141,32 @@ const BacklinkCard = ({ backlink }: BacklinkCardProps) => {
   };
 
   const handleBuy = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    
     if (!user) {
+      // Save current URL for redirect after login
+      localStorage.setItem('redirect_after_login', window.location.pathname);
       toast({
         title: "Login necessário",
-        description: "Você precisa estar logado para comprar backlinks.",
+        description: "Você precisa estar logado para realizar esta ação. Faça login ou crie uma conta gratuita.",
         variant: "destructive"
       });
       navigate('/auth');
       return;
     }
 
-    // TODO: Implement purchase flow
+    // Check if email is confirmed
+    if (!user.email_confirmed_at) {
+      toast({
+        title: "Email não confirmado",
+        description: "Você precisa confirmar seu email antes de comprar backlinks. Verifique sua caixa de entrada.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // TODO: Implement purchase modal
     toast({
       title: "Em desenvolvimento",
-      description: "A funcionalidade de compra será implementada na próxima etapa."
+      description: "O modal de compra será implementado na próxima etapa."
     });
   };
 

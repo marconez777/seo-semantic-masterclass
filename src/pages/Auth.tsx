@@ -23,12 +23,32 @@ const Auth = () => {
     const checkUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const redirect = searchParams.get('redirect') || '/';
+        const redirect = localStorage.getItem('redirect_after_login') || '/';
+        localStorage.removeItem('redirect_after_login');
         navigate(redirect);
       }
     };
     checkUser();
-  }, [navigate, searchParams]);
+
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        if (event === 'SIGNED_IN' && session?.user) {
+          const redirect = localStorage.getItem('redirect_after_login') || '/';
+          localStorage.removeItem('redirect_after_login');
+          
+          toast({
+            title: "Login realizado com sucesso!",
+            description: "Você pode repetir sua ação anterior."
+          });
+          
+          navigate(redirect);
+        }
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [navigate, toast]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -48,8 +68,7 @@ const Auth = () => {
           description: "Bem-vindo de volta."
         });
 
-        const redirect = searchParams.get('redirect') || '/';
-        navigate(redirect);
+        // Don't redirect here, let the auth state listener handle it
       } else {
         const redirectUrl = `${window.location.origin}/`;
         
@@ -65,13 +84,25 @@ const Auth = () => {
 
         toast({
           title: "Conta criada com sucesso!",
-          description: "Verifique seu email para confirmar sua conta."
+          description: "Verifique seu email para confirmar sua conta. Após a confirmação, você poderá fazer login."
         });
       }
     } catch (error: any) {
+      let errorMessage = "Ocorreu um erro inesperado.";
+      
+      if (error.message.includes("Invalid login credentials")) {
+        errorMessage = "Email ou senha incorretos.";
+      } else if (error.message.includes("User already registered")) {
+        errorMessage = "Este email já está cadastrado. Tente fazer login.";
+      } else if (error.message.includes("Password")) {
+        errorMessage = "A senha deve ter pelo menos 6 caracteres.";
+      } else {
+        errorMessage = error.message;
+      }
+
       toast({
         title: "Erro",
-        description: error.message,
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {
