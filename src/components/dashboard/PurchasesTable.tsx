@@ -165,14 +165,9 @@ const PurchasesTable = ({ userId }: PurchasesTableProps) => {
               </td>
               
               <td className="py-4 px-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                    {purchase.backlinks.dr}
-                  </div>
-                  <span className="font-medium text-sm">
-                    {getDomainFromUrl(purchase.backlinks.site_url)}
-                  </span>
-                </div>
+                <span className="font-medium text-sm">
+                  {getDomainFromUrl(purchase.backlinks.site_url)}
+                </span>
               </td>
               
               <td className="py-4 px-4 text-center">

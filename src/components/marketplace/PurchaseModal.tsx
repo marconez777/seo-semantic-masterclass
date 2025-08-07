@@ -16,7 +16,8 @@ type Backlink = Database['public']['Tables']['backlinks']['Row'];
 
 interface PurchaseModalProps {
   isOpen: boolean;
-  onClose: () => void;
+  onClose?: () => void;
+  onOpenChange?: (open: boolean) => void;
   backlink: Backlink;
 }
 
@@ -25,7 +26,7 @@ interface OrderData {
   texto_ancora: string;
 }
 
-const PurchaseModal = ({ isOpen, onClose, backlink }: PurchaseModalProps) => {
+const PurchaseModal = ({ isOpen, onClose, onOpenChange, backlink }: PurchaseModalProps) => {
   const [step, setStep] = useState(1);
   const [orderData, setOrderData] = useState<OrderData>({
     url_destino: "",
@@ -139,13 +140,14 @@ const PurchaseModal = ({ isOpen, onClose, backlink }: PurchaseModalProps) => {
   const handleClose = () => {
     setStep(1);
     setOrderData({ url_destino: "", texto_ancora: "" });
-    onClose();
+    if (onClose) onClose();
+    if (onOpenChange) onOpenChange(false);
   };
 
   const progressValue = (step / 2) * 100;
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={onOpenChange || handleClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
           <DialogTitle className="text-xl">

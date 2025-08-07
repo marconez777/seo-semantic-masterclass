@@ -167,14 +167,9 @@ const FavoritesTable = ({ userId }: FavoritesTableProps) => {
                 </td>
                 
                 <td className="py-4 px-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                      {favorite.backlinks.dr}
-                    </div>
-                    <span className="font-medium text-sm">
-                      {getDomainFromUrl(favorite.backlinks.site_url)}
-                    </span>
-                  </div>
+                  <span className="font-medium text-sm">
+                    {getDomainFromUrl(favorite.backlinks.site_url)}
+                  </span>
                 </td>
                 
                 <td className="py-4 px-4 text-center">
@@ -230,9 +225,9 @@ const FavoritesTable = ({ userId }: FavoritesTableProps) => {
       {selectedBacklink && (
         <PurchaseModal
           isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-            setSelectedBacklink(null);
+          onOpenChange={(open) => {
+            setIsModalOpen(open);
+            if (!open) setSelectedBacklink(null);
           }}
           backlink={selectedBacklink}
         />

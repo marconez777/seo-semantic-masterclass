@@ -1,7 +1,10 @@
 
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
+  const navigate = useNavigate();
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -20,8 +23,12 @@ const Header = () => {
           <a href="#contato" className="text-gray-700 hover:text-purple-600 transition-colors">Contato</a>
         </div>
         
-        <Button className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg">
-          Auditoria Grátis
+        <Button 
+          variant="outline" 
+          className="px-6 py-2 rounded-lg"
+          onClick={() => navigate('/auth')}
+        >
+          Login
         </Button>
       </nav>
     </header>
