@@ -7,7 +7,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BacklinkTable from "@/components/marketplace/BacklinkTable";
-import CategoryBacklinkFilters from "@/components/marketplace/CategoryBacklinkFilters";
+import SEOBacklinkFilters from "@/components/marketplace/SEOBacklinkFilters";
 
 interface Backlink {
   id: string;
@@ -94,6 +94,9 @@ const ComprarBacklinksCategoria = () => {
   const [backlinks, setBacklinks] = useState<Backlink[]>([]);
   const [filteredBacklinks, setFilteredBacklinks] = useState<Backlink[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filters, setFilters] = useState({
+    selectedDRRanges: []
+  });
 
   // Extract category from URL (remove "comprar-backlinks-" prefix)
   const categorySlug = categoria?.replace('comprar-backlinks-', '') || '';
@@ -111,6 +114,10 @@ const ComprarBacklinksCategoria = () => {
     fetchBacklinks();
   }, [categorySlug]);
 
+  useEffect(() => {
+    applyFilters();
+  }, [backlinks, filters]);
+
   const fetchBacklinks = async () => {
     try {
       const { data, error } = await supabase
@@ -121,7 +128,6 @@ const ComprarBacklinksCategoria = () => {
 
       if (error) throw error;
       setBacklinks(data || []);
-      setFilteredBacklinks(data || []);
     } catch (error) {
       console.error('Error fetching backlinks:', error);
     } finally {
@@ -129,8 +135,24 @@ const ComprarBacklinksCategoria = () => {
     }
   };
 
-  const handleFilterChange = (filtered: Backlink[]) => {
+  const applyFilters = () => {
+    let filtered = [...backlinks];
+
+    // Aplicar filtro de DR
+    if (filters.selectedDRRanges.length > 0) {
+      filtered = filtered.filter(backlink => {
+        return filters.selectedDRRanges.some(range => {
+          const [min, max] = range.split(' a ').map(Number);
+          return backlink.dr >= min && backlink.dr <= max;
+        });
+      });
+    }
+
     setFilteredBacklinks(filtered);
+  };
+
+  const handleFilterChange = (newFilters: { selectedDRRanges: string[] }) => {
+    setFilters(newFilters);
   };
 
   const breadcrumbItems = [
@@ -188,27 +210,40 @@ const ComprarBacklinksCategoria = () => {
             </div>
 
             {backlinks.length > 0 && (
-              <CategoryBacklinkFilters 
-                backlinks={backlinks}
-                onFilterChange={handleFilterChange}
-              />
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <div className="lg:col-span-1">
+                  <SEOBacklinkFilters 
+                    filters={filters}
+                    onFiltersChange={handleFilterChange}
+                  />
+                </div>
+                <div className="lg:col-span-3">
+                  <BacklinkTable backlinks={filteredBacklinks} />
+                </div>
+              </div>
             )}
 
-            {filteredBacklinks.length === 0 ? (
+            {filteredBacklinks.length === 0 && backlinks.length > 0 ? (
               <div className="text-center py-12">
                 <h3 className="text-xl font-semibold text-foreground mb-2">
                   Nenhum site encontrado
                 </h3>
                 <p className="text-muted-foreground">
-                  {backlinks.length === 0 
-                    ? "Ainda não temos sites cadastrados nesta categoria." 
-                    : "Tente ajustar os filtros para encontrar mais opções."
-                  }
+                  Tente ajustar os filtros para encontrar mais opções.
                 </p>
               </div>
-            ) : (
-              <BacklinkTable backlinks={filteredBacklinks} />
-            )}
+            ) : null}
+
+            {backlinks.length === 0 ? (
+              <div className="text-center py-12">
+                <h3 className="text-xl font-semibold text-foreground mb-2">
+                  Nenhum site encontrado
+                </h3>
+                <p className="text-muted-foreground">
+                  Ainda não temos sites cadastrados nesta categoria.
+                </p>
+              </div>
+            ) : null}
 
             <section className="mt-16 prose prose-lg max-w-none text-muted-foreground">
               <h2 className="text-2xl font-semibold text-foreground mb-4">
