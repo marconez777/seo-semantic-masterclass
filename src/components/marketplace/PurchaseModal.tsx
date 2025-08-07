@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,9 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
+import { useCart } from "@/contexts/CartContext";
+import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Database } from "@/integrations/supabase/types";
-import { CheckCircle, ArrowLeft, ArrowRight } from "lucide-react";
+import { CheckCircle, ArrowLeft, ArrowRight, ShoppingCart } from "lucide-react";
 
 type Backlink = Database['public']['Tables']['backlinks']['Row'];
 
@@ -30,8 +32,16 @@ const PurchaseModal = ({ isOpen, onClose, backlink }: PurchaseModalProps) => {
     texto_ancora: ""
   });
   const [loading, setLoading] = useState(false);
-  const [orderId, setOrderId] = useState<string | null>(null);
   const { toast } = useToast();
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!isOpen) {
+      setStep(1);
+      setOrderData({ url_destino: "", texto_ancora: "" });
+    }
+  }, [isOpen]);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -57,7 +67,7 @@ const PurchaseModal = ({ isOpen, onClose, backlink }: PurchaseModalProps) => {
     }
   };
 
-  const handleStep1Next = () => {
+  const handleStep1Next = async () => {
     if (!orderData.url_destino.trim()) {
       toast({
         title: "URL obrigatória",
@@ -85,90 +95,54 @@ const PurchaseModal = ({ isOpen, onClose, backlink }: PurchaseModalProps) => {
       return;
     }
 
+    // Check if user is authenticated before proceeding
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      toast({
+        title: "Login necessário",
+        description: "Você precisa estar logado para continuar.",
+        variant: "destructive"
+      });
+      navigate('/auth');
+      return;
+    }
+
+    // Add item to cart with form data
+    const cartItem = {
+      ...backlink,
+      url_destino: orderData.url_destino,
+      texto_ancora: orderData.texto_ancora
+    };
+    
+    addToCart(cartItem);
     setStep(2);
   };
 
-  const handleCreateOrder = async () => {
-    setLoading(true);
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Usuário não autenticado");
-
-      // Create order in database
-      const { data, error } = await supabase
-        .from('pedidos')
-        .insert({
-          user_id: user.id,
-          backlink_id: backlink.id,
-          url_destino: orderData.url_destino,
-          texto_ancora: orderData.texto_ancora,
-          pagamento_status: 'pendente',
-          publicacao_status: 'pendente'
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      setOrderId(data.id);
-      setStep(3);
-    } catch (error) {
-      console.error('Error creating order:', error);
-      toast({
-        title: "Erro",
-        description: "Não foi possível criar o pedido. Tente novamente.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleContinueShopping = () => {
+    toast({
+      title: "Backlink adicionado ao carrinho!",
+      description: `${getDomainFromUrl(backlink.site_url)} foi adicionado com sucesso.`
+    });
+    handleClose();
   };
 
-  const handlePayment = async () => {
-    if (!orderId) return;
-    
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('create-payment', {
-        body: {
-          order_id: orderId,
-          amount: Number(backlink.valor),
-          description: `Backlink de ${getDomainFromUrl(backlink.site_url)}`
-        }
-      });
-
-      if (error) throw error;
-
-      if (data.payment_url) {
-        // Open Mercado Pago checkout in new tab
-        window.open(data.payment_url, '_blank');
-        
-        toast({
-          title: "Redirecionando para pagamento",
-          description: "Complete o pagamento na nova aba. O status será atualizado automaticamente."
-        });
-      } else {
-        throw new Error("URL de pagamento não recebida");
-      }
-    } catch (error) {
-      console.error('Error processing payment:', error);
-      toast({
-        title: "Erro no pagamento",
-        description: "Não conseguimos processar seu pagamento. Tente novamente ou use outro método.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handleFinalizePurchase = () => {
+    toast({
+      title: "Redirecionando para o carrinho",
+      description: "Finalize sua compra no carrinho."
+    });
+    handleClose();
+    navigate('/carrinho');
   };
+
 
   const handleClose = () => {
     setStep(1);
     setOrderData({ url_destino: "", texto_ancora: "" });
-    setOrderId(null);
     onClose();
   };
 
-  const progressValue = (step / 3) * 100;
+  const progressValue = (step / 2) * 100;
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -181,8 +155,7 @@ const PurchaseModal = ({ isOpen, onClose, backlink }: PurchaseModalProps) => {
             <Progress value={progressValue} className="h-2" />
             <div className="flex justify-between mt-2 text-sm text-muted-foreground">
               <span className={step >= 1 ? "text-primary font-medium" : ""}>1. Dados do Link</span>
-              <span className={step >= 2 ? "text-primary font-medium" : ""}>2. Confirmação</span>
-              <span className={step >= 3 ? "text-primary font-medium" : ""}>3. Pagamento</span>
+              <span className={step >= 2 ? "text-primary font-medium" : ""}>2. Adicionar ao Carrinho</span>
             </div>
           </div>
         </DialogHeader>
@@ -235,93 +208,57 @@ const PurchaseModal = ({ isOpen, onClose, backlink }: PurchaseModalProps) => {
             </div>
           )}
 
-          {/* Step 2: Confirmation */}
+          {/* Step 2: Add to Cart Confirmation */}
           {step === 2 && (
             <div className="space-y-6">
-              <div className="bg-muted p-4 rounded-lg">
-                <h3 className="font-semibold text-foreground mb-3">Resumo do pedido</h3>
-                
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Site:</span>
-                    <span className="font-medium">{getDomainFromUrl(backlink.site_url)}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Métricas:</span>
-                    <div className="flex gap-2">
-                      <Badge variant="secondary">DR {backlink.dr}</Badge>
-                      <Badge variant="secondary">DA {backlink.da}</Badge>
-                      <Badge variant="secondary">{backlink.trafego_mensal.toLocaleString()}/mês</Badge>
-                    </div>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">URL de destino:</span>
-                    <span className="font-medium text-sm">{orderData.url_destino}</span>
-                  </div>
-                  
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Texto âncora:</span>
-                    <span className="font-medium">"{orderData.texto_ancora}"</span>
-                  </div>
-                  
-                  <div className="border-t pt-3 flex justify-between">
-                    <span className="text-muted-foreground">Valor total:</span>
-                    <span className="text-xl font-bold text-primary">
-                      {formatPrice(Number(backlink.valor))}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-3">
-                <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
-                  <ArrowLeft className="w-4 h-4 mr-2" /> Voltar
-                </Button>
-                <Button onClick={handleCreateOrder} disabled={loading} className="flex-1">
-                  {loading ? "Processando..." : "Prosseguir para Pagamento"}
-                  <ArrowRight className="w-4 h-4 ml-2" />
-                </Button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Payment */}
-          {step === 3 && (
-            <div className="space-y-6 text-center">
-              <div className="bg-green-50 p-6 rounded-lg">
+              <div className="bg-green-50 p-6 rounded-lg text-center">
                 <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
                 <h3 className="text-lg font-semibold text-green-800 mb-2">
-                  Pedido criado com sucesso!
+                  Backlink adicionado ao carrinho!
                 </h3>
-                <p className="text-green-700 mb-4">
-                  Agora você será redirecionado para finalizar o pagamento via Mercado Pago.
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  Valor: <strong>{formatPrice(Number(backlink.valor))}</strong>
-                </p>
-              </div>
-
-              <div className="bg-muted p-4 rounded-lg">
-                <h4 className="font-medium mb-2">Métodos de pagamento disponíveis:</h4>
-                <div className="flex justify-center gap-4 text-sm text-muted-foreground">
-                  <span>💳 Cartão de Crédito</span>
-                  <span>📱 PIX</span>
-                  <span>🏦 Boleto</span>
+                <div className="bg-muted p-4 rounded-lg mt-4">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Site:</span>
+                      <span className="font-medium">{getDomainFromUrl(backlink.site_url)}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">URL de destino:</span>
+                      <span className="font-medium text-xs">{orderData.url_destino}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-muted-foreground">Texto âncora:</span>
+                      <span className="font-medium">"{orderData.texto_ancora}"</span>
+                    </div>
+                    <div className="flex justify-between border-t pt-2">
+                      <span className="text-muted-foreground">Valor:</span>
+                      <span className="font-bold text-primary">
+                        {formatPrice(Number(backlink.valor))}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <Button onClick={handlePayment} disabled={loading} className="w-full">
-                {loading ? "Processando..." : "Finalizar Pagamento"}
-              </Button>
-
-              <p className="text-xs text-muted-foreground">
-                Após o pagamento, o backlink será publicado em até 3 dias úteis.
-                Você poderá acompanhar o status no seu painel de compras.
-              </p>
+              <div className="text-center">
+                <p className="text-lg font-medium mb-6">
+                  Gostaria de continuar selecionando mais sites ou finalizar a sua compra?
+                </p>
+                
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={handleContinueShopping} className="flex-1">
+                    <ShoppingCart className="w-4 h-4 mr-2" />
+                    Selecionar mais sites
+                  </Button>
+                  <Button onClick={handleFinalizePurchase} className="flex-1">
+                    Finalizar compra
+                    <ArrowRight className="w-4 h-4 ml-2" />
+                  </Button>
+                </div>
+              </div>
             </div>
           )}
+
         </div>
       </DialogContent>
     </Dialog>

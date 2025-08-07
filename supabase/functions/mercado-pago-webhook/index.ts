@@ -46,10 +46,13 @@ serve(async (req) => {
         { auth: { persistSession: false } }
       );
 
-      // Find the order by payment ID (stored in stripe_session_id field)
+      // Find the orders by payment ID (stored in stripe_session_id field)
       const { data: orders, error: findError } = await supabase
         .from('pedidos')
-        .select('*')
+        .select(`
+          *,
+          backlinks:backlink_id (site_url, categoria, valor)
+        `)
         .eq('stripe_session_id', paymentId.toString());
 
       if (findError) {
@@ -58,11 +61,10 @@ serve(async (req) => {
       }
 
       if (!orders || orders.length === 0) {
-        console.log('No order found for payment ID:', paymentId);
-        return new Response('Order not found', { status: 404 });
+        console.log('No orders found for payment ID:', paymentId);
+        return new Response('Orders not found', { status: 404 });
       }
 
-      const order = orders[0];
       let newStatus = 'pendente';
 
       // Map Mercado Pago status to our status
@@ -82,21 +84,70 @@ serve(async (req) => {
           newStatus = 'pendente';
       }
 
-      // Update order status
+      // Update all orders status
+      const orderIds = orders.map(order => order.id);
       const { error: updateError } = await supabase
         .from('pedidos')
         .update({ 
           pagamento_status: newStatus,
           updated_at: new Date().toISOString()
         })
-        .eq('id', order.id);
+        .in('id', orderIds);
 
       if (updateError) {
-        console.error('Error updating order:', updateError);
-        return new Response('Error updating order', { status: 500 });
+        console.error('Error updating orders:', updateError);
+        return new Response('Error updating orders', { status: 500 });
       }
 
-      console.log(`Order ${order.id} updated to status: ${newStatus}`);
+      console.log(`${orders.length} orders updated to status: ${newStatus}`);
+
+      // If payment is approved, send confirmation emails
+      if (newStatus === 'pago') {
+        try {
+          // Get user email
+          const { data: userData } = await supabase.auth.admin.getUserById(orders[0].user_id);
+          
+          if (userData.user?.email) {
+            // Calculate total amount
+            const totalAmount = orders.reduce((sum, order) => sum + Number(order.backlinks?.valor || 0), 0);
+            
+            // Prepare order data for email
+            const emailOrders = orders.map(order => ({
+              site_url: order.backlinks?.site_url || 'N/A',
+              url_destino: order.url_destino,
+              texto_ancora: order.texto_ancora,
+              valor: Number(order.backlinks?.valor || 0)
+            }));
+
+            // Send email to customer
+            await supabase.functions.invoke('send-email', {
+              body: {
+                to: userData.user.email,
+                subject: 'Confirmação de Pedido - Mkart',
+                orders: emailOrders,
+                totalAmount,
+                customerName: userData.user.user_metadata?.name || userData.user.email
+              }
+            });
+
+            // Send email to admin
+            await supabase.functions.invoke('send-email', {
+              body: {
+                to: 'contato@mkart.com.br',
+                subject: `Novo Pedido Confirmado - ${orders.length} backlink${orders.length > 1 ? 's' : ''}`,
+                orders: emailOrders,
+                totalAmount,
+                customerName: userData.user.user_metadata?.name || userData.user.email
+              }
+            });
+
+            console.log('Confirmation emails sent successfully');
+          }
+        } catch (emailError) {
+          console.error('Error sending emails:', emailError);
+          // Don't fail the webhook if email fails
+        }
+      }
     }
 
     return new Response('OK', { 

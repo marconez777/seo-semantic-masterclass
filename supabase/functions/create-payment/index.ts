@@ -12,11 +12,14 @@ serve(async (req) => {
   }
 
   try {
-    const { order_id, amount, description } = await req.json();
+    const { orders, order_id, amount, description } = await req.json();
 
-    if (!order_id || !amount || !description) {
-      throw new Error('Missing required fields: order_id, amount, description');
+    if (!amount || !description) {
+      throw new Error('Missing required fields: amount, description');
     }
+
+    // For multiple orders, use the first order's ID, otherwise use the single order_id
+    const referenceId = orders && orders.length > 0 ? orders[0].id : order_id;
 
     // Initialize Supabase client
     const supabaseClient = createClient(
@@ -44,7 +47,7 @@ serve(async (req) => {
         first_name: user.user_metadata?.full_name?.split(' ')[0] || 'Cliente',
         last_name: user.user_metadata?.full_name?.split(' ').slice(1).join(' ') || '',
       },
-      external_reference: order_id,
+      external_reference: referenceId,
       notification_url: `${Deno.env.get('SUPABASE_URL')}/functions/v1/mercado-pago-webhook`,
     };
 
@@ -73,12 +76,25 @@ serve(async (req) => {
       { auth: { persistSession: false } }
     );
 
-    await supabaseService
-      .from('pedidos')
-      .update({
-        stripe_session_id: paymentResult.id.toString(), // Using this field to store MP payment ID
-      })
-      .eq('id', order_id);
+    // Update orders with payment info
+    if (orders && orders.length > 0) {
+      // Update multiple orders
+      const orderIds = orders.map(order => order.id);
+      await supabaseService
+        .from('pedidos')
+        .update({
+          stripe_session_id: paymentResult.id.toString(), // Using this field to store MP payment ID
+        })
+        .in('id', orderIds);
+    } else if (order_id) {
+      // Update single order (backward compatibility)
+      await supabaseService
+        .from('pedidos')
+        .update({
+          stripe_session_id: paymentResult.id.toString(), // Using this field to store MP payment ID
+        })
+        .eq('id', order_id);
+    }
 
     return new Response(
       JSON.stringify({
