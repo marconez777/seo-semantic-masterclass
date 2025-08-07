@@ -61,7 +61,7 @@ const Index = () => {
       
       <Header />
       
-      <main>
+      <main className="pt-20">
         <HeroSection />
         <ServicesSection />
         <StatsSection />

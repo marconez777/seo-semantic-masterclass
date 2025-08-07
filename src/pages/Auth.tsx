@@ -109,7 +109,7 @@ const Auth = () => {
         noindex={true}
       />
       <Header />
-      <main className="container mx-auto px-4 py-20 flex items-center justify-center min-h-screen">
+      <main className="container mx-auto px-4 pt-28 pb-20 flex items-center justify-center min-h-screen">
         <Card className="w-full max-w-md">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">
