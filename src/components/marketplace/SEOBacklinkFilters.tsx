@@ -11,6 +11,8 @@ interface Filters {
   maxPrice?: number;
   minTraffic?: number;
   selectedDRRanges: string[];
+  selectedTrafficRanges: string[];
+  selectedPriceRanges: string[];
 }
 
 interface SEOBacklinkFiltersProps {
@@ -45,6 +47,21 @@ const SEOBacklinkFilters = ({ filters, onFiltersChange }: SEOBacklinkFiltersProp
     { label: "70 a 80", min: 70, max: 80 },
     { label: "80 a 90", min: 80, max: 90 },
     { label: "90 a 100", min: 90, max: 100 },
+  ];
+
+  const trafficRanges = [
+    { label: "0–1.000", min: 0, max: 1000 },
+    { label: "1.000–10.000", min: 1000, max: 10000 },
+    { label: "10.000+", min: 10000, max: Infinity },
+  ];
+
+  const priceRanges = [
+    { label: "Gratuito", min: 0, max: 0 },
+    { label: "Até R$100", min: 0.01, max: 100 },
+    { label: "R$101 a R$300", min: 101, max: 300 },
+    { label: "R$301 a R$500", min: 301, max: 500 },
+    { label: "R$501 a R$1.000", min: 501, max: 1000 },
+    { label: "Acima de R$1.000", min: 1000.01, max: Infinity },
   ];
 
   // Mapeamento de categorias para URLs SEO-friendly
@@ -121,6 +138,28 @@ const SEOBacklinkFilters = ({ filters, onFiltersChange }: SEOBacklinkFiltersProp
     });
   };
 
+  const handleTrafficRangeChange = (range: string, checked: boolean) => {
+    const newSelectedRanges = checked 
+      ? [...(filters.selectedTrafficRanges || []), range]
+      : (filters.selectedTrafficRanges || []).filter(r => r !== range);
+    
+    onFiltersChange({
+      ...filters,
+      selectedTrafficRanges: newSelectedRanges
+    });
+  };
+
+  const handlePriceRangeChange = (range: string, checked: boolean) => {
+    const newSelectedRanges = checked 
+      ? [...(filters.selectedPriceRanges || []), range]
+      : (filters.selectedPriceRanges || []).filter(r => r !== range);
+    
+    onFiltersChange({
+      ...filters,
+      selectedPriceRanges: newSelectedRanges
+    });
+  };
+
   // Para categorias, navegamos para a URL específica
   const handleCategoryClick = (slug: string) => {
     navigate(`/comprar-backlinks-${slug}`);
@@ -164,6 +203,62 @@ const SEOBacklinkFilters = ({ filters, onFiltersChange }: SEOBacklinkFiltersProp
                     className="text-sm text-muted-foreground cursor-pointer flex-1"
                   >
                     {range.label} <span className="text-xs">({count})</span>
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Traffic Filter */}
+        <div>
+          <h3 className="text-sm font-semibold text-primary mb-3">Tráfego Orgânico Estimado</h3>
+          <div className="space-y-2">
+            {trafficRanges.map((range) => {
+              const isChecked = (filters.selectedTrafficRanges || []).includes(range.label);
+              
+              return (
+                <div key={range.label} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`traffic-${range.label}`}
+                    checked={isChecked}
+                    onCheckedChange={(checked) => 
+                      handleTrafficRangeChange(range.label, checked as boolean)
+                    }
+                  />
+                  <label 
+                    htmlFor={`traffic-${range.label}`}
+                    className="text-sm text-muted-foreground cursor-pointer flex-1"
+                  >
+                    {range.label} <span className="text-xs">(200)</span>
+                  </label>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Price Filter */}
+        <div>
+          <h3 className="text-sm font-semibold text-primary mb-3">Preço</h3>
+          <div className="space-y-2">
+            {priceRanges.map((range) => {
+              const isChecked = (filters.selectedPriceRanges || []).includes(range.label);
+              
+              return (
+                <div key={range.label} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`price-${range.label}`}
+                    checked={isChecked}
+                    onCheckedChange={(checked) => 
+                      handlePriceRangeChange(range.label, checked as boolean)
+                    }
+                  />
+                  <label 
+                    htmlFor={`price-${range.label}`}
+                    className="text-sm text-muted-foreground cursor-pointer flex-1"
+                  >
+                    {range.label} <span className="text-xs">(200)</span>
                   </label>
                 </div>
               );

@@ -23,6 +23,8 @@ interface Backlink {
 
 interface Filters {
   selectedDRRanges: string[];
+  selectedTrafficRanges: string[];
+  selectedPriceRanges: string[];
 }
 
 const ComprarBacklinks = () => {
@@ -31,7 +33,9 @@ const ComprarBacklinks = () => {
   const [filteredBacklinks, setFilteredBacklinks] = useState<Backlink[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState<Filters>({
-    selectedDRRanges: []
+    selectedDRRanges: [],
+    selectedTrafficRanges: [],
+    selectedPriceRanges: []
   });
 
   // Mapeamento de categorias para criar cards de categoria

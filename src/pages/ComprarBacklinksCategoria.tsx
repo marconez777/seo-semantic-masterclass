@@ -95,7 +95,9 @@ const ComprarBacklinksCategoria = () => {
   const [filteredBacklinks, setFilteredBacklinks] = useState<Backlink[]>([]);
   const [loading, setLoading] = useState(true);
   const [filters, setFilters] = useState({
-    selectedDRRanges: []
+    selectedDRRanges: [],
+    selectedTrafficRanges: [],
+    selectedPriceRanges: []
   });
 
   // Extract category from URL (remove "comprar-backlinks-" prefix)
@@ -148,10 +150,48 @@ const ComprarBacklinksCategoria = () => {
       });
     }
 
+    // Aplicar filtro de Tráfego
+    if (filters.selectedTrafficRanges.length > 0) {
+      filtered = filtered.filter(backlink => {
+        return filters.selectedTrafficRanges.some(range => {
+          if (range === "0–1.000") {
+            return backlink.trafego_mensal >= 0 && backlink.trafego_mensal <= 1000;
+          } else if (range === "1.000–10.000") {
+            return backlink.trafego_mensal >= 1000 && backlink.trafego_mensal <= 10000;
+          } else if (range === "10.000+") {
+            return backlink.trafego_mensal >= 10000;
+          }
+          return false;
+        });
+      });
+    }
+
+    // Aplicar filtro de Preço
+    if (filters.selectedPriceRanges.length > 0) {
+      filtered = filtered.filter(backlink => {
+        return filters.selectedPriceRanges.some(range => {
+          if (range === "Gratuito") {
+            return backlink.valor === 0;
+          } else if (range === "Até R$100") {
+            return backlink.valor > 0 && backlink.valor <= 100;
+          } else if (range === "R$101 a R$300") {
+            return backlink.valor >= 101 && backlink.valor <= 300;
+          } else if (range === "R$301 a R$500") {
+            return backlink.valor >= 301 && backlink.valor <= 500;
+          } else if (range === "R$501 a R$1.000") {
+            return backlink.valor >= 501 && backlink.valor <= 1000;
+          } else if (range === "Acima de R$1.000") {
+            return backlink.valor > 1000;
+          }
+          return false;
+        });
+      });
+    }
+
     setFilteredBacklinks(filtered);
   };
 
-  const handleFilterChange = (newFilters: { selectedDRRanges: string[] }) => {
+  const handleFilterChange = (newFilters: { selectedDRRanges: string[]; selectedTrafficRanges: string[]; selectedPriceRanges: string[] }) => {
     setFilters(newFilters);
   };
 
