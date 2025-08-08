@@ -83,6 +83,8 @@ export type Database = {
           id: string
           link_publicacao: string | null
           pagamento_status: string
+          payment_provider: string | null
+          payment_reference: string | null
           publicacao_status: string
           stripe_session_id: string | null
           texto_ancora: string
@@ -96,6 +98,8 @@ export type Database = {
           id?: string
           link_publicacao?: string | null
           pagamento_status?: string
+          payment_provider?: string | null
+          payment_reference?: string | null
           publicacao_status?: string
           stripe_session_id?: string | null
           texto_ancora: string
@@ -109,6 +113,8 @@ export type Database = {
           id?: string
           link_publicacao?: string | null
           pagamento_status?: string
+          payment_provider?: string | null
+          payment_reference?: string | null
           publicacao_status?: string
           stripe_session_id?: string | null
           texto_ancora?: string

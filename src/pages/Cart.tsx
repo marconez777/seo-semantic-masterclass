@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import SEOHead from '@/components/seo/SEOHead';
-import { createCheckout } from '@/services/payment';
+
 
 const Cart = () => {
   const { cartItems, removeFromCart, cartTotal, clearCart } = useCart();
@@ -59,19 +59,43 @@ const Cart = () => {
 
       if (error) throw error;
 
-      // Manual checkout flow (no payment provider)
+      // Abacate Pay (ONE_TIME + PIX) via Edge Function
       if (data && data.length > 0) {
-        // Optional: call a placeholder payment service for future providers
-        const checkout = await createCheckout(data);
+        const { data: sessionData } = await supabase.auth.getSession();
+        const session = sessionData?.session;
 
+        let taxId = (session?.user?.user_metadata?.taxId || '').trim?.() || '';
+        if (!taxId) {
+          taxId = window.prompt('Informe seu CPF (apenas números) para gerar o pagamento PIX:') || '';
+          taxId = taxId.replace(/\D+/g, '');
+          if (!taxId) {
+            throw new Error('CPF é obrigatório para gerar a cobrança.');
+          }
+        }
+
+        const products = cartItems.map((item: any) => ({
+          externalId: item.id,
+          name: `Backlink em ${item.site_url || 'site'}`,
+          description: item.texto_ancora ? `Âncora: ${item.texto_ancora}` : undefined,
+          quantity: 1,
+          price: Number((item as any).price_cents || (item as any).preco_centavos || Math.round(Number(item.valor) * 100) || 0),
+        }));
+
+        const payload = {
+          orders: data.map((o: any) => o.id),
+          products,
+          customer: {
+            name: (session?.user?.user_metadata as any)?.name || session?.user?.email || 'Cliente',
+            email: session?.user?.email,
+            taxId,
+            cellphone: (session?.user?.user_metadata as any)?.cellphone || undefined,
+          },
+        };
+
+        const { data: abacate, error: abacateErr } = await supabase.functions.invoke('abacate-create-billing', { body: payload });
+        if (abacateErr) throw abacateErr;
         clearCart();
-
-        toast({
-          title: "Pedido registrado",
-          description: "Seu pedido foi criado. Em breve você receberá instruções de pagamento.",
-        });
-
-        navigate(checkout.url || '/painel');
+        window.location.assign((abacate as any)?.url);
       } else {
         throw new Error("Não foi possível criar o seu pedido");
       }
