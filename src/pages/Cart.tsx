@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import SEOHead from '@/components/seo/SEOHead';
+import { createCheckout } from '@/services/payment';
 
 const Cart = () => {
   const { cartItems, removeFromCart, cartTotal, clearCart } = useCart();
@@ -58,33 +59,21 @@ const Cart = () => {
 
       if (error) throw error;
 
-      // Create payment with multiple orders
-      const { data: paymentData, error: paymentError } = await supabase.functions.invoke('create-payment', {
-        body: {
-          orders: data,
-          amount: cartTotal,
-          description: `Compra de ${cartItems.length} backlink${cartItems.length > 1 ? 's' : ''}`
-        }
-      });
+      // Manual checkout flow (no payment provider)
+      if (data && data.length > 0) {
+        // Optional: call a placeholder payment service for future providers
+        const checkout = await createCheckout(data);
 
-      if (paymentError) throw paymentError;
-
-      if (paymentData.payment_url) {
-        // Clear cart and redirect to payment
         clearCart();
-        window.open(paymentData.payment_url, '_blank');
-        
+
         toast({
-          title: "Redirecionando para pagamento",
-          description: "Complete o pagamento na nova aba. O status será atualizado automaticamente."
+          title: "Pedido registrado",
+          description: "Seu pedido foi criado. Em breve você receberá instruções de pagamento.",
         });
 
-        // Redirect to dashboard after a short delay
-        setTimeout(() => {
-          navigate('/painel');
-        }, 2000);
+        navigate(checkout.url || '/painel');
       } else {
-        throw new Error("URL de pagamento não recebida");
+        throw new Error("Não foi possível criar o seu pedido");
       }
     } catch (error) {
       console.error('Error processing checkout:', error);
@@ -221,7 +210,7 @@ const Cart = () => {
                   </div>
                   
                   <div className="mt-4 text-sm text-muted-foreground">
-                    <p>✓ Pagamento seguro via Mercado Pago</p>
+                    <p>✓ Pagamento será instruído por e-mail</p>
                     <p>✓ Publicação em até 3 dias úteis</p>
                     <p>✓ Acompanhamento no painel do usuário</p>
                   </div>
