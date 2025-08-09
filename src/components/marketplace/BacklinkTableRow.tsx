@@ -162,7 +162,7 @@ const BacklinkTableRow = ({ backlink, index, isFavorited = false, onFavoriteChan
           <span className="font-medium">{backlink.dr}</span>
         </td>
         
-        <td className="py-4 px-4 text-center text-blue-600 font-medium">
+        <td className="py-4 px-4 text-center text-primary font-medium">
           {backlink.da}
         </td>
         
@@ -173,7 +173,7 @@ const BacklinkTableRow = ({ backlink, index, isFavorited = false, onFavoriteChan
         </td>
         
         <td className="py-4 px-4">
-          <Badge variant="outline" className="text-orange-600 border-orange-200">
+          <Badge variant="secondary">
             {backlink.categoria}
           </Badge>
         </td>
@@ -184,12 +184,8 @@ const BacklinkTableRow = ({ backlink, index, isFavorited = false, onFavoriteChan
         
         <td className="py-4 px-4 text-center">
           <div className="flex items-center justify-center gap-2">
-            <Button
-              size="sm"
-              onClick={handlePurchaseClick}
-              className="bg-pink-500 hover:bg-pink-600 text-white px-4 py-1 text-xs font-medium rounded"
-            >
-              COMPRAR
+            <Button size="sm" onClick={handlePurchaseClick}>
+              Comprar
             </Button>
             
             <Button
@@ -197,12 +193,11 @@ const BacklinkTableRow = ({ backlink, index, isFavorited = false, onFavoriteChan
               size="sm"
               onClick={handleFavoriteClick}
               disabled={loading}
-              className="p-1 hover:bg-orange-100"
             >
               {favorited ? (
-                <Heart className="w-5 h-5 fill-orange-500 text-orange-500" />
+                <Heart className="w-5 h-5 text-primary fill-current" />
               ) : (
-                <HeartIcon className="w-5 h-5 text-orange-500" />
+                <HeartIcon className="w-5 h-5 text-primary" />
               )}
             </Button>
           </div>

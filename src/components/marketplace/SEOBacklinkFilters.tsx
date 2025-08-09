@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { Separator } from "@/components/ui/separator";
 
 interface Filters {
   categoria?: string;
@@ -182,28 +183,31 @@ const SEOBacklinkFilters = ({ filters, onFiltersChange }: SEOBacklinkFiltersProp
       <CardContent className="p-4 space-y-6">
         {/* DR Filter - Continua funcionando como filtro sem URL */}
         <div>
-          <h3 className="text-sm font-semibold text-primary mb-3">Domain Rating (DR)</h3>
-          <div className="space-y-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Domain Rating (DR)</h3>
+          <div className="space-y-1">
             {drRanges.map((range) => {
               const stat = drStats.find(s => s.range === range.label);
               const count = stat?.count || 0;
               const isChecked = (filters.selectedDRRanges || []).includes(range.label);
               
               return (
-                <div key={range.label} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`dr-${range.label}`}
-                    checked={isChecked}
-                    onCheckedChange={(checked) => 
-                      handleDRRangeChange(range.label, checked as boolean)
-                    }
-                  />
-                  <label 
-                    htmlFor={`dr-${range.label}`}
-                    className="text-sm text-muted-foreground cursor-pointer flex-1"
-                  >
-                    {range.label} <span className="text-xs">({count})</span>
-                  </label>
+                <div key={range.label} className="flex items-center gap-2 justify-between rounded-md px-2 py-1 hover:bg-muted/50">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={`dr-${range.label}`}
+                      checked={isChecked}
+                      onCheckedChange={(checked) => 
+                        handleDRRangeChange(range.label, checked as boolean)
+                      }
+                    />
+                    <label 
+                      htmlFor={`dr-${range.label}`}
+                      className="text-sm text-foreground cursor-pointer"
+                    >
+                      {range.label}
+                    </label>
+                  </div>
+                  <span className="ml-2 text-xs rounded-full bg-muted px-2 py-0.5 text-foreground/70">{count}</span>
                 </div>
               );
             })}
@@ -212,26 +216,29 @@ const SEOBacklinkFilters = ({ filters, onFiltersChange }: SEOBacklinkFiltersProp
 
         {/* Traffic Filter */}
         <div>
-          <h3 className="text-sm font-semibold text-primary mb-3">Tráfego Orgânico Estimado</h3>
-          <div className="space-y-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Tráfego Orgânico Estimado</h3>
+          <div className="space-y-1">
             {trafficRanges.map((range) => {
               const isChecked = (filters.selectedTrafficRanges || []).includes(range.label);
               
               return (
-                <div key={range.label} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`traffic-${range.label}`}
-                    checked={isChecked}
-                    onCheckedChange={(checked) => 
-                      handleTrafficRangeChange(range.label, checked as boolean)
-                    }
-                  />
-                  <label 
-                    htmlFor={`traffic-${range.label}`}
-                    className="text-sm text-muted-foreground cursor-pointer flex-1"
-                  >
-                    {range.label} <span className="text-xs">(200)</span>
-                  </label>
+                <div key={range.label} className="flex items-center gap-2 justify-between rounded-md px-2 py-1 hover:bg-muted/50">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={`traffic-${range.label}`}
+                      checked={isChecked}
+                      onCheckedChange={(checked) => 
+                        handleTrafficRangeChange(range.label, checked as boolean)
+                      }
+                    />
+                    <label 
+                      htmlFor={`traffic-${range.label}`}
+                      className="text-sm text-foreground cursor-pointer"
+                    >
+                      {range.label}
+                    </label>
+                  </div>
+                  <span className="ml-2 text-xs rounded-full bg-muted px-2 py-0.5 text-foreground/70">200</span>
                 </div>
               );
             })}
@@ -240,26 +247,29 @@ const SEOBacklinkFilters = ({ filters, onFiltersChange }: SEOBacklinkFiltersProp
 
         {/* Price Filter */}
         <div>
-          <h3 className="text-sm font-semibold text-primary mb-3">Preço</h3>
-          <div className="space-y-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Preço</h3>
+          <div className="space-y-1">
             {priceRanges.map((range) => {
               const isChecked = (filters.selectedPriceRanges || []).includes(range.label);
               
               return (
-                <div key={range.label} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`price-${range.label}`}
-                    checked={isChecked}
-                    onCheckedChange={(checked) => 
-                      handlePriceRangeChange(range.label, checked as boolean)
-                    }
-                  />
-                  <label 
-                    htmlFor={`price-${range.label}`}
-                    className="text-sm text-muted-foreground cursor-pointer flex-1"
-                  >
-                    {range.label} <span className="text-xs">(200)</span>
-                  </label>
+                <div key={range.label} className="flex items-center gap-2 justify-between rounded-md px-2 py-1 hover:bg-muted/50">
+                  <div className="flex items-center gap-2">
+                    <Checkbox
+                      id={`price-${range.label}`}
+                      checked={isChecked}
+                      onCheckedChange={(checked) => 
+                        handlePriceRangeChange(range.label, checked as boolean)
+                      }
+                    />
+                    <label 
+                      htmlFor={`price-${range.label}`}
+                      className="text-sm text-foreground cursor-pointer"
+                    >
+                      {range.label}
+                    </label>
+                  </div>
+                  <span className="ml-2 text-xs rounded-full bg-muted px-2 py-0.5 text-foreground/70">200</span>
                 </div>
               );
             })}
@@ -268,39 +278,43 @@ const SEOBacklinkFilters = ({ filters, onFiltersChange }: SEOBacklinkFiltersProp
 
         {/* Categories - Agora com navegação para URLs específicas */}
         <div>
-          <h3 className="text-sm font-semibold text-primary mb-3">Categorias</h3>
-          <div className="space-y-2">
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">Categorias</h3>
+          <div className="space-y-1">
             {categoryStats.map((stat) => {
               const isCurrent = isCurrentCategory(stat.slug);
               
               return (
-                <div key={stat.categoria} className="flex items-center space-x-2">
+                <div key={stat.categoria} className="flex items-center justify-between rounded-md px-2 py-1 hover:bg-muted/50">
                   <button
                     onClick={() => handleCategoryClick(stat.slug)}
                     className={cn(
-                      "text-sm cursor-pointer flex-1 text-left hover:text-primary transition-colors",
+                      "text-sm cursor-pointer text-left transition-colors",
                       isCurrent 
                         ? "text-primary font-semibold" 
-                        : "text-muted-foreground"
+                        : "text-foreground hover:text-primary"
                     )}
                   >
-                    {stat.categoria} <span className="text-xs">({stat.count})</span>
+                    {stat.categoria}
                   </button>
+                  <span className={cn(
+                    "ml-2 text-xs rounded-full bg-muted px-2 py-0.5",
+                    isCurrent ? "text-primary" : "text-foreground/70"
+                  )}>{stat.count}</span>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Adicionar link para ver todas as categorias */}
-        <div className="pt-2 border-t">
+        <Separator />
+        <div className="pt-3">
           <button
             onClick={() => navigate('/comprar-backlinks')}
             className={cn(
               "text-sm cursor-pointer hover:text-primary transition-colors w-full text-left",
               !currentCategory
                 ? "text-primary font-semibold"
-                : "text-muted-foreground"
+                : "text-foreground"
             )}
           >
             📂 Todas as categorias
