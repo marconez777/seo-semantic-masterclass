@@ -141,6 +141,25 @@ const Cart = () => {
 
         if (abacateErr) {
           // Try to get more detailed error info
+          const ctx: any = (abacateErr as any).context;
+          try {
+            if (ctx?.response && typeof ctx.response.text === 'function') {
+              const bodyText = await ctx.response.text();
+              console.error('[Checkout] EdgeFunction error body:', bodyText);
+              throw new Error(bodyText);
+            }
+            if (ctx?.text) {
+              const bodyText = await ctx.text();
+              console.error('[Checkout] EdgeFunction error body:', bodyText);
+              throw new Error(bodyText);
+            }
+            if (ctx?.error) {
+              console.error('[Checkout] EdgeFunction error body:', ctx.error);
+              throw new Error(typeof ctx.error === 'string' ? ctx.error : JSON.stringify(ctx.error));
+            }
+          } catch (_) {
+            // ignore parsing errors
+          }
           console.error('[Checkout] EdgeFunction error:', abacateErr);
           throw new Error(abacateErr.message || 'Erro ao processar pagamento PIX');
         }
@@ -170,11 +189,23 @@ const Cart = () => {
       return;
     }
 
-    setShowCpfModal(false);
-    setCpfInput('');
-    setCpfError('');
-    
-    await processCheckout(cpfCleaned);
+    setIsLoading(true);
+    try {
+      setShowCpfModal(false);
+      setCpfInput('');
+      setCpfError('');
+
+      await processCheckout(cpfCleaned);
+    } catch (e: any) {
+      console.error('[Checkout] handleCpfSubmit error:', e);
+      toast({
+        title: 'Erro no checkout',
+        description: e?.message || 'Erro ao processar pagamento PIX.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
