@@ -90,11 +90,17 @@ Deno.serve(async (req) => {
 
     console.log('[abacate-create-billing] Sending payload to Abacate:', payload);
 
-    const res = await fetch(`${ABACATE_API}/v1/billing/create`, {
+    const baseUrl = Deno.env.get('ABACATEPAY_BASE_URL') || `${ABACATE_API}/v1`;
+    const createPath = Deno.env.get('ABACATEPAY_CREATE_BILLING_PATH') || '/billing/create';
+    const url = `${baseUrl.replace(/\/$/, '')}${createPath.startsWith('/') ? '' : '/'}${createPath}`;
+    console.log('[abacate-create-billing] URL:', url);
+
+    const res = await fetch(url, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
+        'Accept': 'application/json',
       },
       body: JSON.stringify(payload),
     });
