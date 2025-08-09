@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
 
     console.log('[abacate-create-billing] Sending payload to Abacate:', payload);
 
-    const res = await fetch(`${ABACATE_API}/billing/create`, {
+    const res = await fetch(`${ABACATE_API}/v1/billing/create`, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
