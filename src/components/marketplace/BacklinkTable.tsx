@@ -59,18 +59,18 @@ const BacklinkTable = ({ backlinks }: BacklinkTableProps) => {
   };
 
   return (
-    <div className="bg-card border rounded-lg overflow-hidden shadow-sm">
+    <div className="bg-white rounded-lg border overflow-hidden">
       <table className="w-full">
-        <thead className="bg-muted/50 border-b">
+        <thead className="bg-gray-50 border-b">
           <tr>
-            <th className="py-3 px-4 text-left text-xs font-medium text-primary uppercase tracking-wide">#</th>
-            <th className="py-3 px-4 text-left text-xs font-medium text-primary uppercase tracking-wide">Site</th>
-            <th className="py-3 px-4 text-center text-xs font-medium text-primary uppercase tracking-wide">DR</th>
-            <th className="py-3 px-4 text-center text-xs font-medium text-primary uppercase tracking-wide">DA</th>
-            <th className="py-3 px-4 text-center text-xs font-medium text-primary uppercase tracking-wide">Tráfego / mês</th>
-            <th className="py-3 px-4 text-left text-xs font-medium text-primary uppercase tracking-wide">Categoria</th>
-            <th className="py-3 px-4 text-center text-xs font-medium text-primary uppercase tracking-wide">Valor</th>
-            <th className="py-3 px-4 text-center text-xs font-medium text-primary uppercase tracking-wide">Ações</th>
+            <th className="py-3 px-4 text-left text-sm font-medium text-blue-600">#</th>
+            <th className="py-3 px-4 text-left text-sm font-medium text-blue-600">SITE</th>
+            <th className="py-3 px-4 text-center text-sm font-medium text-blue-600">DR</th>
+            <th className="py-3 px-4 text-center text-sm font-medium text-blue-600">DA</th>
+            <th className="py-3 px-4 text-center text-sm font-medium text-blue-600">TRÁFEGO /MÊS</th>
+            <th className="py-3 px-4 text-left text-sm font-medium text-blue-600">CATEGORIA</th>
+            <th className="py-3 px-4 text-center text-sm font-medium text-blue-600">VALOR</th>
+            <th className="py-3 px-4 text-center text-sm font-medium text-blue-600">AÇÕES</th>
           </tr>
         </thead>
         <tbody>
