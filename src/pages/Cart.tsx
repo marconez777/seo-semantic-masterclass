@@ -121,16 +121,21 @@ const Cart = () => {
       if (data && data.length > 0) {
         // Prepare payload according to Abacate Pay format
         const payload = {
+          frequency: 'ONE_TIME',
+          methods: ['PIX'],
           customer: {
-            name: (session?.user?.user_metadata as any)?.name || session?.user?.email || 'Cliente',
-            tax_id: taxId
+            name: (session?.user?.user_metadata as any)?.full_name || session?.user?.email || 'Cliente',
+            cellphone: (session?.user?.user_metadata as any)?.phone || '',
+            email: session?.user?.email || 'no-reply@mkart.com.br',
+            taxId: taxId,
           },
           products: cartItems.map((item: any) => ({
-            title: `Backlink em ${item.site_url || 'site'}`,
+            externalId: String(item.id),
+            name: `Backlink em ${item.site_url || 'site'}`,
+            description: '',
             quantity: 1,
-            unit_price_cents: Math.round(Number(item.valor) * 100)
+            price: Math.round(Number(item.valor) * 100),
           })),
-          currency: 'BRL'
         };
 
         console.log('[Checkout] Payload Abacate:', payload);

@@ -21,7 +21,7 @@ Deno.serve(async (req) => {
       console.error('[abacate-create-billing] ABACATEPAY_API_KEY not configured');
       return new Response(JSON.stringify({ error: 'ABACATEPAY_API_KEY not set' }), {
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -55,26 +55,43 @@ Deno.serve(async (req) => {
           ),
     }));
 
+    // Helper simples para validar email
+    const isEmail = (s: any) => typeof s === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s);
+
+    // E-mail pode vir em inb.customer.email ou inb.email
+    let email: string = (inb?.customer?.email ?? inb?.email ?? '') as string;
+    const fallbackEmail = Deno.env.get('DEFAULT_CUSTOMER_EMAIL') || 'no-reply@mkart.com.br';
+    if (!isEmail(email)) {
+      if (isEmail(fallbackEmail)) {
+        email = fallbackEmail;
+      } else {
+        return new Response(JSON.stringify({ error: 'customer_email_required' }), {
+          status: 400,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
     // Mapear customer para camelCase exigido pela Abacate
     const customerRaw = inb.customer || {};
     const customer = {
-      name: customerRaw.name ?? customerRaw.nome ?? '',
+      name: customerRaw.name ?? customerRaw.nome ?? inb.name ?? inb.email ?? 'Cliente',
       cellphone: customerRaw.cellphone ?? customerRaw.telefone ?? '',
-      email: customerRaw.email ?? '',
-      taxId: customerRaw.taxId ?? customerRaw.tax_id ?? customerRaw.cpf ?? '',
+      email,
+      taxId: customerRaw.taxId ?? customerRaw.tax_id ?? customerRaw.cpf ?? inb.taxId ?? '',
     };
 
     // Validações mínimas
     if (!Array.isArray(products) || products.length === 0) {
       return new Response(JSON.stringify({ error: 'products_required' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     if (!returnUrl) {
       return new Response(JSON.stringify({ error: 'returnUrl_required' }), {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
@@ -109,20 +126,20 @@ Deno.serve(async (req) => {
       console.error('[abacate-create-billing] Abacate error:', errText);
       return new Response(errText, {
         status: 400,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     const result = await res.json();
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (e) {
     console.error('[abacate-create-billing] Exception:', e);
     return new Response(JSON.stringify({ error: String(e?.message || e) }), {
       status: 500,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   }
 });
