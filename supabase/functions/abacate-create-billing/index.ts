@@ -131,7 +131,11 @@ Deno.serve(async (req) => {
     }
 
     const result = await res.json();
-    return new Response(JSON.stringify(result), {
+    console.log('[abacate-create-billing] Abacate success:', result);
+
+    const url = result?.checkoutUrl ?? null; // <- campo certo
+
+    return new Response(JSON.stringify({ ok: true, url, raw: result }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

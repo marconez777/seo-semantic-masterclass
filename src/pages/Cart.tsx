@@ -111,14 +111,14 @@ const Cart = () => {
         publicacao_status: 'pendente'
       }));
 
-      const { data, error } = await supabase
+      const { data: ordersData, error: ordersError } = await supabase
         .from('pedidos')
         .insert(orders)
         .select();
 
-      if (error) throw error;
+      if (ordersError) throw ordersError;
 
-      if (data && data.length > 0) {
+      if (ordersData && ordersData.length > 0) {
         // Prepare payload according to Abacate Pay format
         const payload = {
           frequency: 'ONE_TIME',
@@ -140,7 +140,7 @@ const Cart = () => {
 
         console.log('[Checkout] Payload Abacate:', payload);
 
-        const { data: abacate, error: abacateErr } = await supabase.functions.invoke('abacate-create-billing', { 
+        const { data, error: abacateErr } = await supabase.functions.invoke('abacate-create-billing', { 
           body: payload 
         });
 
@@ -169,13 +169,13 @@ const Cart = () => {
           throw new Error(abacateErr.message || 'Erro ao processar pagamento PIX');
         }
 
-        if (abacate?.url) {
+        if (data?.url) {
           clearCart();
-          window.location.href = abacate.url;
+          window.location.href = data.url; // redireciona para o checkout
           return;
         }
 
-        console.warn('[Checkout] Resposta sem URL de pagamento:', abacate);
+        console.warn('[Checkout] Resposta sem URL de pagamento:', data);
         throw new Error('Não foi possível iniciar o pagamento. Tente novamente.');
       } else {
         throw new Error("Não foi possível criar o seu pedido");
