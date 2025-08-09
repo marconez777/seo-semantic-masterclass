@@ -21,67 +21,74 @@ Deno.serve(async (req) => {
 
     const apiKey = Deno.env.get('ABACATEPAY_API_KEY');
     if (!apiKey) {
-      return new Response(JSON.stringify({ error: 'ABACATEPAY_API_KEY not set' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      console.error('[abacate-create-billing] ABACATEPAY_API_KEY not configured');
+      return new Response(JSON.stringify({ error: 'ABACATEPAY_API_KEY not set' }), { 
+        status: 500, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
     }
 
-    const body = await req.json();
-    const orders = body?.orders as string[] | undefined;
-    const products = body?.products as Array<any> | undefined;
-    const customer = body?.customer as any;
+    const body = await req.json().catch(() => null);
+    console.log('[abacate-create-billing] Received body:', body);
 
-    if (!orders?.length) {
-      return new Response(JSON.stringify({ error: 'orders is required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    // Validate input format - new payload structure
+    if (!body?.customer?.tax_id) {
+      console.error('[abacate-create-billing] Missing customer.tax_id');
+      return new Response(JSON.stringify({ error: 'customer.tax_id is required' }), { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
     }
 
-    if (!customer?.email || !customer?.name) {
-      return new Response(JSON.stringify({ error: 'customer.name and customer.email are required' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-    }
-    if (!customer?.taxId) {
-      return new Response(JSON.stringify({ error: 'customer.taxId (CPF) is required' }), { status: 422, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    const cpf = String(body.customer.tax_id).replace(/\D/g, '');
+    if (cpf.length !== 11) {
+      console.error('[abacate-create-billing] Invalid CPF length:', cpf.length);
+      return new Response(JSON.stringify({ error: 'invalid_tax_id' }), { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
     }
 
-    let billingProducts: any[] = [];
-    if (products?.length) {
-      billingProducts = products.map((p) => ({
-        externalId: String(p.externalId),
-        name: String(p.name),
-        description: p.description ? String(p.description) : undefined,
-        quantity: Number(p.quantity || 1),
-        price: Number(p.price), // cents
-      }));
-    } else {
-      const { data: pedidos, error } = await supabase
-        .from('pedidos')
-        .select('id, preco_centavos')
-        .in('id', orders);
+    if (!Array.isArray(body?.products) || body.products.length === 0) {
+      console.error('[abacate-create-billing] Invalid products array');
+      return new Response(JSON.stringify({ error: 'products_required' }), { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
+    }
 
-      if (error) throw error;
-      if (!pedidos?.length) {
-        return new Response(JSON.stringify({ error: 'orders not found' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    for (const p of body.products) {
+      if (!p?.quantity || !Number.isFinite(p?.unit_price_cents)) {
+        console.error('[abacate-create-billing] Invalid product format:', p);
+        return new Response(JSON.stringify({ error: 'invalid_product_format' }), { 
+          status: 400, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        });
       }
-      billingProducts = pedidos.map((p: any) => ({
-        externalId: p.id,
-        name: 'Backlink',
-        quantity: 1,
-        price: Number(p.preco_centavos),
-      }));
     }
+
+    const customer = body.customer;
+    const products = body.products;
+
+    // Map to Abacate Pay expected format
+    const billingProducts = products.map((p: any) => ({
+      title: String(p.title || p.name || 'Produto'),
+      quantity: Number(p.quantity || 1),
+      unit_price_cents: Number(p.unit_price_cents || p.price || 0)
+    }));
+
+    const currency = body.currency || 'BRL';
 
     const payload = {
-      frequency: 'ONE_TIME',
-      methods: ['PIX'],
-      products: billingProducts,
-      returnUrl: 'https://mkart.com.br/painel',
-      completionUrl: 'https://mkart.com.br/painel?paid=1',
       customer: {
-        metadata: {
-          name: customer.name,
-          email: customer.email,
-          taxId: customer.taxId,
-          cellphone: customer.cellphone ?? undefined,
-        }
+        name: String(customer.name || 'Cliente'),
+        tax_id: cpf
       },
+      products: billingProducts,
+      currency: currency
     };
+
+    console.log('[abacate-create-billing] Sending payload to Abacate:', payload);
 
     const res = await fetch(`${ABACATE_API}/billing/create`, {
       method: 'POST',
@@ -93,25 +100,37 @@ Deno.serve(async (req) => {
     });
 
     if (!res.ok) {
-      const txt = await res.text();
-      return new Response(JSON.stringify({ error: 'abacate-create failed', details: txt }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      const errText = await res.text();
+      console.error('[abacate-create-billing] Abacate error:', errText);
+      return new Response(errText, { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
     }
 
-    const json = await res.json();
-    const data = json?.data ?? json;
+    const result = await res.json();
+    console.log('[abacate-create-billing] Abacate response:', result);
 
-    const { error: upErr } = await supabase
-      .from('pedidos')
-      .update({ payment_reference: data.id, payment_provider: 'abacatepay', pagamento_status: 'pendente' })
-      .in('id', orders);
+    const responseData = {
+      url: result?.url || result?.checkout_url || result?.pix_url,
+      id: result?.id,
+      raw: result
+    };
 
-    if (upErr) throw upErr;
+    if (!responseData.url) {
+      console.error('[abacate-create-billing] No URL in response:', result);
+      return new Response(JSON.stringify({ error: 'No payment URL returned' }), { 
+        status: 400, 
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+      });
+    }
 
-    return new Response(JSON.stringify({ url: data.url, id: data.id }), {
+    return new Response(JSON.stringify(responseData), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
   } catch (e) {
+    console.error('[abacate-create-billing] Exception:', e);
     return new Response(JSON.stringify({ error: String(e?.message || e) }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }

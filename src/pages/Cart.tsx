@@ -1,6 +1,9 @@
 import { useCart } from '@/contexts/CartContext';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Loader2, X, ShoppingCart } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +18,9 @@ import SEOHead from '@/components/seo/SEOHead';
 const Cart = () => {
   const { cartItems, removeFromCart, cartTotal, clearCart } = useCart();
   const [isLoading, setIsLoading] = useState(false);
+  const [showCpfModal, setShowCpfModal] = useState(false);
+  const [cpfInput, setCpfInput] = useState('');
+  const [cpfError, setCpfError] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -33,6 +39,29 @@ const Cart = () => {
     }
   };
 
+  const formatCpf = (value: string) => {
+    const cleaned = value.replace(/\D/g, '');
+    return cleaned.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
+  };
+
+  const validateCpf = (cpf: string) => {
+    const cleaned = cpf.replace(/\D/g, '');
+    if (cleaned.length !== 11) {
+      return 'CPF deve ter 11 dígitos';
+    }
+    if (/^(\d)\1{10}$/.test(cleaned)) {
+      return 'CPF inválido';
+    }
+    return '';
+  };
+
+  const handleCpfChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    const cleaned = value.replace(/\D/g, '').slice(0, 11);
+    setCpfInput(formatCpf(cleaned));
+    setCpfError('');
+  };
+
   const handleCheckout = async () => {
     setIsLoading(true);
     try {
@@ -42,9 +71,39 @@ const Cart = () => {
         return;
       }
 
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData?.session;
+
+      // Check if user already has CPF
+      let taxId = (session?.user?.user_metadata?.taxId || '').trim?.() || '';
+      if (!taxId) {
+        // Show CPF modal
+        setShowCpfModal(true);
+        return;
+      }
+
+      await processCheckout(taxId);
+    } catch (error) {
+      console.error('[Checkout] Error:', error);
+      toast({
+        title: "Erro no checkout",
+        description: "Não foi possível processar seu pedido. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const processCheckout = async (taxId: string) => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: sessionData } = await supabase.auth.getSession();
+      const session = sessionData?.session;
+
       // Create multiple orders in database
       const orders = cartItems.map(item => ({
-        user_id: user.id,
+        user_id: user!.id,
         backlink_id: item.id,
         url_destino: item.url_destino,
         texto_ancora: item.texto_ancora,
@@ -59,56 +118,63 @@ const Cart = () => {
 
       if (error) throw error;
 
-      // Abacate Pay (ONE_TIME + PIX) via Edge Function
       if (data && data.length > 0) {
-        const { data: sessionData } = await supabase.auth.getSession();
-        const session = sessionData?.session;
-
-        let taxId = (session?.user?.user_metadata?.taxId || '').trim?.() || '';
-        if (!taxId) {
-          taxId = window.prompt('Informe seu CPF (apenas números) para gerar o pagamento PIX:') || '';
-          taxId = taxId.replace(/\D+/g, '');
-          if (!taxId) {
-            throw new Error('CPF é obrigatório para gerar a cobrança.');
-          }
-        }
-
-        const products = cartItems.map((item: any) => ({
-          externalId: item.id,
-          name: `Backlink em ${item.site_url || 'site'}`,
-          description: item.texto_ancora ? `Âncora: ${item.texto_ancora}` : undefined,
-          quantity: 1,
-          price: Number((item as any).price_cents || (item as any).preco_centavos || Math.round(Number(item.valor) * 100) || 0),
-        }));
-
+        // Prepare payload according to Abacate Pay format
         const payload = {
-          orders: data.map((o: any) => o.id),
-          products,
           customer: {
             name: (session?.user?.user_metadata as any)?.name || session?.user?.email || 'Cliente',
-            email: session?.user?.email,
-            taxId,
-            cellphone: (session?.user?.user_metadata as any)?.cellphone || undefined,
+            tax_id: taxId
           },
+          products: cartItems.map((item: any) => ({
+            title: `Backlink em ${item.site_url || 'site'}`,
+            quantity: 1,
+            unit_price_cents: Math.round(Number(item.valor) * 100)
+          })),
+          currency: 'BRL'
         };
 
-        const { data: abacate, error: abacateErr } = await supabase.functions.invoke('abacate-create-billing', { body: payload });
-        if (abacateErr) throw abacateErr;
-        clearCart();
-        window.location.assign((abacate as any)?.url);
+        console.log('[Checkout] Payload Abacate:', payload);
+
+        const { data: abacate, error: abacateErr } = await supabase.functions.invoke('abacate-create-billing', { 
+          body: payload 
+        });
+
+        if (abacateErr) {
+          // Try to get more detailed error info
+          console.error('[Checkout] EdgeFunction error:', abacateErr);
+          throw new Error(abacateErr.message || 'Erro ao processar pagamento PIX');
+        }
+
+        if (abacate?.url) {
+          clearCart();
+          window.location.href = abacate.url;
+          return;
+        }
+
+        console.warn('[Checkout] Resposta sem URL de pagamento:', abacate);
+        throw new Error('Não foi possível iniciar o pagamento. Tente novamente.');
       } else {
         throw new Error("Não foi possível criar o seu pedido");
       }
-    } catch (error) {
-      console.error('Error processing checkout:', error);
-      toast({
-        title: "Erro no checkout",
-        description: "Não foi possível processar seu pedido. Tente novamente.",
-        variant: "destructive"
-      });
-    } finally {
-      setIsLoading(false);
+    } catch (error: any) {
+      console.error('[Checkout] Exception:', error);
+      throw error;
     }
+  };
+
+  const handleCpfSubmit = async () => {
+    const cpfCleaned = cpfInput.replace(/\D/g, '');
+    const error = validateCpf(cpfCleaned);
+    if (error) {
+      setCpfError(error);
+      return;
+    }
+
+    setShowCpfModal(false);
+    setCpfInput('');
+    setCpfError('');
+    
+    await processCheckout(cpfCleaned);
   };
 
   return (
@@ -246,6 +312,56 @@ const Cart = () => {
       </main>
       
       <Footer />
+
+      {/* CPF Modal */}
+      <Dialog open={showCpfModal} onOpenChange={setShowCpfModal}>
+        <DialogContent className="sm:max-w-md" aria-describedby="cpf-dialog-description">
+          <DialogHeader>
+            <DialogTitle>Informe seu CPF</DialogTitle>
+            <DialogDescription id="cpf-dialog-description">
+              Precisamos do seu CPF para gerar o pagamento PIX via Abacate Pay.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="cpf">CPF (apenas números)</Label>
+              <Input
+                id="cpf"
+                placeholder="000.000.000-00"
+                value={cpfInput}
+                onChange={handleCpfChange}
+                maxLength={14}
+                className={cpfError ? 'border-destructive' : ''}
+              />
+              {cpfError && (
+                <p className="text-sm text-destructive">{cpfError}</p>
+              )}
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => {
+              setShowCpfModal(false);
+              setCpfInput('');
+              setCpfError('');
+              setIsLoading(false);
+            }}>
+              Cancelar
+            </Button>
+            <Button onClick={handleCpfSubmit} disabled={!cpfInput || isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Processando...
+                </>
+              ) : (
+                'Continuar'
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 };
