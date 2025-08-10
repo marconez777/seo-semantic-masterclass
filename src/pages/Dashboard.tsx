@@ -5,6 +5,20 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  SidebarProvider,
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupLabel,
+  SidebarInset,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { ClipboardList, FileCheck2, Heart, UserCircle } from "lucide-react";
+
 function PurchasesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
   const [pubSummary, setPubSummary] = useState<Record<string, { total: number; published: number; inProgress: number; rejected: number }>>({});
@@ -50,23 +64,23 @@ function PurchasesTable({ userId }: { userId: string }) {
   const renderPubBadge = (orderId: string) => {
     const s = pubSummary[orderId];
     if (!s || s.total === 0) return <Badge variant="outline">—</Badge>;
-    if (s.published === s.total) return <Badge className="bg-green-600 text-white hover:bg-green-600">Publicados</Badge>;
+    if (s.published === s.total) return <Badge className="bg-secondary/15 text-secondary border-secondary/20">Publicados</Badge>;
     if (s.rejected > 0) return <Badge variant="destructive">Rejeitado</Badge>;
     if (s.inProgress > 0) return <Badge variant="secondary">Em progresso</Badge>;
     return <Badge variant="secondary">Pendente</Badge>;
   };
 
   return (
-    <div className="border rounded-md overflow-x-auto">
+    <div className="border rounded-md overflow-x-auto bg-card">
       <table className="w-full text-sm">
-        <thead className="bg-accent/40">
+        <thead className="bg-muted/60">
           <tr className="text-left">
-            <th className="p-3">Pedido</th>
-            <th className="p-3">Criado em</th>
-            <th className="p-3">Total</th>
-            <th className="p-3">Pagamento</th>
-            <th className="p-3">Publicação</th>
-            <th className="p-3">Ações</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Pedido</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Criado em</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Total</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Pagamento</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Publicação</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Ações</th>
           </tr>
         </thead>
         <tbody>
@@ -81,7 +95,7 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">{renderPubBadge(r.id)}</td>
               <td className="p-3">
                 {r.abacate_url ? (
-                  <a className="text-primary hover:underline" href={r.abacate_url} target="_blank" rel="noopener noreferrer">Ver cobrança</a>
+                  <a className="story-link text-primary" href={r.abacate_url} target="_blank" rel="noopener noreferrer">Ver cobrança</a>
                 ) : (
                   <span className="text-muted-foreground">—</span>
                 )}
@@ -125,23 +139,23 @@ function PublicationsTable({ userId }: { userId: string }) {
   }, [userId]);
 
   const statusBadge = (s: string) => {
-    if (s === 'published') return <Badge className="bg-green-600 text-white hover:bg-green-600">Publicado</Badge>;
+    if (s === 'published') return <Badge className="bg-secondary/15 text-secondary border-secondary/20">Publicado</Badge>;
     if (s === 'in_progress') return <Badge variant="secondary">Em progresso</Badge>;
     if (s === 'rejected') return <Badge variant="destructive">Rejeitado</Badge>;
     return <Badge variant="outline">Pendente</Badge>;
   }
 
   return (
-    <div className="border rounded-md overflow-x-auto">
+    <div className="border rounded-md overflow-x-auto bg-card">
       <table className="w-full text-sm">
-        <thead className="bg-accent/40">
+        <thead className="bg-muted/60">
           <tr className="text-left">
-            <th className="p-3">Pedido</th>
-            <th className="p-3">Site</th>
-            <th className="p-3">Âncora</th>
-            <th className="p-3">URL destino</th>
-            <th className="p-3">Status</th>
-            <th className="p-3">Publicação</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Pedido</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Site</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Âncora</th>
+            <th className="p-3 uppercase font-bold tracking-wide">URL destino</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Status</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Publicação</th>
           </tr>
         </thead>
         <tbody>
@@ -154,7 +168,7 @@ function PublicationsTable({ userId }: { userId: string }) {
               <td className="p-3">{r.anchor_text ?? '—'}</td>
               <td className="p-3">
                 {r.target_url ? (
-                  <a href={r.target_url} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                  <a href={r.target_url} className="story-link text-primary" target="_blank" rel="noopener noreferrer">
                     {r.target_url}
                   </a>
                 ) : '—'}
@@ -162,7 +176,7 @@ function PublicationsTable({ userId }: { userId: string }) {
               <td className="p-3">{statusBadge(r.publication_status)}</td>
               <td className="p-3">
                 {r.publication_url ? (
-                  <a href={r.publication_url} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                  <a href={r.publication_url} className="story-link text-primary" target="_blank" rel="noopener noreferrer">
                     Ver publicação
                   </a>
                 ) : <span className="text-muted-foreground">—</span>}
@@ -202,12 +216,12 @@ function FavoritesTable({ userId }: { userId: string }) {
   }, [userId]);
 
   return (
-    <div className="border rounded-md overflow-x-auto">
+    <div className="border rounded-md overflow-x-auto bg-card">
       <table className="w-full text-sm">
-        <thead className="bg-accent/40">
+        <thead className="bg-muted/60">
           <tr className="text-left">
-            <th className="p-3">Site</th>
-            <th className="p-3">Adicionado</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Site</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Adicionado</th>
           </tr>
         </thead>
         <tbody>
@@ -230,6 +244,7 @@ export default function Dashboard() {
   const location = useLocation();
   const { clearCart } = useCart();
   const [userId, setUserId] = useState<string | null>(null);
+  const [tab, setTab] = useState<string>("pedidos");
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -261,24 +276,82 @@ export default function Dashboard() {
         canonicalUrl={`${window.location.origin}/painel`}
         keywords="dashboard, pedidos, favoritos"
       />
-      <main className="container mx-auto px-4 py-10 space-y-8">
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-semibold">Painel</h1>
-          <Button variant="outline" onClick={() => supabase.auth.signOut()}>Sair</Button>
+
+      <SidebarProvider>
+        <div className="min-h-screen flex w-full">
+          <Sidebar collapsible="offcanvas" className="w-60">
+            <SidebarContent>
+              <SidebarGroup>
+                <SidebarGroupLabel>Minha Conta</SidebarGroupLabel>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton isActive={tab==='pedidos'} onClick={() => setTab('pedidos')}>
+                      <ClipboardList className="mr-2" />
+                      <span>Pedidos</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton isActive={tab==='publicacoes'} onClick={() => setTab('publicacoes')}>
+                      <FileCheck2 className="mr-2" />
+                      <span>Publicações</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton isActive={tab==='favoritos'} onClick={() => setTab('favoritos')}>
+                      <Heart className="mr-2" />
+                      <span>Favoritos</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton isActive={tab==='perfil'} onClick={() => setTab('perfil')}>
+                      <UserCircle className="mr-2" />
+                      <span>Perfil</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+              </SidebarGroup>
+            </SidebarContent>
+          </Sidebar>
+
+          <SidebarInset>
+            <main className="container mx-auto px-4 py-10 space-y-8">
+              <div className="flex items-center justify-between">
+                <h1 className="text-3xl font-semibold">Painel</h1>
+                <Button variant="outline" onClick={() => supabase.auth.signOut()}>Sair</Button>
+              </div>
+
+              <Tabs value={tab} onValueChange={setTab}>
+                <TabsList className="mb-4">
+                  <TabsTrigger value="pedidos">Pedidos</TabsTrigger>
+                  <TabsTrigger value="publicacoes">Publicações</TabsTrigger>
+                  <TabsTrigger value="favoritos">Favoritos</TabsTrigger>
+                  <TabsTrigger value="perfil">Perfil</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="pedidos" className="space-y-4">
+                  <h2 className="text-xl font-semibold">Pedidos</h2>
+                  <PurchasesTable userId={userId} />
+                </TabsContent>
+
+                <TabsContent value="publicacoes" className="space-y-4">
+                  <h2 className="text-xl font-semibold">Publicações</h2>
+                  <PublicationsTable userId={userId} />
+                </TabsContent>
+
+                <TabsContent value="favoritos" className="space-y-4">
+                  <h2 className="text-xl font-semibold">Favoritos</h2>
+                  <FavoritesTable userId={userId} />
+                </TabsContent>
+
+                <TabsContent value="perfil" className="space-y-4">
+                  <h2 className="text-xl font-semibold">Perfil</h2>
+                  <p className="text-muted-foreground">Em breve: ajustes de perfil.</p>
+                </TabsContent>
+              </Tabs>
+            </main>
+          </SidebarInset>
         </div>
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold">Pedidos</h2>
-          <PurchasesTable userId={userId} />
-        </section>
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold">Publicações</h2>
-          <PublicationsTable userId={userId} />
-        </section>
-        <section className="space-y-4">
-          <h2 className="text-xl font-semibold">Favoritos</h2>
-          <FavoritesTable userId={userId} />
-        </section>
-      </main>
+      </SidebarProvider>
     </>
   );
 }

@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
  
 const Header = () => {
   const [isAdmin, setIsAdmin] = useState(false);
+  const [userName, setUserName] = useState<string | null>(null);
  
   useEffect(() => {
     (async () => {
@@ -10,6 +13,7 @@ const Header = () => {
       if (!user) return;
       const { data } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
       setIsAdmin(!!data);
+      setUserName((user.user_metadata as any)?.name || user.email || null);
     })();
   }, []);
  
@@ -49,6 +53,17 @@ const Header = () => {
           )}
           <a href="/contato" className="text-foreground hover:text-primary transition-colors">Contato</a>
         </div>
+        <div className="hidden md:flex items-center gap-3">
+          <Button asChild>
+            <a href="/painel" aria-label="Ir para o Painel">Painel</a>
+          </Button>
+          <UserProfileDropdown
+            name={userName ?? 'Visitante'}
+            role={isAdmin ? 'Admin' : 'Cliente'}
+            onSignOut={() => supabase.auth.signOut()}
+          />
+        </div>
+
       </nav>
     </header>
   );

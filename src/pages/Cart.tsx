@@ -59,7 +59,14 @@ const Cart = () => {
         <h1 className="text-3xl font-semibold mb-6">Carrinho</h1>
 
         {items.length === 0 ? (
-          <p className="text-muted-foreground">Seu carrinho está vazio.</p>
+          <div className="flex flex-col items-start gap-3">
+            <p className="text-muted-foreground">Seu carrinho está vazio.</p>
+            <Button asChild>
+              <a href="/comprar-backlinks" aria-label="Voltar para Comprar Backlinks">
+                Voltar para Comprar Backlinks
+              </a>
+            </Button>
+          </div>
         ) : (
           <section className="space-y-4">
             {items.map((it) => (
