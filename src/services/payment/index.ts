@@ -33,7 +33,7 @@ export async function createCheckout(orders: any[], customer?: { name?: string; 
         : undefined,
       // Frontend routes for navigation
       returnUrl: `${window.location.origin}/carrinho`,
-      completionUrl: `${window.location.origin}/payment-success`,
+      completionUrl: `${window.location.origin}/painel`,
     },
   });
 
