@@ -63,18 +63,22 @@ export default function ComprarBacklinks() {
   const sorted = useMemo(() => {
     const arr = [...filtered];
     if (!sortKey) return arr;
-    const isDesc = ['dr','da','traffic','price_cents'].includes(sortKey);
+    const isDesc = ['dr','da','traffic','price_cents'].includes(sortKey as string);
     arr.sort((a, b) => {
-      const av = a[sortKey];
-      const bv = b[sortKey];
+      const av = sortKey === 'site_name'
+        ? ((a.site_name ?? a.site_url) ?? '').toString().toLowerCase()
+        : a[sortKey];
+      const bv = sortKey === 'site_name'
+        ? ((b.site_name ?? b.site_url) ?? '').toString().toLowerCase()
+        : b[sortKey];
       if (av == null && bv == null) return 0;
       if (av == null) return 1;
       if (bv == null) return -1;
       if (typeof av === 'number' && typeof bv === 'number') {
-        return isDesc ? bv - av : av - bv;
+        return isDesc ? (bv as number) - (av as number) : (av as number) - (bv as number);
       }
-      const as = String(av).toLowerCase();
-      const bs = String(bv).toLowerCase();
+      const as = String(av);
+      const bs = String(bv);
       return isDesc ? bs.localeCompare(as) : as.localeCompare(bs);
     });
     return arr;
