@@ -3,12 +3,11 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-import { Badge } from "@/components/ui/badge";
-import { Circle, BookText, Heart } from "lucide-react";
+import { Circle, BookText } from "lucide-react";
+import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 
 // Helper to format BRL
 const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -136,18 +135,7 @@ export default function ComprarBacklinks() {
                   <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
                 ) : (
                   filtered.map((b) => (
-                    <tr key={b.id} className="border-t">
-                      <td className="p-4">{b.site_name || b.site_url}</td>
-                      <td className="p-4 text-primary font-medium">{b.dr ?? '-'}</td>
-                      <td className="p-4 text-muted-foreground">{b.da ?? '-'}</td>
-                      <td className="p-4">{b.traffic?.toLocaleString('pt-BR') ?? '-'}</td>
-                      <td className="p-4"><Badge variant="secondary">{b.category}</Badge></td>
-                      <td className="p-4 font-medium">{brl(b.price_cents)}</td>
-                      <td className="p-4 flex items-center justify-end gap-2">
-                        <Button size="sm" onClick={() => onBuy(b)}>Comprar</Button>
-                        <button aria-label="Favoritar" className="p-2 rounded hover:bg-accent"><Heart size={18} /></button>
-                      </td>
-                    </tr>
+                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
                   ))
                 )}
               </tbody>
