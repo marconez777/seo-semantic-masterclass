@@ -95,12 +95,18 @@ Deno.serve(async (req) => {
       url.searchParams.get('token') ??
       url.searchParams.get('secret')
 
-    const token = headerToken ?? xToken ?? qToken
+    let token = headerToken ?? xToken ?? qToken
     const tokenSource = headerToken ? 'authorization' : xToken ? 'x-webhook-token' : qToken ? 'query' : 'none'
+    if (token) {
+      try { token = decodeURIComponent(token) } catch {}
+      const qIdx = token.indexOf('?'); if (qIdx > -1) token = token.substring(0, qIdx)
+      const ampIdx = token.indexOf('&'); if (ampIdx > -1) token = token.substring(0, ampIdx)
+      token = token.trim()
+    }
     console.log('[abacate-webhook] tokenSource:', tokenSource)
 
     if (!token || token !== secret) {
-      console.warn('[abacate-webhook] Unauthorized webhook call')
+      console.warn('[abacate-webhook] Unauthorized webhook call', { tokenLen: token?.length ?? 0, tokenSource })
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
