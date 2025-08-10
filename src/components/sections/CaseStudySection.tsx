@@ -16,10 +16,15 @@ const testimonials = [
   {
     client: "Sistema Kronoos",
     videoUrl: "https://www.youtube.com/embed/B35Poq_3xDM",
-    headline: "Primeira Posição no Google",
-    description: "Sistema Kronoos conquistou a primeira posição no Google, solidificando sua presença online e atraindo um público-alvo qualificado para o negócio.",
-    metrics: [{ value: "450", label: "Backlinks" }, { value: "12.500", label: "Tráfego Mensal" }],
-    keywords: ["Sistema Kronoos", "Verificação de antecedentes", "Background check", "Consultoria empresarial"],
+    headline: "O Sistema que foi para 1º Página em 3 meses",
+    description: "Em 3 meses, o Sistema Kronoos alcançou a 1ª página do Google com uma estratégia focada e assertiva.",
+    metrics: [{ value: "88", label: "Backlinks" }, { value: "7.563", label: "Tráfego Mensal" }],
+    keywords: [
+      "listas restritivas",
+      "compliance contratual",
+      "puxar ficha da pessoa pelo cpf",
+      "listas restritivas internacionais",
+    ],
   },
   {
     client: "Loja Soluções em Embalagens",
