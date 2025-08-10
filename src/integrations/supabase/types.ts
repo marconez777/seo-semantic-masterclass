@@ -14,7 +14,155 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      backlinks: {
+        Row: {
+          category: string
+          created_at: string
+          da: number | null
+          dr: number | null
+          id: string
+          is_active: boolean
+          link_type: string | null
+          price_cents: number
+          requirements: string[] | null
+          site_name: string
+          site_url: string
+          traffic: number | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          da?: number | null
+          dr?: number | null
+          id?: string
+          is_active?: boolean
+          link_type?: string | null
+          price_cents: number
+          requirements?: string[] | null
+          site_name: string
+          site_url: string
+          traffic?: number | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          da?: number | null
+          dr?: number | null
+          id?: string
+          is_active?: boolean
+          link_type?: string | null
+          price_cents?: number
+          requirements?: string[] | null
+          site_name?: string
+          site_url?: string
+          traffic?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      favoritos: {
+        Row: {
+          backlink_id: string
+          created_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          backlink_id: string
+          created_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          backlink_id?: string
+          created_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favoritos_backlink_id_fkey"
+            columns: ["backlink_id"]
+            isOneToOne: false
+            referencedRelation: "backlinks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_items: {
+        Row: {
+          backlink_id: string
+          id: string
+          order_id: string
+          price_cents: number
+          quantity: number
+        }
+        Insert: {
+          backlink_id: string
+          id?: string
+          order_id: string
+          price_cents: number
+          quantity?: number
+        }
+        Update: {
+          backlink_id?: string
+          id?: string
+          order_id?: string
+          price_cents?: number
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_backlink_id_fkey"
+            columns: ["backlink_id"]
+            isOneToOne: false
+            referencedRelation: "backlinks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      pedidos: {
+        Row: {
+          abacate_bill_id: string | null
+          abacate_url: string | null
+          created_at: string
+          id: string
+          status: Database["public"]["Enums"]["order_status"]
+          total_cents: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          abacate_bill_id?: string | null
+          abacate_url?: string | null
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          total_cents: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          abacate_bill_id?: string | null
+          abacate_url?: string | null
+          created_at?: string
+          id?: string
+          status?: Database["public"]["Enums"]["order_status"]
+          total_cents?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +171,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      order_status: "pending" | "paid" | "cancelled" | "refunded"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +298,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      order_status: ["pending", "paid", "cancelled", "refunded"],
+    },
   },
 } as const
