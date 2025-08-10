@@ -30,7 +30,7 @@ const Header = () => {
           </div>
 
           <a href="/cart" className="text-foreground hover:text-primary transition-colors">Carrinho</a>
-          <a href="/dashboard" className="text-foreground hover:text-primary transition-colors">Painel</a>
+          <a href="/painel" className="text-foreground hover:text-primary transition-colors">Painel</a>
           <a href="/contato" className="text-foreground hover:text-primary transition-colors">Contato</a>
         </div>
       </nav>

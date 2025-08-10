@@ -4,38 +4,46 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout } from "@/services/payment";
-
+import { useState } from "react";
 const Carrinho = () => {
   const { items, totalCents, itemsCount, clearCart, removeFromCart } = useCart();
-
+  const [loading, setLoading] = useState(false);
   const totalBRL = (totalCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const finalize = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      window.location.href = "/auth";
-      return;
-    }
-    const customer = {
-      name: (session.user.user_metadata as any)?.name,
-      phone: (session.user.user_metadata as any)?.phone,
-      cpf: (session.user.user_metadata as any)?.cpf,
-      email: session.user.email,
-    };
+    try {
+      setLoading(true);
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        window.location.href = "/auth";
+        return;
+      }
+      const customer = {
+        name: (session.user.user_metadata as any)?.name,
+        phone: (session.user.user_metadata as any)?.phone,
+        cpf: (session.user.user_metadata as any)?.cpf,
+        email: session.user.email,
+      };
 
-    const orders = items.map((it) => ({
-      id: it.id,
-      name: it.name,
-      quantity: it.quantity,
-      priceCents: it.price_cents,
-      description: `Ancora: ${it.texto_ancora} | URL: ${it.url_destino}`,
-      anchorText: it.texto_ancora,
-      targetUrl: it.url_destino,
-    }));
+      const orders = items.map((it) => ({
+        id: it.id,
+        name: it.name,
+        quantity: it.quantity,
+        priceCents: it.price_cents,
+        description: `Ancora: ${it.texto_ancora} | URL: ${it.url_destino}`,
+        anchorText: it.texto_ancora,
+        targetUrl: it.url_destino,
+      }));
 
-    const res = await createCheckout(orders as any, customer as any);
-    if (res.url && res.url !== '#') {
-      window.location.href = res.url;
+      const res = await createCheckout(orders as any, customer as any);
+      if (res.url && res.url !== '#') {
+        window.location.href = res.url;
+      } else {
+        setLoading(false);
+      }
+    } catch (e) {
+      console.error('Falha ao finalizar compra', e);
+      setLoading(false);
     }
   };
 
@@ -75,8 +83,20 @@ const Carrinho = () => {
             </div>
 
             <div className="flex gap-2">
-              <Button variant="outline" onClick={clearCart}>Limpar carrinho</Button>
-              <Button onClick={finalize}>Finalizar compra</Button>
+              <Button variant="outline" onClick={clearCart} disabled={loading}>Limpar carrinho</Button>
+              <Button onClick={finalize} disabled={loading || items.length === 0} aria-busy={loading}>
+                {loading ? (
+                  <>
+                    <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" strokeLinecap="round"></path>
+                    </svg>
+                    Redirecionando...
+                  </>
+                ) : (
+                  'Finalizar compra'
+                )}
+              </Button>
             </div>
           </section>
         )}

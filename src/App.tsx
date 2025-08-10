@@ -24,7 +24,7 @@ const App = () => (
         <Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
-        <Route path="/dashboard" element={<Navigate to="/painel" replace />} />
+        
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/cart" element={<Cart />} />
       </Routes>

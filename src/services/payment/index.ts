@@ -53,8 +53,8 @@ export async function createCheckout(orders: OrderInput[], customer?: { name?: s
           }
         : undefined,
       // Frontend routes for navigation
-      returnUrl: `${window.location.origin}/carrinho`,
-      completionUrl: `${window.location.origin}/painel`,
+      returnUrl: `${window.location.origin}/carrinho?cancel=1`,
+      completionUrl: `${window.location.origin}/painel?paid=1`,
       metadata: {
         items: metaItems,
       },

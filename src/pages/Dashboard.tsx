@@ -3,8 +3,8 @@ import SEOHead from "@/components/seo/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate, useLocation } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
 function PurchasesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
   const [pubSummary, setPubSummary] = useState<Record<string, { total: number; published: number; inProgress: number; rejected: number }>>({});
@@ -227,18 +227,26 @@ function FavoritesTable({ userId }: { userId: string }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
+  const { clearCart } = useCart();
   const [userId, setUserId] = useState<string | null>(null);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('paid') === '1') {
+      clearCart();
+    }
+  }, [location.search, clearCart]);
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       const id = session?.user?.id ?? null;
       setUserId(id);
-      if (!id) navigate('/auth', { replace: true, state: { from: '/dashboard' } });
+      if (!id) navigate('/auth', { replace: true, state: { from: '/painel' } });
     });
     supabase.auth.getSession().then(({ data }) => {
       const id = data.session?.user?.id ?? null;
       setUserId(id);
-      if (!id) navigate('/auth', { replace: true, state: { from: '/dashboard' } });
+      if (!id) navigate('/auth', { replace: true, state: { from: '/painel' } });
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
@@ -248,14 +256,14 @@ export default function Dashboard() {
   return (
     <>
       <SEOHead
-        title="Dashboard | MK Art SEO"
+        title="Painel | MK Art SEO"
         description="Veja seus pedidos e favoritos."
-        canonicalUrl={`${window.location.origin}/dashboard`}
+        canonicalUrl={`${window.location.origin}/painel`}
         keywords="dashboard, pedidos, favoritos"
       />
       <main className="container mx-auto px-4 py-10 space-y-8">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-semibold">Dashboard</h1>
+          <h1 className="text-3xl font-semibold">Painel</h1>
           <Button variant="outline" onClick={() => supabase.auth.signOut()}>Sair</Button>
         </div>
         <section className="space-y-4">
