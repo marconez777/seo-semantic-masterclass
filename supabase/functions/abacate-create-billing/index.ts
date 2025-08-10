@@ -109,6 +109,13 @@ Deno.serve(async (req) => {
     }, 0)
     const total_cents = amountFromApi > 0 ? amountFromApi : totalFromProducts
 
+    // Snapshot do comprador a partir do user_metadata do Supabase Auth
+    const meta: any = (user as any)?.user_metadata ?? {}
+    const customer_email = user.email ?? null
+    const customer_name = meta?.name ?? meta?.full_name ?? null
+    const customer_cpf = meta?.cpf ?? null
+    const customer_phone = meta?.phone ?? null
+
     // Insert pedido
     const { data: pedido, error: pedidoErr } = await supabaseUser
       .from('pedidos')
@@ -118,6 +125,11 @@ Deno.serve(async (req) => {
         status: 'pending', // pagamento pendente; webhook deve atualizar para 'paid' depois
         abacate_bill_id: abacateBillId,
         abacate_url: url,
+        // Novas colunas de snapshot do comprador
+        customer_email,
+        customer_name,
+        customer_cpf,
+        customer_phone,
       })
       .select('id')
       .single()

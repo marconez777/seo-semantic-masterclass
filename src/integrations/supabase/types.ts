@@ -153,6 +153,10 @@ export type Database = {
           abacate_bill_id: string | null
           abacate_url: string | null
           created_at: string
+          customer_cpf: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
           id: string
           status: Database["public"]["Enums"]["order_status"]
           total_cents: number
@@ -163,6 +167,10 @@ export type Database = {
           abacate_bill_id?: string | null
           abacate_url?: string | null
           created_at?: string
+          customer_cpf?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
           total_cents: number
@@ -173,10 +181,35 @@ export type Database = {
           abacate_bill_id?: string | null
           abacate_url?: string | null
           created_at?: string
+          customer_cpf?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
           total_cents?: number
           updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
           user_id?: string
         }
         Relationships: []
@@ -186,9 +219,16 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _user_id: string
+          _role: Database["public"]["Enums"]["app_role"]
+        }
+        Returns: boolean
+      }
     }
     Enums: {
+      app_role: "admin" | "moderator" | "user"
       order_status: "pending" | "paid" | "cancelled" | "refunded"
       publication_status: "pending" | "in_progress" | "published" | "rejected"
     }
@@ -318,6 +358,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      app_role: ["admin", "moderator", "user"],
       order_status: ["pending", "paid", "cancelled", "refunded"],
       publication_status: ["pending", "in_progress", "published", "rejected"],
     },
