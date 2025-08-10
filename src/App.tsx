@@ -13,6 +13,7 @@ import Dashboard from "./pages/Dashboard";
 import { CartProvider } from "./contexts/CartContext";
 import Admin from "./pages/Admin";
 import Recibo from "./pages/Recibo";
+import Blog from "./pages/Blog";
  
 const App = () => (
   <BrowserRouter>
@@ -24,6 +25,7 @@ const App = () => (
         <Route path="/consultoria-de-seo-backlinks" element={<ConsultoriaSeo />} />
         <Route path="/comprar-backlinks" element={<ComprarBacklinks />} />
         <Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
+        <Route path="/blog" element={<Blog />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
         <Route path="/admin" element={<Admin />} />

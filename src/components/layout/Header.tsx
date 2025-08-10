@@ -65,6 +65,7 @@ const Header = () => {
             )}
           </div>
 
+          <a href="/blog" className="text-foreground hover:text-primary transition-colors">Blog</a>
           <a href="/painel" className="text-foreground hover:text-primary transition-colors">Painel</a>
           {isAdmin && (
             <a href="/admin" className="text-foreground hover:text-primary transition-colors">Admin</a>
