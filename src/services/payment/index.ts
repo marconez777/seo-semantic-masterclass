@@ -8,7 +8,7 @@ export type CheckoutResult = {
   mode: 'manual' | 'redirect';
 };
 
-export async function createCheckout(orders: any[]): Promise<CheckoutResult> {
+export async function createCheckout(orders: any[], customer?: { name?: string; phone?: string; cpf?: string; email?: string; }): Promise<CheckoutResult> {
   // Map generic orders to Abacate Pay products shape
   const products = (orders ?? []).map((o: any) => ({
     externalId: String(o?.externalId ?? o?.id ?? crypto.randomUUID()),
@@ -23,6 +23,7 @@ export async function createCheckout(orders: any[]): Promise<CheckoutResult> {
       frequency: 'MULTIPLE_PAYMENTS',
       methods: ['PIX'],
       products,
+      customer,
       // Frontend routes for navigation
       returnUrl: `${window.location.origin}/carrinho`,
       completionUrl: `${window.location.origin}/payment-success`,

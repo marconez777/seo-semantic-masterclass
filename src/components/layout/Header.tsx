@@ -10,6 +10,8 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-8">
           <a href="/" className="text-foreground hover:text-primary font-medium transition-colors">Home</a>
 
+          <a href="/comprar-backlinks" className="text-foreground hover:text-primary transition-colors">Comprar Backlinks</a>
+
           <div className="relative group">
             <button className="inline-flex items-center text-foreground hover:text-primary transition-colors">
               Serviços
@@ -27,7 +29,8 @@ const Header = () => {
             </div>
           </div>
 
-          <a href="#blog" className="text-foreground hover:text-primary transition-colors">Blog</a>
+          <a href="/cart" className="text-foreground hover:text-primary transition-colors">Carrinho</a>
+          <a href="/dashboard" className="text-foreground hover:text-primary transition-colors">Painel</a>
           <a href="/contato" className="text-foreground hover:text-primary transition-colors">Contato</a>
         </div>
       </nav>
