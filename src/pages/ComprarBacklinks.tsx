@@ -133,7 +133,7 @@ export default function ComprarBacklinks() {
               <h3 className="text-base font-semibold mb-1">Preço máximo</h3>
               <ul className="text-sm leading-none">
                 <li><button className="block text-left w-full py-0.5" onClick={() => setMaxPrice("")}>Todos</button></li>
-                {[5000,10000,20000,50000,100000,200000].map((v) => (
+                {[5000,10000,20000,50000,100000,500000,1000000,10000000].map((v) => (
                   <li key={v}>
                     <button
                       className={`block text-left w-full py-0.5 ${maxPrice === v ? 'font-semibold' : ''}`}
