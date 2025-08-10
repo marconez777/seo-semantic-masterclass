@@ -17,7 +17,62 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { ClipboardList, FileCheck2, Heart, UserCircle } from "lucide-react";
+
+function ProfileSection() {
+  const [email, setEmail] = useState<string | null>(null);
+  const [name, setName] = useState<string | null>(null);
+  const [open, setOpen] = useState(false);
+  const [pwd1, setPwd1] = useState("");
+  const [pwd2, setPwd2] = useState("");
+
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => {
+      const user = data.user;
+      setEmail(user?.email ?? null);
+      setName((user?.user_metadata as any)?.name ?? null);
+    });
+  }, []);
+
+  const changePassword = async () => {
+    if (pwd1.length < 6 || pwd1 !== pwd2) return;
+    await supabase.auth.updateUser({ password: pwd1 });
+    setOpen(false);
+    setPwd1(""); setPwd2("");
+  };
+
+  return (
+    <div className="border rounded-md p-4 bg-card space-y-4">
+      <div>
+        <p><strong>Nome:</strong> {name ?? "—"}</p>
+        <p><strong>E-mail:</strong> {email ?? "—"}</p>
+      </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogTrigger asChild>
+          <Button>Alterar senha</Button>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Alterar senha</DialogTitle>
+            <DialogDescription>Defina sua nova senha de acesso.</DialogDescription>
+          </DialogHeader>
+          <div className="space-y-3">
+            <Input type="password" placeholder="Nova senha" value={pwd1} onChange={(e) => setPwd1(e.target.value)} />
+            <Input type="password" placeholder="Confirmar senha" value={pwd2} onChange={(e) => setPwd2(e.target.value)} />
+          </div>
+          <DialogFooter>
+            <Button onClick={changePassword} disabled={!pwd1 || pwd1 !== pwd2}>Salvar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 
 function PurchasesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
@@ -104,7 +159,9 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">{renderOrderStatusBadge(r.status)}</td>
               <td className="p-3">{renderPubBadge(r.id)}</td>
               <td className="p-3">
-                {r.abacate_url ? (
+                {r.status === 'paid' ? (
+                  <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
+                ) : r.abacate_url ? (
                   <a className="story-link text-primary" href={r.abacate_url} target="_blank" rel="noopener noreferrer">Ver cobrança</a>
                 ) : (
                   <span className="text-muted-foreground">—</span>
@@ -232,15 +289,22 @@ function FavoritesTable({ userId }: { userId: string }) {
           <tr className="text-left">
             <th className="p-3 uppercase font-bold tracking-wide">Site</th>
             <th className="p-3 uppercase font-bold tracking-wide">Adicionado</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Ações</th>
           </tr>
         </thead>
         <tbody>
           {rows.length === 0 ? (
-            <tr><td className="p-4" colSpan={2}>Sem favoritos.</td></tr>
+            <tr><td className="p-4" colSpan={3}>Sem favoritos.</td></tr>
           ) : rows.map((r) => (
             <tr key={r.id} className="border-t">
               <td className="p-3">{r.site ?? r.backlink_id}</td>
               <td className="p-3">{new Date(r.created_at).toLocaleString('pt-BR')}</td>
+              <td className="p-3">
+                <Button variant="destructive" size="sm" onClick={async () => {
+                  const { error } = await supabase.from('favoritos').delete().eq('id', r.id);
+                  if (!error) setRows((prev) => prev.filter((x) => x.id !== r.id));
+                }}>Remover</Button>
+              </td>
             </tr>
           ))}
         </tbody>
@@ -327,7 +391,12 @@ export default function Dashboard() {
             <main className="container mx-auto px-4 py-10 space-y-8">
               <div className="flex items-center justify-between">
                 <h1 className="text-3xl font-semibold">Painel</h1>
-                <Button variant="outline" onClick={() => supabase.auth.signOut()}>Sair</Button>
+                <div className="flex gap-2">
+                  <Button asChild>
+                    <a href="/comprar-backlinks">Loja de Backlinks</a>
+                  </Button>
+                  <Button variant="outline" onClick={() => supabase.auth.signOut()}>Sair</Button>
+                </div>
               </div>
 
               <Tabs value={tab} onValueChange={setTab}>
@@ -355,7 +424,7 @@ export default function Dashboard() {
 
                 <TabsContent value="perfil" className="space-y-4">
                   <h2 className="text-xl font-semibold">Perfil</h2>
-                  <p className="text-muted-foreground">Em breve: ajustes de perfil.</p>
+                  <ProfileSection />
                 </TabsContent>
               </Tabs>
             </main>

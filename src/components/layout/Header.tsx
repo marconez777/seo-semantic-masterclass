@@ -58,7 +58,7 @@ const Header = () => {
                   onMouseEnter={openServices}
                   onMouseLeave={scheduleCloseServices}
                 >
-                  <a href="/agencia-de-backlinks" className="block rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground">Backlinks</a>
+                  <a href="/comprar-backlinks" className="block rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground">Backlinks</a>
                   <a href="/consultoria-de-seo-backlinks" className="block rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground">Consultoria de SEO</a>
                 </div>
               </div>

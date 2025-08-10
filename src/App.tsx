@@ -12,6 +12,7 @@ import ComprarBacklinksCategoria from "./pages/ComprarBacklinksCategoria";
 import Dashboard from "./pages/Dashboard";
 import { CartProvider } from "./contexts/CartContext";
 import Admin from "./pages/Admin";
+import Recibo from "./pages/Recibo";
  
 const App = () => (
   <BrowserRouter>
@@ -26,6 +27,7 @@ const App = () => (
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/recibo/:orderId" element={<Recibo />} />
         
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/cart" element={<Cart />} />
