@@ -31,7 +31,7 @@ const testimonials = [
     client: "Soluções em Embalagens",
     clientClass: "text-cyan-500",
     videoUrl: "https://www.youtube.com/embed/iX7ShYZVxgo",
-    headline: "O e commerce de Embalagens foi de R$ 25 Mil p/ R$ 70 Mil em apenas 3 meses",
+    headline: "O e commerce Soluções em Embalagens foi de R$ 25 Mil p/ R$ 70 Mil em apenas 3 meses.",
     description: "Em apenas 3 meses conseguimos aumentar o faturamento da loja online do cliente Paulo de R$ 25 Mil para R$ 70 Mil reais.",
     metrics: [{ value: "35", label: "Backlinks" }, { value: "50.230", label: "Tráfego Mensal" }],
     keywords: [
@@ -53,10 +53,31 @@ const CaseStudySection = () => {
               <div className={`space-y-8 ${index % 2 !== 0 ? 'lg:order-2' : ''}`}>
                 <div>
                   <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
-                    {testimonial.headline}{" "}
-                    <span className={testimonial.clientClass ? testimonial.clientClass : "text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-600"}>
-                      do {testimonial.client}
-                    </span>
+                    {(() => {
+                      const { headline, client, clientClass } = testimonial;
+                      const i = headline.indexOf(client);
+                      if (i >= 0) {
+                        const before = headline.slice(0, i);
+                        const after = headline.slice(i + client.length);
+                        return (
+                          <>
+                            {before}
+                            <span className={clientClass ?? "text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-600"}>
+                              {client}
+                            </span>
+                            {after}
+                          </>
+                        );
+                      }
+                      return (
+                        <>
+                          {headline}{" "}
+                          <span className={clientClass ?? "text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-600"}>
+                            do {client}
+                          </span>
+                        </>
+                      );
+                    })()}
                   </h2>
                   
                   <p className="text-lg text-gray-600 mb-8">
