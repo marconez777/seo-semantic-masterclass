@@ -23,7 +23,14 @@ export async function createCheckout(orders: any[], customer?: { name?: string; 
       frequency: 'MULTIPLE_PAYMENTS',
       methods: ['PIX'],
       products,
-      customer,
+      customer: customer
+        ? {
+            name: customer.name,
+            cellphone: (customer as any).cellphone ?? customer.phone,
+            email: customer.email,
+            taxId: (customer as any).taxId ?? customer.cpf,
+          }
+        : undefined,
       // Frontend routes for navigation
       returnUrl: `${window.location.origin}/carrinho`,
       completionUrl: `${window.location.origin}/payment-success`,
