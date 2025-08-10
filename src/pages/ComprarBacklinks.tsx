@@ -3,10 +3,10 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import { Input } from "@/components/ui/input";
+
 import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-import { Circle, BookText } from "lucide-react";
+
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 
 // Helper to format BRL
@@ -73,40 +73,83 @@ export default function ComprarBacklinks() {
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar filters */}
-        <aside className="md:col-span-3 space-y-6">
+        <aside className="md:col-span-2 space-y-8">
           <section>
-            <h2 className="text-lg font-semibold mb-3">Filter by Category</h2>
-            <nav className="space-y-2">
-              <a className="flex items-center gap-2 text-primary hover:underline" href="/comprar-backlinks">
-                <Circle size={16} /> <span>All</span>
-              </a>
-              {categories.map((cat) => (
-                <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
-                  <BookText size={16} /> <span>{cat}</span>
-                </a>
-              ))}
+            <h2 className="text-base font-semibold mb-2">Categorias</h2>
+            <nav>
+              <ul className="text-sm leading-none">
+                <li>
+                  <a className="block py-0.5" href="/comprar-backlinks">Todos</a>
+                </li>
+                {categories.map((cat) => (
+                  <li key={cat}>
+                    <a className="block py-0.5" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
+                      {cat}
+                    </a>
+                  </li>
+                ))}
+              </ul>
             </nav>
           </section>
 
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Filtros</h2>
-            <div className="grid gap-2">
-              <label className="text-sm">DR mínimo</label>
-              <Input type="number" min={0} value={minDR} onChange={(e) => setMinDR(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Ex: 40" />
+          <section>
+            <h2 className="text-base font-semibold mb-2">Filtros</h2>
+
+            <div className="mb-4">
+              <h3 className="text-sm font-medium mb-1">DR</h3>
+              <ul className="text-sm leading-none">
+                <li><button className="block text-left w-full py-0.5" onClick={() => setMinDR("")}>Todos</button></li>
+                {[10,20,30,40,50,60,70].map((v) => (
+                  <li key={v}>
+                    <button
+                      className={`block text-left w-full py-0.5 ${minDR === v ? 'font-semibold' : ''}`}
+                      onClick={() => setMinDR(v)}
+                    >
+                      DR {v}+
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="grid gap-2">
-              <label className="text-sm">Tráfego mínimo</label>
-              <Input type="number" min={0} value={minTraffic} onChange={(e) => setMinTraffic(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Ex: 10000" />
+
+            <div className="mb-4">
+              <h3 className="text-sm font-medium mb-1">Tráfego</h3>
+              <ul className="text-sm leading-none">
+                <li><button className="block text-left w-full py-0.5" onClick={() => setMinTraffic("")}>Todos</button></li>
+                {[1000,5000,10000,25000,50000,100000].map((v) => (
+                  <li key={v}>
+                    <button
+                      className={`block text-left w-full py-0.5 ${minTraffic === v ? 'font-semibold' : ''}`}
+                      onClick={() => setMinTraffic(v)}
+                    >
+                      {v >= 1000 ? `${v/1000}k+` : `${v}+`}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-            <div className="grid gap-2">
-              <label className="text-sm">Preço máximo (centavos)</label>
-              <Input type="number" min={0} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Ex: 150000" />
+
+            <div>
+              <h3 className="text-sm font-medium mb-1">Preço máximo</h3>
+              <ul className="text-sm leading-none">
+                <li><button className="block text-left w-full py-0.5" onClick={() => setMaxPrice("")}>Todos</button></li>
+                {[5000,10000,20000,50000,100000,200000].map((v) => (
+                  <li key={v}>
+                    <button
+                      className={`block text-left w-full py-0.5 ${maxPrice === v ? 'font-semibold' : ''}`}
+                      onClick={() => setMaxPrice(v)}
+                    >
+                      Até {brl(v)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
           </section>
         </aside>
 
         {/* Main list */}
-        <section className="md:col-span-9">
+        <section className="md:col-span-10">
           <Breadcrumbs
             className="mb-3"
             items={[
