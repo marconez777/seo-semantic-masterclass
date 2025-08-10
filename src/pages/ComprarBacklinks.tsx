@@ -3,7 +3,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-
+import { Input } from "@/components/ui/input";
 import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { Circle, BookText } from "lucide-react";
@@ -17,36 +17,9 @@ export default function ComprarBacklinks() {
   const [loading, setLoading] = useState(true);
 
   // Filters
-  const [drRange, setDrRange] = useState<{ min: number; max: number | null } | null>(null);
-  const [trafficRange, setTrafficRange] = useState<{ min: number; max: number | null } | null>(null);
-  const [priceRange, setPriceRange] = useState<{ min: number; max: number | null } | null>(null);
-
-  const drRanges = [
-    { label: "10 a 20", min: 10, max: 20 },
-    { label: "20 a 30", min: 20, max: 30 },
-    { label: "30 a 40", min: 30, max: 40 },
-    { label: "40 a 50", min: 40, max: 50 },
-    { label: "50 a 60", min: 50, max: 60 },
-    { label: "60 a 70", min: 60, max: 70 },
-    { label: "70 a 80", min: 70, max: 80 },
-    { label: "80 a 90", min: 80, max: 90 },
-    { label: "90 a 100", min: 90, max: 100 },
-  ];
-
-  const trafficRanges = [
-    { label: "0 a 1.000", min: 0, max: 1000 },
-    { label: "1.000 a 5.000", min: 1000, max: 5000 },
-    { label: "5.000 a 10.000", min: 5000, max: 10000 },
-    { label: "10.000 a 50.000", min: 10000, max: 50000 },
-    { label: "50.000+", min: 50000, max: null },
-  ];
-
-  const priceRanges = [
-    { label: "Até R$200", min: 0, max: 20000 },
-    { label: "R$200 a R$500", min: 20000, max: 50000 },
-    { label: "R$500 a R$1.000", min: 50000, max: 100000 },
-    { label: "R$1.000+", min: 100000, max: null },
-  ];
+  const [minDR, setMinDR] = useState<number | "">("");
+  const [minTraffic, setMinTraffic] = useState<number | "">("");
+  const [maxPrice, setMaxPrice] = useState<number | "">("");
 
   // Modal state
   const [open, setOpen] = useState(false);
@@ -77,21 +50,12 @@ export default function ComprarBacklinks() {
 
   const filtered = useMemo(() => {
     return (backlinks ?? []).filter((b) => {
-      if (drRange && typeof b.dr === 'number') {
-        if (b.dr < drRange.min) return false;
-        if (drRange.max !== null && b.dr >= drRange.max) return false;
-      }
-      if (trafficRange && typeof b.traffic === 'number') {
-        if (b.traffic < trafficRange.min) return false;
-        if (trafficRange.max !== null && b.traffic >= trafficRange.max) return false;
-      }
-      if (priceRange && typeof b.price_cents === 'number') {
-        if (b.price_cents < priceRange.min) return false;
-        if (priceRange.max !== null && b.price_cents >= priceRange.max) return false;
-      }
+      if (minDR !== "" && typeof b.dr === 'number' && b.dr < Number(minDR)) return false;
+      if (minTraffic !== "" && typeof b.traffic === 'number' && b.traffic < Number(minTraffic)) return false;
+      if (maxPrice !== "" && typeof b.price_cents === 'number' && b.price_cents > Number(maxPrice)) return false;
       return true;
     });
-  }, [backlinks, drRange, trafficRange, priceRange]);
+  }, [backlinks, minDR, minTraffic, maxPrice]);
 
   const onBuy = (b: any) => {
     setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
@@ -109,94 +73,34 @@ export default function ComprarBacklinks() {
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar filters */}
-        <aside className="md:col-span-2 space-y-6">
+        <aside className="md:col-span-3 space-y-6">
           <section>
             <h2 className="text-lg font-semibold mb-3">Filter by Category</h2>
             <nav className="space-y-2">
-              <a className="flex items-center gap-2 text-primary" href="/comprar-backlinks">
+              <a className="flex items-center gap-2 text-primary hover:underline" href="/comprar-backlinks">
                 <Circle size={16} /> <span>All</span>
               </a>
               {categories.map((cat) => (
-                <a key={cat} className="flex items-center gap-2" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
+                <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
                   <BookText size={16} /> <span>{cat}</span>
                 </a>
               ))}
             </nav>
           </section>
 
-          <section className="space-y-5">
+          <section className="space-y-3">
             <h2 className="text-lg font-semibold">Filtros</h2>
-
-            <div>
-              <h3 className="text-sm font-medium mb-2">DR</h3>
-              <ul className="leading-none space-y-0">
-                <li>
-                  <button
-                    className={`w-full text-left px-2 py-1 leading-none ${!drRange ? 'bg-accent text-accent-foreground' : ''}`}
-                    onClick={() => setDrRange(null)}
-                  >
-                    Todos
-                  </button>
-                </li>
-                {drRanges.map((r) => (
-                  <li key={r.label}>
-                    <button
-                      className={`w-full text-left px-2 py-1 leading-none ${drRange?.min === r.min && drRange?.max === r.max ? 'bg-accent text-accent-foreground' : ''}`}
-                      onClick={() => setDrRange({ min: r.min, max: r.max })}
-                    >
-                      {r.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            <div className="grid gap-2">
+              <label className="text-sm">DR mínimo</label>
+              <Input type="number" min={0} value={minDR} onChange={(e) => setMinDR(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Ex: 40" />
             </div>
-
-            <div>
-              <h3 className="text-sm font-medium mb-2">Tráfego mensal</h3>
-              <ul className="leading-none space-y-0">
-                <li>
-                  <button
-                    className={`w-full text-left px-2 py-1 leading-none ${!trafficRange ? 'bg-accent text-accent-foreground' : ''}`}
-                    onClick={() => setTrafficRange(null)}
-                  >
-                    Todos
-                  </button>
-                </li>
-                {trafficRanges.map((r) => (
-                  <li key={r.label}>
-                    <button
-                      className={`w-full text-left px-2 py-1 leading-none ${trafficRange?.min === r.min && trafficRange?.max === r.max ? 'bg-accent text-accent-foreground' : ''}`}
-                      onClick={() => setTrafficRange({ min: r.min, max: r.max })}
-                    >
-                      {r.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            <div className="grid gap-2">
+              <label className="text-sm">Tráfego mínimo</label>
+              <Input type="number" min={0} value={minTraffic} onChange={(e) => setMinTraffic(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Ex: 10000" />
             </div>
-
-            <div>
-              <h3 className="text-sm font-medium mb-2">Preço</h3>
-              <ul className="leading-none space-y-0">
-                <li>
-                  <button
-                    className={`w-full text-left px-2 py-1 leading-none ${!priceRange ? 'bg-accent text-accent-foreground' : ''}`}
-                    onClick={() => setPriceRange(null)}
-                  >
-                    Todos
-                  </button>
-                </li>
-                {priceRanges.map((r) => (
-                  <li key={r.label}>
-                    <button
-                      className={`w-full text-left px-2 py-1 leading-none ${priceRange?.min === r.min && priceRange?.max === r.max ? 'bg-accent text-accent-foreground' : ''}`}
-                      onClick={() => setPriceRange({ min: r.min, max: r.max })}
-                    >
-                      {r.label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+            <div className="grid gap-2">
+              <label className="text-sm">Preço máximo (centavos)</label>
+              <Input type="number" min={0} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value === '' ? '' : Number(e.target.value))} placeholder="Ex: 150000" />
             </div>
           </section>
         </aside>
