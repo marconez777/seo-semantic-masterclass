@@ -21,6 +21,9 @@ export default function ComprarBacklinks() {
   const [minTraffic, setMinTraffic] = useState<number | "">("");
   const [maxPrice, setMaxPrice] = useState<number | "">("");
 
+  // Sorting
+  const [sortKey, setSortKey] = useState<'site_name' | 'dr' | 'da' | 'traffic' | 'category' | 'price_cents' | null>(null);
+
   // Modal state
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<{ id: string; name: string; price_cents: number } | null>(null);
@@ -56,6 +59,26 @@ export default function ComprarBacklinks() {
       return true;
     });
   }, [backlinks, minDR, minTraffic, maxPrice]);
+
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    if (!sortKey) return arr;
+    const isDesc = ['dr','da','traffic','price_cents'].includes(sortKey);
+    arr.sort((a, b) => {
+      const av = a[sortKey];
+      const bv = b[sortKey];
+      if (av == null && bv == null) return 0;
+      if (av == null) return 1;
+      if (bv == null) return -1;
+      if (typeof av === 'number' && typeof bv === 'number') {
+        return isDesc ? bv - av : av - bv;
+      }
+      const as = String(av).toLowerCase();
+      const bs = String(bv).toLowerCase();
+      return isDesc ? bs.localeCompare(as) : as.localeCompare(bs);
+    });
+    return arr;
+  }, [filtered, sortKey]);
 
   const onBuy = (b: any) => {
     setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
@@ -162,12 +185,60 @@ export default function ComprarBacklinks() {
             <table className="w-full text-sm">
               <thead className="bg-accent/40">
                 <tr className="text-left">
-                  <th className="p-4">SITE</th>
-                  <th className="p-4">DR</th>
-                  <th className="p-4">DA</th>
-                  <th className="p-4">TRÁFEGO/Mês</th>
-                  <th className="p-4">CATEGORIA</th>
-                  <th className="p-4">VALOR</th>
+                  <th
+                    className="p-4 cursor-pointer select-none"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSortKey('site_name')}
+                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('site_name'); }}
+                  >
+                    SITE
+                  </th>
+                  <th
+                    className="p-4 cursor-pointer select-none"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSortKey('dr')}
+                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('dr'); }}
+                  >
+                    DR
+                  </th>
+                  <th
+                    className="p-4 cursor-pointer select-none"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSortKey('da')}
+                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('da'); }}
+                  >
+                    DA
+                  </th>
+                  <th
+                    className="p-4 cursor-pointer select-none"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSortKey('traffic')}
+                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('traffic'); }}
+                  >
+                    TRÁFEGO/Mês
+                  </th>
+                  <th
+                    className="p-4 cursor-pointer select-none"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSortKey('category')}
+                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('category'); }}
+                  >
+                    CATEGORIA
+                  </th>
+                  <th
+                    className="p-4 cursor-pointer select-none"
+                    role="button"
+                    tabIndex={0}
+                    onClick={() => setSortKey('price_cents')}
+                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('price_cents'); }}
+                  >
+                    VALOR
+                  </th>
                   <th className="p-4"></th>
                 </tr>
               </thead>
@@ -177,7 +248,7 @@ export default function ComprarBacklinks() {
                 ) : filtered.length === 0 ? (
                   <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
                 ) : (
-                  filtered.map((b) => (
+                  sorted.map((b) => (
                     <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
                   ))
                 )}
