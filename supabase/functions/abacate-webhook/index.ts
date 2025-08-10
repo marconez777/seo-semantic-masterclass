@@ -123,6 +123,8 @@ Deno.serve(async (req) => {
       payload?.billingId ??
       payload?.data?.billId ??
       payload?.data?.billingId ??
+      payload?.billing?.id ??
+      payload?.data?.billing?.id ??
       null
 
     const resolvedStatus = resolveStatusFromPayload(payload)
