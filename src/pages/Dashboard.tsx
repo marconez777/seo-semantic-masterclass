@@ -63,17 +63,17 @@ function PurchasesTable({ userId }: { userId: string }) {
 
   const renderPubBadge = (orderId: string) => {
     const s = pubSummary[orderId];
-    if (!s || s.total === 0) return <Badge variant="outline">—</Badge>;
-    if (s.published === s.total) return <Badge className="bg-secondary/15 text-secondary border-secondary/20">Publicados</Badge>;
-    if (s.rejected > 0) return <Badge variant="destructive">Rejeitado</Badge>;
-    if (s.inProgress > 0) return <Badge variant="secondary">Em progresso</Badge>;
-    return <Badge variant="secondary">Pendente</Badge>;
+    if (!s || s.total === 0) return <Badge className="bg-muted text-muted-foreground border">—</Badge>;
+    if (s.published === s.total) return <Badge className="bg-secondary/15 text-secondary border-secondary/20">Publicado</Badge>;
+    if (s.rejected > 0) return <Badge className="bg-destructive/15 text-destructive border-destructive/20">Rejeitado</Badge>;
+    // Para publicações em progresso ou pendentes, usar laranja
+    return <Badge className="bg-accent/15 text-accent border-accent/20">Pendente</Badge>;
   };
 
   const renderOrderStatusBadge = (s: string) => {
     const map: Record<string, { label: string; cls: string }> = {
       pending: { label: 'Pendente', cls: 'bg-accent/15 text-accent border-accent/20' },
-      paid: { label: 'Pago', cls: 'bg-primary/15 text-primary border-primary/20' },
+      paid: { label: 'Pago', cls: 'bg-secondary/15 text-secondary border-secondary/20' },
       cancelled: { label: 'Cancelado', cls: 'bg-destructive/15 text-destructive border-destructive/20' },
       refunded: { label: 'Reembolsado', cls: 'bg-muted text-muted-foreground border' },
     };
@@ -150,8 +150,8 @@ function PublicationsTable({ userId }: { userId: string }) {
 
   const statusBadge = (s: string) => {
     if (s === 'published') return <Badge className="bg-secondary/15 text-secondary border-secondary/20">Publicado</Badge>;
-    if (s === 'in_progress') return <Badge variant="secondary">Em progresso</Badge>;
-    if (s === 'rejected') return <Badge variant="destructive">Rejeitado</Badge>;
+    if (s === 'in_progress') return <Badge className="bg-accent/15 text-accent border-accent/20">Pendente</Badge>;
+    if (s === 'rejected') return <Badge className="bg-destructive/15 text-destructive border-destructive/20">Rejeitado</Badge>;
     return <Badge className="bg-accent/15 text-accent border-accent/20">Pendente</Badge>;
   }
 
