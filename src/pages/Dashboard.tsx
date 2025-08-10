@@ -71,8 +71,6 @@ function ProfileSection() {
   );
 }
 
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 
 function PurchasesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
