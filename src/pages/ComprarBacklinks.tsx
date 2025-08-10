@@ -8,6 +8,8 @@ import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
+import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
+
 
 // Helper to format BRL
 const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -17,8 +19,8 @@ export default function ComprarBacklinks() {
   const [loading, setLoading] = useState(true);
 
   // Filters
-  const [minDR, setMinDR] = useState<number | "">("");
-  const [minTraffic, setMinTraffic] = useState<number | "">("");
+  const [drRange, setDrRange] = useState<string>('todos');
+  const [trafficRange, setTrafficRange] = useState<string>('todos');
   const [maxPrice, setMaxPrice] = useState<number | "">("");
 
   // Sorting
@@ -51,14 +53,53 @@ export default function ComprarBacklinks() {
     return Array.from(set).sort();
   }, [backlinks]);
 
+  // Helpers
+  const parseRange = (value: string): [number, number] | null => {
+    if (!value || value === 'todos') return null;
+    if (value === 'gt-100000') return [100001, Number.POSITIVE_INFINITY];
+    const [minStr, maxStr] = value.split('-');
+    const min = Number(minStr.replace(/\./g, ''));
+    const max = Number(maxStr.replace(/\./g, ''));
+    if (Number.isNaN(min) || Number.isNaN(max)) return null;
+    return [min, max];
+  };
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const dr = params.get('dr');
+    const traffic = params.get('traffic');
+    if (dr) setDrRange(dr);
+    if (traffic) setTrafficRange(traffic);
+  }, []);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (drRange && drRange !== 'todos') params.set('dr', drRange); else params.delete('dr');
+    if (trafficRange && trafficRange !== 'todos') params.set('traffic', trafficRange); else params.delete('traffic');
+    const query = params.toString();
+    const url = `${window.location.pathname}${query ? `?${query}` : ''}`;
+    window.history.replaceState({}, '', url);
+  }, [drRange, trafficRange]);
+
   const filtered = useMemo(() => {
+    const drParsed = parseRange(drRange);
+    const trafficParsed = parseRange(trafficRange);
+
     return (backlinks ?? []).filter((b) => {
-      if (minDR !== "" && typeof b.dr === 'number' && b.dr < Number(minDR)) return false;
-      if (minTraffic !== "" && typeof b.traffic === 'number' && b.traffic < Number(minTraffic)) return false;
+      if (drParsed) {
+        const [min, max] = drParsed;
+        if (typeof b.dr !== 'number') return false;
+        if (b.dr < min || b.dr > max) return false;
+      }
+      if (trafficParsed) {
+        const [minT, maxT] = trafficParsed;
+        if (typeof b.traffic !== 'number') return false;
+        if (b.traffic < minT || b.traffic > maxT) return false;
+      }
       if (maxPrice !== "" && typeof b.price_cents === 'number' && b.price_cents > Number(maxPrice)) return false;
       return true;
     });
-  }, [backlinks, minDR, minTraffic, maxPrice]);
+  }, [backlinks, drRange, trafficRange, maxPrice]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -124,36 +165,40 @@ export default function ComprarBacklinks() {
 
             <div className="mb-4">
               <h3 className="text-base font-semibold mb-1">DR</h3>
-              <ul className="text-sm leading-none">
-                <li><button className="block text-left w-full py-0.5" onClick={() => setMinDR("")}>Todos</button></li>
-                {[10,20,30,40,50,60,70].map((v) => (
-                  <li key={v}>
-                    <button
-                      className={`block text-left w-full py-0.5 ${minDR === v ? 'font-semibold' : ''}`}
-                      onClick={() => setMinDR(v)}
-                    >
-                      DR {v}+
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <Select value={drRange} onValueChange={setDrRange}>
+                <SelectTrigger aria-label="Filtro de DR" className="w-full">
+                  <SelectValue placeholder="DR" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover text-popover-foreground border shadow-md z-50">
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="10-20">10 a 20</SelectItem>
+                  <SelectItem value="20-30">20 a 30</SelectItem>
+                  <SelectItem value="30-40">30 a 40</SelectItem>
+                  <SelectItem value="40-50">40 a 50</SelectItem>
+                  <SelectItem value="50-60">50 a 60</SelectItem>
+                  <SelectItem value="60-70">60 a 70</SelectItem>
+                  <SelectItem value="70-80">70 a 80</SelectItem>
+                  <SelectItem value="80-90">80 a 90</SelectItem>
+                  <SelectItem value="90-99">90 a 99</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="mb-4">
               <h3 className="text-base font-semibold mb-1">Tráfego</h3>
-              <ul className="text-sm leading-none">
-                <li><button className="block text-left w-full py-0.5" onClick={() => setMinTraffic("")}>Todos</button></li>
-                {[1000,5000,10000,25000,50000,100000].map((v) => (
-                  <li key={v}>
-                    <button
-                      className={`block text-left w-full py-0.5 ${minTraffic === v ? 'font-semibold' : ''}`}
-                      onClick={() => setMinTraffic(v)}
-                    >
-                      {v >= 1000 ? `${v/1000}k+` : `${v}+`}
-                    </button>
-                  </li>
-                ))}
-              </ul>
+              <Select value={trafficRange} onValueChange={setTrafficRange}>
+                <SelectTrigger aria-label="Filtro de Tráfego" className="w-full">
+                  <SelectValue placeholder="Tráfego" />
+                </SelectTrigger>
+                <SelectContent className="bg-popover text-popover-foreground border shadow-md z-50">
+                  <SelectItem value="todos">Todos</SelectItem>
+                  <SelectItem value="0-100">0 a 100</SelectItem>
+                  <SelectItem value="100-1000">100 a 1.000</SelectItem>
+                  <SelectItem value="1000-10000">1.000 a 10.000</SelectItem>
+                  <SelectItem value="10000-100000">10.000 a 100.000</SelectItem>
+                  <SelectItem value="gt-100000">mais de 100.000</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
