@@ -96,7 +96,7 @@ export default function ComprarBacklinks() {
             <h2 className="text-base font-semibold mb-2">Filtros</h2>
 
             <div className="mb-4">
-              <h3 className="text-sm font-medium mb-1">DR</h3>
+              <h3 className="text-base font-semibold mb-1">DR</h3>
               <ul className="text-sm leading-none">
                 <li><button className="block text-left w-full py-0.5" onClick={() => setMinDR("")}>Todos</button></li>
                 {[10,20,30,40,50,60,70].map((v) => (
@@ -113,7 +113,7 @@ export default function ComprarBacklinks() {
             </div>
 
             <div className="mb-4">
-              <h3 className="text-sm font-medium mb-1">Tráfego</h3>
+              <h3 className="text-base font-semibold mb-1">Tráfego</h3>
               <ul className="text-sm leading-none">
                 <li><button className="block text-left w-full py-0.5" onClick={() => setMinTraffic("")}>Todos</button></li>
                 {[1000,5000,10000,25000,50000,100000].map((v) => (
@@ -130,7 +130,7 @@ export default function ComprarBacklinks() {
             </div>
 
             <div>
-              <h3 className="text-sm font-medium mb-1">Preço máximo</h3>
+              <h3 className="text-base font-semibold mb-1">Preço máximo</h3>
               <ul className="text-sm leading-none">
                 <li><button className="block text-left w-full py-0.5" onClick={() => setMaxPrice("")}>Todos</button></li>
                 {[5000,10000,20000,50000,100000,200000].map((v) => (
