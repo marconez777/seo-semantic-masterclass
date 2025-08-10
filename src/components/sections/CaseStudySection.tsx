@@ -14,7 +14,8 @@ const testimonials = [
     keywords: ["Psiquiatra tdah", "Teste diagnóstico tdah", "Como descobrir tdah teste", "Como saber se eu tenho tdah teste"],
   },
   {
-    client: "Sistema Kronoos",
+    client: "kronoos",
+    clientClass: "text-green-700",
     videoUrl: "https://www.youtube.com/embed/B35Poq_3xDM",
     headline: "O Sistema que foi para 1º Página em 3 meses",
     description: "Em 3 meses, o Sistema Kronoos alcançou a 1ª página do Google com uma estratégia focada e assertiva.",
@@ -27,12 +28,18 @@ const testimonials = [
     ],
   },
   {
-    client: "Loja Soluções em Embalagens",
+    client: "Soluções em Embalagens",
+    clientClass: "text-cyan-500",
     videoUrl: "https://www.youtube.com/embed/iX7ShYZVxgo",
-    headline: "Alavancou Vendas e Tráfego",
-    description: "A Loja Soluções em Embalagens viu suas vendas e seu tráfego orgânico dispararem após a consultoria e implementação de estratégias de SEO, garantindo um retorno substancial sobre o investimento.",
-    metrics: [{ value: "210", label: "Backlinks" }, { value: "85.200", label: "Tráfego Mensal" }],
-    keywords: ["Soluções em Embalagens", "Caixas de papelão", "Embalagens sustentáveis", "Packaging personalizado"],
+    headline: "O e commerce de Embalagens foi de R$ 25 Mil p/ R$ 70 Mil em apenas 3 meses",
+    description: "Em apenas 3 meses conseguimos aumentar o faturamento da loja online do cliente Paulo de R$ 25 Mil para R$ 70 Mil reais.",
+    metrics: [{ value: "35", label: "Backlinks" }, { value: "50.230", label: "Tráfego Mensal" }],
+    keywords: [
+      "envelope de segurança",
+      "envelope de segurança preço",
+      "comprar envelope de segurança",
+      "envelope de segurança personalizado",
+    ],
   }
 ];
 
@@ -47,7 +54,7 @@ const CaseStudySection = () => {
                 <div>
                   <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
                     {testimonial.headline}{" "}
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-600">
+                    <span className={testimonial.clientClass ? testimonial.clientClass : "text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-600"}>
                       do {testimonial.client}
                     </span>
                   </h2>
