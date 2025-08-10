@@ -101,7 +101,7 @@ const Header = () => {
             onMouseLeave={scheduleCloseBacklinks}
           >
             <button
-              className="inline-flex items-center text-foreground hover:text-primary transition-colors"
+              className="inline-flex items-center text-foreground hover:text-primary transition-colors normal-case"
               aria-haspopup="menu"
               aria-expanded={backlinksOpen}
               aria-controls="backlinks-menu"
@@ -145,7 +145,7 @@ const Header = () => {
                         <a
                           key={categoria}
                           href={`/comprar-backlinks-${slug}`}
-                          className="group flex items-center gap-3 rounded-md p-2 hover:bg-accent hover:text-accent-foreground transition-colors hover-scale"
+                          className="group flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors hover-scale"
                           role="menuitem"
                         >
                           {(() => { const IconComp = getCategoryIcon(categoria); return (
