@@ -25,7 +25,7 @@ const App = () => (
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Painel />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/carrinho" element={<Cart />} />
+        <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/cart" element={<Cart />} />
       </Routes>
     </CartProvider>

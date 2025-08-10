@@ -1,11 +1,40 @@
 import SEOHead from "@/components/seo/SEOHead";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
+import { supabase } from "@/integrations/supabase/client";
+import { createCheckout } from "@/services/payment";
 
 const Carrinho = () => {
   const { items, totalCents, itemsCount, clearCart, removeFromCart } = useCart();
 
   const totalBRL = (totalCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  const finalize = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      window.location.href = "/auth";
+      return;
+    }
+    const customer = {
+      name: (session.user.user_metadata as any)?.name,
+      phone: (session.user.user_metadata as any)?.phone,
+      cpf: (session.user.user_metadata as any)?.cpf,
+      email: session.user.email,
+    };
+
+    const orders = items.map((it) => ({
+      id: it.id,
+      name: it.name,
+      quantity: it.quantity,
+      priceCents: it.price_cents,
+      description: `Ancora: ${it.texto_ancora} | URL: ${it.url_destino}`,
+    }));
+
+    const res = await createCheckout(orders, customer as any);
+    if (res.url && res.url !== '#') {
+      window.location.href = res.url;
+    }
+  };
 
   return (
     <>
@@ -44,7 +73,7 @@ const Carrinho = () => {
 
             <div className="flex gap-2">
               <Button variant="outline" onClick={clearCart}>Limpar carrinho</Button>
-              <Button>Finalizar compra</Button>
+              <Button onClick={finalize}>Finalizar compra</Button>
             </div>
           </section>
         )}
