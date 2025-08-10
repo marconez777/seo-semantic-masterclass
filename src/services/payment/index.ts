@@ -1,3 +1,4 @@
+
 // Neutral payment service facade
 // Uses Abacate Pay via Edge Function when available; falls back to manual mode otherwise.
 
@@ -8,14 +9,34 @@ export type CheckoutResult = {
   mode: 'manual' | 'redirect';
 };
 
-export async function createCheckout(orders: any[], customer?: { name?: string; phone?: string; cpf?: string; email?: string; }): Promise<CheckoutResult> {
+type OrderInput = {
+  id?: string;
+  externalId?: string;
+  name: string;
+  description?: string;
+  quantity: number;
+  price_cents?: number;
+  priceCents?: number;
+  price?: number;
+  anchorText?: string;
+  targetUrl?: string;
+};
+
+export async function createCheckout(orders: OrderInput[], customer?: { name?: string; phone?: string; cpf?: string; email?: string; }): Promise<CheckoutResult> {
   // Map generic orders to Abacate Pay products shape
-  const products = (orders ?? []).map((o: any) => ({
+  const products = (orders ?? []).map((o: OrderInput) => ({
     externalId: String(o?.externalId ?? o?.id ?? crypto.randomUUID()),
     name: String(o?.name ?? 'Item'),
     description: o?.description ?? undefined,
     quantity: Number(o?.quantity ?? 1),
     price: Number(o?.price_cents ?? o?.priceCents ?? o?.price ?? 0), // in cents
+  }));
+
+  // Provide metadata to also persist anchor/target per item
+  const metaItems = (orders ?? []).map((o: OrderInput) => ({
+    externalId: String(o?.externalId ?? o?.id ?? ''),
+    anchorText: o?.anchorText,
+    targetUrl: o?.targetUrl,
   }));
 
   const { data, error } = await supabase.functions.invoke('abacate-create-billing', {
@@ -34,6 +55,9 @@ export async function createCheckout(orders: any[], customer?: { name?: string; 
       // Frontend routes for navigation
       returnUrl: `${window.location.origin}/carrinho`,
       completionUrl: `${window.location.origin}/painel`,
+      metadata: {
+        items: metaItems,
+      },
     },
   });
 

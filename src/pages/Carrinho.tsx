@@ -1,3 +1,4 @@
+
 import SEOHead from "@/components/seo/SEOHead";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
@@ -28,9 +29,11 @@ const Carrinho = () => {
       quantity: it.quantity,
       priceCents: it.price_cents,
       description: `Ancora: ${it.texto_ancora} | URL: ${it.url_destino}`,
+      anchorText: it.texto_ancora,
+      targetUrl: it.url_destino,
     }));
 
-    const res = await createCheckout(orders, customer as any);
+    const res = await createCheckout(orders as any, customer as any);
     if (res.url && res.url !== '#') {
       window.location.href = res.url;
     }

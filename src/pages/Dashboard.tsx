@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 
 function PurchasesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
+  const [pubSummary, setPubSummary] = useState<Record<string, { total: number; published: number; inProgress: number; rejected: number }>>({});
 
   useEffect(() => {
     let mounted = true;
@@ -16,13 +17,44 @@ function PurchasesTable({ userId }: { userId: string }) {
         .select('id, status, total_cents, created_at, abacate_url')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
+      if (error) console.error('Erro pedidos', error);
+      const pedidos = data ?? [];
+
+      // compute publication summary per order
+      const orderIds = pedidos.map((p) => p.id);
+      let summary: Record<string, { total: number; published: number; inProgress: number; rejected: number }> = {};
+      if (orderIds.length) {
+        const { data: items, error: itemsErr } = await supabase
+          .from('order_items')
+          .select('order_id, publication_status')
+          .in('order_id', orderIds);
+        if (itemsErr) console.error('Erro order_items', itemsErr);
+        (items ?? []).forEach((it) => {
+          const k = it.order_id;
+          if (!summary[k]) summary[k] = { total: 0, published: 0, inProgress: 0, rejected: 0 };
+          summary[k].total += 1;
+          if (it.publication_status === 'published') summary[k].published += 1;
+          else if (it.publication_status === 'in_progress') summary[k].inProgress += 1;
+          else if (it.publication_status === 'rejected') summary[k].rejected += 1;
+        });
+      }
+
       if (mounted) {
-        if (error) console.error('Erro pedidos', error);
-        setRows(data ?? []);
+        setRows(pedidos);
+        setPubSummary(summary);
       }
     })();
     return () => { mounted = false; };
   }, [userId]);
+
+  const renderPubBadge = (orderId: string) => {
+    const s = pubSummary[orderId];
+    if (!s || s.total === 0) return <Badge variant="outline">—</Badge>;
+    if (s.published === s.total) return <Badge className="bg-green-600 text-white hover:bg-green-600">Publicados</Badge>;
+    if (s.rejected > 0) return <Badge variant="destructive">Rejeitado</Badge>;
+    if (s.inProgress > 0) return <Badge variant="secondary">Em progresso</Badge>;
+    return <Badge variant="secondary">Pendente</Badge>;
+  };
 
   return (
     <div className="border rounded-md overflow-x-auto">
@@ -46,13 +78,94 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">{new Date(r.created_at).toLocaleString('pt-BR')}</td>
               <td className="p-3">{(r.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
               <td className="p-3"><Badge variant="secondary">{r.status}</Badge></td>
-              <td className="p-3"><Badge variant="outline">N/A</Badge></td>
+              <td className="p-3">{renderPubBadge(r.id)}</td>
               <td className="p-3">
                 {r.abacate_url ? (
                   <a className="text-primary hover:underline" href={r.abacate_url} target="_blank" rel="noopener noreferrer">Ver cobrança</a>
                 ) : (
                   <span className="text-muted-foreground">—</span>
                 )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function PublicationsTable({ userId }: { userId: string }) {
+  const [rows, setRows] = useState<any[]>([]);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      // Fetch order items for this user (RLS ensures only own items are visible)
+      const { data: items, error } = await supabase
+        .from('order_items')
+        .select('id, order_id, backlink_id, anchor_text, target_url, publication_status, publication_url, created_at')
+        .order('created_at', { ascending: false });
+      if (error) console.error('Erro itens/publicações', error);
+
+      const backlinkIds = Array.from(new Set((items ?? []).map((i) => i.backlink_id)));
+      let backlinkMap: Record<string, { site: string }> = {};
+      if (backlinkIds.length) {
+        const { data: backs } = await supabase
+          .from('backlinks')
+          .select('id, site_name, site_url')
+          .in('id', backlinkIds);
+        (backs ?? []).forEach((b) => { backlinkMap[b.id] = { site: b.site_name || b.site_url }; });
+      }
+
+      if (mounted) {
+        setRows((items ?? []).map((i) => ({ ...i, site: backlinkMap[i.backlink_id]?.site })));
+      }
+    })();
+    return () => { mounted = false; };
+  }, [userId]);
+
+  const statusBadge = (s: string) => {
+    if (s === 'published') return <Badge className="bg-green-600 text-white hover:bg-green-600">Publicado</Badge>;
+    if (s === 'in_progress') return <Badge variant="secondary">Em progresso</Badge>;
+    if (s === 'rejected') return <Badge variant="destructive">Rejeitado</Badge>;
+    return <Badge variant="outline">Pendente</Badge>;
+  }
+
+  return (
+    <div className="border rounded-md overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead className="bg-accent/40">
+          <tr className="text-left">
+            <th className="p-3">Pedido</th>
+            <th className="p-3">Site</th>
+            <th className="p-3">Âncora</th>
+            <th className="p-3">URL destino</th>
+            <th className="p-3">Status</th>
+            <th className="p-3">Publicação</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.length === 0 ? (
+            <tr><td className="p-4" colSpan={6}>Sem publicações.</td></tr>
+          ) : rows.map((r) => (
+            <tr key={r.id} className="border-t">
+              <td className="p-3">{r.order_id}</td>
+              <td className="p-3">{r.site ?? r.backlink_id}</td>
+              <td className="p-3">{r.anchor_text ?? '—'}</td>
+              <td className="p-3">
+                {r.target_url ? (
+                  <a href={r.target_url} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                    {r.target_url}
+                  </a>
+                ) : '—'}
+              </td>
+              <td className="p-3">{statusBadge(r.publication_status)}</td>
+              <td className="p-3">
+                {r.publication_url ? (
+                  <a href={r.publication_url} className="text-primary hover:underline" target="_blank" rel="noopener noreferrer">
+                    Ver publicação
+                  </a>
+                ) : <span className="text-muted-foreground">—</span>}
               </td>
             </tr>
           ))}
@@ -148,6 +261,10 @@ export default function Dashboard() {
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">Pedidos</h2>
           <PurchasesTable userId={userId} />
+        </section>
+        <section className="space-y-4">
+          <h2 className="text-xl font-semibold">Publicações</h2>
+          <PublicationsTable userId={userId} />
         </section>
         <section className="space-y-4">
           <h2 className="text-xl font-semibold">Favoritos</h2>

@@ -93,25 +93,43 @@ export type Database = {
       }
       order_items: {
         Row: {
+          anchor_text: string | null
           backlink_id: string
+          created_at: string
           id: string
           order_id: string
           price_cents: number
+          publication_status: Database["public"]["Enums"]["publication_status"]
+          publication_url: string | null
           quantity: number
+          target_url: string | null
+          updated_at: string
         }
         Insert: {
+          anchor_text?: string | null
           backlink_id: string
+          created_at?: string
           id?: string
           order_id: string
           price_cents: number
+          publication_status?: Database["public"]["Enums"]["publication_status"]
+          publication_url?: string | null
           quantity?: number
+          target_url?: string | null
+          updated_at?: string
         }
         Update: {
+          anchor_text?: string | null
           backlink_id?: string
+          created_at?: string
           id?: string
           order_id?: string
           price_cents?: number
+          publication_status?: Database["public"]["Enums"]["publication_status"]
+          publication_url?: string | null
           quantity?: number
+          target_url?: string | null
+          updated_at?: string
         }
         Relationships: [
           {
@@ -172,6 +190,7 @@ export type Database = {
     }
     Enums: {
       order_status: "pending" | "paid" | "cancelled" | "refunded"
+      publication_status: "pending" | "in_progress" | "published" | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -300,6 +319,7 @@ export const Constants = {
   public: {
     Enums: {
       order_status: ["pending", "paid", "cancelled", "refunded"],
+      publication_status: ["pending", "in_progress", "published", "rejected"],
     },
   },
 } as const
