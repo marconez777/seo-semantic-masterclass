@@ -8,19 +8,22 @@ import { useLocation } from "react-router-dom";
 const Header = () => {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState<string | null>(null);
-  const [servicesOpen, setServicesOpen] = useState(false);
+  const [backlinksOpen, setBacklinksOpen] = useState(false);
+  const openTimer = useRef<number | null>(null);
   const closeTimer = useRef<number | null>(null);
   const location = useLocation();
-
+  
   const isPanelRoute = location.pathname.startsWith("/painel");
-
-  const openServices = () => {
+  
+  const openBacklinks = () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
-    setServicesOpen(true);
+    if (openTimer.current) window.clearTimeout(openTimer.current);
+    openTimer.current = window.setTimeout(() => setBacklinksOpen(true), 500);
   };
-  const scheduleCloseServices = () => {
+  const scheduleCloseBacklinks = () => {
+    if (openTimer.current) window.clearTimeout(openTimer.current);
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
-    closeTimer.current = window.setTimeout(() => setServicesOpen(false), 2000);
+    closeTimer.current = window.setTimeout(() => setBacklinksOpen(false), 500);
   };
 
   useEffect(() => {
@@ -33,6 +36,14 @@ const Header = () => {
     })();
   }, []);
 
+  // Cleanup timers on unmount
+  useEffect(() => {
+    return () => {
+      if (openTimer.current) window.clearTimeout(openTimer.current);
+      if (closeTimer.current) window.clearTimeout(closeTimer.current);
+    };
+  }, []);
+
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
@@ -43,34 +54,71 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-8">
           <a href="/" className="text-foreground hover:text-primary font-medium transition-colors">Home</a>
 
+          <a href="/consultoria-de-seo-backlinks" className="text-foreground hover:text-primary transition-colors">Consultoria SEO</a>
+
           <div
             className="relative"
-            onMouseEnter={openServices}
-            onMouseLeave={scheduleCloseServices}
+            onMouseEnter={openBacklinks}
+            onMouseLeave={scheduleCloseBacklinks}
           >
-            <button className="inline-flex items-center text-foreground hover:text-primary transition-colors">
-              Serviços
+            <button
+              className="inline-flex items-center text-foreground hover:text-primary transition-colors"
+              aria-haspopup="menu"
+              aria-expanded={backlinksOpen}
+              aria-controls="backlinks-menu"
+            >
+              Backlinks
             </button>
-            {servicesOpen && (
+            {backlinksOpen && (
               <div className="absolute left-0 top-full mt-2 z-50">
                 <div
+                  id="backlinks-menu"
+                  role="menu"
                   className="w-72 rounded-md border bg-popover text-popover-foreground shadow-lg p-2"
-                  onMouseEnter={openServices}
-                  onMouseLeave={scheduleCloseServices}
+                  onMouseEnter={openBacklinks}
+                  onMouseLeave={scheduleCloseBacklinks}
                 >
-                  <a href="/comprar-backlinks" className="block rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground">Backlinks</a>
-                  <a href="/consultoria-de-seo-backlinks" className="block rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground">Consultoria de SEO</a>
+                  <div className="px-3 py-2 text-sm text-muted-foreground">Categorias</div>
+                  {[
+                    "Noticias",
+                    "Negócios",
+                    "Saúde",
+                    "Educação",
+                    "Tecnologia",
+                    "Finanças",
+                    "Casa",
+                    "Moda",
+                    "Turismo",
+                    "Alimentação",
+                    "Pets",
+                    "Automotivo",
+                    "Esportes",
+                    "Entretenimento",
+                    "Marketing",
+                    "Direito",
+                  ].map((categoria) => {
+                    const slug = categoria
+                      .toLowerCase()
+                      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                      .replace(/\s+/g, "-");
+                    return (
+                      <a
+                        key={categoria}
+                        href={`/comprar-backlinks-${slug}`}
+                        className="block rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
+                        role="menuitem"
+                      >
+                        Backlinks de {categoria}
+                      </a>
+                    );
+                  })}
                 </div>
               </div>
             )}
           </div>
 
-          <a href="/blog" className="text-foreground hover:text-primary transition-colors">Blog</a>
-          <a href="/painel" className="text-foreground hover:text-primary transition-colors">Painel</a>
-          {isAdmin && (
-            <a href="/admin" className="text-foreground hover:text-primary transition-colors">Admin</a>
-          )}
           <a href="/contato" className="text-foreground hover:text-primary transition-colors">Contato</a>
+          <a href="/blog" className="text-foreground hover:text-primary transition-colors">Blog</a>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
