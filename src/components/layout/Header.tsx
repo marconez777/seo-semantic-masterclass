@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
-import { ShoppingCart, Folder } from "lucide-react";
+import { ShoppingCart, Folder, Newspaper, Briefcase, HeartPulse, GraduationCap, Cpu, Wallet, Home, Shirt, Plane, Utensils, PawPrint, Car, Dumbbell, Clapperboard, Megaphone, Scale } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 const Header = () => {
@@ -24,6 +24,45 @@ const Header = () => {
     if (openTimer.current) window.clearTimeout(openTimer.current);
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
     closeTimer.current = window.setTimeout(() => setBacklinksOpen(false), 500);
+  };
+
+  const getCategoryIcon = (name: string) => {
+    switch (name) {
+      case "Noticias":
+        return Newspaper;
+      case "Negócios":
+        return Briefcase;
+      case "Saúde":
+        return HeartPulse;
+      case "Educação":
+        return GraduationCap;
+      case "Tecnologia":
+        return Cpu;
+      case "Finanças":
+        return Wallet;
+      case "Casa":
+        return Home;
+      case "Moda":
+        return Shirt;
+      case "Turismo":
+        return Plane;
+      case "Alimentação":
+        return Utensils;
+      case "Pets":
+        return PawPrint;
+      case "Automotivo":
+        return Car;
+      case "Esportes":
+        return Dumbbell;
+      case "Entretenimento":
+        return Clapperboard;
+      case "Marketing":
+        return Megaphone;
+      case "Direito":
+        return Scale;
+      default:
+        return Folder;
+    }
   };
 
   useEffect(() => {
@@ -74,7 +113,7 @@ const Header = () => {
                 <div
                   id="backlinks-menu"
                   role="menu"
-                  className="min-w-[560px] md:min-w-[720px] rounded-lg border bg-popover text-popover-foreground shadow-lg p-3"
+                  className="min-w-[560px] md:min-w-[720px] rounded-lg border bg-popover text-popover-foreground shadow-lg p-3 animate-enter"
                   onMouseEnter={openBacklinks}
                   onMouseLeave={scheduleCloseBacklinks}
                 >
@@ -106,15 +145,17 @@ const Header = () => {
                         <a
                           key={categoria}
                           href={`/comprar-backlinks-${slug}`}
-                          className="group flex items-center gap-3 rounded-md p-2 hover:bg-accent hover:text-accent-foreground transition-colors"
+                          className="group flex items-center gap-3 rounded-md p-2 hover:bg-accent hover:text-accent-foreground transition-colors hover-scale"
                           role="menuitem"
                         >
-                          <span className="inline-flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary shadow-sm">
-                            <Folder className="size-4" aria-hidden="true" />
-                          </span>
+                          {(() => { const IconComp = getCategoryIcon(categoria); return (
+                            <span className="inline-flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary shadow-sm">
+                              <IconComp className="size-4" aria-hidden="true" />
+                            </span>
+                          ); })()}
                           <span className="flex flex-col">
-                            <span className="text-sm font-medium leading-none">Backlinks de {categoria}</span>
-                            <span className="text-xs text-muted-foreground leading-none mt-1">Sites da categoria</span>
+                            <span className="text-[11px] uppercase tracking-wide text-muted-foreground leading-none">Backlinks de</span>
+                            <span className="text-sm font-semibold leading-none mt-1">{categoria}</span>
                           </span>
                         </a>
                       );
