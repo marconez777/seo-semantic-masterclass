@@ -109,15 +109,15 @@ export default function ComprarBacklinks() {
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar filters */}
-        <aside className="md:col-span-3 space-y-6">
+        <aside className="md:col-span-2 space-y-6">
           <section>
             <h2 className="text-lg font-semibold mb-3">Filter by Category</h2>
             <nav className="space-y-2">
-              <a className="flex items-center gap-2 text-primary hover:underline" href="/comprar-backlinks">
+              <a className="flex items-center gap-2 text-primary" href="/comprar-backlinks">
                 <Circle size={16} /> <span>All</span>
               </a>
               {categories.map((cat) => (
-                <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
+                <a key={cat} className="flex items-center gap-2" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
                   <BookText size={16} /> <span>{cat}</span>
                 </a>
               ))}
@@ -129,10 +129,10 @@ export default function ComprarBacklinks() {
 
             <div>
               <h3 className="text-sm font-medium mb-2">DR</h3>
-              <ul className="space-y-1">
+              <ul className="leading-none space-y-0">
                 <li>
                   <button
-                    className={`w-full text-left px-3 py-2 rounded ${!drRange ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'}`}
+                    className={`w-full text-left px-2 py-1 leading-none ${!drRange ? 'bg-accent text-accent-foreground' : ''}`}
                     onClick={() => setDrRange(null)}
                   >
                     Todos
@@ -141,7 +141,7 @@ export default function ComprarBacklinks() {
                 {drRanges.map((r) => (
                   <li key={r.label}>
                     <button
-                      className={`w-full text-left px-3 py-2 rounded ${drRange?.min === r.min && drRange?.max === r.max ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'}`}
+                      className={`w-full text-left px-2 py-1 leading-none ${drRange?.min === r.min && drRange?.max === r.max ? 'bg-accent text-accent-foreground' : ''}`}
                       onClick={() => setDrRange({ min: r.min, max: r.max })}
                     >
                       {r.label}
@@ -153,10 +153,10 @@ export default function ComprarBacklinks() {
 
             <div>
               <h3 className="text-sm font-medium mb-2">Tráfego mensal</h3>
-              <ul className="space-y-1">
+              <ul className="leading-none space-y-0">
                 <li>
                   <button
-                    className={`w-full text-left px-3 py-2 rounded ${!trafficRange ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'}`}
+                    className={`w-full text-left px-2 py-1 leading-none ${!trafficRange ? 'bg-accent text-accent-foreground' : ''}`}
                     onClick={() => setTrafficRange(null)}
                   >
                     Todos
@@ -165,7 +165,7 @@ export default function ComprarBacklinks() {
                 {trafficRanges.map((r) => (
                   <li key={r.label}>
                     <button
-                      className={`w-full text-left px-3 py-2 rounded ${trafficRange?.min === r.min && trafficRange?.max === r.max ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'}`}
+                      className={`w-full text-left px-2 py-1 leading-none ${trafficRange?.min === r.min && trafficRange?.max === r.max ? 'bg-accent text-accent-foreground' : ''}`}
                       onClick={() => setTrafficRange({ min: r.min, max: r.max })}
                     >
                       {r.label}
@@ -177,10 +177,10 @@ export default function ComprarBacklinks() {
 
             <div>
               <h3 className="text-sm font-medium mb-2">Preço</h3>
-              <ul className="space-y-1">
+              <ul className="leading-none space-y-0">
                 <li>
                   <button
-                    className={`w-full text-left px-3 py-2 rounded ${!priceRange ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'}`}
+                    className={`w-full text-left px-2 py-1 leading-none ${!priceRange ? 'bg-accent text-accent-foreground' : ''}`}
                     onClick={() => setPriceRange(null)}
                   >
                     Todos
@@ -189,7 +189,7 @@ export default function ComprarBacklinks() {
                 {priceRanges.map((r) => (
                   <li key={r.label}>
                     <button
-                      className={`w-full text-left px-3 py-2 rounded ${priceRange?.min === r.min && priceRange?.max === r.max ? 'bg-accent text-accent-foreground' : 'hover:bg-accent/50'}`}
+                      className={`w-full text-left px-2 py-1 leading-none ${priceRange?.min === r.min && priceRange?.max === r.max ? 'bg-accent text-accent-foreground' : ''}`}
                       onClick={() => setPriceRange({ min: r.min, max: r.max })}
                     >
                       {r.label}
