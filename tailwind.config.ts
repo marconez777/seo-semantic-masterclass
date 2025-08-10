@@ -89,6 +89,21 @@ export default {
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out'
+			},
+			fontFamily: {
+				sans: [
+					'Inter',
+					'ui-sans-serif',
+					'system-ui',
+					'Segoe UI',
+					'Roboto',
+					'Helvetica Neue',
+					'Arial',
+					'Noto Sans',
+					'Apple Color Emoji',
+					'Segoe UI Emoji',
+					'Segoe UI Symbol'
+				]
 			}
 		}
 	},
