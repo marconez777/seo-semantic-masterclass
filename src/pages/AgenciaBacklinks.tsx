@@ -1,7 +1,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import StructuredData from "@/components/seo/StructuredData";
-import BacklinkListing from "@/components/marketplace/BacklinkListing";
+
 
 const AgenciaBacklinks = () => {
   const pageData = {
@@ -28,7 +28,7 @@ const AgenciaBacklinks = () => {
               </p>
             </div>
             
-            <BacklinkListing />
+            
             
             <div className="mt-16 prose prose-lg max-w-none text-muted-foreground">
               <h2 className="text-2xl font-semibold text-foreground mb-4">

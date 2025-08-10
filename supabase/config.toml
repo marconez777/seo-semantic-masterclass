@@ -1,5 +1,0 @@
-project_id = "esgkwpfjvltmrqvyqker"
-
-[functions.abacate-webhook]
-verify_jwt = false
-
