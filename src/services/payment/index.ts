@@ -1,17 +1,39 @@
 // Neutral payment service facade
-// For now, we run in manual mode without an online provider.
+// Uses Abacate Pay via Edge Function when available; falls back to manual mode otherwise.
 
-import { createCheckout as createCheckoutPlaceholder } from './providers/placeholder';
+import { supabase } from '@/integrations/supabase/client';
 
 export type CheckoutResult = {
   url: string;
   mode: 'manual' | 'redirect';
 };
 
-// In the future, choose provider based on a flag.
-// const PAYMENT_PROVIDER: 'none' | 'some-gateway' = 'none'
-
 export async function createCheckout(orders: any[]): Promise<CheckoutResult> {
-  // Currently using the placeholder (manual) provider
-  return createCheckoutPlaceholder(orders);
+  // Map generic orders to Abacate Pay products shape
+  const products = (orders ?? []).map((o: any) => ({
+    externalId: String(o?.externalId ?? o?.id ?? crypto.randomUUID()),
+    name: String(o?.name ?? 'Item'),
+    description: o?.description ?? undefined,
+    quantity: Number(o?.quantity ?? 1),
+    price: Number(o?.price_cents ?? o?.priceCents ?? o?.price ?? 0), // in cents
+  }));
+
+  const { data, error } = await supabase.functions.invoke('abacate-create-billing', {
+    body: {
+      frequency: 'MULTIPLE_PAYMENTS',
+      methods: ['PIX'],
+      products,
+      // Frontend routes for navigation
+      returnUrl: `${window.location.origin}/carrinho`,
+      completionUrl: `${window.location.origin}/payment-success`,
+    },
+  });
+
+  if (error) {
+    console.error('Checkout error:', error);
+    return { url: '#', mode: 'manual' };
+  }
+
+  const url = data?.data?.url as string | undefined;
+  return { url: url ?? '#', mode: 'redirect' };
 }
