@@ -19,14 +19,16 @@ export interface UserProfileDropdownProps {
   avatarUrl?: string
   onSignOut?: () => void
   className?: string
+  showActions?: boolean
 }
 
 export function UserProfileDropdown({
   name,
-  role = "Member",
+  role = "Cliente",
   avatarUrl,
   onSignOut,
   className,
+  showActions = true,
 }: UserProfileDropdownProps) {
   const initials = React.useMemo(() => {
     const parts = name.split(" ")
@@ -37,12 +39,16 @@ export function UserProfileDropdown({
 
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <IconButton ariaLabel="Search">
-        <Search className="opacity-80" />
-      </IconButton>
-      <IconButton ariaLabel="Notifications">
-        <Bell className="opacity-80" />
-      </IconButton>
+{showActions && (
+  <>
+    <IconButton ariaLabel="Buscar">
+      <Search className="opacity-80" />
+    </IconButton>
+    <IconButton ariaLabel="Notificações">
+      <Bell className="opacity-80" />
+    </IconButton>
+  </>
+)}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -58,22 +64,22 @@ export function UserProfileDropdown({
           </button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56">
-          <DropdownMenuLabel className="flex items-center gap-2">
-            <User className="h-4 w-4" />
-            <span>My Account</span>
-          </DropdownMenuLabel>
-          <DropdownMenuSeparator />
-          <DropdownMenuGroup>
-            <DropdownMenuItem>
-              <Settings className="mr-2 h-4 w-4" />
-              <span>Settings</span>
-            </DropdownMenuItem>
-          </DropdownMenuGroup>
-          <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={onSignOut} className="text-destructive focus:text-destructive">
-            <LogOut className="mr-2 h-4 w-4" />
-            <span>Sign out</span>
-          </DropdownMenuItem>
+<DropdownMenuLabel className="flex items-center gap-2">
+  <User className="h-4 w-4" />
+  <span>Minha conta</span>
+</DropdownMenuLabel>
+<DropdownMenuSeparator />
+<DropdownMenuGroup>
+  <DropdownMenuItem>
+    <Settings className="mr-2 h-4 w-4" />
+    <span>Configurações</span>
+  </DropdownMenuItem>
+</DropdownMenuGroup>
+<DropdownMenuSeparator />
+<DropdownMenuItem onClick={onSignOut} className="text-destructive focus:text-destructive">
+  <LogOut className="mr-2 h-4 w-4" />
+  <span>Sair</span>
+</DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

@@ -70,6 +70,16 @@ function PurchasesTable({ userId }: { userId: string }) {
     return <Badge variant="secondary">Pendente</Badge>;
   };
 
+  const renderOrderStatusBadge = (s: string) => {
+    const map: Record<string, { label: string; cls: string }> = {
+      pending: { label: 'Pendente', cls: 'bg-accent/15 text-accent border-accent/20' },
+      paid: { label: 'Pago', cls: 'bg-primary/15 text-primary border-primary/20' },
+      cancelled: { label: 'Cancelado', cls: 'bg-destructive/15 text-destructive border-destructive/20' },
+      refunded: { label: 'Reembolsado', cls: 'bg-muted text-muted-foreground border' },
+    };
+    const cfg = map[s] ?? { label: s, cls: 'bg-muted text-foreground border' };
+    return <Badge className={cfg.cls}>{cfg.label}</Badge>;
+  };
   return (
     <div className="border rounded-md overflow-x-auto bg-card">
       <table className="w-full text-sm">
@@ -91,7 +101,7 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">{r.id}</td>
               <td className="p-3">{new Date(r.created_at).toLocaleString('pt-BR')}</td>
               <td className="p-3">{(r.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-              <td className="p-3"><Badge variant="secondary">{r.status}</Badge></td>
+              <td className="p-3">{renderOrderStatusBadge(r.status)}</td>
               <td className="p-3">{renderPubBadge(r.id)}</td>
               <td className="p-3">
                 {r.abacate_url ? (
@@ -142,7 +152,7 @@ function PublicationsTable({ userId }: { userId: string }) {
     if (s === 'published') return <Badge className="bg-secondary/15 text-secondary border-secondary/20">Publicado</Badge>;
     if (s === 'in_progress') return <Badge variant="secondary">Em progresso</Badge>;
     if (s === 'rejected') return <Badge variant="destructive">Rejeitado</Badge>;
-    return <Badge variant="outline">Pendente</Badge>;
+    return <Badge className="bg-accent/15 text-accent border-accent/20">Pendente</Badge>;
   }
 
   return (
