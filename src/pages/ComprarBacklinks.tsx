@@ -8,7 +8,6 @@ import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "@/components/ui/select";
 
 
 // Helper to format BRL
@@ -165,40 +164,52 @@ export default function ComprarBacklinks() {
 
             <div className="mb-4">
               <h3 className="text-base font-semibold mb-1">DR</h3>
-              <Select value={drRange} onValueChange={setDrRange}>
-                <SelectTrigger aria-label="Filtro de DR" className="w-full">
-                  <SelectValue placeholder="DR" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover text-popover-foreground border shadow-md z-50">
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="10-20">10 a 20</SelectItem>
-                  <SelectItem value="20-30">20 a 30</SelectItem>
-                  <SelectItem value="30-40">30 a 40</SelectItem>
-                  <SelectItem value="40-50">40 a 50</SelectItem>
-                  <SelectItem value="50-60">50 a 60</SelectItem>
-                  <SelectItem value="60-70">60 a 70</SelectItem>
-                  <SelectItem value="70-80">70 a 80</SelectItem>
-                  <SelectItem value="80-90">80 a 90</SelectItem>
-                  <SelectItem value="90-99">90 a 99</SelectItem>
-                </SelectContent>
-              </Select>
+              <ul className="text-sm leading-none">
+                {[
+                  { v: 'todos', label: 'Todos' },
+                  { v: '10-20', label: '10 a 20' },
+                  { v: '20-30', label: '20 a 30' },
+                  { v: '30-40', label: '30 a 40' },
+                  { v: '40-50', label: '40 a 50' },
+                  { v: '50-60', label: '50 a 60' },
+                  { v: '60-70', label: '60 a 70' },
+                  { v: '70-80', label: '70 a 80' },
+                  { v: '80-90', label: '80 a 90' },
+                  { v: '90-99', label: '90 a 99' },
+                ].map(({ v, label }) => (
+                  <li key={v}>
+                    <button
+                      className={`block text-left w-full py-0.5 ${drRange === v ? 'font-semibold text-primary' : ''}`}
+                      onClick={() => setDrRange(v)}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div className="mb-4">
               <h3 className="text-base font-semibold mb-1">Tráfego</h3>
-              <Select value={trafficRange} onValueChange={setTrafficRange}>
-                <SelectTrigger aria-label="Filtro de Tráfego" className="w-full">
-                  <SelectValue placeholder="Tráfego" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover text-popover-foreground border shadow-md z-50">
-                  <SelectItem value="todos">Todos</SelectItem>
-                  <SelectItem value="0-100">0 a 100</SelectItem>
-                  <SelectItem value="100-1000">100 a 1.000</SelectItem>
-                  <SelectItem value="1000-10000">1.000 a 10.000</SelectItem>
-                  <SelectItem value="10000-100000">10.000 a 100.000</SelectItem>
-                  <SelectItem value="gt-100000">mais de 100.000</SelectItem>
-                </SelectContent>
-              </Select>
+              <ul className="text-sm leading-none">
+                {[
+                  { v: 'todos', label: 'Todos' },
+                  { v: '0-100', label: '0 a 100' },
+                  { v: '100-1000', label: '100 a 1.000' },
+                  { v: '1000-10000', label: '1.000 a 10.000' },
+                  { v: '10000-100000', label: '10.000 a 100.000' },
+                  { v: 'gt-100000', label: 'mais de 100.000' },
+                ].map(({ v, label }) => (
+                  <li key={v}>
+                    <button
+                      className={`block text-left w-full py-0.5 ${trafficRange === v ? 'font-semibold text-primary' : ''}`}
+                      onClick={() => setTrafficRange(v)}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <div>
