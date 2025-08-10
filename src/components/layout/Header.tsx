@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, Folder } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
 const Header = () => {
@@ -74,44 +74,52 @@ const Header = () => {
                 <div
                   id="backlinks-menu"
                   role="menu"
-                  className="w-72 rounded-md border bg-popover text-popover-foreground shadow-lg p-2"
+                  className="min-w-[560px] md:min-w-[720px] rounded-lg border bg-popover text-popover-foreground shadow-lg p-3"
                   onMouseEnter={openBacklinks}
                   onMouseLeave={scheduleCloseBacklinks}
                 >
-                  <div className="px-3 py-2 text-sm text-muted-foreground">Categorias</div>
-                  {[
-                    "Noticias",
-                    "Negócios",
-                    "Saúde",
-                    "Educação",
-                    "Tecnologia",
-                    "Finanças",
-                    "Casa",
-                    "Moda",
-                    "Turismo",
-                    "Alimentação",
-                    "Pets",
-                    "Automotivo",
-                    "Esportes",
-                    "Entretenimento",
-                    "Marketing",
-                    "Direito",
-                  ].map((categoria) => {
-                    const slug = categoria
-                      .toLowerCase()
-                      .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-                      .replace(/\s+/g, "-");
-                    return (
-                      <a
-                        key={categoria}
-                        href={`/comprar-backlinks-${slug}`}
-                        className="block rounded-md px-3 py-2 hover:bg-accent hover:text-accent-foreground"
-                        role="menuitem"
-                      >
-                        Backlinks de {categoria}
-                      </a>
-                    );
-                  })}
+                  <div className="px-2 pb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">Categorias</div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-1">
+                    {[
+                      "Noticias",
+                      "Negócios",
+                      "Saúde",
+                      "Educação",
+                      "Tecnologia",
+                      "Finanças",
+                      "Casa",
+                      "Moda",
+                      "Turismo",
+                      "Alimentação",
+                      "Pets",
+                      "Automotivo",
+                      "Esportes",
+                      "Entretenimento",
+                      "Marketing",
+                      "Direito",
+                    ].map((categoria) => {
+                      const slug = categoria
+                        .toLowerCase()
+                        .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                        .replace(/\s+/g, "-");
+                      return (
+                        <a
+                          key={categoria}
+                          href={`/comprar-backlinks-${slug}`}
+                          className="group flex items-center gap-3 rounded-md p-2 hover:bg-accent hover:text-accent-foreground transition-colors"
+                          role="menuitem"
+                        >
+                          <span className="inline-flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary shadow-sm">
+                            <Folder className="size-4" aria-hidden="true" />
+                          </span>
+                          <span className="flex flex-col">
+                            <span className="text-sm font-medium leading-none">Backlinks de {categoria}</span>
+                            <span className="text-xs text-muted-foreground leading-none mt-1">Sites da categoria</span>
+                          </span>
+                        </a>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             )}
