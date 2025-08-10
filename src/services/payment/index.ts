@@ -34,6 +34,6 @@ export async function createCheckout(orders: any[]): Promise<CheckoutResult> {
     return { url: '#', mode: 'manual' };
   }
 
-  const url = data?.data?.url as string | undefined;
+  const url = (data?.url ?? data?.data?.url) as string | undefined;
   return { url: url ?? '#', mode: 'redirect' };
 }

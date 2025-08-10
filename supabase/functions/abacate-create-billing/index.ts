@@ -48,6 +48,8 @@ Deno.serve(async (req) => {
       metadata: payload.metadata ?? undefined,
     }
 
+    console.log('[abacate-create-billing] request body', JSON.stringify(body))
+
     if (!body.products || body.products.length < 1) {
       return new Response(JSON.stringify({ error: 'At least one product is required' }), {
         status: 400,
@@ -65,6 +67,8 @@ Deno.serve(async (req) => {
     })
 
     const data = await res.json().catch(() => null)
+    console.log('[abacate-create-billing] response status', res.status)
+    console.log('[abacate-create-billing] response body', JSON.stringify(data))
 
     if (!res.ok) {
       return new Response(
@@ -73,12 +77,15 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Pass-through successful response
-    return new Response(JSON.stringify(data), {
+    const url = data?.data?.url ?? null
+
+    // Return simplified payload
+    return new Response(JSON.stringify({ url }), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
   } catch (e) {
+    console.error('[abacate-create-billing] unexpected', e)
     return new Response(JSON.stringify({ error: 'Unexpected error', message: String(e) }), {
       status: 500,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
