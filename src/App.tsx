@@ -11,7 +11,8 @@ import ComprarBacklinks from "./pages/ComprarBacklinks";
 import ComprarBacklinksCategoria from "./pages/ComprarBacklinksCategoria";
 import Dashboard from "./pages/Dashboard";
 import { CartProvider } from "./contexts/CartContext";
-
+import Admin from "./pages/Admin";
+ 
 const App = () => (
   <BrowserRouter>
     <CartProvider>
@@ -24,6 +25,7 @@ const App = () => (
         <Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
+        <Route path="/admin" element={<Admin />} />
         
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/cart" element={<Cart />} />
@@ -31,5 +33,5 @@ const App = () => (
     </CartProvider>
   </BrowserRouter>
 );
-
+ 
 export default App;
