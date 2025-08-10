@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ClipboardList, FileCheck2, Heart, UserCircle } from "lucide-react";
+import { ClipboardList, FileCheck2, Heart, UserCircle, Shield } from "lucide-react";
 
 function ProfileSection() {
   const [email, setEmail] = useState<string | null>(null);
@@ -317,7 +317,7 @@ export default function Dashboard() {
   const { clearCart } = useCart();
   const [userId, setUserId] = useState<string | null>(null);
   const [tab, setTab] = useState<string>("pedidos");
-
+  const [isAdmin, setIsAdmin] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('paid') === '1') {
@@ -337,6 +337,14 @@ export default function Dashboard() {
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  useEffect(() => {
+    if (!userId) return;
+    supabase.rpc('has_role', { _user_id: userId, _role: 'admin' }).then(({ data, error }) => {
+      if (error) console.error('Erro role admin', error);
+      setIsAdmin(!!data);
+    });
+  }, [userId]);
 
   if (!userId) return null;
 
@@ -380,6 +388,16 @@ export default function Dashboard() {
                       <span>Perfil</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
+                  {isAdmin && (
+                    <SidebarMenuItem>
+                      <SidebarMenuButton asChild>
+                        <a href="/admin">
+                          <Shield className="mr-2" />
+                          <span>Admin</span>
+                        </a>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  )}
                 </SidebarMenu>
               </SidebarGroup>
             </SidebarContent>
