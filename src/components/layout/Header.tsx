@@ -100,14 +100,15 @@ const Header = () => {
             onMouseEnter={openBacklinks}
             onMouseLeave={scheduleCloseBacklinks}
           >
-            <button
+            <a
+              href="/comprar-backlinks"
               className="inline-flex items-center text-foreground hover:text-primary transition-colors normal-case"
               aria-haspopup="menu"
               aria-expanded={backlinksOpen}
               aria-controls="backlinks-menu"
             >
               Backlinks
-            </button>
+            </a>
             {backlinksOpen && (
               <div className="absolute left-0 top-full mt-2 z-50">
                 <div
