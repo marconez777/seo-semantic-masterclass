@@ -55,8 +55,8 @@ export default function BacklinkTableRow({ item, onBuy }: { item: BacklinkItem; 
           .from('favoritos')
           .insert({ user_id: session.user.id, backlink_id: item.id })
           .select('id')
-          .single();
-        if (!error) setFavId(data.id);
+          .maybeSingle();
+        if (!error && data) setFavId(data.id);
       }
     } catch (e) {
       console.error('favorite error', e);

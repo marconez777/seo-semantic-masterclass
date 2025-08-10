@@ -18,7 +18,7 @@ export default function Recibo() {
         .from('pedidos')
         .select('*')
         .eq('id', orderId)
-        .single();
+        .maybeSingle();
       if (!pedido) return;
       const { data: it } = await supabase
         .from('order_items')
