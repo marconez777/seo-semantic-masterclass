@@ -185,9 +185,14 @@ const Header = () => {
               />
             </>
           ) : (
-            <Button asChild>
-              <a href="/auth" aria-label="Ir para Login">Login</a>
-            </Button>
+            <>
+              <a href="/carrinho" aria-label="Carrinho" className="inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
+                <ShoppingCart className="h-5 w-5" />
+              </a>
+              <Button asChild>
+                <a href="/auth" aria-label="Ir para Login">Login</a>
+              </Button>
+            </>
           )}
         </div>
 
