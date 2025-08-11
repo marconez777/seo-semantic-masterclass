@@ -58,7 +58,7 @@ const Carrinho = () => {
         keywords="carrinho, backlinks, compra"
       />
       <Header />
-      <main className="pt-20 min-h-screen px-4 py-10 max-w-4xl mx-auto">
+      <main className="pt-24 min-h-screen px-4 py-10 max-w-4xl mx-auto">
         <h1 className="text-3xl font-semibold mb-6">Carrinho</h1>
 
         {items.length === 0 ? (
