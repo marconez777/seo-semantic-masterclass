@@ -258,18 +258,6 @@ export default function ComprarBacklinks() {
           <h1 className="text-4xl font-bold mb-6">Título h1 (Comprar Backlinks)</h1>
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="flex items-center gap-3">
-              <label className="text-sm">Itens por página:</label>
-              <select
-                className="bg-card text-foreground border rounded-md px-2 py-1"
-                value={itemsPerPage}
-                onChange={(e) => { setItemsPerPage(Number(e.target.value)); setPage(1); }}
-              >
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={150}>150</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-3">
               <label className="text-sm">Ordenar:</label>
               <select
                 className="bg-card text-foreground border rounded-md px-2 py-1"
@@ -286,11 +274,6 @@ export default function ComprarBacklinks() {
                 <option value="price_asc">Mais barato → mais caro</option>
                 <option value="price_desc">Mais caro → mais barato</option>
               </select>
-            </div>
-            <div className="flex items-center gap-2 md:ml-auto">
-              <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Anterior</button>
-              <span className="text-sm">Página {currentPage} de {pageCount}</span>
-              <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))}>Próxima</button>
             </div>
           </div>
           <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
@@ -366,6 +349,26 @@ export default function ComprarBacklinks() {
                 )}
               </tbody>
             </table>
+          </div>
+
+          <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <label className="text-sm">Itens por página:</label>
+              <select
+                className="bg-card text-foreground border rounded-md px-2 py-1"
+                value={itemsPerPage}
+                onChange={(e) => { setItemsPerPage(Number(e.target.value)); setPage(1); }}
+              >
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={150}>150</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2 md:ml-auto">
+              <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Anterior</button>
+              <span className="text-sm">Página {currentPage} de {pageCount}</span>
+              <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))}>Próxima</button>
+            </div>
           </div>
 
           <section className="mt-10">
