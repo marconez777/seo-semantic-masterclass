@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import AdminBacklinksImport from "@/components/admin/AdminBacklinksImport";
+import AdminBacklinksManager from "@/components/admin/AdminBacklinksManager";
 
 interface Pedido {
   id: string;
@@ -159,6 +160,10 @@ export default function Admin() {
 
         <section className="space-y-4">
           <AdminBacklinksImport />
+        </section>
+
+        <section className="space-y-4">
+          <AdminBacklinksManager />
         </section>
 
         <section className="space-y-4">
