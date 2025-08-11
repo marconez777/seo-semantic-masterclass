@@ -62,7 +62,12 @@ const Carrinho = () => {
         <h1 className="text-3xl font-semibold mb-6">Carrinho</h1>
 
         {items.length === 0 ? (
-          <p className="text-muted-foreground">Seu carrinho está vazio.</p>
+          <div className="text-muted-foreground">
+            <p>Seu carrinho está vazio.</p>
+            <Button variant="link" asChild className="mt-2 p-0">
+              <a href="/comprar-backlinks" aria-label="Ir para a loja de backlinks">loja de backlinks</a>
+            </Button>
+          </div>
         ) : (
           <section className="space-y-4">
             {items.map((it) => (
