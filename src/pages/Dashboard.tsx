@@ -408,7 +408,7 @@ export default function Dashboard() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   <a href="/" aria-label="Ir para a página inicial">
-                    <img src="/LOGOMK.png" alt="Logo MK Art SEO" className="h-8 w-auto" loading="lazy" />
+                    <img src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png" alt="Logo MK Art SEO" className="h-8 w-auto" loading="lazy" />
                   </a>
                   <h1 className="text-3xl font-semibold">Painel</h1>
                 </div>

@@ -89,7 +89,7 @@ const Header = () => {
       <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b">
         <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center space-x-2">
-            <img src="/LOGOMK.png" alt="Logo MK Art" className="w-12 h-12" />
+            <img src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png" alt="Logo MK Art" className="w-12 h-12" />
           </div>
           <div className="hidden md:flex items-center gap-3">
             {isLoggedIn ? (
@@ -111,7 +111,7 @@ const Header = () => {
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b">
       <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
         <div className="flex items-center space-x-2">
-          <img src="/LOGOMK.png" alt="Logo MK Art" className="w-12 h-12" />
+          <img src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png" alt="Logo MK Art" className="w-12 h-12" />
         </div>
         
         <div className="hidden md:flex items-center gap-8">

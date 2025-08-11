@@ -112,7 +112,7 @@ const Blog = () => {
             dateModified: first.date,
             image: first.image,
             publisher: "MK Art - Agência de SEO",
-            publisherLogo: "/LOGOMK.png",
+            publisherLogo: "/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png",
           }}
         />
       )}

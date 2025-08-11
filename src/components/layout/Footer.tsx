@@ -8,7 +8,7 @@ const Footer = () => {
         <div className="grid md:grid-cols-4 gap-8 max-w-6xl mx-auto">
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
-              <img src="/LOGOMK.png" alt="Logo MK Art" className="w-12 h-12" />
+              <img src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png" alt="Logo MK Art" className="w-12 h-12" />
             </div>
             
             <div className="space-y-2 text-gray-400 text-sm">
