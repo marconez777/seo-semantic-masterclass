@@ -24,10 +24,15 @@ export default function ComprarBacklinks() {
 
   // Sorting
   const [sortKey, setSortKey] = useState<'site_name' | 'dr' | 'da' | 'traffic' | 'category' | 'price_cents' | null>(null);
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // Modal state
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<{ id: string; name: string; price_cents: number } | null>(null);
+
+  // Paginação
+  const [page, setPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState<number>(20);
 
   useEffect(() => {
     let mounted = true;
@@ -80,6 +85,10 @@ export default function ComprarBacklinks() {
     window.history.replaceState({}, '', url);
   }, [drRange, trafficRange]);
 
+  useEffect(() => {
+    setPage(1);
+  }, [drRange, trafficRange, maxPrice, sortKey, sortDir, itemsPerPage]);
+
   const filtered = useMemo(() => {
     const drParsed = parseRange(drRange);
     const trafficParsed = parseRange(trafficRange);
@@ -103,26 +112,32 @@ export default function ComprarBacklinks() {
   const sorted = useMemo(() => {
     const arr = [...filtered];
     if (!sortKey) return arr;
-    const isDesc = ['dr','da','traffic','price_cents'].includes(sortKey as string);
     arr.sort((a, b) => {
       const av = sortKey === 'site_name'
         ? ((a.site_name ?? a.site_url) ?? '').toString().toLowerCase()
-        : a[sortKey];
+        : (a as any)[sortKey!];
       const bv = sortKey === 'site_name'
         ? ((b.site_name ?? b.site_url) ?? '').toString().toLowerCase()
-        : b[sortKey];
+        : (b as any)[sortKey!];
       if (av == null && bv == null) return 0;
       if (av == null) return 1;
       if (bv == null) return -1;
       if (typeof av === 'number' && typeof bv === 'number') {
-        return isDesc ? (bv as number) - (av as number) : (av as number) - (bv as number);
+        return sortDir === 'desc' ? (bv as number) - (av as number) : (av as number) - (bv as number);
       }
       const as = String(av);
       const bs = String(bv);
-      return isDesc ? bs.localeCompare(as) : as.localeCompare(bs);
+      return sortDir === 'desc' ? bs.localeCompare(as) : as.localeCompare(bs);
     });
     return arr;
-  }, [filtered, sortKey]);
+  }, [filtered, sortKey, sortDir]);
+
+  const pageCount = Math.max(1, Math.ceil(sorted.length / itemsPerPage));
+  const currentPage = Math.min(page, pageCount);
+  const visible = useMemo(() => {
+    const start = (currentPage - 1) * itemsPerPage;
+    return sorted.slice(start, start + itemsPerPage);
+  }, [sorted, currentPage, itemsPerPage]);
 
   const onBuy = (b: any) => {
     setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
@@ -241,6 +256,43 @@ export default function ComprarBacklinks() {
             ]}
           />
           <h1 className="text-4xl font-bold mb-6">Título h1 (Comprar Backlinks)</h1>
+          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <label className="text-sm">Itens por página:</label>
+              <select
+                className="bg-card text-foreground border rounded-md px-2 py-1"
+                value={itemsPerPage}
+                onChange={(e) => { setItemsPerPage(Number(e.target.value)); setPage(1); }}
+              >
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={150}>150</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-3">
+              <label className="text-sm">Ordenar:</label>
+              <select
+                className="bg-card text-foreground border rounded-md px-2 py-1"
+                value={sortKey === 'price_cents' ? (sortDir === 'asc' ? 'price_asc' : 'price_desc') : ''}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  if (v === 'price_asc') { setSortKey('price_cents'); setSortDir('asc'); }
+                  else if (v === 'price_desc') { setSortKey('price_cents'); setSortDir('desc'); }
+                  else { setSortKey(null); }
+                  setPage(1);
+                }}
+              >
+                <option value="">Padrão</option>
+                <option value="price_asc">Mais barato → mais caro</option>
+                <option value="price_desc">Mais caro → mais barato</option>
+              </select>
+            </div>
+            <div className="flex items-center gap-2 md:ml-auto">
+              <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Anterior</button>
+              <span className="text-sm">Página {currentPage} de {pageCount}</span>
+              <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))}>Próxima</button>
+            </div>
+          </div>
           <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
             <table className="w-full text-sm">
               <thead className="bg-accent/40">
@@ -308,7 +360,7 @@ export default function ComprarBacklinks() {
                 ) : filtered.length === 0 ? (
                   <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
                 ) : (
-                  sorted.map((b) => (
+                  visible.map((b) => (
                     <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
                   ))
                 )}
