@@ -317,8 +317,8 @@ export default function ComprarBacklinks() {
                     className="p-4 cursor-pointer select-none"
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSortKey('site_name')}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('site_name'); }}
+                    onClick={() => { if (sortKey === 'site_name') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('site_name'); setSortDir('desc'); } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'site_name') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('site_name'); setSortDir('desc'); } } }}
                   >
                     SITE
                   </th>
@@ -326,8 +326,8 @@ export default function ComprarBacklinks() {
                     className="p-4 cursor-pointer select-none"
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSortKey('dr')}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('dr'); }}
+                    onClick={() => { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } } }}
                   >
                     DR
                   </th>
@@ -335,8 +335,8 @@ export default function ComprarBacklinks() {
                     className="p-4 cursor-pointer select-none"
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSortKey('da')}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('da'); }}
+                    onClick={() => { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } } }}
                   >
                     DA
                   </th>
@@ -344,8 +344,8 @@ export default function ComprarBacklinks() {
                     className="p-4 cursor-pointer select-none"
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSortKey('traffic')}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('traffic'); }}
+                    onClick={() => { if (sortKey === 'traffic') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('traffic'); setSortDir('desc'); } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'traffic') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('traffic'); setSortDir('desc'); } } }}
                   >
                     TRÁFEGO/Mês
                   </th>
@@ -353,8 +353,8 @@ export default function ComprarBacklinks() {
                     className="p-4 cursor-pointer select-none"
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSortKey('category')}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('category'); }}
+                    onClick={() => { if (sortKey === 'category') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('category'); setSortDir('desc'); } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'category') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('category'); setSortDir('desc'); } } }}
                   >
                     CATEGORIA
                   </th>
@@ -362,8 +362,8 @@ export default function ComprarBacklinks() {
                     className="p-4 cursor-pointer select-none"
                     role="button"
                     tabIndex={0}
-                    onClick={() => setSortKey('price_cents')}
-                    onKeyDown={(e) => { if (e.key === 'Enter') setSortKey('price_cents'); }}
+                    onClick={() => { if (sortKey === 'price_cents') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('price_cents'); setSortDir('desc'); } }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'price_cents') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('price_cents'); setSortDir('desc'); } } }}
                   >
                     VALOR
                   </th>
