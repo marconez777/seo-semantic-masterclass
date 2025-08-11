@@ -15,6 +15,7 @@ import Admin from "./pages/Admin";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
+import AdminBlogNew from "./pages/AdminBlogNew";
 import { Toaster } from "@/components/ui/toaster";
  
 const App = () => (
@@ -32,6 +33,7 @@ const App = () => (
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
         <Route path="/admin" element={<Admin />} />
+        <Route path="/admin/blog/novo" element={<AdminBlogNew />} />
         <Route path="/recibo/:orderId" element={<Recibo />} />
         
         <Route path="/carrinho" element={<Carrinho />} />
