@@ -155,24 +155,7 @@ export default function ComprarBacklinks() {
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar filters */}
-        <aside className="md:col-span-2 space-y-8">
-          <section>
-            <h2 className="text-base font-semibold mb-2">Categorias</h2>
-            <nav>
-              <ul className="text-sm leading-none">
-                <li>
-                  <a className="block py-0.5" href="/comprar-backlinks">Todos</a>
-                </li>
-                {categories.map((cat) => (
-                  <li key={cat}>
-                    <a className="block py-0.5" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
-                      {cat}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          </section>
+        <aside className="md:col-span-2 space-y-8 md:sticky md:top-24 self-start h-max">
 
           <section>
             <h2 className="text-base font-semibold mb-2">Filtros</h2>
@@ -256,6 +239,22 @@ export default function ComprarBacklinks() {
             ]}
           />
           <h1 className="text-4xl font-bold mb-6">Título h1 (Comprar Backlinks)</h1>
+          {categories.length > 0 && (
+            <section className="mb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                {categories.slice(0,16).map((cat) => (
+                  <a
+                    key={cat}
+                    href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}
+                    className="group block border rounded-xl bg-card p-4 hover:shadow-md transition"
+                  >
+                    <div className="text-xs uppercase text-muted-foreground">Backlinks de</div>
+                    <div className="font-semibold group-hover:text-primary">{cat}</div>
+                  </a>
+                ))}
+              </div>
+            </section>
+          )}
           <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
             <div className="flex items-center gap-3">
               <label className="text-sm">Ordenar:</label>
