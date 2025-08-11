@@ -14,6 +14,7 @@ import { CartProvider } from "./contexts/CartContext";
 import Admin from "./pages/Admin";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import { Toaster } from "@/components/ui/toaster";
  
 const App = () => (
@@ -27,6 +28,7 @@ const App = () => (
         <Route path="/comprar-backlinks" element={<ComprarBacklinks />} />
         <Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
         <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
         <Route path="/admin" element={<Admin />} />
