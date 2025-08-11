@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import AdminBacklinksImport from "@/components/admin/AdminBacklinksImport";
 import AdminBacklinksManager from "@/components/admin/AdminBacklinksManager";
+import AdminBlogPublisher from "@/components/admin/AdminBlogPublisher";
 
 interface Pedido {
   id: string;
@@ -157,6 +158,10 @@ export default function Admin() {
           <h1 className="text-3xl font-semibold">Admin – Pedidos</h1>
           <Button variant="outline" onClick={() => supabase.auth.signOut()}>Sair</Button>
         </div>
+
+        <section className="space-y-4">
+          <AdminBlogPublisher />
+        </section>
 
         <section className="space-y-4">
           <AdminBacklinksImport />
