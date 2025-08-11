@@ -8,10 +8,52 @@ import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
+import { Folder, Newspaper, Briefcase, HeartPulse, GraduationCap, Cpu, Wallet, Home, Shirt, Plane, Utensils, PawPrint, Car, Dumbbell, Clapperboard, Megaphone, Scale } from "lucide-react";
 
 
 // Helper to format BRL
 const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+
+// Ícones por categoria (mesmo mapeamento do dropdown do Header)
+const getCategoryIcon = (name: string) => {
+  switch (name) {
+    case "Noticias":
+      return Newspaper;
+    case "Negócios":
+      return Briefcase;
+    case "Saúde":
+      return HeartPulse;
+    case "Educação":
+      return GraduationCap;
+    case "Tecnologia":
+      return Cpu;
+    case "Finanças":
+      return Wallet;
+    case "Casa":
+      return Home;
+    case "Moda":
+      return Shirt;
+    case "Turismo":
+      return Plane;
+    case "Alimentação":
+      return Utensils;
+    case "Pets":
+      return PawPrint;
+    case "Automotivo":
+      return Car;
+    case "Esportes":
+      return Dumbbell;
+    case "Entretenimento":
+      return Clapperboard;
+    case "Marketing":
+      return Megaphone;
+    case "Direito":
+      return Scale;
+    default:
+      return Folder;
+  }
+};
 
 export default function ComprarBacklinks() {
   const [backlinks, setBacklinks] = useState<any[]>([]);
@@ -241,17 +283,29 @@ export default function ComprarBacklinks() {
           <h1 className="text-4xl font-bold mb-6">Título h1 (Comprar Backlinks)</h1>
           {categories.length > 0 && (
             <section className="mb-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {categories.slice(0,16).map((cat) => (
-                  <a
-                    key={cat}
-                    href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}
-                    className="group block border rounded-xl bg-card p-4 hover:shadow-md transition"
-                  >
-                    <div className="text-xs uppercase text-muted-foreground">Backlinks de</div>
-                    <div className="font-semibold group-hover:text-primary">{cat}</div>
-                  </a>
-                ))}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                {categories.slice(0,16).map((cat) => {
+                  const slug = String(cat)
+                    .toLowerCase()
+                    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+                    .replace(/\s+/g,'-');
+                  const IconComp = getCategoryIcon(String(cat));
+                  return (
+                    <a
+                      key={cat}
+                      href={`/comprar-backlinks-${slug}`}
+                      className="group flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors"
+                    >
+                      <span className="inline-flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary shadow-sm">
+                        <IconComp className="size-4" aria-hidden="true" />
+                      </span>
+                      <span className="flex flex-col">
+                        <span className="text-[11px] uppercase tracking-wide text-muted-foreground leading-none">Backlinks de</span>
+                        <span className="text-sm font-semibold leading-none mt-1">{String(cat)}</span>
+                      </span>
+                    </a>
+                  );
+                })}
               </div>
             </section>
           )}
