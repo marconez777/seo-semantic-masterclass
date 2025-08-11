@@ -1,5 +1,7 @@
 
 import SEOHead from "@/components/seo/SEOHead";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -55,7 +57,8 @@ const Carrinho = () => {
         canonicalUrl={`${window.location.origin}/carrinho`}
         keywords="carrinho, backlinks, compra"
       />
-      <main className="min-h-screen px-4 py-10 max-w-4xl mx-auto">
+      <Header />
+      <main className="pt-20 min-h-screen px-4 py-10 max-w-4xl mx-auto">
         <h1 className="text-3xl font-semibold mb-6">Carrinho</h1>
 
         {items.length === 0 ? (
@@ -101,6 +104,7 @@ const Carrinho = () => {
           </section>
         )}
       </main>
+      <Footer />
     </>
   );
 };
