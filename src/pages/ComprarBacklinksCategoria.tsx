@@ -13,6 +13,38 @@ import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 
 const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+// Lista padrão de categorias e normalização para manter acentos corretamente
+const ALLOWED_CATEGORIES = [
+  "Notícias",
+  "Negócios",
+  "Saúde",
+  "Educação",
+  "Tecnologia",
+  "Finanças",
+  "Casa",
+  "Moda",
+  "Turismo",
+  "Alimentação",
+  "Pets",
+  "Automotivo",
+  "Esportes",
+  "Entretenimento",
+  "Marketing",
+  "Direito",
+] as const;
+
+const normalizeCat = (s: string) => s
+  .toLowerCase()
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const toCanonicalCategory = (cat?: string): string | undefined => {
+  if (!cat) return undefined;
+  const n = normalizeCat(cat);
+  return Array.from(ALLOWED_CATEGORIES).find(c => normalizeCat(c) === n);
+};
+
 export default function ComprarBacklinksCategoria() {
   const { categoria } = useParams();
   const [backlinks, setBacklinks] = useState<any[]>([]);
@@ -25,18 +57,22 @@ export default function ComprarBacklinksCategoria() {
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<{ id: string; name: string; price_cents: number } | null>(null);
 
-  const categoryLabel = useMemo(() => decodeURIComponent(String(categoria ?? "")).replace(/^comprar-backlinks-/, "").replace(/-/g, " "), [categoria]);
+  const rawSlug = useMemo(() => decodeURIComponent(String(categoria ?? "")), [categoria]);
+  const normalized = useMemo(() => normalizeCat(rawSlug.replace(/-/g, " ")), [rawSlug]);
+  const canonicalCategory = useMemo(() => toCanonicalCategory(normalized), [normalized]);
+  const categoryLabel = canonicalCategory ?? rawSlug.replace(/-/g, " ");
 
   useEffect(() => {
     let mounted = true;
-    const slugName = decodeURIComponent(String(categoria ?? ""));
-    const realName = slugName.replace(/-/g, ' ');
+    const filterName = canonicalCategory ?? rawSlug.replace(/-/g, ' ');
     (async () => {
-      const { data, error } = await supabase
+      const q = supabase
         .from('backlinks')
         .select('*')
-        .eq('is_active', true)
-        .ilike('category', realName);
+        .eq('is_active', true);
+      const { data, error } = canonicalCategory
+        ? await q.eq('category', filterName)
+        : await q.ilike('category', filterName);
       if (mounted) {
         if (error) console.error('Erro ao buscar categoria', error);
         setBacklinks(data ?? []);
@@ -44,7 +80,7 @@ export default function ComprarBacklinksCategoria() {
       }
     })();
     return () => { mounted = false; };
-  }, [categoria]);
+  }, [canonicalCategory, rawSlug]);
 
   const categories = useMemo(() => {
     const set = new Set<string>();

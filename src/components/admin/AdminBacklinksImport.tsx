@@ -284,7 +284,7 @@ async function startImport() {
                 {preview.map((r, idx) => {
                   const invalid = !isValidCategory(r.category);
                   return (
-                    <tr key={idx} className={`border-top ${invalid ? 'bg-destructive/10' : ''}`}>
+                    <tr key={idx} className={`border-t ${invalid ? 'bg-destructive/10' : ''}`}>
                       <td className="p-2">{r.site_url || "—"}</td>
                       <td className="p-2">{r.site_name || (r.site_url ? extractHost(r.site_url) : "—")}</td>
                       <td className="p-2">
