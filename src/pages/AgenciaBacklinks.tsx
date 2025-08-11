@@ -15,9 +15,10 @@ const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency"
 // Ícones por categoria (mesmo mapeamento do dropdown do Header)
 const getCategoryIcon = (name: string) => {
   switch (name) {
-    case "Noticias":
-      return Newspaper;
-    case "Negócios":
+     case "Noticias":
+     case "Notícias":
+       return Newspaper;
+     case "Negócios":
       return Briefcase;
     case "Saúde":
       return HeartPulse;

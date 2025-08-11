@@ -32,6 +32,7 @@ const Header = () => {
   const getCategoryIcon = (name: string) => {
     switch (name) {
       case "Noticias":
+      case "Notícias":
         return Newspaper;
       case "Negócios":
         return Briefcase;
@@ -160,7 +161,7 @@ const Header = () => {
                   <div className="px-2 pb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">Categorias</div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-1">
                     {[
-                      "Noticias",
+                      "Notícias",
                       "Negócios",
                       "Saúde",
                       "Educação",

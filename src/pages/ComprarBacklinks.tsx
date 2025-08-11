@@ -19,6 +19,7 @@ const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency"
 const getCategoryIcon = (name: string) => {
   switch (name) {
     case "Noticias":
+    case "Notícias":
       return Newspaper;
     case "Negócios":
       return Briefcase;

@@ -23,6 +23,46 @@ function normalizeHeader(h: string) {
     .trim();
 }
 
+// Categorias permitidas (padrão fixo)
+const ALLOWED_CATEGORIES = [
+  "Notícias",
+  "Negócios",
+  "Saúde",
+  "Educação",
+  "Tecnologia",
+  "Finanças",
+  "Casa",
+  "Moda",
+  "Turismo",
+  "Alimentação",
+  "Pets",
+  "Automotivo",
+  "Esportes",
+  "Entretenimento",
+  "Marketing",
+  "Direito",
+] as const;
+
+const normalizeCat = (s: string) => s
+  .toLowerCase()
+  .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  .replace(/\s+/g, " ")
+  .trim();
+
+const ALLOWED_NORMALIZED = new Set(Array.from(ALLOWED_CATEGORIES).map(normalizeCat));
+
+function isValidCategory(cat?: string) {
+  if (!cat) return false;
+  return ALLOWED_NORMALIZED.has(normalizeCat(cat));
+}
+
+function toCanonicalCategory(cat?: string): string | undefined {
+  if (!cat) return undefined;
+  const n = normalizeCat(cat);
+  const found = Array.from(ALLOWED_CATEGORIES).find(c => normalizeCat(c) === n);
+  return found;
+}
+
 function parseMoneyToCents(value: any): number | null {
   if (value == null) return null;
   let s = String(value).trim();
@@ -67,6 +107,7 @@ export default function AdminBacklinksImport() {
   const [importing, setImporting] = useState(false);
   const [imported, setImported] = useState(0);
   const [skipped, setSkipped] = useState(0);
+  const [invalidCategoryRows, setInvalidCategoryRows] = useState<ParsedRow[]>([]);
 
   const preview = useMemo(() => rows.slice(0, 5), [rows]);
 
@@ -125,69 +166,78 @@ export default function AdminBacklinksImport() {
     }
   }
 
-  async function startImport() {
-    if (!rows.length) return;
-    setImporting(true);
-    setImported(0);
-    setSkipped(0);
+async function startImport() {
+  if (!rows.length) return;
+  setImporting(true);
+  setImported(0);
+  setSkipped(0);
+  setInvalidCategoryRows([]);
 
-    let ok = 0, skip = 0;
-    const chunkSize = 100;
-    for (let i = 0; i < rows.length; i += chunkSize) {
-      const chunk = rows.slice(i, i + chunkSize);
-      // Filter and prepare
-      const payload = chunk
-        .map((r) => {
-          const site_url = r.site_url?.trim();
-          const site_name = r.site_name?.trim() || extractHost(site_url);
-          const category = r.category?.trim();
-          const price_cents = r.price_cents ?? null;
-          const da = r.da ?? null;
-          const dr = r.dr ?? null;
-          const traffic = r.traffic ?? null;
-          if (!site_url && !site_name) return null;
-          return {
-            site_url: site_url || null,
-            site_name: site_name || null,
-            category: category || null,
-            price_cents: price_cents,
-            da,
-            dr,
-            traffic,
-            is_active: true,
-          };
-        })
-        .filter(Boolean) as any[];
-
-      const toSkip = chunk.length - payload.length;
-      skip += toSkip;
-
-      if (payload.length) {
-        const { error, count } = await supabase
-          .from("backlinks")
-          .insert(payload, { count: "exact" });
-        if (error) {
-          console.error("Erro ao importar", error);
-          toast({ title: "Erro ao importar", description: error.message });
-          // Count all of this chunk as skipped on error to proceed
-          skip += payload.length;
-        } else {
-          ok += count || payload.length;
-          setImported(ok);
-          setSkipped(skip);
+  let ok = 0, skip = 0;
+  const invalids: ParsedRow[] = [];
+  const chunkSize = 100;
+  for (let i = 0; i < rows.length; i += chunkSize) {
+    const chunk = rows.slice(i, i + chunkSize);
+    // Filtra e prepara; ignora categorias fora do padrão
+    const payload = chunk
+      .map((r) => {
+        const site_url = r.site_url?.trim();
+        const site_name = r.site_name?.trim() || extractHost(site_url);
+        const categoryRaw = r.category?.trim();
+        const canonical = toCanonicalCategory(categoryRaw || "");
+        const price_cents = r.price_cents ?? null;
+        const da = r.da ?? null;
+        const dr = r.dr ?? null;
+        const traffic = r.traffic ?? null;
+        if (!site_url && !site_name) return null;
+        if (!canonical) {
+          invalids.push(r);
+          return null;
         }
+        return {
+          site_url: site_url || null,
+          site_name: site_name || null,
+          category: canonical,
+          price_cents,
+          da,
+          dr,
+          traffic,
+          is_active: true,
+        };
+      })
+      .filter(Boolean) as any[];
+
+    const toSkip = chunk.length - payload.length;
+    skip += toSkip;
+
+    if (payload.length) {
+      const { error, count } = await supabase
+        .from("backlinks")
+        .insert(payload, { count: "exact" });
+      if (error) {
+        console.error("Erro ao importar", error);
+        toast({ title: "Erro ao importar", description: error.message });
+        // Conta todo o payload como ignorado em caso de erro para prosseguir
+        skip += payload.length;
+      } else {
+        ok += count || payload.length;
+        setImported(ok);
+        setSkipped(skip);
       }
     }
-
-    setImporting(false);
-    toast({ title: "Importação concluída", description: `${ok} inseridos, ${skip} ignorados.` });
   }
+
+  setInvalidCategoryRows(invalids);
+  setImporting(false);
+  toast({ title: "Importação concluída", description: `${ok} inseridos, ${skip} ignorados. ${invalids.length ? invalids.length + ' com categoria inválida.' : ''}` });
+}
 
   function reset() {
     setFileName("");
     setRows([]);
     setImported(0);
     setSkipped(0);
+    setInvalidCategoryRows([]);
   }
 
   return (
@@ -231,19 +281,40 @@ export default function AdminBacklinksImport() {
                 </tr>
               </thead>
               <tbody>
-                {preview.map((r, idx) => (
-                  <tr key={idx} className="border-t">
-                    <td className="p-2">{r.site_url || "—"}</td>
-                    <td className="p-2">{r.site_name || (r.site_url ? extractHost(r.site_url) : "—")}</td>
-                    <td className="p-2">{r.category || "—"}</td>
-                    <td className="p-2">{r.da ?? "—"}</td>
-                    <td className="p-2">{r.dr ?? "—"}</td>
-                    <td className="p-2">{r.traffic ?? "—"}</td>
-                    <td className="p-2">{r.price_cents ?? "—"}</td>
-                  </tr>
-                ))}
+                {preview.map((r, idx) => {
+                  const invalid = !isValidCategory(r.category);
+                  return (
+                    <tr key={idx} className={`border-top ${invalid ? 'bg-destructive/10' : ''}`}>
+                      <td className="p-2">{r.site_url || "—"}</td>
+                      <td className="p-2">{r.site_name || (r.site_url ? extractHost(r.site_url) : "—")}</td>
+                      <td className="p-2">
+                        {r.category || "—"}
+                        {invalid && <span className="ml-2 text-[10px] text-destructive font-semibold">categoria inválida</span>}
+                      </td>
+                      <td className="p-2">{r.da ?? "—"}</td>
+                      <td className="p-2">{r.dr ?? "—"}</td>
+                      <td className="p-2">{r.traffic ?? "—"}</td>
+                      <td className="p-2">{r.price_cents ?? "—"}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
+          </div>
+        )}
+
+        {invalidCategoryRows.length > 0 && (
+          <div className="border rounded-md p-3 bg-destructive/5">
+            <div className="font-semibold text-destructive mb-2">
+              {invalidCategoryRows.length} linha(s) ignoradas por categoria inválida
+            </div>
+            <ul className="list-disc pl-5 text-sm">
+              {invalidCategoryRows.slice(0, 50).map((r, i) => (
+                <li key={i}>
+                  {(r.site_name || r.site_url || '—')} — categoria: "{r.category || '—'}"
+                </li>
+              ))}
+            </ul>
           </div>
         )}
       </CardContent>
