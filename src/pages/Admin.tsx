@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
+import AdminBacklinksImport from "@/components/admin/AdminBacklinksImport";
 
 interface Pedido {
   id: string;
@@ -155,6 +156,10 @@ export default function Admin() {
           <h1 className="text-3xl font-semibold">Admin – Pedidos</h1>
           <Button variant="outline" onClick={() => supabase.auth.signOut()}>Sair</Button>
         </div>
+
+        <section className="space-y-4">
+          <AdminBacklinksImport />
+        </section>
 
         <section className="space-y-4">
           <div className="border rounded-md overflow-x-auto">
