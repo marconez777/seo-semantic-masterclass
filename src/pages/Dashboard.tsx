@@ -406,7 +406,12 @@ export default function Dashboard() {
           <SidebarInset>
             <main className="container mx-auto px-4 py-10 space-y-8">
               <div className="flex items-center justify-between">
-                <h1 className="text-3xl font-semibold">Painel</h1>
+                <div className="flex items-center gap-3">
+                  <a href="/" aria-label="Ir para a página inicial">
+                    <img src="/LOGOMK.png" alt="Logo MK Art SEO" className="h-8 w-auto" loading="lazy" />
+                  </a>
+                  <h1 className="text-3xl font-semibold">Painel</h1>
+                </div>
                 <div className="flex gap-2">
                   <Button asChild>
                     <a href="/comprar-backlinks">Loja de Backlinks</a>
