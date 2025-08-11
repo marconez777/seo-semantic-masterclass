@@ -5,6 +5,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import Header from "@/components/layout/Header";
 
 const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup">("login");
@@ -77,6 +78,7 @@ const Auth = () => {
         canonicalUrl={`${window.location.origin}/auth`}
         keywords="login, cadastro, autenticação, backlinks"
       />
+      <Header />
       <main className="min-h-screen flex items-center justify-center px-4 py-16">
         <article className="w-full max-w-md border rounded-lg p-6 bg-background shadow">
           <h1 className="text-2xl font-semibold mb-4">{mode === "login" ? "Entrar" : "Cadastrar"}</h1>
