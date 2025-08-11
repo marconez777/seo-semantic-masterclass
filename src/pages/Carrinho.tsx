@@ -71,7 +71,7 @@ const Carrinho = () => {
         ) : (
           <section className="space-y-4">
             {items.map((it) => (
-              <div key={`${it.id}-${it.texto_ancora}-${it.url_destino}`} className="border rounded-md p-4 flex items-start justify-between gap-4">
+              <div key={`${it.id}-${it.texto_ancora}-${it.url_destino}`} className="border rounded-md p-4 flex items-start justify-between gap-4 bg-card">
                 <div>
                   <h2 className="font-medium">{it.name}</h2>
                   <p className="text-sm text-muted-foreground">Âncora: {it.texto_ancora}</p>
