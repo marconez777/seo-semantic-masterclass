@@ -14,6 +14,7 @@ const Header = () => {
   const location = useLocation();
   
   const isPanelRoute = location.pathname.startsWith("/painel");
+  const isLoggedIn = !!userName;
   
   const openBacklinks = () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
@@ -91,9 +92,15 @@ const Header = () => {
             <img src="/LOGOMK.png" alt="Logo MK Art" className="w-12 h-12" />
           </div>
           <div className="hidden md:flex items-center gap-3">
-            <Button asChild>
-              <a href="/auth" aria-label="Ir para Login">Login</a>
-            </Button>
+            {isLoggedIn ? (
+              <Button asChild>
+                <a href="/painel" aria-label="Ir para o Painel">Painel</a>
+              </Button>
+            ) : (
+              <Button asChild>
+                <a href="/auth" aria-label="Ir para Login">Login</a>
+              </Button>
+            )}
           </div>
         </nav>
       </header>
@@ -206,9 +213,15 @@ const Header = () => {
               <a href="/carrinho" aria-label="Carrinho" className="inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
                 <ShoppingCart className="h-5 w-5" />
               </a>
-              <Button asChild>
-                <a href="/auth" aria-label="Ir para Login">Login</a>
-              </Button>
+              {isLoggedIn ? (
+                <Button asChild>
+                  <a href="/painel" aria-label="Ir para o Painel">Painel</a>
+                </Button>
+              ) : (
+                <Button asChild>
+                  <a href="/auth" aria-label="Ir para Login">Login</a>
+                </Button>
+              )}
             </>
           )}
         </div>
