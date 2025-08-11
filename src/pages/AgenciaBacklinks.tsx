@@ -377,26 +377,6 @@ const AgenciaBacklinks = () => {
               </div>
             </section>
           )}
-          <div className="mb-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <label className="text-sm">Ordenar:</label>
-              <select
-                className="bg-card text-foreground border rounded-md px-2 py-1"
-                value={sortKey === 'price_cents' ? (sortDir === 'asc' ? 'price_asc' : 'price_desc') : ''}
-                onChange={(e) => {
-                  const v = e.target.value;
-                  if (v === 'price_asc') { setSortKey('price_cents'); setSortDir('asc'); }
-                  else if (v === 'price_desc') { setSortKey('price_cents'); setSortDir('desc'); }
-                  else { setSortKey(null); }
-                  setPage(1);
-                }}
-              >
-                <option value="">Padrão</option>
-                <option value="price_asc">Mais barato → mais caro</option>
-                <option value="price_desc">Mais caro → mais barato</option>
-              </select>
-            </div>
-          </div>
           <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
             <table className="w-full text-sm">
               <thead className="bg-accent/40">
