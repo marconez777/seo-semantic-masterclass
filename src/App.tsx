@@ -14,6 +14,7 @@ import { CartProvider } from "./contexts/CartContext";
 import Admin from "./pages/Admin";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
+import { Toaster } from "@/components/ui/toaster";
  
 const App = () => (
   <BrowserRouter>
@@ -34,6 +35,7 @@ const App = () => (
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/cart" element={<Cart />} />
       </Routes>
+      <Toaster />
     </CartProvider>
   </BrowserRouter>
 );

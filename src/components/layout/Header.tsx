@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { ShoppingCart, Folder, Newspaper, Briefcase, HeartPulse, GraduationCap, Cpu, Wallet, Home, Shirt, Plane, Utensils, PawPrint, Car, Dumbbell, Clapperboard, Megaphone, Scale } from "lucide-react";
 import { useLocation } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
 
 const Header = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -15,6 +16,7 @@ const Header = () => {
   
   const isPanelRoute = location.pathname.startsWith("/painel");
   const isLoggedIn = !!userName;
+  const { itemsCount } = useCart();
   
   const openBacklinks = () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
@@ -198,8 +200,13 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-3">
           {isPanelRoute ? (
             <>
-              <a href="/cart" aria-label="Carrinho" className="inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
+              <a href="/cart" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
                 <ShoppingCart className="h-5 w-5" />
+                {itemsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none ring-2 ring-background">
+                    {itemsCount}
+                  </span>
+                )}
               </a>
               <UserProfileDropdown
                 name={userName ?? 'Visitante'}
@@ -210,8 +217,13 @@ const Header = () => {
             </>
           ) : (
             <>
-              <a href="/carrinho" aria-label="Carrinho" className="inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
+              <a href="/carrinho" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
                 <ShoppingCart className="h-5 w-5" />
+                {itemsCount > 0 && (
+                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none ring-2 ring-background">
+                    {itemsCount}
+                  </span>
+                )}
               </a>
               {isLoggedIn ? (
                 <Button asChild>

@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/contexts/CartContext";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export type PurchaseModalProps = {
   open: boolean;
@@ -53,6 +54,7 @@ const PurchaseModal = ({ open, onOpenChange, product }: PurchaseModalProps) => {
       navigate("/carrinho");
     } else {
       onOpenChange(false);
+      toast({ title: "Adicionado ao Carrinho" });
     }
   };
 
