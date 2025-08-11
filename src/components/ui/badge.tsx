@@ -15,7 +15,7 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground",
         outline: "text-foreground",
-        pending: "bg-accent/15 text-accent border-accent/20",
+        pending: "bg-warning/15 text-warning border-warning/20",
         paid: "bg-secondary/15 text-secondary border-secondary/20",
         success: "bg-secondary/15 text-secondary border-secondary/20",
         failed: "bg-destructive/15 text-destructive border-destructive/20",
