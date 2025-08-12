@@ -628,7 +628,7 @@ export default function ComprarBacklinksNegocios() {
         <PurchaseModal
           open={open}
           onOpenChange={setOpen}
-          item={{ id: selected.id, name: selected.name, price_cents: selected.price_cents }}
+          product={selected}
         />
       )}
     </>
