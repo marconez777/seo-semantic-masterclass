@@ -677,7 +677,7 @@ export default function ComprarBacklinksAutomoveis() {
         <PurchaseModal
           open={open}
           onOpenChange={setOpen}
-          item={selected}
+          product={selected}
         />
       )}
     </>
