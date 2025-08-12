@@ -6,52 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
-import { Folder, Newspaper, Briefcase, HeartPulse, GraduationCap, Cpu, Wallet, Home, Shirt, Plane, Utensils, PawPrint, Car, Dumbbell, Clapperboard, Megaphone, Scale } from "lucide-react";
+import { getCategoryIcon } from "@/lib/category-icons";
 
 // Helper to format BRL
 const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 
 // Ícones por categoria (mesmo mapeamento do dropdown do Header)
-const getCategoryIcon = (name: string) => {
-  switch (name) {
-     case "Noticias":
-     case "Notícias":
-       return Newspaper;
-     case "Negócios":
-      return Briefcase;
-    case "Saúde":
-      return HeartPulse;
-    case "Educação":
-      return GraduationCap;
-    case "Tecnologia":
-      return Cpu;
-    case "Finanças":
-      return Wallet;
-    case "Casa":
-      return Home;
-    case "Moda":
-      return Shirt;
-    case "Turismo":
-      return Plane;
-    case "Alimentação":
-      return Utensils;
-    case "Pets":
-      return PawPrint;
-    case "Automotivo":
-      return Car;
-    case "Esportes":
-      return Dumbbell;
-    case "Entretenimento":
-      return Clapperboard;
-    case "Marketing":
-      return Megaphone;
-    case "Direito":
-      return Scale;
-    default:
-      return Folder;
-  }
-};
 
 const AgenciaBacklinks = () => {
   const [backlinks, setBacklinks] = useState<any[]>([]);
