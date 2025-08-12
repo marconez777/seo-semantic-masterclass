@@ -62,6 +62,42 @@ export type Database = {
         }
         Relationships: []
       }
+      backlinks_public: {
+        Row: {
+          category: string
+          da: number | null
+          dr: number | null
+          id: string
+          is_active: boolean
+          price_cents: number
+          site_name: string
+          site_url: string
+          traffic: number | null
+        }
+        Insert: {
+          category: string
+          da?: number | null
+          dr?: number | null
+          id: string
+          is_active?: boolean
+          price_cents: number
+          site_name: string
+          site_url: string
+          traffic?: number | null
+        }
+        Update: {
+          category?: string
+          da?: number | null
+          dr?: number | null
+          id?: string
+          is_active?: boolean
+          price_cents?: number
+          site_name?: string
+          site_url?: string
+          traffic?: number | null
+        }
+        Relationships: []
+      }
       favoritos: {
         Row: {
           backlink_id: string
