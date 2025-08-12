@@ -44,9 +44,9 @@ export async function createCheckout(orders: OrderInput[], customer?: { name?: s
       frequency: 'MULTIPLE_PAYMENTS',
       methods: ['PIX'],
       products,
-      customer: customer
+      customer: customer?.name
         ? {
-            name: customer.name,
+            name: String(customer.name),
             cellphone: (customer as any).cellphone ?? customer.phone,
             email: customer.email,
             taxId: (customer as any).taxId ?? customer.cpf,
