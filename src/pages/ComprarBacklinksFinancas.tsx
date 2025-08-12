@@ -650,7 +650,7 @@ export default function ComprarBacklinksFinancas() {
             <p className="text-muted-foreground">
               Explore Plataformas de Conteúdo Especializado: Envolva-se com blogs voltados ao setor financeiro brasileiro e ofereça conteúdo de guest post em troca de backlinks.
             </p>
-            <p className="text-muted-foreground">-Parcerias com Influenciadores: Colabore com influenciadores do nicho financeiro, pois eles frequentemente possuem sites ou blogs onde podem incluir backlinks.</p>
+            <p className="text-muted-foreground">Parcerias com Influenciadores: Colabore com influenciadores do nicho financeiro, pois eles frequentemente possuem sites ou blogs onde podem incluir backlinks.</p>
             <p className="text-muted-foreground">
               Artigos Patrocinados: Utilize artigos patrocinados em portais respeitados para garantir backlinks robustos e aumentar a visibilidade da sua marca no Brasil.
             </p>
