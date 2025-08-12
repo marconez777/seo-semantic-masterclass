@@ -442,14 +442,14 @@ export default function ComprarBacklinks() {
             <h2 className="text-2xl font-semibold">CHECKLIST – Analisando a Autoridade de um Site para Avaliar a Compra de Backlinks</h2>
             <p className="text-muted-foreground">Você deve analisar os seguintes critérios, usando a ferramenta Ahrefs (separamos um link da versão grátis):</p>
             <ol className="list-decimal pl-6 space-y-1 text-muted-foreground">
-              <li>1 – DR – O Domain Rating deve ter de 15 a 30 para concorrência média, 30 a 60 para concorrência alta e 60 a 90 para concorrência muito alta;</li>
-              <li>2 – Quantidade de Backlinks Únicos – A quantidade de Referring Domains deve ter de 15 a 300 backlinks únicos;</li>
-              <li>3 – Tráfego – Também é um critério ou métrica muito relevante para o Google. Um site com tráfego de 10 a 1.000 visitas mensais é considerado razoável, já sites com mais de 10.000 mil visitas são muito bons e qualquer coisa acima disso são ótimos e muito eficazes para o posicionamento das palavras chaves mais concorridas.</li>
-              <li>4 – Referências – Liste os sites que apontam para o site em que você vai comprar um backlink e visite alguns deles para ver se são sites reais, brasileiros e com conteúdo único e de qualidade.</li>
-              <li>5 – Links Dofollow / Nofollow – O site precisa ter uma variação próxima de links 80% dofollow e 20% nofollow.</li>
-              <li>6 – Perfil sem SPAM / Tóxico – Faça uma análise dos backlinks do site para ver se eles são sites reais e brasileiros, ou se são apenas sites com lista de links, em inglês, sem conteúdo e com alto nível de Spam. Que são os sites com bastante backlinks de referência mas baixo DR.</li>
-              <li>7 – Links de Saída – Quanto mais links de saída o site tiver, mais a autoridade está sendo dividida e menos autoridade o seu site irá receber.</li>
-              <li>8 – Gráfico de Aquisição de Links – Veja a curva do gráfico que mostra o histórico de links que o site recebeu ao longo do tempo, se for muito acentuada, é um site com Spam.</li>
+              <li>DR – O Domain Rating deve ter de 15 a 30 para concorrência média, 30 a 60 para concorrência alta e 60 a 90 para concorrência muito alta;</li>
+              <li>Quantidade de Backlinks Únicos – A quantidade de Referring Domains deve ter de 15 a 300 backlinks únicos;</li>
+              <li>Tráfego – Também é um critério ou métrica muito relevante para o Google. Um site com tráfego de 10 a 1.000 visitas mensais é considerado razoável, já sites com mais de 10.000 mil visitas são muito bons e qualquer coisa acima disso são ótimos e muito eficazes para o posicionamento das palavras chaves mais concorridas.</li>
+              <li>Referências – Liste os sites que apontam para o site em que você vai comprar um backlink e visite alguns deles para ver se são sites reais, brasileiros e com conteúdo único e de qualidade.</li>
+              <li>Links Dofollow / Nofollow – O site precisa ter uma variação próxima de links 80% dofollow e 20% nofollow.</li>
+              <li>Perfil sem SPAM / Tóxico – Faça uma análise dos backlinks do site para ver se eles são sites reais e brasileiros, ou se são apenas sites com lista de links, em inglês, sem conteúdo e com alto nível de Spam. Que são os sites com bastante backlinks de referência mas baixo DR.</li>
+              <li>Links de Saída – Quanto mais links de saída o site tiver, mais a autoridade está sendo dividida e menos autoridade o seu site irá receber.</li>
+              <li>Gráfico de Aquisição de Links – Veja a curva do gráfico que mostra o histórico de links que o site recebeu ao longo do tempo, se for muito acentuada, é um site com Spam.</li>
             </ol>
 
             <h2 className="text-2xl font-semibold">A Importância de Comprar Backlinks para o Seu Negócio</h2>
