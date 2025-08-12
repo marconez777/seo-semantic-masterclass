@@ -10,6 +10,7 @@ import Cart from "./pages/Cart";
 import ComprarBacklinks from "./pages/ComprarBacklinks";
 import ComprarBacklinksCategoria from "./pages/ComprarBacklinksCategoria";
 import ComprarBacklinksNoticias from "./pages/ComprarBacklinksNoticias";
+import ComprarBacklinksAutomoveis from "./pages/ComprarBacklinksAutomoveis";
 import Dashboard from "./pages/Dashboard";
 import { CartProvider } from "./contexts/CartContext";
 import Admin from "./pages/Admin";
@@ -29,6 +30,7 @@ const App = () => (
         <Route path="/consultoria-de-seo-backlinks" element={<ConsultoriaSeo />} />
         <Route path="/comprar-backlinks" element={<ComprarBacklinks />} />
         <Route path="/comprar-backlinks-noticias" element={<ComprarBacklinksNoticias />} />
+        <Route path="/comprar-backlinks-automoveis" element={<ComprarBacklinksAutomoveis />} />
         <Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
