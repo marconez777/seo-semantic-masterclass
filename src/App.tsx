@@ -19,6 +19,7 @@ import ComprarBacklinksEducacao from "./pages/ComprarBacklinksEducacao";
 import ComprarBacklinksTurismo from "./pages/ComprarBacklinksTurismo";
 import ComprarBacklinksAlimentacao from "./pages/ComprarBacklinksAlimentacao";
 import ComprarBacklinksPets from "./pages/ComprarBacklinksPets";
+import ComprarBacklinksEsportes from "./pages/ComprarBacklinksEsportes";
 import Dashboard from "./pages/Dashboard";
 import { CartProvider } from "./contexts/CartContext";
 import Admin from "./pages/Admin";
@@ -47,7 +48,8 @@ const App = () => (
         <Route path="/comprar-backlinks-turismo" element={<ComprarBacklinksTurismo />} />
         <Route path="/comprar-backlinks-alimentacao" element={<ComprarBacklinksAlimentacao />} />
         <Route path="/comprar-backlinks-pets" element={<ComprarBacklinksPets />} />
-<Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
+        <Route path="/comprar-backlinks-esportes" element={<ComprarBacklinksEsportes />} />
+        <Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
