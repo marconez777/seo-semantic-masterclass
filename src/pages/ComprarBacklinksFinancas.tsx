@@ -361,7 +361,7 @@ export default function ComprarBacklinksFinancas() {
             ]}
           />
           <h1 className="text-4xl font-bold mb-6">
-            Adquira Backlinks de Qualidade para Impulsionar seu Negócio de Finanças
+            Comprar Backlinks de Finanças
           </h1>
 
           {categories.length > 0 && (
