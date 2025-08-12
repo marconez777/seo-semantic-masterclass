@@ -8,7 +8,6 @@ import { useNavigate } from "react-router-dom";
 import AdminBacklinksImport from "@/components/admin/AdminBacklinksImport";
 import AdminBacklinksManager from "@/components/admin/AdminBacklinksManager";
 
-
 interface Pedido {
   id: string;
   user_id: string;
@@ -16,6 +15,10 @@ interface Pedido {
   total_cents: number;
   created_at: string;
   abacate_url: string | null;
+}
+
+interface PedidoPII {
+  order_id: string;
   customer_email: string | null;
   customer_name: string | null;
   customer_cpf: string | null;
@@ -45,6 +48,7 @@ export default function Admin() {
   const [siteMap, setSiteMap] = useState<Record<string, { name: string; url: string }>>({});
   const [loading, setLoading] = useState(false);
   const [publinks, setPublinks] = useState<Record<string, string>>({}); // itemId -> url input
+  const [piiByOrder, setPiiByOrder] = useState<Record<string, PedidoPII>>({});
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -98,6 +102,18 @@ export default function Admin() {
         backlinkIds = Array.from(new Set((items ?? []).map((i: any) => i.backlink_id)));
       }
       setItemsByOrder(itemsMap);
+
+      // Load PII snapshot for each order (admin only)
+      let piiMap: Record<string, PedidoPII> = {};
+      if (orderIds.length) {
+        const { data: piiList, error: piiErr } = await supabase
+          .from('pedidos_pii')
+          .select('*')
+          .in('order_id', orderIds);
+        if (piiErr) console.error('Erro ao carregar dados PII', piiErr);
+        (piiList ?? []).forEach((r: any) => { piiMap[r.order_id] = r as PedidoPII; });
+      }
+      setPiiByOrder(piiMap);
 
       if (backlinkIds.length) {
         const { data: backs } = await supabase
@@ -198,12 +214,20 @@ export default function Admin() {
                         )}
                       </td>
                       <td className="p-3">
-                        <div className="font-medium">{p.customer_name ?? '—'}</div>
-                        <div className="text-muted-foreground text-xs">CPF: {p.customer_cpf ?? '—'}</div>
+                        {(() => { const pii = piiByOrder[p.id]; return (
+                          <>
+                            <div className="font-medium">{pii?.customer_name ?? '—'}</div>
+                            <div className="text-muted-foreground text-xs">CPF: {pii?.customer_cpf ?? '—'}</div>
+                          </>
+                        ); })()}
                       </td>
                       <td className="p-3 text-xs">
-                        <div>{p.customer_email ?? '—'}</div>
-                        <div>{p.customer_phone ?? '—'}</div>
+                        {(() => { const pii = piiByOrder[p.id]; return (
+                          <>
+                            <div>{pii?.customer_email ?? '—'}</div>
+                            <div>{pii?.customer_phone ?? '—'}</div>
+                          </>
+                        ); })()}
                       </td>
                       <td className="p-3">{new Date(p.created_at).toLocaleString('pt-BR')}</td>
                       <td className="p-3">{(p.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>

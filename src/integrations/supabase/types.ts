@@ -189,10 +189,6 @@ export type Database = {
           abacate_bill_id: string | null
           abacate_url: string | null
           created_at: string
-          customer_cpf: string | null
-          customer_email: string | null
-          customer_name: string | null
-          customer_phone: string | null
           id: string
           status: Database["public"]["Enums"]["order_status"]
           total_cents: number
@@ -203,10 +199,6 @@ export type Database = {
           abacate_bill_id?: string | null
           abacate_url?: string | null
           created_at?: string
-          customer_cpf?: string | null
-          customer_email?: string | null
-          customer_name?: string | null
-          customer_phone?: string | null
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
           total_cents: number
@@ -217,10 +209,6 @@ export type Database = {
           abacate_bill_id?: string | null
           abacate_url?: string | null
           created_at?: string
-          customer_cpf?: string | null
-          customer_email?: string | null
-          customer_name?: string | null
-          customer_phone?: string | null
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
           total_cents?: number
@@ -228,6 +216,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      pedidos_pii: {
+        Row: {
+          created_at: string
+          customer_cpf: string | null
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          order_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          customer_cpf?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          order_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          customer_cpf?: string | null
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          order_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_pii_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       posts: {
         Row: {

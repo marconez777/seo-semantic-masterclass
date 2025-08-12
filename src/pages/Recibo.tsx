@@ -9,6 +9,7 @@ export default function Recibo() {
   const [order, setOrder] = useState<any | null>(null);
   const [items, setItems] = useState<any[]>([]);
   const [siteMap, setSiteMap] = useState<Record<string, { name: string; url: string }>>({});
+  const [pii, setPii] = useState<any | null>(null);
 
   useEffect(() => {
     if (!orderId) return;
@@ -24,6 +25,11 @@ export default function Recibo() {
         .from('order_items')
         .select('*')
         .eq('order_id', orderId);
+      const { data: piiRow } = await supabase
+        .from('pedidos_pii')
+        .select('*')
+        .eq('order_id', orderId)
+        .maybeSingle();
       const backlinkIds = Array.from(new Set((it ?? []).map((i) => i.backlink_id)));
       let m: Record<string, { name: string; url: string }> = {};
       if (backlinkIds.length) {
@@ -33,7 +39,7 @@ export default function Recibo() {
           .in('id', backlinkIds);
         (backs ?? []).forEach((b) => { m[b.id] = { name: b.site_name, url: b.site_url }; });
       }
-      if (mounted) { setOrder(pedido); setItems(it ?? []); setSiteMap(m); }
+      if (mounted) { setOrder(pedido); setItems(it ?? []); setSiteMap(m); setPii(piiRow ?? null); }
     })();
     return () => { mounted = false; };
   }, [orderId]);
@@ -61,8 +67,8 @@ export default function Recibo() {
           <div className="grid gap-2 sm:grid-cols-2">
             <p><strong>Nº do pedido:</strong> {order.id}</p>
             <p><strong>Data/hora:</strong> {new Date(order.created_at).toLocaleString('pt-BR')}</p>
-            <p><strong>Cliente:</strong> {order.customer_name ?? '—'}</p>
-            <p><strong>E-mail:</strong> {order.customer_email ?? '—'}</p>
+            <p><strong>Cliente:</strong> {pii?.customer_name ?? '—'}</p>
+            <p><strong>E-mail:</strong> {pii?.customer_email ?? '—'}</p>
           </div>
         </div>
 
