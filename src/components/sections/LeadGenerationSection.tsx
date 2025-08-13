@@ -55,17 +55,17 @@ const LeadGenerationSection = () => {
               <Input
                 type="text"
                 placeholder="Nome"
-                className="bg-white/20 border-white/30 text-white placeholder-white"
+                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
               />
               <Input
                 type="email"
                 placeholder="E-mail"
-                className="bg-white/20 border-white/30 text-white placeholder-white"
+                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
               />
               <Input
                 type="tel"
                 placeholder="WhatsApp"
-                className="bg-white/20 border-white/30 text-white placeholder-white"
+                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
               />
               <Select>
                 <SelectTrigger className="bg-white/20 border-white/30 text-white">
