@@ -37,6 +37,9 @@ export const getCategoryIcon = (name: string): LucideIcon => {
       return Megaphone;
     case "Direito":
       return Scale;
+    case "Imóveis":
+    case "Imoveis":
+      return Home;
     default:
       return Folder;
   }
