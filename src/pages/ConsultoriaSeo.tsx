@@ -1,7 +1,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import StructuredData from "@/components/seo/StructuredData";
-import MonthlyRevenueFilter from "@/components/sections/MonthlyRevenueFilter";
+
 import DeliveryProcessSection from "@/components/sections/DeliveryProcessSection";
 import CaseStudyCard from "@/components/sections/CaseStudyCard";
 import LeadGenerationSection from "@/components/sections/LeadGenerationSection";
@@ -19,9 +19,6 @@ const ConsultoriaSeo = () => {
       <Header />
       
       <main className="pt-20 min-h-screen bg-background">
-        {/* Monthly Revenue Filter */}
-        <MonthlyRevenueFilter />
-        
         {/* Delivery Process */}
         <DeliveryProcessSection />
         
