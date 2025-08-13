@@ -35,6 +35,7 @@ import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlogNew from "./pages/AdminBlogNew";
+import NotFound from "./pages/NotFound";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
  
@@ -77,6 +78,9 @@ const App = () => (
         
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/cart" element={<Cart />} />
+        
+        {/* Catch-all route for 404 */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster />
       <WhatsAppFAB />
