@@ -25,7 +25,12 @@ import ComprarBacklinksMarketing from "./pages/ComprarBacklinksMarketing";
 import ComprarBacklinksDireito from "./pages/ComprarBacklinksDireito";
 import Dashboard from "./pages/Dashboard";
 import { CartProvider } from "./contexts/CartContext";
-import Admin from "./pages/Admin";
+
+import AdminLayout from "./layouts/AdminLayout";
+import AdminPedidos from "./pages/admin/AdminPedidos";
+import AdminSites from "./pages/admin/AdminSites";
+import AdminPublicacoes from "./pages/admin/AdminPublicacoes";
+import AdminBlog from "./pages/admin/AdminBlog";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -57,11 +62,17 @@ const App = () => (
         <Route path="/comprar-backlinks-marketing" element={<ComprarBacklinksMarketing />} />
         <Route path="/comprar-backlinks-direito" element={<ComprarBacklinksDireito />} />
         <Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
+        <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/admin/blog/novo" element={<AdminBlogNew />} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<AdminPedidos />} />
+          <Route path="sites" element={<AdminSites />} />
+          <Route path="publicacoes" element={<AdminPublicacoes />} />
+          <Route path="blog" element={<AdminBlog />} />
+          <Route path="blog/novo" element={<AdminBlogNew />} />
+        </Route>
         <Route path="/recibo/:orderId" element={<Recibo />} />
         
         <Route path="/carrinho" element={<Carrinho />} />
