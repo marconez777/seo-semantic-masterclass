@@ -7,6 +7,8 @@ import CaseStudyCard from "@/components/sections/CaseStudyCard";
 import LeadGenerationSection from "@/components/sections/LeadGenerationSection";
 
 const ConsultoriaSeo = () => {
+  console.log("ConsultoriaSeo component rendering");
+  
   const pageData = {
     name: "Consultoria de SEO e Backlinks - MK Art",
     url: "https://seo-semantic-masterclass.lovable.app/consultoria-de-seo",
