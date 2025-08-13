@@ -374,9 +374,11 @@ export default function Dashboard() {
 
   useEffect(() => {
     if (!userId) return;
-    supabase.rpc('has_role', { _user_id: userId, _role: 'admin' }).then(({ data, error }) => {
-      if (error) console.error('Erro role admin', error);
-      setIsAdmin(!!data);
+    
+    // Verificar se o usuário é especificamente o admin autorizado
+    supabase.auth.getUser().then(({ data }) => {
+      const userEmail = data.user?.email;
+      setIsAdmin(userEmail === 'contato@mkart.com.br');
     });
   }, [userId]);
 
