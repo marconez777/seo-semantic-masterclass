@@ -103,9 +103,11 @@ const CaseStudySection = () => {
                   ))}
                 </div>
                 
-                <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg">
-                  RECEBER AUDITORIA GRÁTIS
-                </Button>
+                <a href="/consultoria-seo">
+                  <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg">
+                    RECEBER AUDITORIA GRÁTIS
+                  </Button>
+                </a>
               </div>
               
               <div className={`${index % 2 !== 0 ? 'lg:order-1' : ''}`}>

@@ -43,7 +43,7 @@ const LeadGenerationSection = () => {
             </div>
           </div>
           
-          <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8">
+          <div id="hero-form" className="bg-white/10 backdrop-blur-sm rounded-xl p-8">
             <h3 className="text-2xl font-bold text-white mb-2">
               Análise Grátis do seu SEO
             </h3>

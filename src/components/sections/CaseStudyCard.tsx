@@ -62,9 +62,11 @@ const CaseStudyCard = ({
               </div>
             </div>
             
-            <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3">
-              RECEBER AUDITORIA GRÁTIS
-            </Button>
+            <a href="#hero-form">
+              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3">
+                RECEBER AUDITORIA GRÁTIS
+              </Button>
+            </a>
           </div>
           
           <div className={reverse ? 'lg:col-start-1' : ''}>
