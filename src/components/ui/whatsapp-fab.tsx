@@ -10,7 +10,7 @@ export function WhatsAppFAB() {
   return (
     <FAB 
       onClick={handleWhatsAppClick}
-      className="bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-full"
+      className="bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-full z-[9999]"
       aria-label="Falar no WhatsApp"
     >
       <div className="flex items-center gap-3 px-3 py-8">
