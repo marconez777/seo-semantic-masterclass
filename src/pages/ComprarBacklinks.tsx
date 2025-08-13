@@ -41,7 +41,7 @@ export default function ComprarBacklinks() {
     let mounted = true;
     (async () => {
       const { data, error } = await supabase
-        .from('backlinks')
+        .from('backlinks_public')
         .select('*')
         .eq('is_active', true)
         .order('dr', { ascending: false });
