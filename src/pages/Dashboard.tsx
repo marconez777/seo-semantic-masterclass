@@ -75,6 +75,7 @@ function ProfileSection() {
 function PurchasesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
   const [pubSummary, setPubSummary] = useState<Record<string, { total: number; published: number; inProgress: number; rejected: number }>>({});
+  const [orderSites, setOrderSites] = useState<Record<string, string[]>>({});
 
   useEffect(() => {
     let mounted = true;
@@ -87,28 +88,52 @@ function PurchasesTable({ userId }: { userId: string }) {
       if (error) console.error('Erro pedidos', error);
       const pedidos = data ?? [];
 
-      // compute publication summary per order
+      // compute publication summary per order and get sites
       const orderIds = pedidos.map((p) => p.id);
       let summary: Record<string, { total: number; published: number; inProgress: number; rejected: number }> = {};
+      let sites: Record<string, string[]> = {};
+      
       if (orderIds.length) {
         const { data: items, error: itemsErr } = await supabase
           .from('order_items')
-          .select('order_id, publication_status')
+          .select('order_id, publication_status, backlink_id')
           .in('order_id', orderIds);
         if (itemsErr) console.error('Erro order_items', itemsErr);
+        
+        // Get unique backlink IDs
+        const backlinkIds = Array.from(new Set((items ?? []).map((i) => i.backlink_id)));
+        let backlinkMap: Record<string, string> = {};
+        
+        if (backlinkIds.length) {
+          const { data: backs } = await supabase
+            .from('backlinks_public')
+            .select('id, site_name')
+            .in('id', backlinkIds);
+          (backs ?? []).forEach((b) => { backlinkMap[b.id] = b.site_name; });
+        }
+        
         (items ?? []).forEach((it) => {
           const k = it.order_id;
           if (!summary[k]) summary[k] = { total: 0, published: 0, inProgress: 0, rejected: 0 };
+          if (!sites[k]) sites[k] = [];
+          
           summary[k].total += 1;
           if (it.publication_status === 'published') summary[k].published += 1;
           else if (it.publication_status === 'in_progress') summary[k].inProgress += 1;
           else if (it.publication_status === 'rejected') summary[k].rejected += 1;
+          
+          // Add site name if not already added
+          const siteName = backlinkMap[it.backlink_id];
+          if (siteName && !sites[k].includes(siteName)) {
+            sites[k].push(siteName);
+          }
         });
       }
 
       if (mounted) {
         setRows(pedidos);
         setPubSummary(summary);
+        setOrderSites(sites);
       }
     })();
     return () => { mounted = false; };
@@ -133,6 +158,13 @@ function PurchasesTable({ userId }: { userId: string }) {
     const cfg = map[s] ?? { label: s, cls: 'bg-muted text-foreground border' };
     return <Badge className={cfg.cls}>{cfg.label}</Badge>;
   };
+
+  const renderSites = (orderId: string) => {
+    const sites = orderSites[orderId] || [];
+    if (sites.length === 0) return <span className="text-muted-foreground">—</span>;
+    if (sites.length === 1) return <span>{sites[0]}</span>;
+    return <span>{sites.slice(0, 2).join(', ')}{sites.length > 2 ? ` +${sites.length - 2}` : ''}</span>;
+  };
   return (
     <div className="border rounded-md overflow-x-auto bg-card">
       <table className="w-full text-sm">
@@ -140,6 +172,7 @@ function PurchasesTable({ userId }: { userId: string }) {
           <tr className="text-left">
             <th className="p-3 uppercase font-bold tracking-wide">Pedido</th>
             <th className="p-3 uppercase font-bold tracking-wide">Criado em</th>
+            <th className="p-3 uppercase font-bold tracking-wide">Site</th>
             <th className="p-3 uppercase font-bold tracking-wide">Total</th>
             <th className="p-3 uppercase font-bold tracking-wide">Pagamento</th>
             <th className="p-3 uppercase font-bold tracking-wide">Publicação</th>
@@ -148,11 +181,12 @@ function PurchasesTable({ userId }: { userId: string }) {
         </thead>
         <tbody>
           {rows.length === 0 ? (
-            <tr><td className="p-4" colSpan={6}>Nenhum pedido.</td></tr>
+            <tr><td className="p-4" colSpan={7}>Nenhum pedido.</td></tr>
           ) : rows.map((r) => (
             <tr key={r.id} className="border-t">
               <td className="p-3">{r.id}</td>
               <td className="p-3">{new Date(r.created_at).toLocaleString('pt-BR')}</td>
+              <td className="p-3">{renderSites(r.id)}</td>
               <td className="p-3">{(r.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
               <td className="p-3">{renderOrderStatusBadge(r.status)}</td>
               <td className="p-3">{renderPubBadge(r.id)}</td>
