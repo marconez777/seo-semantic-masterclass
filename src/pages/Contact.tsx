@@ -1,12 +1,62 @@
+import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import StructuredData from "@/components/seo/StructuredData";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    message: ""
+  });
+  const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
+
   const pageData = {
     name: "Contato - MK Art Agência de SEO",
     url: "https://seo-semantic-masterclass.lovable.app/contato",
     description: "Entre em contato com nossa agência de SEO e backlinks. Consultoria especializada para melhorar seu ranking no Google."
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { error } = await supabase.functions.invoke('send-contact-email', {
+        body: formData
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Mensagem enviada!",
+        description: "Recebemos sua mensagem e retornaremos em breve."
+      });
+
+      setFormData({ name: "", email: "", message: "" });
+    } catch (error) {
+      console.error('Error sending email:', error);
+      toast({
+        title: "Erro ao enviar mensagem",
+        description: "Tente novamente ou entre em contato diretamente."
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -31,16 +81,16 @@ const Contact = () => {
                 </h2>
                 <div className="space-y-4">
                   <div>
-                    <h3 className="font-medium text-foreground">Email</h3>
-                    <p className="text-muted-foreground">contato@mkart.com.br</p>
+                    <h3 className="font-medium text-foreground">Endereço</h3>
+                    <p className="text-muted-foreground">Rua Caminho do Pilar, 401 - Santo André – SP</p>
                   </div>
                   <div>
                     <h3 className="font-medium text-foreground">Telefone</h3>
-                    <p className="text-muted-foreground">(11) 99999-9999</p>
+                    <p className="text-muted-foreground">+55 11 9 8915 1997</p>
                   </div>
                   <div>
-                    <h3 className="font-medium text-foreground">Horário de Atendimento</h3>
-                    <p className="text-muted-foreground">Segunda à Sexta: 9h às 18h</p>
+                    <h3 className="font-medium text-foreground">Email</h3>
+                    <p className="text-muted-foreground">contato@mkart.com.br</p>
                   </div>
                 </div>
               </div>
@@ -49,46 +99,47 @@ const Contact = () => {
                 <h2 className="text-2xl font-semibold text-foreground mb-6">
                   Formulário de Contato
                 </h2>
-                <form className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-4">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-                      Nome
-                    </label>
-                    <input
+                    <Label htmlFor="name">Nome</Label>
+                    <Input
                       type="text"
                       id="name"
-                      className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-                      Email
-                    </label>
-                    <input
+                    <Label htmlFor="email">Email</Label>
+                    <Input
                       type="email"
                       id="email"
-                      className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
                       required
                     />
                   </div>
                   <div>
-                    <label htmlFor="message" className="block text-sm font-medium text-foreground mb-2">
-                      Mensagem
-                    </label>
-                    <textarea
+                    <Label htmlFor="message">Mensagem</Label>
+                    <Textarea
                       id="message"
+                      name="message"
                       rows={4}
-                      className="w-full px-3 py-2 border border-input bg-background text-foreground rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                      value={formData.message}
+                      onChange={handleChange}
                       required
-                    ></textarea>
+                    />
                   </div>
-                  <button
+                  <Button
                     type="submit"
-                    className="w-full bg-primary text-primary-foreground px-4 py-2 rounded-md hover:bg-primary/90 transition-colors"
+                    className="w-full"
+                    disabled={isLoading}
                   >
-                    Enviar Mensagem
-                  </button>
+                    {isLoading ? "Enviando..." : "Enviar Mensagem"}
+                  </Button>
                 </form>
               </div>
             </div>
