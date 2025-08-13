@@ -67,7 +67,7 @@ export default function ComprarBacklinksCategoria() {
     const filterName = canonicalCategory ?? rawSlug.replace(/-/g, ' ');
     (async () => {
       const q = supabase
-        .from('backlinks')
+        .from('backlinks_public')
         .select('*')
         .eq('is_active', true);
       const { data, error } = canonicalCategory
