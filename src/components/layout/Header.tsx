@@ -95,7 +95,7 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-8">
           <a href="/" className="text-foreground hover:text-primary font-medium transition-colors">Home</a>
 
-          <a href="/consultoria-de-seo-backlinks" className="text-foreground hover:text-primary transition-colors">Consultoria SEO</a>
+          <a href="/consultoria-seo" className="text-foreground hover:text-primary transition-colors">Consultoria SEO</a>
 
           <div
             className="relative"
