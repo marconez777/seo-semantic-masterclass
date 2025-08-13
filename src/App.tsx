@@ -31,6 +31,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlogNew from "./pages/AdminBlogNew";
 import { Toaster } from "@/components/ui/toaster";
+import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
  
 const App = () => (
   <BrowserRouter>
@@ -67,6 +68,7 @@ const App = () => (
         <Route path="/cart" element={<Cart />} />
       </Routes>
       <Toaster />
+      <WhatsAppFAB />
     </CartProvider>
   </BrowserRouter>
 );

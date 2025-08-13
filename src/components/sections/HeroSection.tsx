@@ -26,15 +26,6 @@ const HeroSection = () => {
           Auditoria Grátis
         </Button>
       </div>
-      
-      {/* WhatsApp floating button */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <Button className="bg-green-500 hover:bg-green-600 text-white px-4 py-3 rounded-full shadow-lg">
-          <span className="text-sm font-medium">FALE AGORA POR</span>
-          <br />
-          <span className="text-lg font-bold">WhatsApp</span>
-        </Button>
-      </div>
     </section>
   );
 };
