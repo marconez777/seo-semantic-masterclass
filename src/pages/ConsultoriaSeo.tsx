@@ -19,6 +19,9 @@ const ConsultoriaSeo = () => {
       <Header />
       
       <main className="pt-20 min-h-screen bg-background">
+        {/* Hero Section - Lead Generation */}
+        <LeadGenerationSection />
+        
         {/* Delivery Process */}
         <DeliveryProcessSection />
         
@@ -68,9 +71,6 @@ const ConsultoriaSeo = () => {
           backlinks={35}
           monthlyTraffic="50.230"
         />
-        
-        {/* Lead Generation Section */}
-        <LeadGenerationSection />
       </main>
       
       <Footer />
