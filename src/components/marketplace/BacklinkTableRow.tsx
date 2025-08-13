@@ -19,6 +19,26 @@ function brl(v: number) {
   return (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+const getCategoryBadgeClass = (category: string) => {
+  const categoryColors: Record<string, string> = {
+    'Tecnologia': 'bg-blue-100 text-blue-800 border-blue-200',
+    'Entretenimento': 'bg-purple-100 text-purple-800 border-purple-200',
+    'Notícias': 'bg-green-100 text-green-800 border-green-200',
+    'Alimentação': 'bg-orange-100 text-orange-800 border-orange-200',
+    'Automóveis': 'bg-red-100 text-red-800 border-red-200',
+    'Direito': 'bg-slate-100 text-slate-800 border-slate-200',
+    'Educação': 'bg-indigo-100 text-indigo-800 border-indigo-200',
+    'Esportes': 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    'Finanças': 'bg-yellow-100 text-yellow-800 border-yellow-200',
+    'Marketing': 'bg-pink-100 text-pink-800 border-pink-200',
+    'Moda': 'bg-rose-100 text-rose-800 border-rose-200',
+    'Negócios': 'bg-cyan-100 text-cyan-800 border-cyan-200',
+    'Pets': 'bg-amber-100 text-amber-800 border-amber-200',
+    'Turismo': 'bg-teal-100 text-teal-800 border-teal-200'
+  };
+  return categoryColors[category] || 'bg-gray-100 text-gray-800 border-gray-200';
+};
+
 export default function BacklinkTableRow({ item, onBuy }: { item: BacklinkItem; onBuy: (b: BacklinkItem) => void }) {
   const [favId, setFavId] = useState<string | null>(null);
 
@@ -69,7 +89,11 @@ export default function BacklinkTableRow({ item, onBuy }: { item: BacklinkItem; 
       <td className="p-4 text-primary font-medium">{item.dr ?? '-'}</td>
       <td className="p-4 text-muted-foreground">{item.da ?? '-'}</td>
       <td className="p-4">{item.traffic?.toLocaleString('pt-BR') ?? '-'}</td>
-      <td className="p-4"><Badge variant="secondary">{item.category}</Badge></td>
+      <td className="p-4">
+        <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getCategoryBadgeClass(item.category)}`}>
+          {item.category}
+        </span>
+      </td>
       <td className="p-4 font-medium">{brl(item.price_cents)}</td>
       <td className="p-4 flex items-center justify-end gap-2">
         <Button size="sm" onClick={() => onBuy(item)}>Comprar</Button>
