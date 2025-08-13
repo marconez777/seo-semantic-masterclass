@@ -32,7 +32,7 @@ const ConsultoriaSeo = () => {
           title="Mais de 100 Mil Visitas no Site do Dr. Gabriel"
           clientName="Dr. Gabriel"
           description="O cliente atingiu 100k de visitas mensais e sua recepcionista chegou até a reclamar de não estar dando conta de tantos atendimentos."
-          videoId="dQw4w9WgXcQ" // Replace with actual video ID
+          videoId="OWWQfH-V1Iw"
           keywords={[
             "Psiquiatra tdah",
             "Teste diagnóstico tdah", 
@@ -47,7 +47,7 @@ const ConsultoriaSeo = () => {
           title="O Sistema que foi para 1º Página em 3 meses do kronoos"
           clientName="kronoos"
           description="Em 3 meses, o Sistema Kronoos alcançou a 1ª página do Google com uma estratégia focada e assertiva."
-          videoId="dQw4w9WgXcQ" // Replace with actual video ID
+          videoId="B35Poq_3xDM"
           keywords={[
             "listas restritivas",
             "compliance contratual",
@@ -63,7 +63,7 @@ const ConsultoriaSeo = () => {
           title="O e commerce Soluções em Embalagens foi de R$ 25 Mil p/ R$ 70 Mil em apenas 3 meses."
           clientName="Soluções em Embalagens"
           description="Em apenas 3 meses conseguimos aumentar o faturamento da loja online do cliente Paulo de R$ 25 Mil para R$ 70 Mil reais."
-          videoId="dQw4w9WgXcQ" // Replace with actual video ID
+          videoId="iX7ShYZVxgo"
           keywords={[
             "envelope de segurança",
             "envelope de segurança preço",
