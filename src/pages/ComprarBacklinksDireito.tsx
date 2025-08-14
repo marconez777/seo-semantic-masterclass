@@ -8,6 +8,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import StructuredData from "@/components/seo/StructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
+import { Folder } from "lucide-react";
 
 // Helper to format BRL
 const brl = (v: number) =>
@@ -74,7 +75,9 @@ export default function ComprarBacklinksDireito() {
   const categories = useMemo(() => {
     const set = new Set<string>();
     (backlinks ?? []).forEach((b) => {
-      if (b.category) set.add(String(b.category));
+      if (b.category && String(b.category) !== "Justiça") {
+        set.add(String(b.category));
+      }
     });
     return Array.from(set).sort();
   }, [backlinks]);
@@ -303,7 +306,8 @@ export default function ComprarBacklinksDireito() {
             className="mb-3"
             items={[
               { name: "Início", url: "/" },
-              { name: "Backlinks de Direito", url: "/comprar-backlinks-direito" },
+              { name: "Comprar Backlinks", url: "/comprar-backlinks" },
+              { name: "Direito", url: "/comprar-backlinks-direito" },
             ]}
           />
           <h1 className="text-4xl font-bold mb-4">Backlinks para Advogados</h1>
@@ -319,7 +323,23 @@ export default function ComprarBacklinksDireito() {
           {categories.length > 0 && (
             <section className="mb-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {categories.slice(0, 16).map((cat) => {
+                <a
+                  href="/comprar-backlinks"
+                  className="group flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors"
+                >
+                  <span className="inline-flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary shadow-sm">
+                    <Folder className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-[11px] uppercase tracking-wide text-muted-foreground leading-none">
+                      Ver Todas
+                    </span>
+                    <span className="text-sm font-semibold leading-none mt-1">
+                      Categorias
+                    </span>
+                  </span>
+                </a>
+                {categories.slice(0, 15).map((cat) => {
                   const slug = String(cat)
                     .toLowerCase()
                     .normalize("NFD")
