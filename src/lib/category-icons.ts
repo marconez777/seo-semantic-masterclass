@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import { Folder, Newspaper, Briefcase, HeartPulse, GraduationCap, Cpu, Wallet, Home, Shirt, Plane, Utensils, PawPrint, Car, Dumbbell, Clapperboard, Megaphone, Scale } from "lucide-react";
+import { Folder, Newspaper, Briefcase, HeartPulse, GraduationCap, Cpu, Wallet, Home, Shirt, Plane, Utensils, PawPrint, Car, Dumbbell, Clapperboard, Megaphone, Scale, Baby } from "lucide-react";
 
 // Shared icon mapping for all category cards and menus
 export const getCategoryIcon = (name: string): LucideIcon => {
@@ -40,6 +40,8 @@ export const getCategoryIcon = (name: string): LucideIcon => {
     case "Imóveis":
     case "Imoveis":
       return Home;
+    case "Maternidade":
+      return Baby;
     default:
       return Folder;
   }
