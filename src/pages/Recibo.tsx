@@ -25,34 +25,19 @@ export default function Recibo() {
         .from('order_items')
         .select('*')
         .eq('order_id', orderId);
-      const { data: piiRow } = await supabase
-        .from('pedidos_pii')
-        .select('order_id, customer_email, customer_name, customer_cpf, customer_phone')
-        .eq('order_id', orderId)
-        .maybeSingle();
-      
-      // Decrypt PII data if available
-      if (piiRow) {
-        const decryptedPii = { ...piiRow };
+      // Load PII data using secure edge function
+      try {
+        const { data: piiResponse, error: piiErr } = await supabase.functions.invoke('get-pii-data', {
+          body: { single_order_id: orderId }
+        });
         
-        if (piiRow.customer_email) {
-          const { data: decryptedEmail } = await supabase.rpc('decrypt_pii', { encrypted_data: piiRow.customer_email });
-          decryptedPii.customer_email = decryptedEmail;
+        if (piiErr) {
+          console.error('Erro ao carregar dados PII via edge function', piiErr);
+        } else if (piiResponse?.data && piiResponse.data.length > 0) {
+          setPii(piiResponse.data[0]);
         }
-        if (piiRow.customer_name) {
-          const { data: decryptedName } = await supabase.rpc('decrypt_pii', { encrypted_data: piiRow.customer_name });
-          decryptedPii.customer_name = decryptedName;
-        }
-        if (piiRow.customer_cpf) {
-          const { data: decryptedCpf } = await supabase.rpc('decrypt_pii', { encrypted_data: piiRow.customer_cpf });
-          decryptedPii.customer_cpf = decryptedCpf;
-        }
-        if (piiRow.customer_phone) {
-          const { data: decryptedPhone } = await supabase.rpc('decrypt_pii', { encrypted_data: piiRow.customer_phone });
-          decryptedPii.customer_phone = decryptedPhone;
-        }
-        
-        setPii(decryptedPii);
+      } catch (error) {
+        console.error('Erro ao chamar função segura de PII', error);
       }
       const backlinkIds = Array.from(new Set((it ?? []).map((i) => i.backlink_id)));
       let m: Record<string, { name: string; url: string }> = {};
@@ -63,7 +48,7 @@ export default function Recibo() {
           .in('id', backlinkIds);
         (backs ?? []).forEach((b) => { m[b.id] = { name: b.site_name, url: b.site_url }; });
       }
-      if (mounted) { setOrder(pedido); setItems(it ?? []); setSiteMap(m); setPii(piiRow ?? null); }
+      if (mounted) { setOrder(pedido); setItems(it ?? []); setSiteMap(m); }
     })();
     return () => { mounted = false; };
   }, [orderId]);

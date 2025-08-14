@@ -138,10 +138,10 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Store snapshot of customer PII in separate table (best-effort) - now encrypted
+    // Store snapshot of customer PII in separate table (best-effort) - now encrypted and secure
     if (pedido?.id) {
-      const { error: piiErr } = await supabaseUser
-        .rpc('insert_encrypted_pii', {
+      const { error: piiErr } = await supabaseServiceRole
+        .rpc('insert_encrypted_pii_secure', {
           p_order_id: pedido.id,
           p_customer_email: customer_email,
           p_customer_name: customer_name,

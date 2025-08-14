@@ -364,6 +364,26 @@ export type Database = {
         Args: { data: string }
         Returns: string
       }
+      get_decrypted_pii_secure: {
+        Args: { p_order_id: string }
+        Returns: {
+          customer_cpf: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          order_id: string
+        }[]
+      }
+      get_multiple_decrypted_pii_secure: {
+        Args: { p_order_ids: string[] }
+        Returns: {
+          customer_cpf: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          order_id: string
+        }[]
+      }
       get_pii_encryption_key: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -376,6 +396,16 @@ export type Database = {
         Returns: boolean
       }
       insert_encrypted_pii: {
+        Args: {
+          p_customer_cpf?: string
+          p_customer_email?: string
+          p_customer_name?: string
+          p_customer_phone?: string
+          p_order_id: string
+        }
+        Returns: undefined
+      }
+      insert_encrypted_pii_secure: {
         Args: {
           p_customer_cpf?: string
           p_customer_email?: string
