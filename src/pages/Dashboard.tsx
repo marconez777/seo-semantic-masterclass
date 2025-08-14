@@ -375,11 +375,30 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userId) return;
     
-    // Verificar se o usuário é especificamente o admin autorizado
-    supabase.auth.getUser().then(({ data }) => {
-      const userEmail = data.user?.email;
-      setIsAdmin(userEmail === 'contato@mkart.com.br');
-    });
+    // Verificar se o usuário tem role de admin usando RBAC
+    const checkAdminRole = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .eq('role', 'admin')
+          .single();
+        
+        if (error && error.code !== 'PGRST116') {
+          console.error('Erro ao verificar role de admin:', error);
+          setIsAdmin(false);
+          return;
+        }
+        
+        setIsAdmin(!!data);
+      } catch (error) {
+        console.error('Erro ao verificar role de admin:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminRole();
   }, [userId]);
 
   if (!userId) return null;

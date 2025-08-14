@@ -38,13 +38,34 @@ export default function AdminLayout() {
   useEffect(() => {
     if (!userId) return;
     
-    // Verificar se é o admin autorizado
-    supabase.auth.getUser().then(({ data }) => {
-      const userEmail = data.user?.email;
-      const isAdminUser = userEmail === 'contato@mkart.com.br';
-      setIsAdmin(isAdminUser);
-      if (!isAdminUser) navigate('/painel', { replace: true });
-    });
+    // Verificar se o usuário tem role de admin usando RBAC
+    const checkAdminRole = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', userId)
+          .eq('role', 'admin')
+          .single();
+        
+        if (error && error.code !== 'PGRST116') {
+          console.error('Erro ao verificar role de admin:', error);
+          setIsAdmin(false);
+          navigate('/painel', { replace: true });
+          return;
+        }
+        
+        const isAdminUser = !!data;
+        setIsAdmin(isAdminUser);
+        if (!isAdminUser) navigate('/painel', { replace: true });
+      } catch (error) {
+        console.error('Erro ao verificar role de admin:', error);
+        setIsAdmin(false);
+        navigate('/painel', { replace: true });
+      }
+    };
+
+    checkAdminRole();
   }, [userId, navigate]);
 
   if (!userId || isAdmin === null) return null;
