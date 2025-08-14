@@ -191,7 +191,7 @@ export default function ComprarBacklinksAutomoveis() {
       <SEOHead
         title="Backlinks de Qualidade de Automóveis para Seu Site | MK"
         description="Venda de backlinks de qualidade em Blogs de Automóveis. Melhor Loja onde comprar backlinks para aumentar sua autoridade online!"
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-automoveis`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-automoveis"
         keywords="backlinks de automóveis, comprar backlinks automotivos, backlinks de qualidade"
       />
       <StructuredData

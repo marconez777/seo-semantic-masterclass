@@ -194,7 +194,7 @@ export default function ComprarBacklinksDireito() {
       <SEOHead
         title="Comprar Backlinks Brasileiros no Nicho de Direito e Justiça | MK"
         description="Comprar Backlinks de qualidade no Nicho de Advogados. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-direito`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-direito"
         keywords="backlinks direito, backlinks para advogados, comprar backlinks justiça, backlinks brasileiros"
       />
       <StructuredData

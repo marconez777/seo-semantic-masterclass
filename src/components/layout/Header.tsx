@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { ShoppingCart } from "lucide-react";
 import { getCategoryIcon } from "@/lib/category-icons";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 
 const Header = () => {
@@ -72,11 +72,11 @@ const Header = () => {
           <div className="hidden md:flex items-center gap-3">
             {isLoggedIn ? (
               <Button asChild>
-                <a href="/painel" aria-label="Ir para o Painel">Painel</a>
+                <Link to="/painel" aria-label="Ir para o Painel">Painel</Link>
               </Button>
             ) : (
               <Button asChild>
-                <a href="/auth" aria-label="Ir para Login">Login</a>
+                <Link to="/auth" aria-label="Ir para Login">Login</Link>
               </Button>
             )}
           </div>
@@ -93,24 +93,24 @@ const Header = () => {
         </div>
         
         <div className="hidden md:flex items-center gap-8">
-          <a href="/" className="text-foreground hover:text-primary font-medium transition-colors">Home</a>
+          <Link to="/" className="text-foreground hover:text-primary font-medium transition-colors">Home</Link>
 
-          <a href="/consultoria-seo" className="text-foreground hover:text-primary transition-colors">Consultoria SEO</a>
+          <Link to="/consultoria-seo" className="text-foreground hover:text-primary transition-colors">Consultoria SEO</Link>
 
           <div
             className="relative"
             onMouseEnter={openBacklinks}
             onMouseLeave={scheduleCloseBacklinks}
           >
-            <a
-              href="/comprar-backlinks"
+            <Link
+              to="/comprar-backlinks"
               className="inline-flex items-center text-foreground hover:text-primary transition-colors normal-case"
               aria-haspopup="menu"
               aria-expanded={backlinksOpen}
               aria-controls="backlinks-menu"
             >
               Backlinks
-            </a>
+            </Link>
             {backlinksOpen && (
               <div className="absolute left-0 top-full mt-2 z-50">
                 <div
@@ -145,9 +145,9 @@ const Header = () => {
                         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
                         .replace(/\s+/g, "-");
                       return (
-                        <a
+                        <Link
                           key={categoria}
-                          href={`/comprar-backlinks-${slug}`}
+                          to={`/comprar-backlinks-${slug}`}
                           className="group flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors hover-scale"
                           role="menuitem"
                         >
@@ -160,7 +160,7 @@ const Header = () => {
                             <span className="text-[11px] uppercase tracking-wide text-muted-foreground leading-none">Backlinks de</span>
                             <span className="text-sm font-semibold leading-none mt-1">{categoria}</span>
                           </span>
-                        </a>
+                        </Link>
                       );
                     })}
                   </div>
@@ -169,21 +169,21 @@ const Header = () => {
             )}
           </div>
 
-          <a href="/contato" className="text-foreground hover:text-primary transition-colors">Contato</a>
-          <a href="/blog" className="text-foreground hover:text-primary transition-colors">Blog</a>
+          <Link to="/contato" className="text-foreground hover:text-primary transition-colors">Contato</Link>
+          <Link to="/blog" className="text-foreground hover:text-primary transition-colors">Blog</Link>
         </div>
 
         <div className="hidden md:flex items-center gap-3">
           {isPanelRoute ? (
             <>
-              <a href="/cart" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
+              <Link to="/cart" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
                 <ShoppingCart className="h-5 w-5" />
                 {itemsCount > 0 && (
                   <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none ring-2 ring-background">
                     {itemsCount}
                   </span>
                 )}
-              </a>
+              </Link>
               <UserProfileDropdown
                 name={userName ?? 'Visitante'}
                 role={isAdmin ? 'Admin' : 'Cliente'}
@@ -193,21 +193,21 @@ const Header = () => {
             </>
           ) : (
             <>
-              <a href="/carrinho" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
+              <Link to="/carrinho" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
                 <ShoppingCart className="h-5 w-5" />
                 {itemsCount > 0 && (
                   <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none ring-2 ring-background">
                     {itemsCount}
                   </span>
                 )}
-              </a>
+              </Link>
               {isLoggedIn ? (
                 <Button asChild>
-                  <a href="/painel" aria-label="Ir para o Painel">Painel</a>
+                  <Link to="/painel" aria-label="Ir para o Painel">Painel</Link>
                 </Button>
               ) : (
                 <Button asChild>
-                  <a href="/auth" aria-label="Ir para Login">Login</a>
+                  <Link to="/auth" aria-label="Ir para Login">Login</Link>
                 </Button>
               )}
             </>

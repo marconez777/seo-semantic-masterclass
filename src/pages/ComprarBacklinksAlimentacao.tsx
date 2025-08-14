@@ -188,7 +188,7 @@ export default function ComprarBacklinksAlimentacao() {
       <SEOHead
         title="Backlinks Brasileiros no Nicho de Gastronomia e Alimentação | MK"
         description="Comprar Backlinks de qualidade no Nicho de Alimentos. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-alimentacao`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-alimentacao"
         keywords="backlinks alimentacao, comprar backlinks gastronomia, backlinks brasileiros, alimentação"
       />
       <StructuredData

@@ -68,7 +68,7 @@ const App = () => (
         <Route path="/comprar-backlinks-imoveis" element={<ComprarBacklinksImoveis />} />
         <Route path="/comprar-backlinks-maternidade" element={<ComprarBacklinksMaternidade />} />
         <Route path="/comprar-backlinks-saude" element={<ComprarBacklinksSaude />} />
-        <Route path="/comprar-backlinks-:categoria" element={<ComprarBacklinksCategoria />} />
+        <Route path="/comprar-backlinks-categoria/:categoria" element={<ComprarBacklinksCategoria />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/auth" element={<Auth />} />

@@ -191,7 +191,7 @@ export default function ComprarBacklinksEsportes() {
       <SEOHead
         title="Comprar Backlinks Brasileiros no Nicho de Esportes | MK"
         description="Comprar Backlinks de qualidade no Nicho de Esportes. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-esportes`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-esportes"
         keywords="backlinks esportes, comprar backlinks esportivos, backlinks brasileiros, futebol"
       />
       <StructuredData

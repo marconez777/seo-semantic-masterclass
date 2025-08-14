@@ -191,7 +191,7 @@ export default function ComprarBacklinksEducacao() {
       <SEOHead
         title="Venda de Backlinks Brasileiros no Nicho de Educação | MK"
         description="Backlinks de qualidade em Blogs de Educação. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-educacao`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-educacao"
         keywords="backlinks de educação, comprar backlinks educação, backlinks brasileiros, educação"
       />
       <StructuredData

@@ -152,7 +152,7 @@ export default function ComprarBacklinks() {
       <SEOHead
         title="Comprar Backlinks de em Grandes Portais | MK"
         description="Comprar Backlinks de qualidade no Nicho que você escolher. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks"
         keywords="comprar backlinks, link building, DR, DA, tráfego, preço"
       />
       <Header />

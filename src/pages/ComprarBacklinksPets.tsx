@@ -185,7 +185,7 @@ export default function ComprarBacklinksPets() {
       <SEOHead
         title="Comprar Backlinks Brasileiros no Nicho Veterinário e PET | MK"
         description="Comprar Backlinks de qualidade no Nicho de Animais de Estimação. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-pets`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-pets"
         keywords="backlinks pets, backlinks veterinário, comprar backlinks animais de estimação, pet"
       />
       <StructuredData

@@ -188,7 +188,7 @@ export default function ComprarBacklinksNoticias() {
       <SEOHead
         title="Backlinks de Qualidade de Notícias para Seu Site | MK"
         description="Comprar backlinks de qualidade de portais de notícias. Melhor Loja onde comprar backlinks para aumentar sua autoridade online!"
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-noticias`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-noticias"
         keywords="backlinks de notícias, comprar backlinks de notícias, backlinks de qualidade"
       />
       <StructuredData

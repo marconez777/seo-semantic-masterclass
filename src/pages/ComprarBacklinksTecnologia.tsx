@@ -188,7 +188,7 @@ export default function ComprarBacklinksTecnologia() {
       <SEOHead
         title="Comprar Backlinks de Qualidade Nicho de Tecnologia | MK"
         description="Melhores backlinks de qualidade em Blogs de Tecnologia. Compre backlinks para aparecer no Topo do Google e nas IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-tecnologia`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-tecnologia"
         keywords="backlinks de tecnologia, comprar backlinks tecnologia, backlinks de qualidade"
       />
       <StructuredData

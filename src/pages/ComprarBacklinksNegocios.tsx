@@ -245,7 +245,7 @@ export default function ComprarBacklinksNegocios() {
       <SEOHead
         title="Loja de Backlinks de Qualidade no Nicho de Negócios | MK"
         description="Backlinks de qualidade em Blogs de Empreendedorismo. Compre backlinks para aparecer no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-negocios`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-negocios"
         keywords="backlinks de negócios, comprar backlinks negócios, backlinks de qualidade, empreendedorismo"
       />
       <StructuredData

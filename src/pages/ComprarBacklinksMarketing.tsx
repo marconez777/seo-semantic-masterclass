@@ -191,7 +191,7 @@ export default function ComprarBacklinksMarketing() {
       <SEOHead
         title="Comprar Backlinks Brasileiros no Nicho de Marketing Digital | MK"
         description="Comprar Backlinks de qualidade no Nicho de Marketing Digital. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-marketing`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-marketing"
         keywords="backlinks marketing digital, comprar backlinks marketing, backlinks brasileiros"
       />
       <StructuredData

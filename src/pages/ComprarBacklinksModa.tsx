@@ -188,7 +188,7 @@ export default function ComprarBacklinksModa() {
       <SEOHead
         title="Comprar Backlinks de Qualidade Nicho de Moda | MK"
         description="Loja de backlinks de qualidade em Blogs de Moda. Melhores backlinks para aparecer no Topo do Google e nas IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-moda`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-moda"
         keywords="backlinks de moda, comprar backlinks moda, backlinks de qualidade"
       />
       <StructuredData

@@ -1,5 +1,6 @@
 
 import { Instagram, Youtube, Facebook } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => {
   return (
@@ -23,30 +24,30 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Empresa</h4>
             <div className="space-y-2 text-gray-400">
-              <p><a href="#cursos" className="hover:text-white transition-colors">Cursos</a></p>
-              <p><a href="#sobre" className="hover:text-white transition-colors">Sobre Nós</a></p>
-              <p><a href="#blog" className="hover:text-white transition-colors">Blog</a></p>
-              <p><a href="#contato" className="hover:text-white transition-colors">Contato</a></p>
+              <p><Link to="/consultoria-seo" className="hover:text-white transition-colors">Consultoria SEO</Link></p>
+              <p><Link to="/agencia-de-backlinks" className="hover:text-white transition-colors">Sobre Nós</Link></p>
+              <p><Link to="/blog" className="hover:text-white transition-colors">Blog</Link></p>
+              <p><Link to="/contato" className="hover:text-white transition-colors">Contato</Link></p>
             </div>
           </div>
           
           <div>
             <h4 className="font-semibold mb-4 text-purple-400">Seja Parceiro</h4>
             <div className="space-y-2 text-gray-400">
-              <p><a href="#" className="hover:text-purple-400 transition-colors">Cadastrar Blog</a></p>
-              <p><a href="#" className="hover:text-purple-400 transition-colors">Envie seu Currículo</a></p>
+              <p><Link to="/contato" className="hover:text-purple-400 transition-colors">Cadastrar Blog</Link></p>
+              <p><Link to="/contato" className="hover:text-purple-400 transition-colors">Envie seu Currículo</Link></p>
             </div>
           </div>
           
           <div className="space-y-4">
             <div className="flex space-x-4">
-              <a href="#" className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
+              <a href="https://instagram.com/mkart.seo" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
                 <Instagram className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
+              <a href="https://youtube.com/@mkart.seo" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
                 <Youtube className="w-5 h-5" />
               </a>
-              <a href="#" className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
+              <a href="https://facebook.com/mkart.seo" target="_blank" rel="noopener noreferrer" className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
                 <Facebook className="w-5 h-5" />
               </a>
             </div>

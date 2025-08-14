@@ -188,7 +188,7 @@ export default function ComprarBacklinksFinancas() {
       <SEOHead
         title="Onde Comprar Backlinks de Qualidade para Finanças | MK"
         description="Loja de backlinks de qualidade em Blogs de Finanças. Melhor Loja onde conseguir backlinks para aparecer no Topo do Google e nas IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-financas`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-financas"
         keywords="backlinks de finanças, comprar backlinks finanças, backlinks de qualidade"
       />
       <StructuredData

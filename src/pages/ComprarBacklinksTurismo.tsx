@@ -185,7 +185,7 @@ export default function ComprarBacklinksTurismo() {
       <SEOHead
         title="Backlinks Brasileiros no Nicho de Turismo e Viagens | MK"
         description="Comprar Backlinks de qualidade no Nicho de Viagens. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-turismo`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-turismo"
         keywords="backlinks turismo, comprar backlinks viagens, backlinks brasileiros, turismo, viagens"
       />
       <StructuredData
