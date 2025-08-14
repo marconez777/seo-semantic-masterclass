@@ -2,6 +2,7 @@ import { createServer } from 'vite';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { shouldServeStatic } from './crawler-detector.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -15,9 +16,10 @@ async function createDevServer() {
     configFile: path.resolve(__dirname, '..', 'vite.config.ts')
   });
 
-  // Middleware para servir páginas prerendering em desenvolvimento
+  // Middleware inteligente para servir páginas prerendering baseado no User-Agent
   server.middlewares.use((req, res, next) => {
     const url = req.url?.split('?')[0] || '';
+    const userAgent = req.headers['user-agent'] || '';
     
     // Lista de rotas que têm páginas prerendering
     const prerenderRoutes = [
@@ -46,21 +48,24 @@ async function createDevServer() {
       '/blog'
     ];
 
-    // Verificar se a rota tem versão prerendering e servir se existir
-    if (prerenderRoutes.includes(url)) {
+    // Verificar se deve servir versão estática
+    if (prerenderRoutes.includes(url) && shouldServeStatic(userAgent)) {
       const fileName = url === '/' ? 'index.html' : `${url.slice(1)}.html`;
       const prerenderPath = path.join(__dirname, '..', 'public', 'pages', fileName);
       
       if (fs.existsSync(prerenderPath)) {
-        console.log(`🎯 Servindo página prerendering: ${fileName}`);
+        console.log(`🤖 Crawler detectado! Servindo página estática: ${fileName}`);
         const content = fs.readFileSync(prerenderPath, 'utf8');
         res.setHeader('Content-Type', 'text/html');
-        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Cache-Control', 'public, max-age=3600');
         res.end(content);
         return;
-      } else {
-        console.log(`⚠️  Página prerendering não encontrada: ${fileName}, servindo SPA`);
       }
+    }
+    
+    // Para usuários normais, continuar com SPA
+    if (prerenderRoutes.includes(url)) {
+      console.log(`👤 Usuário normal: ${url} - Servindo SPA`);
     }
 
     next();
