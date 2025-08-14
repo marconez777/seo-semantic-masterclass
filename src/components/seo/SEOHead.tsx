@@ -23,14 +23,19 @@ const SEOHead = ({
   const defaultImage = "https://mkart.com.br/og-image.jpg";
 
   return (
-    <Helmet>
+    <Helmet prioritizeSeoTags>
       <title>{title}</title>
       <meta name="description" content={description} />
       {keywords && <meta name="keywords" content={keywords} />}
+      <meta name="author" content="MK Art SEO" />
       
       {canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
       
-      {noindex && <meta name="robots" content="noindex, nofollow" />}
+      {noindex ? (
+        <meta name="robots" content="noindex, nofollow" />
+      ) : (
+        <meta name="robots" content="index, follow" />
+      )}
       
       {/* Open Graph */}
       <meta property="og:title" content={title} />
@@ -40,6 +45,7 @@ const SEOHead = ({
       <meta property="og:image" content={ogImage || defaultImage} />
       <meta property="og:image:width" content="1200" />
       <meta property="og:image:height" content="630" />
+      <meta property="og:locale" content="pt_BR" />
       {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
       
       {/* Twitter Card */}
@@ -51,6 +57,12 @@ const SEOHead = ({
       {/* Additional SEO */}
       <meta name="format-detection" content="telephone=no" />
       <meta name="theme-color" content="#0066ff" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      
+      {/* Preload critical resources */}
+      <link rel="preconnect" href="https://fonts.googleapis.com" />
+      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://mkart.com.br" />
     </Helmet>
   );
 };
