@@ -1,0 +1,103 @@
+{
+  "pipeline": {
+    "name": "Lovable Prerendering Pipeline",
+    "version": "1.0.0",
+    "description": "Sistema híbrido de prerendering para SEO + SPA",
+    "author": "Backlinks Premium"
+  },
+  "environment": {
+    "required": [
+      "SUPABASE_URL",
+      "SUPABASE_ANON_KEY"
+    ],
+    "optional": [
+      "SITE_URL"
+    ],
+    "defaults": {
+      "SITE_URL": "https://backlinks-premium.lovable.app"
+    }
+  },
+  "steps": {
+    "prebuild": {
+      "script": "scripts/build-prerender.mjs",
+      "description": "Gera páginas estáticas com dados do Supabase",
+      "timeout": 300,
+      "required": true,
+      "outputs": ["dist/*.html", "dist/sitemap.xml", "dist/robots.txt", "dist/_redirects", "dist/vercel.json"]
+    },
+    "build": {
+      "command": "vite build",
+      "description": "Compila aplicação React/Vite",
+      "timeout": 600,
+      "required": true,
+      "outputs": ["dist/index.html", "dist/assets/*"]
+    },
+    "qa": {
+      "script": "scripts/qa-seo.mjs",
+      "description": "Verificação de qualidade SEO",
+      "timeout": 60,
+      "required": false,
+      "failOnError": true
+    },
+    "publish": {
+      "description": "Validação final para deploy",
+      "timeout": 30,
+      "required": true
+    }
+  },
+  "validation": {
+    "requiredFiles": [
+      "dist/index.html",
+      "dist/sitemap.xml",
+      "dist/robots.txt",
+      "dist/_redirects",
+      "dist/vercel.json"
+    ],
+    "seo": {
+      "minTitleLength": 20,
+      "maxTitleLength": 60,
+      "minDescriptionLength": 120,
+      "maxDescriptionLength": 160,
+      "requiredTags": ["title", "description", "canonical", "og:title", "og:description", "h1"],
+      "structuredData": true,
+      "accessibility": ["lang", "skip-link"]
+    }
+  },
+  "deployment": {
+    "platforms": {
+      "netlify": {
+        "configFile": "_redirects",
+        "redirects": true,
+        "spa": true
+      },
+      "vercel": {
+        "configFile": "vercel.json",
+        "rewrites": true,
+        "spa": true
+      },
+      "cloudflare": {
+        "configFile": "_redirects",
+        "pages": true
+      }
+    }
+  },
+  "monitoring": {
+    "logs": {
+      "level": "info",
+      "format": "lovable",
+      "timestamp": true,
+      "steps": true
+    },
+    "errors": {
+      "includeStack": false,
+      "friendlyMessages": true,
+      "corrections": true
+    },
+    "metrics": {
+      "buildTime": true,
+      "pageCount": true,
+      "fileSize": true,
+      "seoScore": true
+    }
+  }
+}
