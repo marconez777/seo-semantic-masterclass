@@ -194,19 +194,15 @@ export default function ComprarBacklinksEntretenimento() {
       <SEOHead
         title="Comprar Backlinks Brasileiros no Nicho de Entretenimento | MK"
         description="Comprar Backlinks de qualidade no Nicho de Entretenimento. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-entretenimento`}
+        canonicalUrl="https://mkart.com.br/comprar-backlinks-entretenimento"
         keywords="backlinks entretenimento, comprar backlinks musica, filmes, series, games, backlinks brasileiros"
       />
       <StructuredData
-        type="breadcrumb"
+        type="website"
         data={{
-          items: [
-            { name: "Início", url: `${window.location.origin}/` },
-            {
-              name: "Backlinks de Entretenimento",
-              url: `${window.location.origin}/comprar-backlinks-entretenimento`,
-            },
-          ],
+          name: "Comprar Backlinks Brasileiros no Nicho de Entretenimento",
+          description: "Comprar Backlinks de qualidade no Nicho de Entretenimento. Apareça no Topo do Google e nas Respostas das IAs.",
+          url: "https://mkart.com.br/comprar-backlinks-entretenimento"
         }}
       />
       <Header />
@@ -314,7 +310,7 @@ export default function ComprarBacklinksEntretenimento() {
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-2">Compre Backlinks de Qualidade para o nicho de Músicas, Filmes, Séries e Games</h2>
             <p className="text-muted-foreground">
-              Apareça com sua agência de viagens ou blog no topo do Google e também nas respostas das principais inteligências artificiais.
+              Apareça com seu site ou blog no topo do Google e também nas respostas das principais inteligências artificiais.
             </p>
           </div>
 
