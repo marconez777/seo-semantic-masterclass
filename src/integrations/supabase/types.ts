@@ -254,27 +254,39 @@ export type Database = {
         Row: {
           created_at: string
           customer_cpf: string | null
+          customer_cpf_enc: string | null
           customer_email: string | null
+          customer_email_enc: string | null
           customer_name: string | null
+          customer_name_enc: string | null
           customer_phone: string | null
+          customer_phone_enc: string | null
           order_id: string
           updated_at: string
         }
         Insert: {
           created_at?: string
           customer_cpf?: string | null
+          customer_cpf_enc?: string | null
           customer_email?: string | null
+          customer_email_enc?: string | null
           customer_name?: string | null
+          customer_name_enc?: string | null
           customer_phone?: string | null
+          customer_phone_enc?: string | null
           order_id: string
           updated_at?: string
         }
         Update: {
           created_at?: string
           customer_cpf?: string | null
+          customer_cpf_enc?: string | null
           customer_email?: string | null
+          customer_email_enc?: string | null
           customer_name?: string | null
+          customer_name_enc?: string | null
           customer_phone?: string | null
+          customer_phone_enc?: string | null
           order_id?: string
           updated_at?: string
         }
@@ -353,7 +365,38 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      pedidos_pii_masked: {
+        Row: {
+          customer_cpf_masked: string | null
+          customer_email_masked: string | null
+          customer_first_name: string | null
+          customer_phone_masked: string | null
+          order_id: string | null
+        }
+        Insert: {
+          customer_cpf_masked?: never
+          customer_email_masked?: never
+          customer_first_name?: never
+          customer_phone_masked?: never
+          order_id?: string | null
+        }
+        Update: {
+          customer_cpf_masked?: never
+          customer_email_masked?: never
+          customer_first_name?: never
+          customer_phone_masked?: never
+          order_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pedidos_pii_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: true
+            referencedRelation: "pedidos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       decrypt_pii: {
@@ -384,7 +427,21 @@ export type Database = {
           order_id: string
         }[]
       }
+      get_pedidos_pii_decrypted: {
+        Args: { p_order_ids: string[] }
+        Returns: {
+          customer_cpf: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          order_id: string
+        }[]
+      }
       get_pii_encryption_key: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_pii_key: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -406,6 +463,16 @@ export type Database = {
         Returns: undefined
       }
       insert_encrypted_pii_secure: {
+        Args: {
+          p_customer_cpf?: string
+          p_customer_email?: string
+          p_customer_name?: string
+          p_customer_phone?: string
+          p_order_id: string
+        }
+        Returns: undefined
+      }
+      insert_pedidos_pii_encrypted: {
         Args: {
           p_customer_cpf?: string
           p_customer_email?: string
