@@ -11,11 +11,15 @@ async function buildWithPrerender() {
   console.log('🚀 Iniciando build com prerendering inteligente...\n');
   
   try {
-    // 1. Gerar páginas estáticas customizadas
-    console.log('📄 Gerando páginas estáticas com SEO específico...');
-    execSync('node scripts/prerender.js', { stdio: 'inherit' });
+    // 1. Gerar páginas estáticas com dados do Supabase
+    console.log('📄 Gerando páginas estáticas com SEO específico do Supabase...');
+    execSync('node scripts/prerender-supabase.js', { stdio: 'inherit' });
     
-    // 2. Build da aplicação Vite
+    // 2. Gerar configurações de redirecionamento
+    console.log('🔧 Gerando configurações de redirecionamento...');
+    execSync('node scripts/generate-redirects.js', { stdio: 'inherit' });
+    
+    // 3. Build da aplicação Vite
     console.log('⚡ Executando build do Vite...');
     await build();
     

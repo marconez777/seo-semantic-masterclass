@@ -13,37 +13,32 @@ const PORT = process.env.PORT || 3000;
 // Servir arquivos estáticos
 app.use(express.static(path.join(__dirname, '..', 'dist')));
 
+// Carregar configuração dinâmica das rotas
+let prerenderRoutes = [
+  '/',
+  '/comprar-backlinks',
+  '/agencia-de-backlinks',
+  '/consultoria-seo',
+  '/contato',
+  '/blog'
+];
+
+// Tentar carregar configuração dinâmica
+try {
+  const configPath = path.join(__dirname, 'server-config.json');
+  if (fs.existsSync(configPath)) {
+    const serverConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+    prerenderRoutes = serverConfig.prerenderRoutes || prerenderRoutes;
+    console.log(`📊 Carregadas ${prerenderRoutes.length} rotas prerendering`);
+  }
+} catch (error) {
+  console.log('⚠️ Usando configuração estática de rotas');
+}
+
 // Middleware para detectar crawlers e servir páginas prerendering
 app.get('*', (req, res) => {
   const userAgent = req.headers['user-agent'] || '';
   const url = req.path;
-  
-  // Lista de rotas prerendering
-  const prerenderRoutes = [
-    '/',
-    '/comprar-backlinks',
-    '/comprar-backlinks-tecnologia',
-    '/comprar-backlinks-noticias',
-    '/comprar-backlinks-financas',
-    '/comprar-backlinks-negocios',
-    '/comprar-backlinks-moda',
-    '/comprar-backlinks-educacao',
-    '/comprar-backlinks-turismo',
-    '/comprar-backlinks-automoveis',
-    '/comprar-backlinks-saude',
-    '/comprar-backlinks-direito',
-    '/comprar-backlinks-alimentacao',
-    '/comprar-backlinks-pets',
-    '/comprar-backlinks-esportes',
-    '/comprar-backlinks-entretenimento',
-    '/comprar-backlinks-marketing',
-    '/comprar-backlinks-imoveis',
-    '/comprar-backlinks-maternidade',
-    '/agencia-de-backlinks',
-    '/consultoria-seo',
-    '/contato',
-    '/blog'
-  ];
 
   // Se é um crawler e temos uma página prerendering, servir estática
   if (prerenderRoutes.includes(url) && shouldServeStatic(userAgent)) {
