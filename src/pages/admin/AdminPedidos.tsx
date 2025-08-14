@@ -39,15 +39,39 @@ export default function AdminPedidos() {
 
       const orderIds = pedidos.map((p: any) => p.id);
 
-      // Load PII snapshot for each order (admin only)
+      // Load PII snapshot for each order (admin only) - now using decryption
       let piiMap: Record<string, PedidoPII> = {};
       if (orderIds.length) {
         const { data: piiList, error: piiErr } = await supabase
           .from('pedidos_pii')
-          .select('*')
+          .select('order_id, customer_email, customer_name, customer_cpf, customer_phone')
           .in('order_id', orderIds);
         if (piiErr) console.error('Erro ao carregar dados PII', piiErr);
-        (piiList ?? []).forEach((r: any) => { piiMap[r.order_id] = r as PedidoPII; });
+        
+        // Decrypt the PII data for admin view
+        for (const record of piiList ?? []) {
+          const decryptedRecord = { ...record };
+          
+          // Decrypt each field if it exists
+          if (record.customer_email) {
+            const { data: decryptedEmail } = await supabase.rpc('decrypt_pii', { encrypted_data: record.customer_email });
+            decryptedRecord.customer_email = decryptedEmail;
+          }
+          if (record.customer_name) {
+            const { data: decryptedName } = await supabase.rpc('decrypt_pii', { encrypted_data: record.customer_name });
+            decryptedRecord.customer_name = decryptedName;
+          }
+          if (record.customer_cpf) {
+            const { data: decryptedCpf } = await supabase.rpc('decrypt_pii', { encrypted_data: record.customer_cpf });
+            decryptedRecord.customer_cpf = decryptedCpf;
+          }
+          if (record.customer_phone) {
+            const { data: decryptedPhone } = await supabase.rpc('decrypt_pii', { encrypted_data: record.customer_phone });
+            decryptedRecord.customer_phone = decryptedPhone;
+          }
+          
+          piiMap[record.order_id] = decryptedRecord as PedidoPII;
+        }
       }
       setPiiByOrder(piiMap);
       setLoading(false);

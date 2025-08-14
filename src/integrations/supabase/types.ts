@@ -356,12 +356,34 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      decrypt_pii: {
+        Args: { encrypted_data: string }
+        Returns: string
+      }
+      encrypt_pii: {
+        Args: { data: string }
+        Returns: string
+      }
+      get_pii_encryption_key: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      insert_encrypted_pii: {
+        Args: {
+          p_customer_cpf?: string
+          p_customer_email?: string
+          p_customer_name?: string
+          p_customer_phone?: string
+          p_order_id: string
+        }
+        Returns: undefined
       }
     }
     Enums: {

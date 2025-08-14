@@ -138,16 +138,15 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Store snapshot of customer PII in separate table (best-effort)
+    // Store snapshot of customer PII in separate table (best-effort) - now encrypted
     if (pedido?.id) {
       const { error: piiErr } = await supabaseUser
-        .from('pedidos_pii')
-        .insert({
-          order_id: pedido.id,
-          customer_email,
-          customer_name,
-          customer_cpf,
-          customer_phone,
+        .rpc('insert_encrypted_pii', {
+          p_order_id: pedido.id,
+          p_customer_email: customer_email,
+          p_customer_name: customer_name,
+          p_customer_cpf: customer_cpf,
+          p_customer_phone: customer_phone,
         })
       if (piiErr) {
         console.error('[abacate-create-billing] insert pedidos_pii error', piiErr)

@@ -27,9 +27,33 @@ export default function Recibo() {
         .eq('order_id', orderId);
       const { data: piiRow } = await supabase
         .from('pedidos_pii')
-        .select('*')
+        .select('order_id, customer_email, customer_name, customer_cpf, customer_phone')
         .eq('order_id', orderId)
         .maybeSingle();
+      
+      // Decrypt PII data if available
+      if (piiRow) {
+        const decryptedPii = { ...piiRow };
+        
+        if (piiRow.customer_email) {
+          const { data: decryptedEmail } = await supabase.rpc('decrypt_pii', { encrypted_data: piiRow.customer_email });
+          decryptedPii.customer_email = decryptedEmail;
+        }
+        if (piiRow.customer_name) {
+          const { data: decryptedName } = await supabase.rpc('decrypt_pii', { encrypted_data: piiRow.customer_name });
+          decryptedPii.customer_name = decryptedName;
+        }
+        if (piiRow.customer_cpf) {
+          const { data: decryptedCpf } = await supabase.rpc('decrypt_pii', { encrypted_data: piiRow.customer_cpf });
+          decryptedPii.customer_cpf = decryptedCpf;
+        }
+        if (piiRow.customer_phone) {
+          const { data: decryptedPhone } = await supabase.rpc('decrypt_pii', { encrypted_data: piiRow.customer_phone });
+          decryptedPii.customer_phone = decryptedPhone;
+        }
+        
+        setPii(decryptedPii);
+      }
       const backlinkIds = Array.from(new Set((it ?? []).map((i) => i.backlink_id)));
       let m: Record<string, { name: string; url: string }> = {};
       if (backlinkIds.length) {
