@@ -1,0 +1,119 @@
+[[redirects]]
+  from = "/"
+  to = "/pages/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks"
+  to = "/pages/comprar-backlinks.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-tecnologia"
+  to = "/pages/comprar-backlinks-tecnologia.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-noticias"
+  to = "/pages/comprar-backlinks-noticias.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-financas"
+  to = "/pages/comprar-backlinks-financas.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-negocios"
+  to = "/pages/comprar-backlinks-negocios.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-moda"
+  to = "/pages/comprar-backlinks-moda.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-educacao"
+  to = "/pages/comprar-backlinks-educacao.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-turismo"
+  to = "/pages/comprar-backlinks-turismo.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-automoveis"
+  to = "/pages/comprar-backlinks-automoveis.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-saude"
+  to = "/pages/comprar-backlinks-saude.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-direito"
+  to = "/pages/comprar-backlinks-direito.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-alimentacao"
+  to = "/pages/comprar-backlinks-alimentacao.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-pets"
+  to = "/pages/comprar-backlinks-pets.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-esportes"
+  to = "/pages/comprar-backlinks-esportes.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-entretenimento"
+  to = "/pages/comprar-backlinks-entretenimento.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-marketing"
+  to = "/pages/comprar-backlinks-marketing.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-imoveis"
+  to = "/pages/comprar-backlinks-imoveis.html"
+  status = 200
+
+[[redirects]]
+  from = "/comprar-backlinks-maternidade"
+  to = "/pages/comprar-backlinks-maternidade.html"
+  status = 200
+
+[[redirects]]
+  from = "/agencia-de-backlinks"
+  to = "/pages/agencia-de-backlinks.html"
+  status = 200
+
+[[redirects]]
+  from = "/consultoria-seo"
+  to = "/pages/consultoria-seo.html"
+  status = 200
+
+[[redirects]]
+  from = "/contato"
+  to = "/pages/contato.html"
+  status = 200
+
+[[redirects]]
+  from = "/blog"
+  to = "/pages/blog.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

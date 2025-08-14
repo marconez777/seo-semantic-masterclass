@@ -1,0 +1,100 @@
+{
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/pages/index.html"
+    },
+    {
+      "source": "/comprar-backlinks",
+      "destination": "/pages/comprar-backlinks.html"
+    },
+    {
+      "source": "/comprar-backlinks-tecnologia",
+      "destination": "/pages/comprar-backlinks-tecnologia.html"
+    },
+    {
+      "source": "/comprar-backlinks-noticias",
+      "destination": "/pages/comprar-backlinks-noticias.html"
+    },
+    {
+      "source": "/comprar-backlinks-financas",
+      "destination": "/pages/comprar-backlinks-financas.html"
+    },
+    {
+      "source": "/comprar-backlinks-negocios",
+      "destination": "/pages/comprar-backlinks-negocios.html"
+    },
+    {
+      "source": "/comprar-backlinks-moda",
+      "destination": "/pages/comprar-backlinks-moda.html"
+    },
+    {
+      "source": "/comprar-backlinks-educacao",
+      "destination": "/pages/comprar-backlinks-educacao.html"
+    },
+    {
+      "source": "/comprar-backlinks-turismo",
+      "destination": "/pages/comprar-backlinks-turismo.html"
+    },
+    {
+      "source": "/comprar-backlinks-automoveis",
+      "destination": "/pages/comprar-backlinks-automoveis.html"
+    },
+    {
+      "source": "/comprar-backlinks-saude",
+      "destination": "/pages/comprar-backlinks-saude.html"
+    },
+    {
+      "source": "/comprar-backlinks-direito",
+      "destination": "/pages/comprar-backlinks-direito.html"
+    },
+    {
+      "source": "/comprar-backlinks-alimentacao",
+      "destination": "/pages/comprar-backlinks-alimentacao.html"
+    },
+    {
+      "source": "/comprar-backlinks-pets",
+      "destination": "/pages/comprar-backlinks-pets.html"
+    },
+    {
+      "source": "/comprar-backlinks-esportes",
+      "destination": "/pages/comprar-backlinks-esportes.html"
+    },
+    {
+      "source": "/comprar-backlinks-entretenimento",
+      "destination": "/pages/comprar-backlinks-entretenimento.html"
+    },
+    {
+      "source": "/comprar-backlinks-marketing",
+      "destination": "/pages/comprar-backlinks-marketing.html"
+    },
+    {
+      "source": "/comprar-backlinks-imoveis",
+      "destination": "/pages/comprar-backlinks-imoveis.html"
+    },
+    {
+      "source": "/comprar-backlinks-maternidade",
+      "destination": "/pages/comprar-backlinks-maternidade.html"
+    },
+    {
+      "source": "/agencia-de-backlinks",
+      "destination": "/pages/agencia-de-backlinks.html"
+    },
+    {
+      "source": "/consultoria-seo",
+      "destination": "/pages/consultoria-seo.html"
+    },
+    {
+      "source": "/contato",
+      "destination": "/pages/contato.html"
+    },
+    {
+      "source": "/blog",
+      "destination": "/pages/blog.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
