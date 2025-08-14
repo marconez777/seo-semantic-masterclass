@@ -5,8 +5,20 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Lista de rotas importantes para prerender
+// Lista de todas as rotas importantes para prerender
 const routes = [
+  {
+    path: '/',
+    title: 'MK Art SEO - Comprar Backlinks Brasileiros de Qualidade DR 50+',
+    description: 'Especialista em backlinks brasileiros de qualidade. Compre links de sites com DR 50+ para melhorar seu posicionamento no Google. Entrega garantida.',
+    keywords: 'backlinks brasileiros, comprar backlinks, links de qualidade, seo, posicionamento google'
+  },
+  {
+    path: '/comprar-backlinks',
+    title: 'Comprar Backlinks - Sites Brasileiros DR 50+ | MK Art SEO',
+    description: 'Compre backlinks de qualidade em sites brasileiros com DR 50+. Melhore seu posicionamento no Google com nossa rede de sites confiáveis.',
+    keywords: 'comprar backlinks, backlinks brasileiros, links qualidade, seo brasil'
+  },
   {
     path: '/comprar-backlinks-tecnologia',
     title: 'Comprar Backlinks Tecnologia - Sites de Tecnologia DR 50+ | MK Art SEO',
@@ -66,6 +78,72 @@ const routes = [
     title: 'Comprar Backlinks Direito - Sites Jurídicos DR 50+ | MK Art SEO',
     description: 'Compre backlinks de qualidade em sites jurídicos com DR 50+. Fortaleça sua autoridade legal com links de sites especializados.',
     keywords: 'backlinks direito, comprar backlinks juridicos, links sites direito, seo juridico'
+  },
+  {
+    path: '/comprar-backlinks-alimentacao',
+    title: 'Comprar Backlinks Alimentação - Sites de Gastronomia DR 50+ | MK Art SEO',
+    description: 'Compre backlinks de qualidade em sites de alimentação com DR 50+. Melhore seu SEO no nicho gastronômico com links especializados.',
+    keywords: 'backlinks alimentacao, comprar backlinks gastronomia, links sites culinaria, seo gastronomia'
+  },
+  {
+    path: '/comprar-backlinks-pets',
+    title: 'Comprar Backlinks Pets - Sites de Animais DR 50+ | MK Art SEO',
+    description: 'Compre backlinks de qualidade em sites de pets com DR 50+. Fortaleça sua presença no nicho pet com links especializados.',
+    keywords: 'backlinks pets, comprar backlinks animais, links sites pets, seo pet'
+  },
+  {
+    path: '/comprar-backlinks-esportes',
+    title: 'Comprar Backlinks Esportes - Sites Esportivos DR 50+ | MK Art SEO',
+    description: 'Compre backlinks de qualidade em sites de esportes com DR 50+. Melhore seu SEO no nicho esportivo com links especializados.',
+    keywords: 'backlinks esportes, comprar backlinks esportivos, links sites esportes, seo esportivo'
+  },
+  {
+    path: '/comprar-backlinks-entretenimento',
+    title: 'Comprar Backlinks Entretenimento - Sites de Entretenimento DR 50+ | MK Art SEO',
+    description: 'Compre backlinks de qualidade em sites de entretenimento com DR 50+. Fortaleça sua presença no nicho de entretenimento.',
+    keywords: 'backlinks entretenimento, comprar backlinks diversao, links sites entretenimento, seo entretenimento'
+  },
+  {
+    path: '/comprar-backlinks-marketing',
+    title: 'Comprar Backlinks Marketing - Sites de Marketing DR 50+ | MK Art SEO',
+    description: 'Compre backlinks de qualidade em sites de marketing com DR 50+. Melhore seu SEO no nicho de marketing digital.',
+    keywords: 'backlinks marketing, comprar backlinks marketing digital, links sites marketing, seo marketing'
+  },
+  {
+    path: '/comprar-backlinks-imoveis',
+    title: 'Comprar Backlinks Imóveis - Sites Imobiliários DR 50+ | MK Art SEO',
+    description: 'Compre backlinks de qualidade em sites imobiliários com DR 50+. Fortaleça sua presença no mercado imobiliário.',
+    keywords: 'backlinks imoveis, comprar backlinks imobiliarios, links sites imoveis, seo imobiliario'
+  },
+  {
+    path: '/comprar-backlinks-maternidade',
+    title: 'Comprar Backlinks Maternidade - Sites de Maternidade DR 50+ | MK Art SEO',
+    description: 'Compre backlinks de qualidade em sites de maternidade com DR 50+. Melhore seu SEO no nicho materno infantil.',
+    keywords: 'backlinks maternidade, comprar backlinks materno, links sites maternidade, seo materno'
+  },
+  {
+    path: '/agencia-de-backlinks',
+    title: 'Agência de Backlinks - Serviços Profissionais de Link Building | MK Art SEO',
+    description: 'Agência especializada em link building com sites brasileiros DR 50+. Serviços profissionais de SEO e construção de autoridade.',
+    keywords: 'agencia backlinks, servicos link building, agencia seo, link building brasil'
+  },
+  {
+    path: '/consultoria-seo',
+    title: 'Consultoria SEO - Especialista em Posicionamento Google | MK Art SEO',
+    description: 'Consultoria SEO especializada em posicionamento no Google. Estratégias personalizadas para melhorar seu ranking e aumentar o tráfego.',
+    keywords: 'consultoria seo, consultor seo, posicionamento google, estrategia seo'
+  },
+  {
+    path: '/contato',
+    title: 'Contato - Entre em Contato com a MK Art SEO',
+    description: 'Entre em contato conosco para solicitar orçamento de backlinks ou consultoria SEO. Atendimento especializado e personalizado.',
+    keywords: 'contato seo, orcamento backlinks, falar com consultor seo'
+  },
+  {
+    path: '/blog',
+    title: 'Blog SEO - Dicas e Estratégias de Posicionamento | MK Art SEO',
+    description: 'Blog com dicas, estratégias e novidades sobre SEO, backlinks e marketing digital. Conteúdo especializado para melhorar seu ranking.',
+    keywords: 'blog seo, dicas seo, estrategias seo, marketing digital'
   }
 ];
 

@@ -4,12 +4,36 @@ Este projeto implementa prerendering para as páginas de categoria mais importan
 
 ## 🎯 Páginas Pré-renderizadas
 
-As seguintes páginas de categoria têm arquivos HTML estáticos gerados:
+As seguintes páginas têm arquivos HTML estáticos gerados com SEO otimizado:
 
+### 🏠 Páginas Principais
+- `/` - Homepage principal
+- `/comprar-backlinks` - Página principal de backlinks
+- `/agencia-de-backlinks` - Página da agência
+- `/consultoria-seo` - Consultoria SEO
+- `/contato` - Página de contato
+- `/blog` - Blog SEO
+
+### 📂 Páginas de Categoria
 - `/comprar-backlinks-tecnologia` - Backlinks de Tecnologia
 - `/comprar-backlinks-noticias` - Backlinks de Notícias  
 - `/comprar-backlinks-financas` - Backlinks de Finanças
 - `/comprar-backlinks-negocios` - Backlinks de Negócios
+- `/comprar-backlinks-moda` - Backlinks de Moda
+- `/comprar-backlinks-educacao` - Backlinks de Educação
+- `/comprar-backlinks-turismo` - Backlinks de Turismo
+- `/comprar-backlinks-automoveis` - Backlinks de Automóveis
+- `/comprar-backlinks-saude` - Backlinks de Saúde
+- `/comprar-backlinks-direito` - Backlinks de Direito
+- `/comprar-backlinks-alimentacao` - Backlinks de Alimentação
+- `/comprar-backlinks-pets` - Backlinks de Pets
+- `/comprar-backlinks-esportes` - Backlinks de Esportes
+- `/comprar-backlinks-entretenimento` - Backlinks de Entretenimento
+- `/comprar-backlinks-marketing` - Backlinks de Marketing
+- `/comprar-backlinks-imoveis` - Backlinks de Imóveis
+- `/comprar-backlinks-maternidade` - Backlinks de Maternidade
+
+**Total: 23 páginas pré-renderizadas**
 
 ## 🔧 Como Funciona
 

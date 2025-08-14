@@ -1,4 +1,6 @@
 # Redirects para páginas pré-renderizadas
+/ /pages/index.html 200
+/comprar-backlinks /pages/comprar-backlinks.html 200
 /comprar-backlinks-tecnologia /pages/comprar-backlinks-tecnologia.html 200
 /comprar-backlinks-noticias /pages/comprar-backlinks-noticias.html 200
 /comprar-backlinks-financas /pages/comprar-backlinks-financas.html 200
@@ -9,6 +11,17 @@
 /comprar-backlinks-automoveis /pages/comprar-backlinks-automoveis.html 200
 /comprar-backlinks-saude /pages/comprar-backlinks-saude.html 200
 /comprar-backlinks-direito /pages/comprar-backlinks-direito.html 200
+/comprar-backlinks-alimentacao /pages/comprar-backlinks-alimentacao.html 200
+/comprar-backlinks-pets /pages/comprar-backlinks-pets.html 200
+/comprar-backlinks-esportes /pages/comprar-backlinks-esportes.html 200
+/comprar-backlinks-entretenimento /pages/comprar-backlinks-entretenimento.html 200
+/comprar-backlinks-marketing /pages/comprar-backlinks-marketing.html 200
+/comprar-backlinks-imoveis /pages/comprar-backlinks-imoveis.html 200
+/comprar-backlinks-maternidade /pages/comprar-backlinks-maternidade.html 200
+/agencia-de-backlinks /pages/agencia-de-backlinks.html 200
+/consultoria-seo /pages/consultoria-seo.html 200
+/contato /pages/contato.html 200
+/blog /pages/blog.html 200
 
 # Fallback para SPA
 /* /index.html 200
