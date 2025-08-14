@@ -36,6 +36,14 @@ async function buildWithPrerender() {
       }
     }
     
+    // 3.1. Substituir index.html da dist com a versão prerendering
+    const prerenderIndex = path.join(pagesDir, 'index.html');
+    const distIndex = path.join(distDir, 'index.html');
+    if (fs.existsSync(prerenderIndex)) {
+      fs.copyFileSync(prerenderIndex, distIndex);
+      console.log('✅ Index.html substituído com versão prerendering');
+    }
+    
     // 4. Criar configuração de servidor para produção
     const nginxConfig = `
 # Configuração Nginx para servir páginas prerendering

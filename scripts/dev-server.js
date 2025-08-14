@@ -23,7 +23,7 @@ async function createDevServer() {
     const prerenderRoutes = [
       '/',
       '/comprar-backlinks',
-      '/comprar-backlinks-tecnologia',
+      '/comprar-backlinks-tecnologia', 
       '/comprar-backlinks-noticias',
       '/comprar-backlinks-financas',
       '/comprar-backlinks-negocios',
@@ -46,7 +46,7 @@ async function createDevServer() {
       '/blog'
     ];
 
-    // Verificar se a rota tem versão prerendering
+    // Verificar se a rota tem versão prerendering e servir se existir
     if (prerenderRoutes.includes(url)) {
       const fileName = url === '/' ? 'index.html' : `${url.slice(1)}.html`;
       const prerenderPath = path.join(__dirname, '..', 'public', 'pages', fileName);
@@ -55,8 +55,11 @@ async function createDevServer() {
         console.log(`🎯 Servindo página prerendering: ${fileName}`);
         const content = fs.readFileSync(prerenderPath, 'utf8');
         res.setHeader('Content-Type', 'text/html');
+        res.setHeader('Cache-Control', 'no-cache');
         res.end(content);
         return;
+      } else {
+        console.log(`⚠️  Página prerendering não encontrada: ${fileName}, servindo SPA`);
       }
     }
 
