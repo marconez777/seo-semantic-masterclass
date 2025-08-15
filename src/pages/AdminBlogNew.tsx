@@ -53,7 +53,7 @@ export default function AdminBlogNew() {
   useEffect(() => {
     if (!userId) return;
     (async () => {
-      const { data } = await supabase.rpc('has_role', { _user_id: userId, _role: 'admin' });
+      const { data } = await supabase.rpc('is_admin', { uid: userId });
       setIsAdmin(!!data);
     })();
   }, [userId]);

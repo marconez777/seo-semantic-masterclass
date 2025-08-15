@@ -39,6 +39,8 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlogNew from "./pages/AdminBlogNew";
 import NotFound from "./pages/NotFound";
+import Forbidden from "./pages/Forbidden";
+import { RequireRole } from "./components/auth/RequireRole";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
  
@@ -73,7 +75,12 @@ const App = () => (
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
-        <Route path="/admin" element={<AdminLayout />}>
+        <Route path="/403" element={<Forbidden />} />
+        <Route path="/admin" element={
+          <RequireRole role="admin">
+            <AdminLayout />
+          </RequireRole>
+        }>
           <Route index element={<AdminPedidos />} />
           <Route path="sites" element={<AdminSites />} />
           <Route path="publicacoes" element={<AdminPublicacoes />} />

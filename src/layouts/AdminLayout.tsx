@@ -19,7 +19,6 @@ import { NavLink } from "react-router-dom";
 export default function AdminLayout() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -35,40 +34,7 @@ export default function AdminLayout() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  useEffect(() => {
-    if (!userId) return;
-    
-    // Verificar se o usuário tem role de admin usando RBAC
-    const checkAdminRole = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .eq('role', 'admin')
-          .single();
-        
-        if (error && error.code !== 'PGRST116') {
-          console.error('Erro ao verificar role de admin:', error);
-          setIsAdmin(false);
-          navigate('/painel', { replace: true });
-          return;
-        }
-        
-        const isAdminUser = !!data;
-        setIsAdmin(isAdminUser);
-        if (!isAdminUser) navigate('/painel', { replace: true });
-      } catch (error) {
-        console.error('Erro ao verificar role de admin:', error);
-        setIsAdmin(false);
-        navigate('/painel', { replace: true });
-      }
-    };
-
-    checkAdminRole();
-  }, [userId, navigate]);
-
-  if (!userId || isAdmin === null) return null;
+  if (!userId) return null;
 
   const adminMenuItems = [
     { title: "Pedidos", url: "/admin", icon: ClipboardList },

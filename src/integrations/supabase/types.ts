@@ -342,6 +342,24 @@ export type Database = {
         }
         Relationships: []
       }
+      profiles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Insert: {
+          created_at?: string | null
+          id: string
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -482,11 +500,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      is_admin: {
+        Args: { uid: string }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
       order_status: "pending" | "paid" | "cancelled" | "refunded"
       publication_status: "pending" | "in_progress" | "published" | "rejected"
+      user_role: "user" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -617,6 +640,7 @@ export const Constants = {
       app_role: ["admin", "moderator", "user"],
       order_status: ["pending", "paid", "cancelled", "refunded"],
       publication_status: ["pending", "in_progress", "published", "rejected"],
+      user_role: ["user", "admin"],
     },
   },
 } as const

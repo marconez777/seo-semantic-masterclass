@@ -35,8 +35,18 @@ const Header = () => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
-      const { data } = await supabase.rpc('has_role', { _user_id: user.id, _role: 'admin' });
-      setIsAdmin(!!data);
+      
+      // Check role from JWT first, then fallback to database
+      const jwtRole = user.app_metadata?.role || user.user_metadata?.role;
+      
+      if (jwtRole === 'admin') {
+        setIsAdmin(true);
+      } else {
+        // Fallback: check database
+        const { data } = await supabase.rpc('is_admin', { uid: user.id });
+        setIsAdmin(!!data);
+      }
+      
       setUserName((user.user_metadata as any)?.name || user.email || null);
     })();
   }, []);

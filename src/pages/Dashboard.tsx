@@ -375,22 +375,10 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userId) return;
     
-    // Verificar se o usuário tem role de admin usando RBAC
+    // Verificar se o usuário tem role de admin usando nova estrutura
     const checkAdminRole = async () => {
       try {
-        const { data, error } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', userId)
-          .eq('role', 'admin')
-          .single();
-        
-        if (error && error.code !== 'PGRST116') {
-          console.error('Erro ao verificar role de admin:', error);
-          setIsAdmin(false);
-          return;
-        }
-        
+        const { data } = await supabase.rpc('is_admin', { uid: userId });
         setIsAdmin(!!data);
       } catch (error) {
         console.error('Erro ao verificar role de admin:', error);
