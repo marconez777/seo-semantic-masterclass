@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
-import { generateCategoryContent } from './content-generator.js';
+import { seoContent } from '../src/lib/seo-content.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -256,7 +256,7 @@ async function generateStaticPages() {
     
     const fileName = `comprar-backlinks-${category.slug}.html`;
     const filePath = path.join(pagesDir, fileName);
-    const categoryContent = generateCategoryContent(category.slug);
+    const categoryContent = seoContent[category.slug] || '';
     const htmlContent = createHTML(pageData, categoryContent);
     
     fs.writeFileSync(filePath, htmlContent);
