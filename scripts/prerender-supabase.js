@@ -2,8 +2,8 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
-import { seoContent } from '../src/lib/seo-content.js';
 import { processTemplate } from './html-template.js';
+import { seoContent } from '../src/lib/seo-content.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -122,7 +122,6 @@ const staticPageData = {
     }
   }
 };
-
 
 // Função principal
 async function generateStaticPages() {

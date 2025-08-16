@@ -439,6 +439,6 @@ export function processTemplate(data) {
 
   // Replace SEO content
   html = html.replace('<!-- SEO_CONTENT -->', data.seoContent || '');
-  
+
   return html;
 }
