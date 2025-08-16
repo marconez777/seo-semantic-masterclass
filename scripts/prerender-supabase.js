@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
+import { generateCategoryContent } from './content-generator.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -122,7 +123,7 @@ const staticPageData = {
 };
 
 // Template base HTML com metadados SEO otimizados
-const createHTML = (pageData) => `<!DOCTYPE html>
+const createHTML = (pageData, content = '') => `<!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
@@ -192,7 +193,7 @@ const createHTML = (pageData) => `<!DOCTYPE html>
   </head>
 
   <body>
-    <div id="root"></div>
+    <div id="root">${content}</div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>`;
@@ -207,13 +208,13 @@ async function generateStaticPages() {
 
   // 1. Gerar páginas estáticas fixas
   console.log('📄 Gerando páginas estáticas fixas...');
-  for (const [path, data] of Object.entries(staticPageData)) {
-    const fileName = path === '/' ? 'index.html' : path.replace('/', '') + '.html';
+  for (const [pagePath, data] of Object.entries(staticPageData)) {
+    const fileName = pagePath === '/' ? 'index.html' : pagePath.replace('/', '') + '.html';
     const filePath = path.join(pagesDir, fileName);
     
     const pageData = {
       ...data,
-      path: path
+      path: pagePath
     };
     
     const htmlContent = createHTML(pageData);
@@ -255,7 +256,8 @@ async function generateStaticPages() {
     
     const fileName = `comprar-backlinks-${category.slug}.html`;
     const filePath = path.join(pagesDir, fileName);
-    const htmlContent = createHTML(pageData);
+    const categoryContent = generateCategoryContent(category.slug);
+    const htmlContent = createHTML(pageData, categoryContent);
     
     fs.writeFileSync(filePath, htmlContent);
     console.log(`✅ Gerado: ${fileName} (${stats.count} backlinks, DR médio: ${stats.avgDr})`);
