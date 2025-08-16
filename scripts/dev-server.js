@@ -1,80 +1,110 @@
-import { createServer } from 'vite';
+// scripts/dev-server.js
+import { createServer, loadConfigFromFile, mergeConfig } from 'vite';
+import path from 'node:path';
+import process from 'node:process';
 import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
 import { shouldServeStatic } from './crawler-detector.js';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+async function main() {
+  const mode = process.env.NODE_ENV || 'development';
 
-async function createDevServer() {
-  const server = await createServer({
+  // 1) Carrega seu vite.config.ts
+  const configFile = await loadConfigFromFile(
+    { command: 'serve', mode },
+    path.resolve(process.cwd(), 'vite.config.ts')
+  );
+
+  const baseCfg = configFile?.config || {};
+
+  // 2) Normaliza host/port (com IPv4 por padrão)
+  const envHost =
+    process.env.HOST ||
+    process.env.VITE_HOST ||
+    baseCfg?.server?.host ||
+    '0.0.0.0';
+
+  const host =
+    envHost === true || envHost === 'true'
+      ? '0.0.0.0'
+      : envHost === '::'    // evita IPv6 em ambientes que não suportam
+      ? '0.0.0.0'
+      : envHost;
+
+  const port =
+    Number(process.env.PORT) ||
+    Number(process.env.VITE_PORT) ||
+    Number(baseCfg?.server?.port) ||
+    8080; // Changed to 8080 to match previous config
+
+  const hmrHost =
+    process.env.HMR_HOST ||
+    (baseCfg?.server?.hmr && baseCfg.server.hmr.host) ||
+    undefined;
+
+  const hmrPort =
+    process.env.HMR_PORT
+      ? Number(process.env.HMR_PORT)
+      : (baseCfg?.server?.hmr && baseCfg.server.hmr.port) || undefined;
+
+  // 3) Faz merge garantindo que nada "pise" no host/port desejados
+  const finalCfg = mergeConfig(baseCfg, {
     server: {
-      host: "::",
-      port: 8080,
+      host,
+      port,
+      strictPort: true,
+      hmr: {
+        host: hmrHost,
+        port: hmrPort,
+        protocol: (baseCfg?.server?.hmr && baseCfg.server.hmr.protocol) || 'ws',
+      },
     },
-    configFile: path.resolve(__dirname, '..', 'vite.config.ts')
+    // evita pegar IPv6 em algumas instalações
+    optimizeDeps: {
+      force: true,
+    },
   });
+
+  // 4) Log de diagnóstico
+  console.log('[dev-server] Resolved server config:', {
+    host: finalCfg.server.host,
+    port: finalCfg.server.port,
+    hmr: finalCfg.server.hmr,
+  });
+
+  // 5) Cria e inicia
+  const server = await createServer(finalCfg);
 
   // Middleware inteligente para servir páginas prerendering baseado no User-Agent
   server.middlewares.use((req, res, next) => {
     const url = req.url?.split('?')[0] || '';
     const userAgent = req.headers['user-agent'] || '';
     
-    // Lista de rotas que têm páginas prerendering
-    const prerenderRoutes = [
-      '/',
-      '/comprar-backlinks',
-      '/comprar-backlinks-tecnologia', 
-      '/comprar-backlinks-noticias',
-      '/comprar-backlinks-financas',
-      '/comprar-backlinks-negocios',
-      '/comprar-backlinks-moda',
-      '/comprar-backlinks-educacao',
-      '/comprar-backlinks-turismo',
-      '/comprar-backlinks-automoveis',
-      '/comprar-backlinks-saude',
-      '/comprar-backlinks-direito',
-      '/comprar-backlinks-alimentacao',
-      '/comprar-backlinks-pets',
-      '/comprar-backlinks-esportes',
-      '/comprar-backlinks-entretenimento',
-      '/comprar-backlinks-marketing',
-      '/comprar-backlinks-imoveis',
-      '/comprar-backlinks-maternidade',
-      '/agencia-de-backlinks',
-      '/consultoria-seo',
-      '/contato',
-      '/blog'
-    ];
+    const fileName = (url === '/' ? 'index' : url.substring(1).replace(/\//g, '-')) + '.html';
+    const prerenderedHtmlPath = path.join(process.cwd(), 'public', 'pages', fileName);
 
     // Verificar se deve servir versão estática
-    if (prerenderRoutes.includes(url) && shouldServeStatic(userAgent)) {
-      const fileName = url === '/' ? 'index.html' : `${url.slice(1)}.html`;
-      const prerenderPath = path.join(__dirname, '..', 'public', 'pages', fileName);
-      
-      if (fs.existsSync(prerenderPath)) {
-        console.log(`🤖 Crawler detectado! Servindo página estática: ${fileName}`);
-        const content = fs.readFileSync(prerenderPath, 'utf8');
+    if (fs.existsSync(prerenderedHtmlPath) && shouldServeStatic(userAgent)) {
+        console.log(`🤖 Crawler detectado! Servindo página estática: ${prerenderedHtmlPath}`);
+        const content = fs.readFileSync(prerenderedHtmlPath, 'utf8');
         res.setHeader('Content-Type', 'text/html');
         res.setHeader('Cache-Control', 'public, max-age=3600');
         res.end(content);
         return;
-      }
     }
     
     // Para usuários normais, continuar com SPA
-    if (prerenderRoutes.includes(url)) {
-      console.log(`👤 Usuário normal: ${url} - Servindo SPA`);
-    }
+    console.log(`👤 Usuário normal: ${url} - Servindo SPA`);
 
     next();
   });
 
-  await server.listen();
-  console.log('🚀 Servidor de desenvolvimento iniciado com prerendering');
-  console.log('📄 Páginas prerendering serão servidas quando disponíveis');
-  console.log('🔗 http://localhost:8080');
+
+  await server.listen(); // NÃO passe host/port aqui — use só o config
+
+  server.printUrls();
 }
 
-createDevServer().catch(console.error);
+main().catch((err) => {
+  console.error('[dev-server] Failed to start:', err);
+  process.exit(1);
+});
