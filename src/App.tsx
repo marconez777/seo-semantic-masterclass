@@ -34,6 +34,7 @@ import AdminPedidos from "./pages/admin/AdminPedidos";
 import AdminSites from "./pages/admin/AdminSites";
 import AdminPublicacoes from "./pages/admin/AdminPublicacoes";
 import AdminBlog from "./pages/admin/AdminBlog";
+import AdminAuth from "./pages/admin/AdminAuth";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -76,6 +77,10 @@ const App = () => (
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
         <Route path="/403" element={<Forbidden />} />
+        
+        {/* Admin auth route */}
+        <Route path="/admin/login" element={<AdminAuth />} />
+        
         <Route path="/admin" element={
           <RequireRole role="admin">
             <AdminLayout />

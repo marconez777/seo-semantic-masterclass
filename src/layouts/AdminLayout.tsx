@@ -24,12 +24,12 @@ export default function AdminLayout() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       const id = session?.user?.id ?? null;
       setUserId(id);
-      if (!id) navigate('/auth', { replace: true, state: { from: '/admin' } });
+      if (!id) navigate('/admin/login', { replace: true });
     });
     supabase.auth.getSession().then(({ data }) => {
       const id = data.session?.user?.id ?? null;
       setUserId(id);
-      if (!id) navigate('/auth', { replace: true, state: { from: '/admin' } });
+      if (!id) navigate('/admin/login', { replace: true });
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
