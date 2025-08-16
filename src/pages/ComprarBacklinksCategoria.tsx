@@ -10,6 +10,8 @@ import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { Circle, BookText } from "lucide-react";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
+import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
+import CategorySeoContent from "@/components/seo/CategorySeoContent";
 
 const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -102,23 +104,34 @@ export default function ComprarBacklinksCategoria() {
     setOpen(true);
   };
 
+  const slug = useMemo(() => String(categoryLabel).toLowerCase().replace(/\s+/g,'-'), [categoryLabel]);
+  const canonicalUrl = `https://mkart.com.br/comprar-backlinks-${slug}`;
+  const seoTitle = `Comprar Backlinks de ${categoryLabel} | Alta Autoridade | MK Art SEO`;
+  const seoDesc = `Encontre e compre backlinks de alta qualidade na categoria ${categoryLabel}. Impulsione o SEO do seu site com links de sites relevantes e com alta autoridade (DR).`;
+
   return (
     <>
       <SEOHead
-        title={`Comprar Backlinks - ${categoryLabel} | MK Art SEO`}
-        description={`Backlinks da categoria ${categoryLabel}. Filtre por DR, tráfego e preço.`}
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-${encodeURIComponent(String(categoryLabel).toLowerCase().replace(/\s+/g,'-'))}`}
-        keywords={`comprar backlinks, ${categoryLabel}`}
+        title={seoTitle}
+        description={seoDesc}
+        canonicalUrl={canonicalUrl}
+        keywords={`comprar backlinks, backlinks ${categoryLabel.toLowerCase()}, seo ${categoryLabel.toLowerCase()}`}
+      />
+      <CategoryStructuredData
+        categoryName={categoryLabel}
+        categoryUrl={canonicalUrl}
+        backlinks={filtered}
+        description={seoDesc}
       />
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar filters */}
         <aside className="md:col-span-3 space-y-6">
           <section>
-            <h2 className="text-lg font-semibold mb-3">Filter by Category</h2>
+            <h2 className="text-lg font-semibold mb-3">Filtrar por Categoria</h2>
             <nav className="space-y-2">
               <a className="flex items-center gap-2 hover:underline" href="/comprar-backlinks">
-                <Circle size={16} /> <span>All</span>
+                <Circle size={16} /> <span>Todas</span>
               </a>
               {categories.map((cat) => (
                 <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
@@ -139,7 +152,7 @@ export default function ComprarBacklinksCategoria() {
               <Input type="number" min={0} value={minTraffic} onChange={(e) => setMinTraffic(e.target.value === '' ? '' : Number(e.target.value))} />
             </div>
             <div className="grid gap-2">
-              <label className="text-sm">Preço máximo (centavos)</label>
+              <label className="text-sm">Preço máximo (R$)</label>
               <Input type="number" min={0} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value === '' ? '' : Number(e.target.value))} />
             </div>
           </section>
@@ -152,10 +165,10 @@ export default function ComprarBacklinksCategoria() {
             items={[
               { name: 'Início', url: '/' },
               { name: 'Comprar Backlinks', url: '/comprar-backlinks' },
-              { name: categoryLabel, url: `/comprar-backlinks-${encodeURIComponent(String(categoryLabel).toLowerCase().replace(/\s+/g,'-'))}` },
+              { name: categoryLabel, url: canonicalUrl },
             ]}
           />
-          <h1 className="text-4xl font-bold mb-6">Título h1 (Comprar Backlinks da {categoryLabel})</h1>
+          <h1 className="text-4xl font-bold mb-6">Comprar Backlinks da Categoria: {categoryLabel}</h1>
           <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
             <table className="w-full text-sm">
               <thead className="bg-accent/40">
@@ -183,10 +196,7 @@ export default function ComprarBacklinksCategoria() {
             </table>
           </div>
 
-          <section className="mt-10">
-            <h2 className="text-2xl font-semibold mb-2">Título h2 (Como escolher os melhores backlinks para o seu site de Saúde:)</h2>
-            <p className="text-muted-foreground">Texto SEO com 500 palavras e títulos h2, h3 e listagens</p>
-          </section>
+          <CategorySeoContent categoryName={categoryLabel} />
         </section>
       </main>
       <Footer />

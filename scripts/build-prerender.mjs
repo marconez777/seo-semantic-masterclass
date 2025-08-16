@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 // Configuration
 const SUPABASE_URL = process.env.SUPABASE_URL || 'https://lvinoytvsyloccajnrwp.supabase.co';
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aW5veXR2c3lsb2NjYWpucndwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3ODgwNDUsImV4cCI6MjA3MDM2NDA0NX0.SlXouoiD_epPlYwPJVodUMOg7tK0NIWJwD2s70rmAsc';
-const SITE_URL = process.env.SITE_URL || 'https://backlinks-premium.lovable.app';
+const SITE_URL = process.env.SITE_URL || 'https://mkart.com.br';
 
 let generatedPages = [];
 let buildReport = {
@@ -33,13 +33,26 @@ console.log(`📡 Conectando ao Supabase: ${SUPABASE_URL}`);
 // Initialize Supabase client
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+const slugify = (text) => {
+    if (!text) return '';
+    return text
+      .toString()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim()
+      .replace(/\s+/g, '-')
+      .replace(/[^\w-]+/g, '')
+      .replace(/--+/g, '-');
+};
+
 async function fetchCategories() {
   console.log('📂 Buscando categorias do Supabase...');
   
   try {
-    const { data: categories, error } = await supabase
-      .from('categories')
-      .select('slug, title, description, image, schema_data');
+    const { data, error } = await supabase
+      .from('backlinks_public')
+      .select('category');
     
     if (error) {
       console.error('❌ Erro ao buscar categorias:', error.message);
@@ -48,8 +61,15 @@ async function fetchCategories() {
     }
     
     buildReport.supabaseConnected = true;
+    const categories = [...new Set(data.map(item => item.category).filter(Boolean))];
     console.log(`✅ ${categories?.length || 0} categorias encontradas`);
-    return categories || [];
+    return categories.map(category => ({
+        slug: slugify(category),
+        title: category,
+        description: `Encontre e compre backlinks de alta qualidade na categoria ${category}. Impulsione o SEO do seu site com links de sites relevantes e com alta autoridade (DR).`,
+        image: '',
+        schema_data: {}
+    }));
   } catch (error) {
     console.error('❌ [ERRO] Falha na conexão com Supabase');
     buildReport.errors.push(`Supabase connection failed: ${error.message}`);
@@ -71,7 +91,7 @@ async function fetchCategories() {
 function checkExistingPages() {
   console.log('🔍 Verificando páginas HTML pré-existentes...');
   
-  const distDir = path.join(__dirname, '..', 'dist');
+  const distDir = path.join(__dirname, '..', 'public', 'pages');
   if (!fs.existsSync(distDir)) {
     return [];
   }
@@ -82,40 +102,6 @@ function checkExistingPages() {
   
   console.log(`📄 ${existingPages.length} páginas de categoria existentes encontradas`);
   return existingPages;
-}
-
-async function fetchBacklinkStats(category) {
-  try {
-    const { data: backlinks, error } = await supabase
-      .from('backlinks_public')
-      .select('price_cents, dr, da')
-      .eq('category', category)
-      .eq('is_active', true);
-    
-    if (error) {
-      buildReport.warnings.push(`Stats error for category ${category}: ${error.message}`);
-      throw error;
-    }
-    
-    if (!backlinks || backlinks.length === 0) {
-      return { count: 0, avgPrice: 0, avgDR: 0, avgDA: 0 };
-    }
-    
-    const avgPrice = Math.round(backlinks.reduce((sum, b) => sum + (b.price_cents || 0), 0) / backlinks.length / 100);
-    const avgDR = Math.round(backlinks.reduce((sum, b) => sum + (b.dr || 0), 0) / backlinks.length);
-    const avgDA = Math.round(backlinks.reduce((sum, b) => sum + (b.da || 0), 0) / backlinks.length);
-    
-    return {
-      count: backlinks.length,
-      avgPrice,
-      avgDR,
-      avgDA
-    };
-  } catch (error) {
-    console.warn(`⚠️ Erro ao buscar stats para categoria ${category}:`, error.message);
-    buildReport.warnings.push(`Failed to fetch stats for ${category}: ${error.message}`);
-    return { count: 0, avgPrice: 0, avgDR: 0, avgDA: 0 };
-  }
 }
 
 const staticPages = {
@@ -184,12 +170,12 @@ const staticPages = {
 async function generateStaticPages() {
   console.log('📄 Gerando páginas estáticas...');
   
-  const pagesDir = path.join(__dirname, '..', 'dist');
+  const pagesDir = path.join(__dirname, '..', 'public', 'pages');
   
   // Ensure dist directory exists
   if (!fs.existsSync(pagesDir)) {
     fs.mkdirSync(pagesDir, { recursive: true });
-    console.log('📁 Diretório /dist criado');
+    console.log('📁 Diretório /public/pages criado');
   }
   
   // Generate static pages
@@ -239,7 +225,7 @@ async function generateCategoryPages() {
   
   try {
     const categories = await fetchCategories();
-    const pagesDir = path.join(__dirname, '..', 'dist');
+    const pagesDir = path.join(__dirname, '..', 'public', 'pages');
     
     if (categories.length === 0 && buildReport.supabaseConnected === false) {
       console.log('⚠️ Supabase indisponível - mantendo páginas existentes');
@@ -248,15 +234,14 @@ async function generateCategoryPages() {
     
     for (const category of categories) {
       try {
-        const stats = await fetchBacklinkStats(category.slug);
         const fileName = `comprar-backlinks-${category.slug}.html`;
         const filePath = path.join(pagesDir, fileName);
         
         const pageData = {
-          title: `Comprar Backlinks ${category.title} - ${stats.count} Sites DR ${stats.avgDR}+`,
-          description: `${stats.count} backlinks de ${category.title} disponíveis. DR médio ${stats.avgDR}, preços a partir de R$ ${stats.avgPrice}. ${category.description}`,
+          title: `Comprar Backlinks ${category.title}`,
+          description: category.description,
           h1: `Backlinks de ${category.title}`,
-          intro: `${stats.count} sites de alta qualidade na categoria ${category.title}. DR médio de ${stats.avgDR} e entrega garantida.`,
+          intro: `Encontre os melhores backlinks para sua estratégia de SEO na categoria ${category.title}.`,
           canonical: `${SITE_URL}/comprar-backlinks-${category.slug}`,
           url: `${SITE_URL}/comprar-backlinks-${category.slug}`,
           ogImage: category.image || '',
@@ -269,18 +254,8 @@ async function generateCategoryPages() {
             "url": `${SITE_URL}/comprar-backlinks-${category.slug}`,
             "mainEntity": {
               "@type": "ItemList",
-              "numberOfItems": stats.count,
-              "itemListElement": [{
-                "@type": "Product",
-                "name": `Backlinks ${category.title}`,
-                "category": category.title,
-                "offers": {
-                  "@type": "AggregateOffer",
-                  "lowPrice": Math.max(1, stats.avgPrice - 50),
-                  "highPrice": stats.avgPrice + 100,
-                  "priceCurrency": "BRL"
-                }
-              }]
+              "numberOfItems": 0,
+              "itemListElement": []
             },
             ...(category.schema_data && typeof category.schema_data === 'object' ? category.schema_data : {})
           })
@@ -296,10 +271,10 @@ async function generateCategoryPages() {
           type: 'category',
           status: 'success',
           category: category.slug,
-          backlinks: stats.count,
+          backlinks: 0,
           size: html.length
         });
-        console.log(`✅ Categoria gerada: ${fileName} (${stats.count} backlinks)`);
+        console.log(`✅ Categoria gerada: ${fileName}`);
       } catch (error) {
         console.error(`❌ Erro ao gerar categoria ${category.slug}:`, error.message);
         buildReport.errors.push(`Failed to generate category ${category.slug}: ${error.message}`);
@@ -323,7 +298,7 @@ async function generateCategoryPages() {
 async function generateSupportFiles() {
   console.log('🔧 Gerando arquivos de suporte...');
   
-  const distDir = path.join(__dirname, '..', 'dist');
+  const distDir = path.join(__dirname, '..', 'public', 'pages');
   
   try {
     // Generate sitemap.xml
@@ -358,12 +333,12 @@ Sitemap: ${SITE_URL}/sitemap.xml`;
     
     // Generate _redirects for Netlify
     const redirects = `# Prerendered pages
-${generatedPages.map(page => `/${page.replace('.html', '')} /${page} 200`).join('\n')}
+${generatedPages.map(page => `/${page.replace('.html', '')} /pages/${page} 200`).join('\n')}
 
 # SPA fallback
 /* /index.html 200`;
     
-    fs.writeFileSync(path.join(distDir, '_redirects'), redirects);
+    fs.writeFileSync(path.join(__dirname, '..', 'public', '_redirects'), redirects);
     console.log('✅ _redirects gerado');
     
     // Generate vercel.json
@@ -371,7 +346,7 @@ ${generatedPages.map(page => `/${page.replace('.html', '')} /${page} 200`).join(
       "rewrites": [
         ...generatedPages.filter(p => p !== 'index.html').map(page => ({
           "source": `/${page.replace('.html', '')}`,
-          "destination": `/${page}`
+          "destination": `/pages/${page}`
         })),
         {
           "source": "/(.*)",
@@ -380,7 +355,7 @@ ${generatedPages.map(page => `/${page.replace('.html', '')} /${page} 200`).join(
       ]
     };
     
-    fs.writeFileSync(path.join(distDir, 'vercel.json'), JSON.stringify(vercelConfig, null, 2));
+    fs.writeFileSync(path.join(__dirname, '..', 'public', 'vercel.json'), JSON.stringify(vercelConfig, null, 2));
     console.log('✅ vercel.json gerado');
     
   } catch (error) {
@@ -437,7 +412,7 @@ async function main() {
     }
     
     console.log(`📊 Total de páginas: ${generatedPages.length}`);
-    console.log(`📁 Arquivos disponíveis em /dist`);
+    console.log(`📁 Arquivos disponíveis em /public/pages`);
     console.log(`📋 Relatório: dist/seo-build-report.json`);
     
   } catch (error) {
