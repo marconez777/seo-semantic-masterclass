@@ -1,79 +1,417 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Blog SEO - Dicas e Estratégias de Posicionamento | MK Art SEO | Backlinks Premium</title>
+  <meta name="description" content="Blog com dicas, estratégias e novidades sobre SEO, backlinks e marketing digital. Conteúdo especializado para melhorar seu ranking.">
+  <link rel="canonical" href="https://mkart.com.br/blog">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://mkart.com.br/blog">
+  <meta property="og:title" content="Blog SEO - Dicas e Estratégias de Posicionamento | MK Art SEO | Backlinks Premium">
+  <meta property="og:description" content="Blog com dicas, estratégias e novidades sobre SEO, backlinks e marketing digital. Conteúdo especializado para melhorar seu ranking.">
+  <meta property="og:site_name" content="Backlinks Premium">
+  <meta property="og:image" content="https://mkart.com.br/LOGOMK.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://mkart.com.br/blog">
+  <meta name="twitter:title" content="Blog SEO - Dicas e Estratégias de Posicionamento | MK Art SEO | Backlinks Premium">
+  <meta name="twitter:description" content="Blog com dicas, estratégias e novidades sobre SEO, backlinks e marketing digital. Conteúdo especializado para melhorar seu ranking.">
+  <meta name="twitter:image" content="https://mkart.com.br/LOGOMK.png">
+
+  <!-- Additional SEO -->
+  <meta name="robots" content="index, follow">
+  <meta name="author" content="Backlinks Premium">
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+
+  <!-- Preconnect to improve performance -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <!-- BEGIN CRITICAL CSS -->
+  <style>
     
-    <!-- SEO Meta Tags -->
-    <title>Blog SEO - Dicas e Estratégias de Posicionamento | MK Art SEO</title>
-    <meta name="description" content="Blog com dicas, estratégias e novidades sobre SEO, backlinks e marketing digital. Conteúdo especializado para melhorar seu ranking." />
-    <meta name="keywords" content="blog seo, dicas seo, estrategias seo, marketing digital" />
-    <meta name="author" content="MK Art SEO" />
-    <meta name="robots" content="index, follow" />
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="Blog SEO - Dicas e Estratégias de Posicionamento | MK Art SEO" />
-    <meta property="og:description" content="Blog com dicas, estratégias e novidades sobre SEO, backlinks e marketing digital. Conteúdo especializado para melhorar seu ranking." />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://mkart.com.br/blog" />
-    <meta property="og:site_name" content="MK Art SEO" />
-    <meta property="og:locale" content="pt_BR" />
-    <meta property="og:image" content="https://mkart.com.br/LOGOMK.png" />
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Blog SEO - Dicas e Estratégias de Posicionamento | MK Art SEO" />
-    <meta name="twitter:description" content="Blog com dicas, estratégias e novidades sobre SEO, backlinks e marketing digital. Conteúdo especializado para melhorar seu ranking." />
-    <meta name="twitter:image" content="https://mkart.com.br/LOGOMK.png" />
-    
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://mkart.com.br/blog" />
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/lovable-uploads/0864d7e5-3590-4961-8de4-16e3f0249326.png" />
-    
-    <!-- Theme Color -->
-    <meta name="theme-color" content="#0066ff" />
-    
-    <!-- Structured Data - Organization -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "MK Art SEO",
-      "url": "https://mkart.com.br",
-      "logo": "https://mkart.com.br/LOGOMK.png",
-      "description": "Especialista em backlinks brasileiros de qualidade para melhorar o posicionamento no Google",
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "Customer Service",
-        "availableLanguage": "Portuguese"
-      },
-      "sameAs": [
-        "https://wa.me/5511999999999"
-      ]
-    }
-    </script>
-    
-    <!-- Structured Data - Specific Page -->
-    <script type="application/ld+json">
-    {
+/* Critical CSS - Above the fold styles only */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background-color: #fff;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.focus\:not-sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: 0.5rem 1rem;
+  margin: 0;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}
+
+/* Header */
+.header {
+  background-color: #fff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+}
+
+.logo {
+  text-decoration: none;
+  color: #1f2937;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+}
+
+.nav-menu a {
+  text-decoration: none;
+  color: #4b5563;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-menu a:hover {
+  color: #3b82f6;
+}
+
+/* Main Content */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.article-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.article-title {
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  line-height: 1.2;
+}
+
+.article-intro {
+  font-size: 1.25rem;
+  color: #6b7280;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.content-section {
+  margin-bottom: 3rem;
+}
+
+.section-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.section-text {
+  font-size: 1.125rem;
+  color: #4b5563;
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto 2rem;
+}
+
+.cta-section {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cta-button {
+  display: inline-block;
+  background-color: #3b82f6;
+  color: white;
+  padding: 0.75rem 2rem;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.cta-button:hover {
+  background-color: #2563eb;
+}
+
+.secondary-button {
+  display: inline-block;
+  background-color: transparent;
+  color: #3b82f6;
+  padding: 0.75rem 2rem;
+  border: 2px solid #3b82f6;
+  border-radius: 0.5rem;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.secondary-button:hover {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.features-section {
+  margin-top: 4rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-top: 2rem;
+}
+
+.feature-item {
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+}
+
+.feature-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+}
+
+.feature-text {
+  color: #6b7280;
+}
+
+/* Footer */
+.footer {
+  background-color: #1f2937;
+  color: #d1d5db;
+  margin-top: 4rem;
+}
+
+.footer-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 3rem 1rem 1rem;
+}
+
+.footer-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+  margin-bottom: 2rem;
+}
+
+.footer-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.footer-subtitle {
+  font-size: 1rem;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 1rem;
+}
+
+.footer-text {
+  color: #d1d5db;
+  line-height: 1.6;
+}
+
+.footer-menu {
+  list-style: none;
+}
+
+.footer-menu li {
+  margin-bottom: 0.5rem;
+}
+
+.footer-menu a {
+  color: #d1d5db;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.footer-menu a:hover {
+  color: #60a5fa;
+}
+
+.footer-bottom {
+  border-top: 1px solid #374151;
+  padding-top: 1rem;
+  text-align: center;
+}
+
+.footer-copyright {
+  color: #9ca3af;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .nav-menu {
+    display: none;
+  }
+
+  .article-title {
+    font-size: 2rem;
+  }
+
+  .cta-section {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .cta-button,
+  .secondary-button {
+    width: 100%;
+    max-width: 300px;
+    text-align: center;
+  }
+}
+
+  </style>
+  <!-- END CRITICAL CSS -->
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">{
   "@context": "https://schema.org",
   "@type": "Blog",
   "name": "Blog SEO",
   "description": "Blog especializado em SEO e marketing digital"
-}
-    </script>
-    
-    <!-- Preconnect for Performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-  </head>
+}</script>
+</head>
+<body>
+  <!-- Skip to main content for accessibility -->
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded">
+    Pular para o conteúdo principal
+  </a>
 
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+  <!-- Header -->
+  <header role="banner" class="header">
+    <nav class="nav" role="navigation" aria-label="Navegação principal">
+      <div class="nav-container">
+        <a href="/" class="logo" aria-label="Backlinks Premium - Página inicial">
+          <strong>Backlinks Premium</strong>
+        </a>
+        <ul class="nav-menu" role="menubar">
+          <li role="none">
+            <a href="/comprar-backlinks" role="menuitem">Comprar Backlinks</a>
+          </li>
+          <li role="none">
+            <a href="/agencia-de-backlinks" role="menuitem">Agência</a>
+          </li>
+          <li role="none">
+            <a href="/consultoria-seo" role="menuitem">Consultoria SEO</a>
+          </li>
+          <li role="none">
+            <a href="/blog" role="menuitem">Blog</a>
+          </li>
+          <li role="none">
+            <a href="/contato" role="menuitem">Contato</a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Content -->
+  <main id="main-content" role="main" class="main">
+    
+  </main>
+
+  <!-- Footer -->
+  <footer role="contentinfo" class="footer">
+    <div class="footer-container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <h3 class="footer-title">Backlinks Premium</h3>
+          <p class="footer-text">
+            A melhor plataforma para comprar backlinks de qualidade e
+            impulsionar seu ranking no Google.
+          </p>
+        </div>
+
+        <div class="footer-section">
+          <h4 class="footer-subtitle">Navegação</h4>
+          <nav class="footer-nav" aria-label="Navegação do rodapé">
+            <ul class="footer-menu">
+              <li><a href="/comprar-backlinks">Comprar Backlinks</a></li>
+              <li><a href="/agencia-de-backlinks">Agência</a></li>
+              <li><a href="/consultoria-seo">Consultoria SEO</a></li>
+              <li><a href="/blog">Blog</a></li>
+              <li><a href="/contato">Contato</a></li>
+            </ul>
+          </nav>
+        </div>
+
+        <div class="footer-section">
+          <h4 class="footer-subtitle">Categorias</h4>
+          <nav class="footer-nav" aria-label="Categorias principais">
+            <ul class="footer-menu">
+              <li><a href="/comprar-backlinks-tecnologia">Tecnologia</a></li>
+              <li><a href="/comprar-backlinks-financas">Finanças</a></li>
+              <li><a href="/comprar-backlinks-saude">Saúde</a></li>
+              <li><a href="/categorias">Ver Todas</a></li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p class="footer-copyright">
+          © 2024 Backlinks Premium. Todos os direitos reservados.
+        </p>
+      </div>
+    </div>
+  </footer>
+</body>
 </html>

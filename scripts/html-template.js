@@ -76,47 +76,7 @@ export const htmlTemplate = `<!DOCTYPE html>
 
   <!-- Main Content -->
   <main id="main-content" role="main" class="main">
-    <article class="article">
-      <header class="article-header">
-        <h1 class="article-title">{{H1}}</h1>
-        <p class="article-intro">{{INTRO}}</p>
-      </header>
-      
-      <section class="content-section" aria-labelledby="content-heading">
-        <h2 id="content-heading" class="section-title">Backlinks de Qualidade Premium</h2>
-        <p class="section-text">
-          Encontre os melhores backlinks para impulsionar seu SEO. Nossa plataforma oferece 
-          links de alta qualidade, com métricas transparentes e entrega garantida.
-        </p>
-        
-        <div class="cta-section">
-          <a href="/comprar-backlinks" class="cta-button" role="button">
-            Ver Backlinks Disponíveis
-          </a>
-          <a href="/categorias" class="secondary-button" role="button">
-            Ver Mais Categorias
-          </a>
-        </div>
-      </section>
-
-      <section class="features-section" aria-labelledby="features-heading">
-        <h2 id="features-heading" class="section-title">Por Que Escolher Nossos Backlinks?</h2>
-        <div class="features-grid">
-          <div class="feature-item">
-            <h3 class="feature-title">Alta Autoridade</h3>
-            <p class="feature-text">Sites com DR e DA elevados para máximo impacto SEO</p>
-          </div>
-          <div class="feature-item">
-            <h3 class="feature-title">Entrega Rápida</h3>
-            <p class="feature-text">Publicação em até 7 dias úteis com comprovante</p>
-          </div>
-          <div class="feature-item">
-            <h3 class="feature-title">Suporte 24/7</h3>
-            <p class="feature-text">Equipe especializada sempre disponível para ajudar</p>
-          </div>
-        </div>
-      </section>
-    </article>
+    <!-- SEO_CONTENT -->
   </main>
 
   <!-- Footer -->
@@ -476,6 +436,9 @@ export function processTemplate(data) {
   
   // Replace critical CSS
   html = html.replace('{{CRITICAL_CSS}}', data.criticalCSS || criticalCSS);
+
+  // Replace SEO content
+  html = html.replace('<!-- SEO_CONTENT -->', data.seoContent || '');
   
   return html;
 }
