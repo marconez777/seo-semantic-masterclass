@@ -102,9 +102,12 @@ export type Database = {
         Row: {
           created_at: string
           description: string
+          h1: string | null
           id: string
           image: string | null
+          intro: string | null
           schema_data: Json | null
+          seo_html: string | null
           slug: string
           title: string
           updated_at: string
@@ -112,9 +115,12 @@ export type Database = {
         Insert: {
           created_at?: string
           description: string
+          h1?: string | null
           id?: string
           image?: string | null
+          intro?: string | null
           schema_data?: Json | null
+          seo_html?: string | null
           slug: string
           title: string
           updated_at?: string
@@ -122,9 +128,12 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string
+          h1?: string | null
           id?: string
           image?: string | null
+          intro?: string | null
           schema_data?: Json | null
+          seo_html?: string | null
           slug?: string
           title?: string
           updated_at?: string

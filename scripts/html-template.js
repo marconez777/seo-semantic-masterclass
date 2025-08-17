@@ -74,50 +74,26 @@ export const htmlTemplate = `<!DOCTYPE html>
     </nav>
   </header>
 
-  <!-- Main Content -->
-  <main id="main-content" role="main" class="main">
-    <article class="article">
-      <header class="article-header">
-        <h1 class="article-title">{{H1}}</h1>
-        <p class="article-intro">{{INTRO}}</p>
-      </header>
-      
-      <section class="content-section" aria-labelledby="content-heading">
-        <h2 id="content-heading" class="section-title">Backlinks de Qualidade Premium</h2>
-        <p class="section-text">
-          Encontre os melhores backlinks para impulsionar seu SEO. Nossa plataforma oferece 
-          links de alta qualidade, com métricas transparentes e entrega garantida.
-        </p>
-        
-        <div class="cta-section">
-          <a href="/comprar-backlinks" class="cta-button" role="button">
-            Ver Backlinks Disponíveis
-          </a>
-          <a href="/categorias" class="secondary-button" role="button">
-            Ver Mais Categorias
-          </a>
-        </div>
-      </section>
+  <body>
+    <a class="skip-to-content" href="#conteudo">Pular para o conteúdo</a>
+    <header class="site-header">
+      <nav><a href="/">Início</a></nav>
+    </header>
 
-      <section class="features-section" aria-labelledby="features-heading">
-        <h2 id="features-heading" class="section-title">Por Que Escolher Nossos Backlinks?</h2>
-        <div class="features-grid">
-          <div class="feature-item">
-            <h3 class="feature-title">Alta Autoridade</h3>
-            <p class="feature-text">Sites com DR e DA elevados para máximo impacto SEO</p>
-          </div>
-          <div class="feature-item">
-            <h3 class="feature-title">Entrega Rápida</h3>
-            <p class="feature-text">Publicação em até 7 dias úteis com comprovante</p>
-          </div>
-          <div class="feature-item">
-            <h3 class="feature-title">Suporte 24/7</h3>
-            <p class="feature-text">Equipe especializada sempre disponível para ajudar</p>
-          </div>
-        </div>
-      </section>
-    </article>
-  </main>
+    <main id="conteudo" class="container">
+      <article class="seo-article">
+        <h1>{{H1}}</h1>
+        <p class="intro">{{INTRO}}</p>
+        <!-- BLOCO DE CONTEÚDO SEO RICO -->
+        <section class="seo-body">
+          {{SEO_BODY}}
+        </section>
+      </article>
+    </main>
+
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
 
   <!-- Footer -->
   <footer role="contentinfo" class="footer">
@@ -463,6 +439,7 @@ export function processTemplate(data) {
   html = html.replace(/{{URL}}/g, data.url || '');
   html = html.replace(/{{H1}}/g, data.h1 || data.title || '');
   html = html.replace(/{{INTRO}}/g, data.intro || '');
+  html = html.replace(/{{SEO_BODY}}/g, data.seoBody || '');
   html = html.replace(/{{JSON_LD}}/g, data.jsonLd || '{}');
   
   // Handle conditional OG_IMAGE

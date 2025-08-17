@@ -2,6 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { createClient } from '@supabase/supabase-js';
+import { processTemplate } from './html-template.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -18,7 +19,7 @@ console.log('🚀 Gerando páginas estáticas com SEO específico do Supabase...
 async function fetchCategories() {
   const { data: categories, error } = await supabase
     .from('categories')
-    .select('slug, title, description, image, schema_data');
+    .select('slug, title, description, image, schema_data, h1, intro, seo_html');
   
   if (error) {
     console.error('Erro ao buscar categorias:', error);
@@ -121,82 +122,6 @@ const staticPageData = {
   }
 };
 
-// Template base HTML com metadados SEO otimizados
-const createHTML = (pageData) => `<!DOCTYPE html>
-<html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
-    <!-- SEO Meta Tags -->
-    <title>${pageData.title}</title>
-    <meta name="description" content="${pageData.description}" />
-    <meta name="keywords" content="${pageData.keywords || ''}" />
-    <meta name="author" content="MK Art SEO" />
-    <meta name="robots" content="index, follow" />
-    
-    <!-- Open Graph -->
-    <meta property="og:title" content="${pageData.title}" />
-    <meta property="og:description" content="${pageData.description}" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://mkart.com.br${pageData.path}" />
-    <meta property="og:site_name" content="MK Art SEO" />
-    <meta property="og:locale" content="pt_BR" />
-    <meta property="og:image" content="${pageData.image || 'https://mkart.com.br/LOGOMK.png'}" />
-    
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${pageData.title}" />
-    <meta name="twitter:description" content="${pageData.description}" />
-    <meta name="twitter:image" content="${pageData.image || 'https://mkart.com.br/LOGOMK.png'}" />
-    
-    <!-- Canonical URL -->
-    <link rel="canonical" href="https://mkart.com.br${pageData.path}" />
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/png" href="/lovable-uploads/0864d7e5-3590-4961-8de4-16e3f0249326.png" />
-    
-    <!-- Theme Color -->
-    <meta name="theme-color" content="#0066ff" />
-    
-    <!-- Structured Data - Organization -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "Organization",
-      "name": "MK Art SEO",
-      "url": "https://mkart.com.br",
-      "logo": "https://mkart.com.br/LOGOMK.png",
-      "description": "Especialista em backlinks brasileiros de qualidade para melhorar o posicionamento no Google",
-      "contactPoint": {
-        "@type": "ContactPoint",
-        "contactType": "Customer Service",
-        "availableLanguage": "Portuguese"
-      },
-      "sameAs": [
-        "https://wa.me/5511999999999"
-      ]
-    }
-    </script>
-    
-    <!-- Structured Data - Specific Page -->
-    ${pageData.schema_data ? `<script type="application/ld+json">
-    ${JSON.stringify(pageData.schema_data, null, 2)}
-    </script>` : ''}
-    
-    <!-- Preconnect for Performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
-    <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
-  </head>
-
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
-</html>`;
-
 // Função principal
 async function generateStaticPages() {
   // Criar diretório de páginas se não existir
@@ -212,11 +137,17 @@ async function generateStaticPages() {
     const filePath = path.join(pagesDir, fileName);
     
     const pageData = {
-      ...data,
-      path: path
+      title: data.title,
+      description: data.description,
+      canonical: `https://mkart.com.br${path}`,
+      url: `https://mkart.com.br${path}`,
+      h1: data.title,
+      intro: '',
+      seoBody: '',
+      jsonLd: JSON.stringify(data.schema_data, null, 2)
     };
     
-    const htmlContent = createHTML(pageData);
+    const htmlContent = processTemplate(pageData);
     fs.writeFileSync(filePath, htmlContent);
     console.log(`✅ Gerado: ${fileName}`);
   }
@@ -228,14 +159,23 @@ async function generateStaticPages() {
   for (const category of categories) {
     const stats = await fetchBacklinkStats(category.slug);
     
+    const urlPath = `/comprar-backlinks-${category.slug}`;
+    const canonical = `https://mkart.com.br${urlPath}`;
+    
     const pageData = {
-      path: `/comprar-backlinks-${category.slug}`,
-      title: category.title,
-      description: category.description,
-      keywords: `backlinks ${category.slug}, comprar backlinks ${category.slug}, links ${category.slug}, seo ${category.slug}`,
-      image: category.image || 'https://mkart.com.br/LOGOMK.png',
-      schema_data: {
-        ...category.schema_data,
+      title: `Comprar Backlinks ${category.title} - Backlinks Premium`,
+      description: `Compre backlinks de qualidade para ${category.title.toLowerCase()}. ${stats.count} sites disponíveis com DR médio de ${stats.avgDr} e preços a partir de R$ ${(stats.avgPrice * 0.8).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}.`,
+      canonical,
+      url: canonical,
+      h1: category.h1 || `Comprar Backlinks ${category.title}`,
+      intro: category.intro || '',
+      seoBody: category.seo_html || '',
+      jsonLd: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "name": `Backlinks ${category.title}`,
+        "description": category.description,
+        "url": canonical,
         "offers": {
           "@type": "AggregateOffer",
           "offerCount": stats.count,
@@ -249,13 +189,14 @@ async function generateStaticPages() {
           "reviewCount": stats.count,
           "bestRating": "5",
           "worstRating": "1"
-        }
-      }
+        },
+        ...category.schema_data
+      }, null, 2)
     };
-    
+
     const fileName = `comprar-backlinks-${category.slug}.html`;
     const filePath = path.join(pagesDir, fileName);
-    const htmlContent = createHTML(pageData);
+    const htmlContent = processTemplate(pageData);
     
     fs.writeFileSync(filePath, htmlContent);
     console.log(`✅ Gerado: ${fileName} (${stats.count} backlinks, DR médio: ${stats.avgDr})`);
