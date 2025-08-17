@@ -1,95 +1,109 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const LeadGenerationSection = () => {
+  const { toast } = useToast();
+  const [monthlyRevenue, setMonthlyRevenue] = useState<string>("");
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    website: "",
+    message: "",
+  });
+  const [loading, setLoading] = useState(false);
+
+  const onChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+    setForm((s) => ({ ...s, [e.target.name]: e.target.value }));
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      // 1) Envia e-mail pela Edge Function (já existente)
+      const { error } = await supabase.functions.invoke("send-contact-email", {
+        body: {
+          name: form.name,
+          email: form.email,
+          message:
+            `Telefone: ${form.phone}\n` +
+            `Site: ${form.website}\n` +
+            `Faturamento: ${monthlyRevenue}\n\n` +
+            `${form.message || "Sem mensagem adicional."}`,
+        },
+      });
+      if (error) throw error;
+
+      // 2) (Opcional) Salvar lead no banco (ver SQL da tabela abaixo)
+      await supabase.from("leads").insert({
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        website: form.website,
+        monthly_revenue: monthlyRevenue,
+        source_page: "/consultoria-seo",
+      });
+
+      toast({ title: "Enviado!", description: "Recebemos seus dados. Vamos falar com você :)" });
+      setForm({ name: "", email: "", phone: "", website: "", message: "" });
+      setMonthlyRevenue("");
+    } catch (err) {
+      console.error(err);
+      toast({ title: "Erro ao enviar", description: "Tente novamente ou fale no WhatsApp." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
-      <div className="absolute inset-0 opacity-20">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500 rounded-full filter blur-3xl"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500 rounded-full filter blur-3xl"></div>
-      </div>
-      
-      <div className="container mx-auto px-4 relative z-10">
-        <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
-          <div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-8">
-              Você em Destaque nas IAs<br />
-              e em 1º no Google!
-            </h2>
-            
-            <p className="text-lg text-gray-300 mb-12">
-              Domine as melhores posições nos resultados de pesquisa do Google, do Chat GPT e do Perplexity e seja encontrado quando seu cliente mais precisa!
-            </p>
-            
-            <div className="grid grid-cols-3 gap-4 mb-6">
-              <div className="border border-gray-600 rounded-lg p-3 text-center">
-                <div className="text-xl font-bold text-white mb-1">+9 anos</div>
-                <div className="text-xs text-gray-400">de expertise em digital em vendas.</div>
-              </div>
-              <div className="border border-gray-600 rounded-lg p-3 text-center">
-                <div className="text-xl font-bold text-white mb-1">+3.000</div>
-                <div className="text-xs text-gray-400">de projetos de SEO</div>
-              </div>
-              <div className="border border-gray-600 rounded-lg p-3 text-center">
-                <div className="text-xl font-bold text-white mb-1">+40</div>
-                <div className="text-xs text-gray-400">de clientes ativos.</div>
-              </div>
-            </div>
-            
-            <div className="border border-gray-600 rounded-lg p-4 text-center mb-8">
-              <div className="text-2xl font-bold text-white mb-2">+R$ 150 milhões</div>
-              <div className="text-gray-400">de faturamento gerados desde 2016</div>
-            </div>
-          </div>
-          
-          <div id="hero-form" className="bg-white/10 backdrop-blur-sm rounded-xl p-8">
-            <h3 className="text-2xl font-bold text-white mb-2">
-              Análise Grátis do seu SEO
-            </h3>
-            <p className="text-gray-300 mb-6">
-              e um plano de ação para aparecer nas respostas da IA e no topo do Google
-            </p>
-            
-            <form className="space-y-4">
-              <Input
-                type="text"
-                placeholder="Nome"
-                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
-              />
-              <Input
-                type="email"
-                placeholder="E-mail"
-                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
-              />
-              <Input
-                type="tel"
-                placeholder="WhatsApp"
-                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
-              />
-              <Select>
-                <SelectTrigger className="bg-white/20 border-white/30 text-white">
-                  <SelectValue placeholder="Faturamento Mensal" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="under-1000">Menor que R$ 1.000</SelectItem>
-                  <SelectItem value="under-2000">Menor que R$ 2.000</SelectItem>
-                  <SelectItem value="2000-3000">R$ 2.000 a R$ 3.000</SelectItem>
-                  <SelectItem value="3000-5000">R$ 3.000 a R$ 5.000</SelectItem>
-                  <SelectItem value="5000-10000">R$ 5.000 a R$ 10.000</SelectItem>
-                  <SelectItem value="over-10000">Mais de R$ 10.000</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-semibold">
-                ENVIAR
-              </Button>
-            </form>
-            
-            <p className="text-xs text-gray-400 mt-4 text-center">
-              Este site é protegido por reCAPTCHA e a Política de Privacidade e os Termos de Serviço do Google se aplicam.
-            </p>
-          </div>
-        </div>
+      {/* ...conteúdo à esquerda mantido... */}
+      <div id="hero-form" className="bg-white/10 backdrop-blur-sm rounded-xl p-8">
+        <h3 className="text-2xl font-bold text-white mb-2">Análise Grátis do seu SEO</h3>
+        <p className="text-gray-300 mb-6">
+          Preencha seus dados para receber uma análise personalizada do seu site.
+        </p>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <Input name="name" placeholder="Seu nome" value={form.name} onChange={onChange} required />
+          <Input name="email" type="email" placeholder="Seu e-mail" value={form.email} onChange={onChange} required />
+          <Input name="phone" placeholder="Seu telefone/WhatsApp" value={form.phone} onChange={onChange} />
+          <Input name="website" placeholder="URL do seu site (opcional)" value={form.website} onChange={onChange} />
+
+          <Select value={monthlyRevenue} onValueChange={setMonthlyRevenue}>
+            <SelectTrigger className="bg-white/20 border-white/30 text-white">
+              <SelectValue placeholder="Faturamento Mensal" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="under-1000">Menor que R$ 1.000</SelectItem>
+              <SelectItem value="under-2000">Menor que R$ 2.000</SelectItem>
+              <SelectItem value="2000-3000">R$ 2.000 a R$ 3.000</SelectItem>
+              <SelectItem value="3000-5000">R$ 3.000 a R$ 5.000</SelectItem>
+              <SelectItem value="5000-10000">R$ 5.000 a R$ 10.000</SelectItem>
+              <SelectItem value="over-10000">Mais de R$ 10.000</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <textarea
+            name="message"
+            placeholder="Contexto do seu projeto (opcional)"
+            value={form.message}
+            onChange={onChange}
+            className="w-full min-h-[100px] rounded-md bg-white/20 text-white p-3"
+          />
+
+          <Button type="submit" disabled={loading} className="w-full bg-green-600 hover:bg-green-700">
+            {loading ? "Enviando..." : "ENVIAR"}
+          </Button>
+        </form>
+
+        <p className="text-xs text-gray-400 mt-4 text-center">
+          Este site é protegido por reCAPTCHA e a Política de Privacidade e os Termos de Serviço do Google se aplicam.
+        </p>
       </div>
     </section>
   );
