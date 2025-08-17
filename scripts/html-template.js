@@ -76,7 +76,7 @@ export const htmlTemplate = `<!DOCTYPE html>
 
   <!-- Main Content -->
   <main id="main-content" role="main" class="main">
-    <!-- SEO_CONTENT -->
+    {{SEO_BODY}}
   </main>
 
   <!-- Footer -->
@@ -438,7 +438,7 @@ export function processTemplate(data) {
   html = html.replace('{{CRITICAL_CSS}}', data.criticalCSS || criticalCSS);
 
   // Replace SEO content
-  html = html.replace('<!-- SEO_CONTENT -->', data.seoContent || '');
+  html = html.replace('{{SEO_BODY}}', data.seoBody || '');
 
   return html;
 }
