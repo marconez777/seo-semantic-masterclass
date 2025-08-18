@@ -1,7 +1,5 @@
 
 import SEOHead from "@/components/seo/SEOHead";
-import Header from "@/components/layout/Header";
-import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,17 +8,14 @@ import PixPaymentModal from "@/components/PixPaymentModal";
 import { toast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
-const Carrinho = () => {
+const Cart = () => {
   const { items, totalCents, itemsCount, clearCart, removeFromCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [pixOpen, setPixOpen] = useState(false);
   const [lastOrderId, setLastOrderId] = useState<string | undefined>(undefined);
   const navigate = useNavigate();
 
-  const totalBRL = (totalCents / 100).toLocaleString("pt-BR", {
-    style: "currency",
-    currency: "BRL",
-  });
+  const totalBRL = (totalCents / 100);
 
   async function finalize() {
     setLoading(true);
@@ -69,22 +64,21 @@ const Carrinho = () => {
       <SEOHead
         title="Carrinho de Compras | MK Art SEO"
         description="Revise seus backlinks antes de finalizar a compra."
-        canonicalUrl={`${window.location.origin}/carrinho`}
+        canonicalUrl={`${window.location.origin}/cart`}
         keywords="carrinho, backlinks, compra"
       />
-      <Header />
-      <main className="pt-24 min-h-screen px-4 py-10 max-w-4xl mx-auto">
+      <main className="min-h-screen px-4 py-10 max-w-4xl mx-auto">
         <h1 className="text-3xl font-semibold mb-6">Carrinho</h1>
 
         {items.length === 0 ? (
-          <div className="text-muted-foreground">
-            <p>Seu carrinho está vazio.</p>
-            <Button variant="link" asChild className="mt-2 p-0">
+          <div className="flex flex-col items-start gap-3">
+            <p className="text-muted-foreground">Seu carrinho está vazio.</p>
+            <Button asChild>
               <a
                 href="/comprar-backlinks"
-                aria-label="Ir para a loja de backlinks"
+                aria-label="Voltar para Comprar Backlinks"
               >
-                loja de backlinks
+                Voltar para Comprar Backlinks
               </a>
             </Button>
           </div>
@@ -130,7 +124,7 @@ const Carrinho = () => {
               <p className="text-sm text-muted-foreground">
                 Itens: {itemsCount}
               </p>
-              <p className="text-xl font-semibold">Total: {totalBRL}</p>
+              <p className="text-xl font-semibold">Total: {totalBRL.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</p>
             </div>
 
             <div className="flex gap-2">
@@ -181,7 +175,6 @@ const Carrinho = () => {
           </section>
         )}
       </main>
-      <Footer />
       <PixPaymentModal
         open={pixOpen}
         onClose={() => {
@@ -195,4 +188,4 @@ const Carrinho = () => {
   );
 };
 
-export default Carrinho;
+export default Cart;
