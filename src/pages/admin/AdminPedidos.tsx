@@ -2,6 +2,14 @@ import { useEffect, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Pedido {
   id: string;
@@ -9,7 +17,6 @@ interface Pedido {
   status: string;
   total_cents: number;
   created_at: string;
-  abacate_url: string | null;
 }
 
 interface PedidoPII {
@@ -20,11 +27,39 @@ interface PedidoPII {
   customer_phone: string | null;
 }
 
+import { toast } from "@/hooks/use-toast";
 export default function AdminPedidos() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(false);
   const [piiByOrder, setPiiByOrder] = useState<Record<string, PedidoPII>>({});
+  const [statusByOrder, setStatusByOrder] = useState<Record<string, string>>({});
+  const [updating, setUpdating] = useState<Record<string, boolean>>({});
 
+  const handleStatusChange = (orderId: string, newStatus: string) => {
+    setStatusByOrder((prev) => ({ ...prev, [orderId]: newStatus }));
+  };
+
+  const handleSave = async (orderId: string) => {
+    setUpdating((prev) => ({ ...prev, [orderId]: true }));
+    try {
+      const { error } = await supabase.functions.invoke("admin-update-order", {
+        body: { order_id: orderId, status: statusByOrder[orderId] },
+      });
+      if (error) throw error;
+      toast({ title: "Status atualizado!" });
+      // refresh local state
+      setPedidos((prev) =>
+        prev.map((p) =>
+          p.id === orderId ? { ...p, status: statusByOrder[orderId] } : p
+        )
+      );
+    } catch (e) {
+      console.error("Falha ao atualizar status", e);
+      toast({ title: "Erro ao atualizar status", variant: "destructive" });
+    } finally {
+      setUpdating((prev) => ({ ...prev, [orderId]: false }));
+    }
+  };
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -85,21 +120,19 @@ export default function AdminPedidos() {
                 <th className="p-3">Criado</th>
                 <th className="p-3">Total</th>
                 <th className="p-3">Pagamento</th>
+                <th className="p-3">Ações</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                <tr><td className="p-4" colSpan={6}>Carregando…</td></tr>
+                <tr><td className="p-4" colSpan={7}>Carregando…</td></tr>
               ) : pedidos.length === 0 ? (
-                <tr><td className="p-4" colSpan={6}>Nenhum pedido.</td></tr>
+                <tr><td className="p-4" colSpan={7}>Nenhum pedido.</td></tr>
               ) : (
                 pedidos.map((p) => (
                   <tr key={p.id} className="border-t align-top">
                     <td className="p-3">
                       <div className="font-mono text-xs break-all">{p.id}</div>
-                      {p.abacate_url && (
-                        <a className="text-primary hover:underline" href={p.abacate_url!} target="_blank" rel="noopener noreferrer">Cobrança</a>
-                      )}
                     </td>
                     <td className="p-3">
                       {(() => { const pii = piiByOrder[p.id]; return (
@@ -120,6 +153,35 @@ export default function AdminPedidos() {
                     <td className="p-3">{new Date(p.created_at).toLocaleString('pt-BR')}</td>
                     <td className="p-3">{(p.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
                     <td className="p-3"><Badge variant="secondary">{p.status}</Badge></td>
+                    <td className="p-3">
+                      <div className="flex items-center gap-2">
+                        <Select
+                          value={statusByOrder[p.id] ?? p.status}
+                          onValueChange={(value) => handleStatusChange(p.id, value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Status" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="pending">Pendente</SelectItem>
+                            <SelectItem value="paid">Pago</SelectItem>
+                            <SelectItem value="cancelled">Cancelado</SelectItem>
+                            <SelectItem value="refunded">Reembolsado</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <Button
+                          size="sm"
+                          onClick={() => handleSave(p.id)}
+                          disabled={
+                            updating[p.id] ||
+                            !statusByOrder[p.id] ||
+                            statusByOrder[p.id] === p.status
+                          }
+                        >
+                          {updating[p.id] ? "Salvando..." : "Salvar"}
+                        </Button>
+                      </div>
+                    </td>
                   </tr>
                 ))
               )}

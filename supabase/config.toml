@@ -1,7 +1,5 @@
 project_id = "lvinoytvsyloccajnrwp"
 
-[functions.abacate-create-billing]
+[functions.admin-update-order]
 verify_jwt = true
 
-[functions.abacate-webhook]
-verify_jwt = false
