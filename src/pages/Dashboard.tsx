@@ -82,7 +82,7 @@ function PurchasesTable({ userId }: { userId: string }) {
     (async () => {
       const { data, error } = await supabase
         .from('pedidos')
-        .select('id, status, total_cents, created_at')
+        .select('id, status, total_cents, created_at, abacate_url')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       if (error) console.error('Erro pedidos', error);
@@ -193,6 +193,8 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">
                 {r.status === 'paid' ? (
                   <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
+                ) : r.abacate_url ? (
+                  <a className="story-link text-primary" href={r.abacate_url} target="_blank" rel="noopener noreferrer">Ver cobrança</a>
                 ) : (
                   <span className="text-muted-foreground">—</span>
                 )}

@@ -12,68 +12,51 @@ import { toast } from "@/hooks/use-toast";
 export type PixModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  amount: number;
-  orderId: string;
+  totalCents: number;
 };
 
-const PixModal = ({ open, onOpenChange, amount, orderId }: PixModalProps) => {
-  const pixKey = "00020126360014br.gov.bcb.pix0114+5561999999999520400005303986540510.005802BR5913NOME DO LOJISTA6008BRASILIA62070503***6304E4A7";
+const PixModal = ({ open, onOpenChange, totalCents }: PixModalProps) => {
+  const pixKey = "54.128.027/0001-93";
+  const pixName = "keila de Oliveira Castellini";
+  const pixMessage =
+    "Aqui está a chave pix para você realizar o seu pagamento. Assim que o pagamento for identificado, inicia o prazo de até 7 dias para a publicação dos backlinks. Você pode conferir o status e o link da publicação no seu painel. Dúvidas: WhatsApp 11 99179-5436.";
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(pixKey);
-    toast({ title: "Chave PIX copiada!" });
+    toast({ title: "Chave PIX (CNPJ) copiada!" });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Pague com PIX</DialogTitle>
-          <DialogDescription>
-            Use o QR Code ou a chave para pagar e concluir seu pedido.
-          </DialogDescription>
+          <DialogTitle>Pague via Pix</DialogTitle>
         </DialogHeader>
 
-        <div className="flex flex-col items-center justify-center space-y-4 py-4">
-          <div className="w-48 h-48 bg-gray-200 flex items-center justify-center">
-            <p className="text-gray-500">QR Code</p>
-          </div>
-          <p className="text-lg font-semibold">
+        <div className="space-y-4 py-2">
+          <p className="text-lg font-semibold text-center">
             Total:{" "}
-            {(amount / 100).toLocaleString("pt-BR", {
+            {(totalCents / 100).toLocaleString("pt-BR", {
               style: "currency",
               currency: "BRL",
             })}
           </p>
+          <div className="text-center">
+            <p className="font-semibold">Chave Pix (CNPJ):</p>
+            <p>{pixKey}</p>
+            <p className="font-semibold mt-2">Nome:</p>
+            <p>{pixName}</p>
+          </div>
+          <div className="text-sm text-muted-foreground p-4 bg-muted rounded-md">
+            {pixMessage}
+          </div>
         </div>
 
-        <DialogFooter className="flex flex-col gap-2">
-          <div className="flex items-center space-x-2">
-            <input
-              readOnly
-              value={pixKey}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-            />
-            <Button onClick={copyToClipboard}>Copiar</Button>
-          </div>
-          <Button
-            variant="outline"
-            onClick={() => {
-              const phone = "5561999999999";
-              const message = `Olá, fiz o pedido ${orderId} e gostaria de confirmar o pagamento.`;
-              window.open(
-                `https://api.whatsapp.com/send?phone=${phone}&text=${encodeURIComponent(
-                  message
-                )}`,
-                "_blank"
-              );
-            }}
-          >
-            Abrir WhatsApp
+        <DialogFooter className="flex-col gap-2">
+          <Button onClick={copyToClipboard}>Copiar chave</Button>
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Fechar
           </Button>
-          <p className="text-xs text-muted-foreground text-center">
-            Pedido ID: {orderId}
-          </p>
         </DialogFooter>
       </DialogContent>
     </Dialog>

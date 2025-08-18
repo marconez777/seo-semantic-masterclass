@@ -10,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "@/hooks/use-toast";
 
 interface Pedido {
   id: string;
@@ -27,7 +28,6 @@ interface PedidoPII {
   customer_phone: string | null;
 }
 
-import { toast } from "@/hooks/use-toast";
 export default function AdminPedidos() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(false);
@@ -42,9 +42,10 @@ export default function AdminPedidos() {
   const handleSave = async (orderId: string) => {
     setUpdating((prev) => ({ ...prev, [orderId]: true }));
     try {
-      const { error } = await supabase.functions.invoke("admin-update-order", {
-        body: { order_id: orderId, status: statusByOrder[orderId] },
-      });
+      const { error } = await supabase
+        .from("pedidos")
+        .update({ status: statusByOrder[orderId] })
+        .eq("id", orderId);
       if (error) throw error;
       toast({ title: "Status atualizado!" });
       // refresh local state
@@ -60,6 +61,7 @@ export default function AdminPedidos() {
       setUpdating((prev) => ({ ...prev, [orderId]: false }));
     }
   };
+
   useEffect(() => {
     (async () => {
       setLoading(true);
