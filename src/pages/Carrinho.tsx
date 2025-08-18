@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout } from "@/services/payment";
 import { useState } from "react";
+import { toast } from "@/hooks/use-toast";
 const Carrinho = () => {
   const { items, totalCents, itemsCount, clearCart, removeFromCart } = useCart();
   const [loading, setLoading] = useState(false);
@@ -43,8 +44,13 @@ const Carrinho = () => {
       } else {
         setLoading(false);
       }
-    } catch (e) {
+    } catch (e: any) {
       console.error('Falha ao finalizar compra', e);
+      toast({
+        title: "Erro ao finalizar a compra",
+        description: "Não foi possível redirecionar para o pagamento. Tente novamente.",
+        duration: 5000,
+      });
       setLoading(false);
     }
   };

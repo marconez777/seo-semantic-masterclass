@@ -63,7 +63,7 @@ export async function createCheckout(orders: OrderInput[], customer?: { name?: s
 
   if (error) {
     console.error('Checkout error:', error);
-    return { url: '#', mode: 'manual' };
+    throw new Error(`Falha ao criar checkout: ${error.message}`);
   }
 
   const url = (data?.url ?? data?.data?.url) as string | undefined;
