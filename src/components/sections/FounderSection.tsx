@@ -37,12 +37,16 @@ const FounderSection = () => {
               </div>
               
               <div className="flex space-x-4 pt-4">
-                <Button variant="outline" size="icon" className="rounded-full w-12 h-12 bg-purple-600 text-white border-purple-600 hover:bg-purple-700">
-                  <Instagram className="w-5 h-5" />
-                </Button>
-                <Button variant="outline" size="icon" className="rounded-full w-12 h-12 bg-purple-600 text-white border-purple-600 hover:bg-purple-700">
-                  <Youtube className="w-5 h-5" />
-                </Button>
+                <a href="https://www.instagram.com/seosupremo777/" target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="icon" className="rounded-full w-12 h-12 bg-purple-600 text-white border-purple-600 hover:bg-purple-700">
+                    <Instagram className="w-5 h-5" />
+                  </Button>
+                </a>
+                <a href="https://www.youtube.com/@mkartseolinkbuilding614" target="_blank" rel="noopener noreferrer">
+                  <Button variant="outline" size="icon" className="rounded-full w-12 h-12 bg-purple-600 text-white border-purple-600 hover:bg-purple-700">
+                    <Youtube className="w-5 h-5" />
+                  </Button>
+                </a>
               </div>
             </div>
             
@@ -55,13 +59,12 @@ const FounderSection = () => {
                       <p className="text-purple-100">CEO & Founder</p>
                     </div>
                     
-                    {/* Placeholder for founder image */}
-                    <div className="w-full h-full bg-gradient-to-b from-transparent to-gray-300 flex items-center justify-center">
-                      <div className="text-gray-500 text-center">
-                        <div className="w-32 h-32 bg-gray-400 rounded-full mx-auto mb-4"></div>
-                        <p>Marco Guimarães</p>
-                      </div>
-                    </div>
+                    {/* Founder image */}
+                    <img 
+                      src="/lovable-uploads/b120631c-0792-4f41-8951-878c83dd310f.png"
+                      alt="Marco Guimarães - CEO & Founder da MK Art SEO"
+                      className="w-full h-full object-cover object-center"
+                    />
                   </div>
                 </CardContent>
               </Card>

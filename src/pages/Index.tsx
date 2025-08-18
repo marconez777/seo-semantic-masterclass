@@ -18,8 +18,8 @@ const Index = () => {
     description: "Agência especializada em SEO e Marketing Digital com mais de 9 anos de experiência e 1000+ clientes atendidos.",
     logo: "https://seo-semantic-masterclass.lovable.app/logo.png",
     sameAs: [
-      "https://instagram.com/mkart",
-      "https://youtube.com/mkart"
+      "https://www.instagram.com/seosupremo777/",
+      "https://www.youtube.com/@mkartseolinkbuilding614"
     ]
   };
 
