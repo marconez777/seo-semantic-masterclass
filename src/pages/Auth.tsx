@@ -9,6 +9,9 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/Header";
 import { CheckCircle, Mail } from "lucide-react";
+import zxcvbn from "zxcvbn";
+import { Progress } from "@/components/ui/progress";
+import { getFriendlyAuthError } from "@/lib/auth-errors";
 
 const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup" | "forgot-password">("login");
@@ -23,6 +26,7 @@ const Auth = () => {
   const [cpf, setCpf] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [passwordStrength, setPasswordStrength] = useState(0);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -52,30 +56,49 @@ const Auth = () => {
   }, [navigate, redirectTo]);
 
   const handleSignup = async () => {
+    if (passwordStrength < 3) {
+      setError("A senha é muito fraca. Tente uma mais forte.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(null);
-    
+
     const redirectUrl = `${window.location.origin}/comprar-backlinks`;
-    const { error } = await supabase.auth.signUp({
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { name, phone, cpf },
       },
     });
-    
-    setLoading(false);
-    if (error) {
-      setError(error.message);
-    } else {
-      setSuccess("Cadastro realizado com sucesso! Verifique seu e-mail para ativar sua conta.");
-      toast({
-        title: "Cadastro realizado!",
-        description: "Verifique seu e-mail para ativar sua conta.",
-      });
+
+    if (signUpError) {
+      setLoading(false);
+      setError(getFriendlyAuthError(signUpError.message));
+      return;
     }
+
+    if (signUpData.user) {
+      const { error: insertError } = await supabase
+        .from("user_details")
+        .insert({ id: signUpData.user.id, name, phone, cpf });
+
+      if (insertError) {
+        setLoading(false);
+        setError(getFriendlyAuthError(insertError.message));
+        // TODO: Handle user deletion if details insertion fails
+        return;
+      }
+    }
+
+    setLoading(false);
+    setSuccess("Cadastro realizado com sucesso! Verifique seu e-mail para ativar sua conta.");
+    toast({
+      title: "Cadastro realizado!",
+      description: "Verifique seu e-mail para ativar sua conta.",
+    });
   };
 
   const handleLogin = async () => {
@@ -87,7 +110,7 @@ const Auth = () => {
     setLoading(false);
     
     if (error) {
-      setError(error.message);
+      setError(getFriendlyAuthError(error.message));
     }
   };
 
@@ -108,7 +131,7 @@ const Auth = () => {
     setLoading(false);
     
     if (error) {
-      setError(error.message);
+      setError(getFriendlyAuthError(error.message));
     } else {
       setResetEmailSent(true);
       setSuccess("E-mail de recuperação enviado! Verifique sua caixa de entrada.");
@@ -191,7 +214,24 @@ const Auth = () => {
               {mode !== "forgot-password" && (
                 <div className="grid gap-2">
                   <Label htmlFor="password">Senha</Label>
-                  <Input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Sua senha" />
+                  <Input
+                    id="password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => {
+                      setPassword(e.target.value);
+                      setPasswordStrength(zxcvbn(e.target.value).score);
+                    }}
+                    placeholder="Sua senha"
+                  />
+                  {mode === "signup" && password && (
+                    <div className="mt-2">
+                      <Progress value={(passwordStrength + 1) * 20} className="w-full" />
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Força da senha: {["Muito Fraca", "Fraca", "Razoável", "Forte", "Muito Forte"][passwordStrength]}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -217,7 +257,7 @@ const Auth = () => {
               )}
               
               {mode === "signup" && (
-                <Button className="w-full" onClick={handleSignup} disabled={loading}>
+                <Button className="w-full" onClick={handleSignup} disabled={loading || passwordStrength < 3}>
                   {loading ? "Cadastrando..." : "Cadastrar"}
                 </Button>
               )}
