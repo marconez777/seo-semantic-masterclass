@@ -50,6 +50,12 @@ Deno.serve(async (req) => {
       auth: { persistSession: false },
     })
 
+    // Create service role client for secure PII operations
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+    const supabaseServiceRole = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, {
+      auth: { persistSession: false },
+    })
+
     const payload = await req.json().catch(() => ({}))
 
     // Minimal shaping and sane defaults
