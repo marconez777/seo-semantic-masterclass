@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PixPaymentModal from "@/components/PixPaymentModal";
 import {
   SidebarProvider,
   Sidebar,
@@ -76,13 +77,20 @@ function PurchasesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
   const [pubSummary, setPubSummary] = useState<Record<string, { total: number; published: number; inProgress: number; rejected: number }>>({});
   const [orderSites, setOrderSites] = useState<Record<string, string[]>>({});
+  const [pixModalOpen, setPixModalOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+
+  const handleOpenPixModal = (order: any) => {
+    setSelectedOrder(order);
+    setPixModalOpen(true);
+  };
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       const { data, error } = await supabase
         .from('pedidos')
-        .select('id, status, total_cents, created_at, abacate_url')
+        .select('id, status, total_cents, created_at')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
       if (error) console.error('Erro pedidos', error);
@@ -166,44 +174,54 @@ function PurchasesTable({ userId }: { userId: string }) {
     return <span>{sites.slice(0, 2).join(', ')}{sites.length > 2 ? ` +${sites.length - 2}` : ''}</span>;
   };
   return (
-    <div className="border rounded-md overflow-x-auto bg-card">
-      <table className="w-full text-sm">
-        <thead className="bg-muted/60">
-          <tr className="text-left">
-            <th className="p-3 uppercase font-bold tracking-wide">Pedido</th>
-            <th className="p-3 uppercase font-bold tracking-wide">Criado em</th>
-            <th className="p-3 uppercase font-bold tracking-wide">Site</th>
-            <th className="p-3 uppercase font-bold tracking-wide">Total</th>
-            <th className="p-3 uppercase font-bold tracking-wide">Pagamento</th>
-            <th className="p-3 uppercase font-bold tracking-wide">Publicação</th>
-            <th className="p-3 uppercase font-bold tracking-wide">Ações</th>
-          </tr>
-        </thead>
-        <tbody>
-          {rows.length === 0 ? (
-            <tr><td className="p-4" colSpan={7}>Nenhum pedido.</td></tr>
-          ) : rows.map((r) => (
-            <tr key={r.id} className="border-t">
-              <td className="p-3">{r.id}</td>
-              <td className="p-3">{new Date(r.created_at).toLocaleString('pt-BR')}</td>
-              <td className="p-3">{renderSites(r.id)}</td>
-              <td className="p-3">{(r.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-              <td className="p-3">{renderOrderStatusBadge(r.status)}</td>
-              <td className="p-3">{renderPubBadge(r.id)}</td>
-              <td className="p-3">
-                {r.status === 'paid' ? (
-                  <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
-                ) : r.abacate_url ? (
-                  <a className="story-link text-primary" href={r.abacate_url} target="_blank" rel="noopener noreferrer">Ver cobrança</a>
-                ) : (
-                  <span className="text-muted-foreground">—</span>
-                )}
-              </td>
+    <>
+      <div className="border rounded-md overflow-x-auto bg-card">
+        <table className="w-full text-sm">
+          <thead className="bg-muted/60">
+            <tr className="text-left">
+              <th className="p-3 uppercase font-bold tracking-wide">Pedido</th>
+              <th className="p-3 uppercase font-bold tracking-wide">Criado em</th>
+              <th className="p-3 uppercase font-bold tracking-wide">Site</th>
+              <th className="p-3 uppercase font-bold tracking-wide">Total</th>
+              <th className="p-3 uppercase font-bold tracking-wide">Pagamento</th>
+              <th className="p-3 uppercase font-bold tracking-wide">Publicação</th>
+              <th className="p-3 uppercase font-bold tracking-wide">Ações</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+          </thead>
+          <tbody>
+            {rows.length === 0 ? (
+              <tr><td className="p-4" colSpan={7}>Nenhum pedido.</td></tr>
+            ) : rows.map((r) => (
+              <tr key={r.id} className="border-t">
+                <td className="p-3">{r.id}</td>
+                <td className="p-3">{new Date(r.created_at).toLocaleString('pt-BR')}</td>
+                <td className="p-3">{renderSites(r.id)}</td>
+                <td className="p-3">{(r.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
+                <td className="p-3">{renderOrderStatusBadge(r.status)}</td>
+                <td className="p-3">{renderPubBadge(r.id)}</td>
+                <td className="p-3">
+                  {r.status === 'paid' ? (
+                    <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
+                  ) : r.status === 'pending' ? (
+                    <Button variant="link" onClick={() => handleOpenPixModal(r)}>Ver chave PIX</Button>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {selectedOrder && (
+        <PixPaymentModal
+          open={pixModalOpen}
+          onClose={() => setPixModalOpen(false)}
+          amountBRL={selectedOrder.total_cents / 100}
+          orderId={selectedOrder.id}
+        />
+      )}
+    </>
   );
 }
 

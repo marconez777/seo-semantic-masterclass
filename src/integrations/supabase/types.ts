@@ -228,8 +228,6 @@ export type Database = {
       }
       pedidos: {
         Row: {
-          abacate_bill_id: string | null
-          abacate_url: string | null
           created_at: string
           id: string
           status: Database["public"]["Enums"]["order_status"]
@@ -238,8 +236,6 @@ export type Database = {
           user_id: string
         }
         Insert: {
-          abacate_bill_id?: string | null
-          abacate_url?: string | null
           created_at?: string
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
@@ -248,8 +244,6 @@ export type Database = {
           user_id: string
         }
         Update: {
-          abacate_bill_id?: string | null
-          abacate_url?: string | null
           created_at?: string
           id?: string
           status?: Database["public"]["Enums"]["order_status"]
