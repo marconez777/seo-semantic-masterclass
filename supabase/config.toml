@@ -1,7 +1,7 @@
 project_id = "lvinoytvsyloccajnrwp"
 
 [functions.manual-create-order]
-verify_jwt = true
+verify_jwt = false
 
 [functions.get-pii-data]
 verify_jwt = true
