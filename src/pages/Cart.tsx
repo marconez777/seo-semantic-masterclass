@@ -5,9 +5,15 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout } from "@/services/payment";
 import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+
 const Cart = () => {
   const { items, totalCents, itemsCount, clearCart, removeFromCart } = useCart();
   const [loading, setLoading] = useState(false);
+  const [showPixModal, setShowPixModal] = useState(false);
+  const [orderId, setOrderId] = useState<string>("");
+  const { toast } = useToast();
   const totalBRL = (totalCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const finalize = async () => {
@@ -36,8 +42,10 @@ const Cart = () => {
       }));
 
       const res = await createCheckout(orders as any, customer as any);
-      if (res.url && res.url !== '#') {
-        window.location.href = res.url;
+      if (res.mode === 'manual' && res.orderId) {
+        setOrderId(res.orderId);
+        setShowPixModal(true);
+        setLoading(false);
       } else {
         setLoading(false);
       }
@@ -107,6 +115,76 @@ const Cart = () => {
             </div>
           </section>
         )}
+
+        {/* Modal PIX */}
+        <Dialog open={showPixModal} onOpenChange={(open) => {
+          setShowPixModal(open);
+          if (!open) {
+            clearCart();
+          }
+        }}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle>Finalize o pagamento por PIX</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Por favor, realize o PIX do valor total do seu pedido na chave abaixo.
+                Após identificarmos o pagamento, inicia a contagem de 7 dias para publicação de todos os backlinks.
+              </p>
+              
+              <div className="bg-muted p-4 rounded-lg space-y-2">
+                <div>
+                  <span className="font-semibold">Chave PIX (CNPJ):</span>
+                  <div className="font-mono text-sm">54.128.027/0001-93</div>
+                </div>
+                <div>
+                  <span className="font-semibold">Titular:</span>
+                  <div className="text-sm">Keila de Oliveira Castellini</div>
+                </div>
+                <div>
+                  <span className="font-semibold">Total:</span>
+                  <div className="text-lg font-semibold">{totalBRL}</div>
+                </div>
+              </div>
+
+              <div className="text-sm">
+                <span className="font-semibold">Contato WhatsApp (dúvidas):</span>
+                <div>11 99179-5436</div>
+              </div>
+
+              <div className="flex flex-col gap-2">
+                <Button 
+                  onClick={() => {
+                    navigator.clipboard.writeText("54.128.027/0001-93");
+                    toast({ title: "CNPJ copiado para a área de transferência" });
+                  }}
+                  variant="outline"
+                >
+                  Copiar CNPJ
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    window.open("https://wa.me/5511991795436", "_blank");
+                  }}
+                  variant="outline"
+                >
+                  Ir ao WhatsApp
+                </Button>
+                
+                <Button 
+                  onClick={() => {
+                    setShowPixModal(false);
+                    window.location.href = "/painel";
+                  }}
+                >
+                  Ver meus pedidos
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </>
   );

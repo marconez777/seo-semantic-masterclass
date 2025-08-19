@@ -9,7 +9,6 @@ interface Pedido {
   status: string;
   total_cents: number;
   created_at: string;
-  abacate_url: string | null;
 }
 
 interface PedidoPII {
@@ -97,9 +96,6 @@ export default function AdminPedidos() {
                   <tr key={p.id} className="border-t align-top">
                     <td className="p-3">
                       <div className="font-mono text-xs break-all">{p.id}</div>
-                      {p.abacate_url && (
-                        <a className="text-primary hover:underline" href={p.abacate_url!} target="_blank" rel="noopener noreferrer">Cobrança</a>
-                      )}
                     </td>
                     <td className="p-3">
                       {(() => { const pii = piiByOrder[p.id]; return (

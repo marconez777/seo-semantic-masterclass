@@ -5,8 +5,9 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export type CheckoutResult = {
-  url: string;
+  url?: string;
   mode: 'manual' | 'redirect';
+  orderId?: string;
 };
 
 type OrderInput = {
@@ -39,22 +40,17 @@ export async function createCheckout(orders: OrderInput[], customer?: { name?: s
     targetUrl: o?.targetUrl,
   }));
 
-  const { data, error } = await supabase.functions.invoke('abacate-create-billing', {
+  const { data, error } = await supabase.functions.invoke('manual-create-order', {
     body: {
-      frequency: 'MULTIPLE_PAYMENTS',
-      methods: ['PIX'],
       products,
       customer: customer?.name
         ? {
             name: String(customer.name),
-            cellphone: (customer as any).cellphone ?? customer.phone,
+            phone: customer.phone,
             email: customer.email,
-            taxId: (customer as any).taxId ?? customer.cpf,
+            cpf: customer.cpf,
           }
         : undefined,
-      // Frontend routes for navigation
-      returnUrl: `${window.location.origin}/carrinho?cancel=1`,
-      completionUrl: `${window.location.origin}/painel?paid=1`,
       metadata: {
         items: metaItems,
       },
@@ -63,9 +59,9 @@ export async function createCheckout(orders: OrderInput[], customer?: { name?: s
 
   if (error) {
     console.error('Checkout error:', error);
-    return { url: '#', mode: 'manual' };
+    return { mode: 'manual' };
   }
 
-  const url = (data?.url ?? data?.data?.url) as string | undefined;
-  return { url: url ?? '#', mode: 'redirect' };
+  const orderId = data?.orderId;
+  return { mode: 'manual', orderId };
 }
