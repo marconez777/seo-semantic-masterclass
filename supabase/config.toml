@@ -1,7 +1,19 @@
 project_id = "lvinoytvsyloccajnrwp"
 
-[functions.abacate-create-billing]
+[functions.manual-create-order]
 verify_jwt = true
 
-[functions.abacate-webhook]
+[functions.get-pii-data]
+verify_jwt = true
+
+[functions.send-activation-email]
+verify_jwt = false
+
+[functions.send-contact-email]
+verify_jwt = false
+
+[functions.send-reset-password-email]
+verify_jwt = false
+
+[functions.seo-health-check]
 verify_jwt = false
