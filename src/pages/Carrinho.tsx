@@ -129,29 +129,24 @@ const Carrinho = () => {
               <DialogTitle>Finalize o pagamento por PIX</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Por favor, realize o PIX do valor total do seu pedido na chave abaixo.
-                Após identificarmos o pagamento, inicia a contagem de 7 dias para publicação de todos os backlinks.
-              </p>
-              
-              <div className="bg-muted p-4 rounded-lg space-y-2">
-                <div>
-                  <span className="font-semibold">Chave PIX (CNPJ):</span>
-                  <div className="font-mono text-sm">54.128.027/0001-93</div>
+              <div className="space-y-3 text-sm text-muted-foreground">
+                <p>
+                  Por favor, realize o PIX do valor total do seu pedido na chave abaixo. Após a identificação do pagamento, inicia a contagem de 7 dias para a publicação de todos os backlinks.
+                </p>
+                <div className="bg-muted p-4 rounded-lg space-y-2">
+                  <p>Segue abaixo o PIX para a realização do pagamento:</p>
+                  <div className="font-mono text-base">
+                    <p><strong>CNPJ:</strong> 54.128.027/0001-93</p>
+                    <p><strong>Titular:</strong> Keila de Oliveira Castellini</p>
+                  </div>
+                  <div className="pt-2">
+                    <span className="font-semibold">Total:</span>
+                    <div className="text-lg font-semibold">{totalBRL}</div>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-semibold">Titular:</span>
-                  <div className="text-sm">Keila de Oliveira Castellini</div>
-                </div>
-                <div>
-                  <span className="font-semibold">Total:</span>
-                  <div className="text-lg font-semibold">{totalBRL}</div>
-                </div>
-              </div>
-
-              <div className="text-sm">
-                <span className="font-semibold">Contato WhatsApp (dúvidas):</span>
-                <div>11 99179-5436</div>
+                <p>
+                  Caso tenha alguma dúvida, entre em contato no Whatsapp: <strong>11 99179-5436</strong>
+                </p>
               </div>
 
               <div className="flex flex-col gap-2">
