@@ -75,16 +75,21 @@ export default function AdminPedidos() {
   };
 
   const handleApprovePayment = async (orderId: string) => {
-    const { error } = await supabase
+    const { data: updatedOrder, error } = await supabase
       .from('pedidos')
       .update({ status: 'paid' })
-      .eq('id', orderId);
+      .eq('id', orderId)
+      .select('*')
+      .single();
     
-    if (error) {
+    if (error || !updatedOrder) {
       console.error('Erro ao aprovar pagamento', error);
-      toast({ title: "Erro ao aprovar pagamento", description: error.message });
+      toast({ title: "Erro ao aprovar pagamento", description: error?.message });
     } else {
-      toast({ title: "Pagamento aprovado com sucesso" });
+      const dueDate = updatedOrder.publish_due_at
+        ? new Date(updatedOrder.publish_due_at).toLocaleDateString('pt-BR')
+        : 'N/A';
+      toast({ title: "Pagamento aprovado", description: `Prazo de publicação até ${dueDate}.` });
       loadData();
     }
   };
@@ -99,7 +104,7 @@ export default function AdminPedidos() {
       console.error('Erro ao cancelar pedido', error);
       toast({ title: "Erro ao cancelar pedido", description: error.message });
     } else {
-      toast({ title: "Pedido cancelado com sucesso" });
+      toast({ title: "Pedido cancelado" });
       loadData();
     }
   };
@@ -107,13 +112,13 @@ export default function AdminPedidos() {
   const handleAddReceipt = async () => {
     const amount = parseFloat(receiptAmount);
     if (!amount || amount <= 0) {
-      toast({ title: "Valor inválido", description: "Digite um valor válido" });
+      toast({ title: "Valor inválido", description: "Digite um valor válido." });
       return;
     }
 
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
-      toast({ title: "Usuário não autenticado", description: "Faça login novamente" });
+      toast({ title: "Usuário não autenticado", description: "Faça login novamente." });
       return;
     }
 
@@ -135,6 +140,7 @@ export default function AdminPedidos() {
       setReceiptAmount("");
       setReceiptNote("");
       setSelectedOrderId("");
+      loadData(); // Refetch data
     }
   };
 

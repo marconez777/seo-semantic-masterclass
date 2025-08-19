@@ -7,8 +7,9 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout } from "@/services/payment";
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useRef, useEffect } from "react";
 
 const Carrinho = () => {
   const { items, totalCents, itemsCount, clearCart, removeFromCart } = useCart();
@@ -16,22 +17,47 @@ const Carrinho = () => {
   const [showPixModal, setShowPixModal] = useState(false);
   const [orderId, setOrderId] = useState<string>("");
   const { toast } = useToast();
+  const copyCnpjBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (showPixModal) {
+      setTimeout(() => copyCnpjBtnRef.current?.focus(), 100);
+    }
+  }, [showPixModal]);
   const totalBRL = (totalCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const finalize = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) {
         window.location.href = "/auth";
+        setLoading(false);
         return;
       }
+
       const customer = {
-        name: (session.user.user_metadata as any)?.name,
-        phone: (session.user.user_metadata as any)?.phone,
-        cpf: (session.user.user_metadata as any)?.cpf,
-        email: session.user.email,
+        name: session.user.user_metadata?.name ?? '',
+        phone: session.user.user_metadata?.phone ?? '',
+        cpf: session.user.user_metadata?.cpf ?? '',
+        email: session.user.email ?? '',
       };
+
+      const missingFields = [];
+      if (!customer.name) missingFields.push('Nome');
+      if (!customer.email) missingFields.push('Email');
+      if (!customer.cpf) missingFields.push('CPF');
+      if (!customer.phone) missingFields.push('Telefone');
+
+      if (missingFields.length > 0) {
+        toast({
+          title: "Dados incompletos",
+          description: `Por favor, preencha os seguintes campos no seu perfil: ${missingFields.join(', ')}.`,
+          variant: "destructive",
+        });
+        setLoading(false);
+        return;
+      }
 
       const orders = items.map((it) => ({
         id: it.id,
@@ -43,16 +69,19 @@ const Carrinho = () => {
         targetUrl: it.url_destino,
       }));
 
-      const res = await createCheckout(orders as any, customer as any);
+      const res = await createCheckout(orders, customer);
       if (res.mode === 'manual' && res.orderId) {
         setOrderId(res.orderId);
         setShowPixModal(true);
-        setLoading(false);
-      } else {
-        setLoading(false);
       }
     } catch (e) {
       console.error('Falha ao finalizar compra', e);
+      toast({
+        title: "Erro ao finalizar compra",
+        description: "Houve um problema ao criar seu pedido. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
       setLoading(false);
     }
   };
@@ -124,9 +153,16 @@ const Carrinho = () => {
             clearCart();
           }
         }}>
-          <DialogContent className="max-w-md">
+          <DialogContent
+            className="max-w-md"
+            aria-labelledby="pix-dialog-title"
+            aria-describedby="pix-dialog-description"
+          >
             <DialogHeader>
-              <DialogTitle>Finalize o pagamento por PIX</DialogTitle>
+              <DialogTitle id="pix-dialog-title">Finalize o pagamento por PIX</DialogTitle>
+              <DialogDescription id="pix-dialog-description" className="sr-only">
+                Instruções para pagamento via PIX e próximos passos.
+              </DialogDescription>
             </DialogHeader>
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
@@ -156,9 +192,10 @@ const Carrinho = () => {
 
               <div className="flex flex-col gap-2">
                 <Button 
+                  ref={copyCnpjBtnRef}
                   onClick={() => {
                     navigator.clipboard.writeText("54.128.027/0001-93");
-                    toast({ title: "CNPJ copiado para a área de transferência" });
+                    toast({ title: "CNPJ copiado" });
                   }}
                   variant="outline"
                 >
@@ -167,17 +204,18 @@ const Carrinho = () => {
                 
                 <Button 
                   onClick={() => {
-                    window.open("https://wa.me/5511991795436", "_blank");
+                    const whatsappUrl = `https://wa.me/5511991795436?text=Oi%2C%20tenho%20uma%20d%C3%BAvida%20sobre%20meu%20pedido%20${orderId}`;
+                    window.open(whatsappUrl, "_blank");
                   }}
                   variant="outline"
                 >
-                  Ir ao WhatsApp
+                  Abrir WhatsApp
                 </Button>
                 
                 <Button 
                   onClick={() => {
                     setShowPixModal(false);
-                    window.location.href = "/painel";
+                    window.location.href = "/dashboard?focus=pedidos";
                   }}
                 >
                   Ver meus pedidos

@@ -73,7 +73,27 @@ Deno.serve(async (req) => {
     const customer_cpf = payload.customer?.cpf ?? payload.customer?.taxId ?? meta?.cpf ?? null
     const customer_phone = payload.customer?.phone ?? payload.customer?.cellphone ?? meta?.phone ?? null
 
-    // Insert pedido (sem abacate_bill_id/abacate_url)
+    // Validate customer data
+    const missingFields = []
+    if (!customer_name) missingFields.push('name')
+    if (!customer_email) missingFields.push('email')
+    if (!customer_cpf) missingFields.push('cpf')
+    if (!customer_phone) missingFields.push('phone')
+
+    if (missingFields.length > 0) {
+      return new Response(
+        JSON.stringify({
+          error: 'Missing required customer fields',
+          fields: missingFields,
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      )
+    }
+
+    // Insert pedido
     const { data: pedido, error: pedidoErr } = await supabaseUser
       .from('pedidos')
       .insert({
