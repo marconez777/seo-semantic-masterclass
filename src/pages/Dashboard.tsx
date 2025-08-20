@@ -21,20 +21,17 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input";
 import { ClipboardList, FileCheck2, Heart, UserCircle, Shield } from "lucide-react";
 
+import { useAuth } from "@/contexts/AuthContext";
+
 function ProfileSection() {
-  const [email, setEmail] = useState<string | null>(null);
-  const [name, setName] = useState<string | null>(null);
+  const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [pwd1, setPwd1] = useState("");
   const [pwd2, setPwd2] = useState("");
 
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      const user = data.user;
-      setEmail(user?.email ?? null);
-      setName((user?.user_metadata as any)?.name ?? null);
-    });
-  }, []);
+  const email = user?.email;
+  // Assuming name is stored in user_metadata, which is the standard Supabase practice.
+  const name = user?.user_metadata?.name;
 
   const changePassword = async () => {
     if (pwd1.length < 6 || pwd1 !== pwd2) return;
@@ -72,10 +69,16 @@ function ProfileSection() {
 }
 
 
+import { useToast } from "@/hooks/use-toast";
+
 function PurchasesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
   const [pubSummary, setPubSummary] = useState<Record<string, { total: number; published: number; inProgress: number; rejected: number }>>({});
   const [orderSites, setOrderSites] = useState<Record<string, string[]>>({});
+  const [selectedOrder, setSelectedOrder] = useState<any>(null);
+  const { toast } = useToast();
+
+  const pixKey = import.meta.env.VITE_PIX_KEY;
 
   useEffect(() => {
     let mounted = true;
@@ -191,16 +194,67 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">{renderOrderStatusBadge(r.status)}</td>
               <td className="p-3">{renderPubBadge(r.id)}</td>
               <td className="p-3">
-                {r.status === 'paid' ? (
-                  <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
-                ) : (
-                  <span className="text-muted-foreground">Aguardando pagamento PIX</span>
+                {r.status === 'pending' && (
+                  <Button size="sm" variant="outline" onClick={() => setSelectedOrder(r)}>
+                    Pagar PIX
+                  </Button>
                 )}
+                {r.status === 'paid' && (
+                  <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
+                )}
+                {/* Other statuses will show nothing */}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+
+      {/* PIX Payment Modal */}
+      <Dialog open={!!selectedOrder} onOpenChange={(open) => !open && setSelectedOrder(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Pagar com PIX</DialogTitle>
+            <DialogDescription>
+              Realize o pagamento para o pedido abaixo para iniciar o processo de publicação.
+            </DialogDescription>
+          </DialogHeader>
+          {selectedOrder && (
+            <div className="space-y-4">
+              <div className="bg-muted p-4 rounded-lg space-y-2">
+                <div>
+                  <span className="font-semibold">Nº do Pedido:</span>
+                  <div className="font-mono text-sm">{selectedOrder.id}</div>
+                </div>
+                <div>
+                  <span className="font-semibold">Valor Total:</span>
+                  <div className="text-lg font-bold">
+                    {(selectedOrder.total_cents / 100).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                  </div>
+                </div>
+                <div>
+                  <span className="font-semibold">Chave PIX (CNPJ):</span>
+                  <div className="font-mono text-sm">{pixKey ?? 'Chave não configurada. Entre em contato.'}</div>
+                </div>
+              </div>
+              <Button
+                className="w-full"
+                onClick={() => {
+                  if (pixKey) {
+                    navigator.clipboard.writeText(pixKey);
+                    toast({ title: "Chave PIX copiada!" });
+                  }
+                }}
+                disabled={!pixKey}
+              >
+                Copiar Chave PIX
+              </Button>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSelectedOrder(null)}>Fechar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
@@ -344,50 +398,21 @@ function FavoritesTable({ userId }: { userId: string }) {
 }
 
 export default function Dashboard() {
-  const navigate = useNavigate();
   const location = useLocation();
   const { clearCart } = useCart();
-  const [userId, setUserId] = useState<string | null>(null);
+  const { user, profile, signOut } = useAuth();
   const [tab, setTab] = useState<string>("pedidos");
-  const [isAdmin, setIsAdmin] = useState(false);
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('paid') === '1') {
       clearCart();
     }
   }, [location.search, clearCart]);
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      const id = session?.user?.id ?? null;
-      setUserId(id);
-      if (!id) navigate('/auth', { replace: true, state: { from: '/painel' } });
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      const id = data.session?.user?.id ?? null;
-      setUserId(id);
-      if (!id) navigate('/auth', { replace: true, state: { from: '/painel' } });
-    });
-    return () => subscription.unsubscribe();
-  }, [navigate]);
 
-  useEffect(() => {
-    if (!userId) return;
-    
-    // Verificar se o usuário tem role de admin usando nova estrutura
-    const checkAdminRole = async () => {
-      try {
-        const { data } = await supabase.rpc('is_admin', { uid: userId });
-        setIsAdmin(!!data);
-      } catch (error) {
-        console.error('Erro ao verificar role de admin:', error);
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdminRole();
-  }, [userId]);
-
-  if (!userId) return null;
+  // The user is guaranteed to be non-null here because of the <RequireAuth> guard
+  const isAdmin = profile?.role === 'admin';
+  const userId = user!.id;
 
   return (
     <>
@@ -457,7 +482,7 @@ export default function Dashboard() {
                   <Button asChild>
                     <a href="/comprar-backlinks">Loja de Backlinks</a>
                   </Button>
-                  <Button variant="outline" onClick={() => supabase.auth.signOut()}>Sair</Button>
+                  <Button variant="outline" onClick={signOut}>Sair</Button>
                 </div>
               </div>
 

@@ -46,16 +46,23 @@ const Carrinho = () => {
         email: session.user.email,
       };
 
-      // Prepare orders
-      const orders = items.map((it) => ({
-        id: it.id,
-        name: it.name,
-        quantity: it.quantity,
-        priceCents: it.price_cents,
-        description: `Ancora: ${it.texto_ancora} | URL: ${it.url_destino}`,
-        anchorText: it.texto_ancora,
-        targetUrl: it.url_destino,
-      }));
+      // Prepare orders with normalization
+      const orders = items.map((it) => {
+        let normalizedUrl = it.url_destino;
+        if (normalizedUrl && !normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+          normalizedUrl = `https://${normalizedUrl}`;
+        }
+
+        return {
+          id: it.id,
+          name: it.name,
+          quantity: it.quantity,
+          priceCents: it.price_cents,
+          description: `Ancora: ${it.texto_ancora || 'N/A'} | URL: ${normalizedUrl || 'N/A'}`,
+          anchorText: it.texto_ancora || undefined,
+          targetUrl: normalizedUrl || undefined,
+        };
+      });
 
       console.log('Finalizing order with:', { orders, customer });
 
@@ -71,7 +78,8 @@ const Carrinho = () => {
       if (result.mode === 'manual' && result.orderId) {
         setOrderId(result.orderId);
         setShowPixModal(true);
-        toast({ title: "Pedido criado com sucesso!" });
+        toast({ title: "Pedido criado com sucesso!", description: "Finalize o pagamento via PIX para começar." });
+        // The cart will be cleared and user redirected when the modal is closed.
       } else {
         throw new Error('Resposta inválida do checkout');
       }
@@ -151,6 +159,8 @@ const Carrinho = () => {
           setShowPixModal(open);
           if (!open) {
             clearCart();
+            // B.4: Redirect to panel to refetch orders, instead of just staying here
+            window.location.href = '/painel';
           }
         }}>
           <DialogContent className="max-w-md">

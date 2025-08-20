@@ -1,19 +1,18 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface RequireRoleProps {
-  role: 'admin' | 'user';
+interface RequireAuthProps {
   children: JSX.Element;
 }
 
-export function RequireRole({ role, children }: RequireRoleProps) {
-  const { user, profile, loading } = useAuth();
+export function RequireAuth({ children }: RequireAuthProps) {
+  const { user, loading } = useAuth();
   const location = useLocation();
 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">Verificando permissões...</div>
+        <div className="text-center">Carregando...</div>
       </div>
     );
   }
@@ -23,12 +22,6 @@ export function RequireRole({ role, children }: RequireRoleProps) {
     // trying to go to when they were redirected. This allows us to send them
     // along to that page after they login.
     return <Navigate to="/auth" state={{ from: location }} replace />;
-  }
-
-  if (role === 'admin' && profile?.role !== 'admin') {
-    // If the user is not an admin but tries to access an admin page,
-    // redirect them to a "Forbidden" page.
-    return <Navigate to="/403" replace />;
   }
 
   return children;

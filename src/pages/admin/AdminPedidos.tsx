@@ -7,6 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface Pedido {
   id: string;
@@ -30,48 +31,53 @@ interface PedidoPII {
 
 export default function AdminPedidos() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [piiByOrder, setPiiByOrder] = useState<Record<string, PedidoPII>>({});
   const [receiptAmount, setReceiptAmount] = useState("");
   const [receiptNote, setReceiptNote] = useState("");
   const [selectedOrderId, setSelectedOrderId] = useState<string>("");
   const [showReceiptDialog, setShowReceiptDialog] = useState(false);
   const { toast } = useToast();
+  const { user } = useAuth(); // Get user from context
 
   const loadData = async () => {
     setLoading(true);
-    // Pedidos (todos)
-    const { data: pedidosData, error: pedidosErr } = await supabase
-      .from('pedidos')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (pedidosErr) console.error('Erro ao carregar pedidos', pedidosErr);
-    const pedidos = pedidosData ?? [];
-    setPedidos(pedidos as any);
+    try {
+      const { data: pedidosData, error: pedidosErr } = await supabase
+        .from('pedidos')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-    const orderIds = pedidos.map((p: any) => p.id);
+      if (pedidosErr) throw pedidosErr;
 
-    // Load PII snapshot for each order (admin only) - using secure edge function
-    let piiMap: Record<string, PedidoPII> = {};
-    if (orderIds.length) {
-      try {
+      const pedidos = pedidosData ?? [];
+      setPedidos(pedidos as any);
+
+      const orderIds = pedidos.map((p: any) => p.id);
+
+      if (orderIds.length > 0) {
         const { data: piiResponse, error: piiErr } = await supabase.functions.invoke('get-pii-data', {
-          body: { order_ids: orderIds }
+          body: { order_ids: orderIds },
         });
-        
+
         if (piiErr) {
-          console.error('Erro ao carregar dados PII via edge function', piiErr);
-        } else if (piiResponse?.data) {
-          piiResponse.data.forEach((record: any) => {
+          // Errors like 401/403 are handled by RequireRole, so this is likely a 500
+          console.error('Erro ao carregar dados PII:', piiErr);
+          toast({ title: "Erro ao carregar dados", description: "Não foi possível carregar as informações dos clientes.", variant: "destructive" });
+        } else if (piiResponse) {
+          const piiMap: Record<string, PedidoPII> = {};
+          piiResponse.forEach((record: any) => {
             piiMap[record.order_id] = record as PedidoPII;
           });
+          setPiiByOrder(piiMap);
         }
-      } catch (error) {
-        console.error('Erro ao chamar função segura de PII', error);
       }
+    } catch (error: any) {
+      console.error('Erro ao carregar painel de admin:', error);
+      toast({ title: 'Erro ao carregar painel', description: error.message, variant: 'destructive' });
+    } finally {
+      setLoading(false);
     }
-    setPiiByOrder(piiMap);
-    setLoading(false);
   };
 
   const handleApprovePayment = async (orderId: string) => {
@@ -111,7 +117,6 @@ export default function AdminPedidos() {
       return;
     }
 
-    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       toast({ title: "Usuário não autenticado", description: "Faça login novamente" });
       return;
@@ -148,8 +153,10 @@ export default function AdminPedidos() {
   };
 
   useEffect(() => {
+    // The RequireRole component ensures that a user is an admin at this point.
+    // We can directly call loadData.
     loadData();
-  }, []);
+  }, []); // Run only once on component mount
 
   return (
     <>
@@ -180,9 +187,9 @@ export default function AdminPedidos() {
             </thead>
             <tbody>
               {loading ? (
-                <tr><td className="p-4" colSpan={9}>Carregando…</td></tr>
+                <tr><td className="p-4 text-center" colSpan={9}>Carregando dados do painel...</td></tr>
               ) : pedidos.length === 0 ? (
-                <tr><td className="p-4" colSpan={9}>Nenhum pedido.</td></tr>
+                <tr><td className="p-4 text-center" colSpan={9}>Nenhum pedido encontrado.</td></tr>
               ) : (
                 pedidos.map((p) => (
                   <tr key={p.id} className="border-t align-top">
@@ -190,20 +197,24 @@ export default function AdminPedidos() {
                       <div className="font-mono text-xs break-all max-w-32">{p.id}</div>
                     </td>
                     <td className="p-3">
-                      {(() => { const pii = piiByOrder[p.id]; return (
+                      {piiByOrder[p.id] ? (
                         <>
-                          <div className="font-medium">{pii?.customer_name ?? '—'}</div>
-                          <div className="text-muted-foreground text-xs">CPF: {pii?.customer_cpf ?? '—'}</div>
+                          <div className="font-medium">{piiByOrder[p.id].customer_name ?? '—'}</div>
+                          <div className="text-muted-foreground text-xs">CPF: {piiByOrder[p.id].customer_cpf ?? '—'}</div>
                         </>
-                      ); })()}
+                      ) : (
+                        <div className="text-muted-foreground text-xs">Carregando PII...</div>
+                      )}
                     </td>
                     <td className="p-3 text-xs">
-                      {(() => { const pii = piiByOrder[p.id]; return (
+                      {piiByOrder[p.id] ? (
                         <>
-                          <div>{pii?.customer_email ?? '—'}</div>
-                          <div>{pii?.customer_phone ?? '—'}</div>
+                          <div>{piiByOrder[p.id].customer_email ?? '—'}</div>
+                          <div>{piiByOrder[p.id].customer_phone ?? '—'}</div>
                         </>
-                      ); })()}
+                      ) : (
+                        '—'
+                      )}
                     </td>
                     <td className="p-3 text-xs">{new Date(p.created_at).toLocaleString('pt-BR')}</td>
                     <td className="p-3">{(p.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
