@@ -4,19 +4,22 @@ import { Button } from "@/components/ui/button";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { ShoppingCart } from "lucide-react";
 import { getCategoryIcon } from "@/lib/category-icons";
-import { useLocation, Link } from "react-router-dom";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/auth/AuthProvider";
+import { useQueryClient } from "@tanstack/react-query";
 
 const Header = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
   const [backlinksOpen, setBacklinksOpen] = useState(false);
   const openTimer = useRef<number | null>(null);
   const closeTimer = useRef<number | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { session, profile } = useAuth();
   
   const isPanelRoute = location.pathname.startsWith("/painel");
-  const isLoggedIn = !!userName;
+  const isLoggedIn = !!session;
   const { itemsCount } = useCart();
   
   const openBacklinks = () => {
@@ -30,26 +33,16 @@ const Header = () => {
     closeTimer.current = window.setTimeout(() => setBacklinksOpen(false), 500);
   };
 
-
-  useEffect(() => {
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      
-      // Check role from JWT first, then fallback to database
-      const jwtRole = user.app_metadata?.role || user.user_metadata?.role;
-      
-      if (jwtRole === 'admin') {
-        setIsAdmin(true);
-      } else {
-        // Fallback: check database
-        const { data } = await supabase.rpc('is_admin', { uid: user.id });
-        setIsAdmin(!!data);
-      }
-      
-      setUserName((user.user_metadata as any)?.name || user.email || null);
-    })();
-  }, []);
+  async function handleLogout() {
+    try {
+      await supabase.auth.signOut();
+      queryClient.clear();
+      navigate("/auth", { replace: true });
+    } catch (e) {
+      console.error(e);
+      navigate("/auth", { replace: true });
+    }
+  }
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -195,9 +188,9 @@ const Header = () => {
                 )}
               </Link>
               <UserProfileDropdown
-                name={userName ?? 'Visitante'}
-                role={isAdmin ? 'Admin' : 'Cliente'}
-                onSignOut={() => supabase.auth.signOut()}
+                name={session?.user.email ?? 'Visitante'}
+                role={profile?.role === 'admin' ? 'Admin' : 'Cliente'}
+                onSignOut={handleLogout}
                 showActions={false}
               />
             </>

@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import Contact from "./pages/Contact";
 import AgenciaBacklinks from "./pages/AgenciaBacklinks";
@@ -41,12 +41,11 @@ import BlogPost from "./pages/BlogPost";
 import AdminBlogNew from "./pages/AdminBlogNew";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
-import { RequireRole } from "./components/auth/RequireRole";
+import { RequireAuth, RequireAdmin } from "./auth/RouteGuards";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
  
 const App = () => (
-  <BrowserRouter>
     <CartProvider>
       <Routes>
         <Route path="/" element={<Index />} />
@@ -75,16 +74,20 @@ const App = () => (
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/auth" element={<Auth />} />
-        <Route path="/painel" element={<Dashboard />} />
+        <Route path="/painel" element={
+          <RequireAuth>
+            <Dashboard />
+          </RequireAuth>
+        } />
         <Route path="/403" element={<Forbidden />} />
         
         {/* Admin auth route */}
         <Route path="/admin/login" element={<AdminAuth />} />
         
         <Route path="/admin" element={
-          <RequireRole role="admin">
+          <RequireAdmin>
             <AdminLayout />
-          </RequireRole>
+          </RequireAdmin>
         }>
           <Route index element={<AdminPedidos />} />
           <Route path="sites" element={<AdminSites />} />
@@ -103,7 +106,6 @@ const App = () => (
       <Toaster />
       <WhatsAppFAB />
     </CartProvider>
-  </BrowserRouter>
 );
  
 export default App;

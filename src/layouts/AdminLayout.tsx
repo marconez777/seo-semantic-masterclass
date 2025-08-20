@@ -1,6 +1,8 @@
 import { Outlet, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/auth/AuthProvider";
 import {
   SidebarProvider,
   Sidebar,
@@ -18,23 +20,21 @@ import { NavLink } from "react-router-dom";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
-  const [userId, setUserId] = useState<string | null>(null);
+  const queryClient = useQueryClient();
+  const { session } = useAuth();
 
-  useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      const id = session?.user?.id ?? null;
-      setUserId(id);
-      if (!id) navigate('/admin/login', { replace: true });
-    });
-    supabase.auth.getSession().then(({ data }) => {
-      const id = data.session?.user?.id ?? null;
-      setUserId(id);
-      if (!id) navigate('/admin/login', { replace: true });
-    });
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+  async function handleLogout() {
+    try {
+      await supabase.auth.signOut();
+      queryClient.clear();
+      navigate("/auth", { replace: true });
+    } catch (e) {
+      console.error(e);
+      navigate("/auth", { replace: true });
+    }
+  }
 
-  if (!userId) return null;
+  if (!session) return null;
 
   const adminMenuItems = [
     { title: "Pedidos", url: "/admin", icon: ClipboardList },
@@ -81,7 +81,7 @@ export default function AdminLayout() {
                 </a>
                 <h1 className="text-3xl font-semibold">Admin</h1>
               </div>
-              <Button variant="outline" onClick={() => supabase.auth.signOut()}>
+              <Button variant="outline" onClick={handleLogout}>
                 Sair
               </Button>
             </div>
