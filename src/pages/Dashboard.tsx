@@ -76,6 +76,8 @@ function PurchasesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
   const [pubSummary, setPubSummary] = useState<Record<string, { total: number; published: number; inProgress: number; rejected: number }>>({});
   const [orderSites, setOrderSites] = useState<Record<string, string[]>>({});
+  const [pixOpen, setPixOpen] = useState(false);
+  const [pixOrder, setPixOrder] = useState<{ id: string; total: number } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -191,16 +193,38 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">{renderOrderStatusBadge(r.status)}</td>
               <td className="p-3">{renderPubBadge(r.id)}</td>
               <td className="p-3">
-                {r.status === 'paid' ? (
+                {r.status === 'paid' && (
                   <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
-                ) : (
-                  <span className="text-muted-foreground">Aguardando pagamento PIX</span>
+                )}
+                {r.status === 'pending' && (
+                  <Button size="sm" onClick={() => {
+                    setPixOrder({ id: r.id, total: r.total_cents });
+                    setPixOpen(true);
+                  }}>
+                    Pagar PIX
+                  </Button>
                 )}
               </td>
             </tr>
           ))}
         </tbody>
       </table>
+      <Dialog open={pixOpen} onOpenChange={setPixOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Pagamento via PIX</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 text-sm">
+            <p><strong>Pedido:</strong> {pixOrder?.id}</p>
+            <p><strong>Total:</strong> {(((pixOrder?.total ?? 0) / 100)).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</p>
+
+            <div className="p-3 rounded border bg-muted/40">
+              <p><strong>Chave PIX:</strong> <span className="font-mono break-all">{import.meta.env.VITE_PIX_KEY}</span></p>
+              <p className="text-muted-foreground">Copie a chave e faça o pagamento. Assim que o valor for identificado, confirmaremos sua compra.</p>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

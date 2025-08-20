@@ -40,9 +40,18 @@ export async function createCheckout(
       throw new Error('No orders provided');
     }
 
+    // Map orders to a unified format with consistent externalId
+    const processedOrders = orders.map(order => {
+      const externalId = String(order.externalId || order.id || crypto.randomUUID());
+      return {
+        ...order,
+        externalId,
+      };
+    });
+
     // Map orders to products format
-    const products = orders.map((order) => ({
-      externalId: String(order.externalId || order.id || crypto.randomUUID()),
+    const products = processedOrders.map((order) => ({
+      externalId: order.externalId,
       name: String(order.name || 'Item'),
       description: order.description || undefined,
       quantity: Number(order.quantity || 1),
@@ -50,8 +59,8 @@ export async function createCheckout(
     }));
 
     // Map metadata for anchor text and target URL
-    const metaItems = orders.map((order) => ({
-      externalId: String(order.externalId || order.id || ''),
+    const metaItems = processedOrders.map((order) => ({
+      externalId: order.externalId,
       anchorText: order.anchorText,
       targetUrl: order.targetUrl,
     }));

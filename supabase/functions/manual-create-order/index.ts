@@ -71,6 +71,7 @@ Deno.serve(async (req) => {
     }
 
     const user = userData.user;
+    console.log('[manual-create-order] user', user?.id);
     console.log(`Authenticated user: ${user.email}`);
 
     // Parse request body

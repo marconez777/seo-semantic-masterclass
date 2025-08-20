@@ -48,15 +48,22 @@ const Cart = () => {
       };
 
       // Prepare orders
-      const orders = items.map((it) => ({
-        id: it.id,
-        name: it.name,
-        quantity: it.quantity,
-        priceCents: it.price_cents,
-        description: `Ancora: ${it.texto_ancora} | URL: ${it.url_destino}`,
-        anchorText: it.texto_ancora,
-        targetUrl: it.url_destino,
-      }));
+      const orders = items.map((it) => {
+        let normalizedUrl = it.url_destino;
+        if (normalizedUrl && !normalizedUrl.startsWith('http://') && !normalizedUrl.startsWith('https://')) {
+          normalizedUrl = `https://${normalizedUrl}`;
+        }
+
+        return {
+          id: it.id,
+          name: it.name,
+          quantity: it.quantity,
+          priceCents: it.price_cents,
+          description: `Ancora: ${it.texto_ancora} | URL: ${normalizedUrl}`,
+          anchorText: it.texto_ancora,
+          targetUrl: normalizedUrl,
+        };
+      });
 
       console.log('Finalizing order with:', { orders, customer });
 
