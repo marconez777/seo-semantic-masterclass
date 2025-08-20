@@ -60,6 +60,22 @@ This project is built with:
 - shadcn-ui
 - Tailwind CSS
 
+## Configuração de Ambiente
+
+Para rodar o projeto, você precisa configurar as variáveis de ambiente.
+
+**Desenvolvimento Local**
+
+1.  Crie um arquivo `.env.local` na raiz do projeto.
+2.  Copie o conteúdo de `.env.production.example` para `.env.local`.
+3.  Substitua os valores das variáveis, como `<YOUR-PROJECT-ID>`, pelas suas chaves do Supabase.
+
+**Produção**
+
+1.  No seu provedor de hospedagem (Vercel, Netlify, etc.), configure as variáveis de ambiente com base no arquivo `.env.production.example`.
+2.  Certifique-se de que a variável `VITE_CHECKOUT_ENGINE` está definida como `new`.
+3.  Adicione também a variável `PIX_KEY` com a sua chave PIX.
+
 ## How can I deploy this project?
 
 Simply open [Lovable](https://lovable.dev/projects/64be96ec-500e-4bf9-b808-b82d5b5c8def) and click on Share -> Publish.

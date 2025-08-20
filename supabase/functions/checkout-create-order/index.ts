@@ -74,21 +74,12 @@ Deno.serve(async (req) => {
     console.log(`Authenticated user: ${user.email}`);
 
     // Parse request body
-    const body = await req.json().catch(() => null);
-    if (!body || !Array.isArray(body.products) || body.products.length === 0) {
-      console.error('Invalid request body or no products');
-      return new Response(
-        JSON.stringify({ error: 'Invalid request: products required' }),
-        { status: 400, headers: corsHeaders }
-      );
-    }
+    const { items, total_cents } = await req.json();
 
-    // Calculate total
-    const totalCents = body.products.reduce((sum: number, product: any) => {
-      const quantity = Number(product.quantity) || 0;
-      const price = Number(product.price) || 0;
-      return sum + (quantity * price);
-    }, 0);
+    if (!items || !total_cents) {
+      return new Response(JSON.stringify({ error: 'Invalid request: items and total_cents required' }), { status: 400, headers: corsHeaders });
+    }
+    const totalCents = total_cents;
 
     console.log(`Creating order for user ${user.id}, total: ${totalCents} cents`);
 
@@ -120,58 +111,33 @@ Deno.serve(async (req) => {
 
     console.log(`Order created: ${order.id}`);
 
-    // Insert customer PII (if available)
-    const supabaseService = createClient(supabaseUrl, supabaseServiceKey, {
-      auth: { persistSession: false }
-    });
+    const orderItems = items.map((item: any) => ({
+      order_id: order.id,
+      backlink_id: item.id,
+      quantity: item.quantity,
+      price_cents: item.price_cents,
+      anchor_text: item.texto_ancora,
+      target_url: item.url_destino,
+    }));
 
-    const customer = body.customer || {};
-    const userMeta = user.user_metadata || {};
-    
-    await supabaseService.rpc('insert_encrypted_pii_secure', {
-      p_order_id: order.id,
-      p_customer_email: user.email || customer.email || null,
-      p_customer_name: customer.name || userMeta.name || userMeta.full_name || null,
-      p_customer_cpf: customer.cpf || userMeta.cpf || null,
-      p_customer_phone: customer.phone || userMeta.phone || null,
-    }).catch(err => console.error('PII insert error:', err));
-
-    // Insert order items
-    const metaItems = body.metadata?.items || [];
-    const metaMap = new Map();
-    metaItems.forEach((item: any) => {
-      if (item.externalId) {
-        metaMap.set(item.externalId, item);
-      }
-    });
-
-    const orderItems = body.products.map((product: any) => {
-      const meta = metaMap.get(product.externalId) || {};
-      return {
-        order_id: order.id,
-        backlink_id: product.externalId || '',
-        quantity: Number(product.quantity) || 1,
-        price_cents: Number(product.price) || 0,
-        anchor_text: meta.anchorText || null,
-        target_url: meta.targetUrl || null,
-      };
-    });
-
-    await supabaseUser
-      .from('order_items')
-      .insert(orderItems)
-      .catch(err => console.error('Order items insert error:', err));
+    await supabaseUser.from('order_items').insert(orderItems);
 
     console.log(`Order ${order.id} completed successfully`);
 
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        orderId: order.id,
-        mode: 'manual'
-      }),
-      { status: 200, headers: corsHeaders }
-    );
+    console.log(`Order ${order.id} completed successfully`);
+
+    return new Response(JSON.stringify({
+      order_id: order.id,
+      pix_key: Deno.env.get('PIX_KEY'),
+      total_cents: totalCents,
+      expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString()
+    }), {
+      headers: {
+        "Content-Type": "application/json",
+        ...corsHeaders
+      },
+      status: 200
+    });
 
   } catch (error) {
     console.error('Unexpected error:', error);

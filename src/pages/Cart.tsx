@@ -1,86 +1,103 @@
-
 import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { createCheckout } from "@/services/payment";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+
+const CREATE_URL = import.meta.env.VITE_FN_CREATE_ORDER;
+const GET_URL = import.meta.env.VITE_FN_GET_ORDER;
 
 const Cart = () => {
   const { items, totalCents, itemsCount, clearCart, removeFromCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [showPixModal, setShowPixModal] = useState(false);
   const [orderId, setOrderId] = useState<string>("");
+  const [pixKey, setPixKey] = useState<string>("");
+  const [expiresAt, setExpiresAt] = useState<string>("");
+  const [orderStatus, setOrderStatus] = useState<string>("pending");
   const { toast } = useToast();
   const totalBRL = (totalCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
+  useEffect(() => {
+    if (!orderId || !showPixModal) return;
+
+    const interval = setInterval(async () => {
+      try {
+        const res = await fetch(`${GET_URL}?order_id=${orderId}`);
+        if (res.ok) {
+          const { status } = await res.json();
+          setOrderStatus(status);
+          if (status === 'paid') {
+            clearInterval(interval);
+          }
+        }
+      } catch (error) {
+        console.error("Error polling order status:", error);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [orderId, showPixModal]);
+
   const finalize = async () => {
+    if (import.meta.env.VITE_CHECKOUT_ENGINE !== "new") {
+      // old flow
+      return;
+    }
+
     try {
       setLoading(true);
-      
-      // Check authentication
+
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      if (sessionError) {
-        console.error('Session error:', sessionError);
-        toast({ title: "Erro de autenticação", description: "Erro ao verificar sessão" });
-        setLoading(false);
-        return;
-      }
-      
-      if (!session) {
-        console.log('No session, redirecting to auth');
+      if (sessionError || !session) {
+        toast({ title: "Erro de autenticação", description: "Por favor, faça login novamente." });
         window.location.href = "/auth";
         return;
       }
 
-      console.log('Session found, user:', session.user.email);
-
-      // Prepare customer data
-      const customer = {
-        name: (session.user.user_metadata as any)?.name,
-        phone: (session.user.user_metadata as any)?.phone,
-        cpf: (session.user.user_metadata as any)?.cpf,
-        email: session.user.email,
-      };
-
-      // Prepare orders
-      const orders = items.map((it) => ({
+      const cartItems = items.map(it => ({
         id: it.id,
         name: it.name,
         quantity: it.quantity,
-        priceCents: it.price_cents,
-        description: `Ancora: ${it.texto_ancora} | URL: ${it.url_destino}`,
-        anchorText: it.texto_ancora,
-        targetUrl: it.url_destino,
+        price_cents: it.price_cents,
+        texto_ancora: it.texto_ancora,
+        url_destino: it.url_destino,
       }));
 
-      console.log('Finalizing order with:', { orders, customer });
+      const response = await fetch(CREATE_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          items: cartItems,
+          total_cents: totalCents
+        })
+      });
 
-      // Create checkout
-      const result = await createCheckout(orders as any, customer as any);
-      
-      console.log('Checkout result:', result);
-
-      if (result.error) {
-        throw new Error(result.error);
+      if (!response.ok) {
+        throw new Error("Falha ao criar o pedido.");
       }
 
-      if (result.mode === 'manual' && result.orderId) {
-        setOrderId(result.orderId);
-        setShowPixModal(true);
-        toast({ title: "Pedido criado com sucesso!" });
-      } else {
-        throw new Error('Resposta inválida do checkout');
-      }
+      const result = await response.json();
+
+      setOrderId(result.order_id);
+      setPixKey(result.pix_key);
+      setExpiresAt(new Date(result.expires_at).toLocaleString("pt-BR"));
+      setOrderStatus('pending');
+      setShowPixModal(true);
+      toast({ title: "Pedido criado com sucesso!" });
+
     } catch (error) {
       console.error('Falha ao finalizar compra:', error);
-      toast({ 
-        title: "Erro ao finalizar compra", 
-        description: error instanceof Error ? error.message : "Erro desconhecido" 
+      toast({
+        title: "Erro ao finalizar compra",
+        description: error instanceof Error ? error.message : "Erro desconhecido"
       });
     } finally {
       setLoading(false);
@@ -131,51 +148,37 @@ const Cart = () => {
             <div className="flex gap-2">
               <Button variant="outline" onClick={clearCart} disabled={loading}>Limpar carrinho</Button>
               <Button onClick={finalize} disabled={loading || items.length === 0} aria-busy={loading}>
-                {loading ? (
-                  <>
-                    <svg className="mr-2 h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" strokeLinecap="round"></path>
-                    </svg>
-                    Processando...
-                  </>
-                ) : (
-                  'Finalizar compra'
-                )}
+                {loading ? "Processando..." : 'Finalizar compra'}
               </Button>
             </div>
           </section>
         )}
 
-        {/* Modal PIX */}
         <Dialog open={showPixModal} onOpenChange={(open) => {
           setShowPixModal(open);
-          if (!open) {
-            clearCart();
-          }
+          if (!open) clearCart();
         }}>
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle>Finalize o pagamento por PIX</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Por favor, realize o PIX do valor total do seu pedido na chave abaixo.
-                Após identificarmos o pagamento, inicia a contagem de 7 dias para publicação de todos os backlinks.
-              </p>
-              
               <div className="bg-muted p-4 rounded-lg space-y-2">
                 <div>
-                  <span className="font-semibold">Chave PIX (CNPJ):</span>
-                  <div className="font-mono text-sm">54.128.027/0001-93</div>
+                  <span className="font-semibold">Chave PIX:</span>
+                  <div className="font-mono text-sm">{pixKey}</div>
                 </div>
                 <div>
-                  <span className="font-semibold">Titular:</span>
-                  <div className="text-sm">Keila de Oliveira Castellini</div>
+                  <span className="font-semibold">Expira em:</span>
+                  <div className="text-sm">{expiresAt}</div>
                 </div>
                 <div>
                   <span className="font-semibold">Total:</span>
                   <div className="text-lg font-semibold">{totalBRL}</div>
+                </div>
+                <div>
+                  <span className="font-semibold">Status:</span>
+                  <div className="text-sm">{orderStatus}</div>
                 </div>
                 {orderId && (
                   <div>
@@ -184,41 +187,9 @@ const Cart = () => {
                   </div>
                 )}
               </div>
-
-              <div className="text-sm">
-                <span className="font-semibold">Contato WhatsApp (dúvidas):</span>
-                <div>11 99179-5436</div>
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <Button 
-                  onClick={() => {
-                    navigator.clipboard.writeText("54.128.027/0001-93");
-                    toast({ title: "CNPJ copiado para a área de transferência" });
-                  }}
-                  variant="outline"
-                >
-                  Copiar CNPJ
-                </Button>
-                
-                <Button 
-                  onClick={() => {
-                    window.open("https://wa.me/5511991795436", "_blank");
-                  }}
-                  variant="outline"
-                >
-                  Ir ao WhatsApp
-                </Button>
-                
-                <Button 
-                  onClick={() => {
-                    setShowPixModal(false);
-                    window.location.href = "/painel";
-                  }}
-                >
-                  Ver meus pedidos
-                </Button>
-              </div>
+              <Button onClick={() => navigator.clipboard.writeText(pixKey)} variant="outline">
+                Copiar Chave PIX
+              </Button>
             </div>
           </DialogContent>
         </Dialog>
