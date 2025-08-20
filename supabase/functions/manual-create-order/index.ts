@@ -10,7 +10,7 @@ const corsHeaders: HeadersInit = {
 Deno.serve(async (req) => {
   // CORS preflight
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { status: 204, headers: corsHeaders })
+    return new Response(null, { status: 204, headers: corsHeaders })
   }
 
   try {
