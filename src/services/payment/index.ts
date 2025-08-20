@@ -5,6 +5,7 @@ export type CheckoutResult = {
   url?: string;
   mode: 'manual' | 'redirect';
   orderId?: string;
+  pix_key?: string;
   error?: string;
 };
 
@@ -30,8 +31,18 @@ export async function createCheckout(
     email?: string; 
   }
 ): Promise<CheckoutResult> {
+  const ENGINE = import.meta.env.VITE_CHECKOUT_ENGINE || 'manual';
+
+  if (ENGINE !== 'manual') {
+    console.error(`Motor de checkout '${ENGINE}' não suportado.`);
+    return {
+      mode: 'redirect', // Fallback mode
+      error: `Motor de checkout '${ENGINE}' não é suportado.`,
+    };
+  }
+
   try {
-    console.log('=== CHECKOUT START ===');
+    console.log('=== CHECKOUT START (MANUAL) ===');
     console.log('Orders:', orders);
     console.log('Customer:', customer);
 
@@ -72,7 +83,8 @@ export async function createCheckout(
     console.log('Request body:', JSON.stringify(requestBody, null, 2));
 
     // Call edge function
-    const { data, error } = await supabase.functions.invoke('manual-create-order', {
+    const fnName = import.meta.env.VITE_FN_CREATE_ORDER || 'manual-create-order';
+    const { data, error } = await supabase.functions.invoke(fnName, {
       body: requestBody,
     });
 
@@ -94,6 +106,7 @@ export async function createCheckout(
     return {
       mode: 'manual',
       orderId: data.orderId,
+      pix_key: data.pix_key || import.meta.env.VITE_PIX_KEY,
     };
 
   } catch (error) {

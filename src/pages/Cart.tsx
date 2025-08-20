@@ -15,6 +15,7 @@ const Cart = () => {
   const [loading, setLoading] = useState(false);
   const [showPixModal, setShowPixModal] = useState(false);
   const [orderId, setOrderId] = useState<string>("");
+  const [pixKey, setPixKey] = useState<string>("");
   const { toast } = useToast();
   const totalBRL = (totalCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -69,8 +70,9 @@ const Cart = () => {
         throw new Error(result.error);
       }
 
-      if (result.mode === 'manual' && result.orderId) {
+      if (result.mode === 'manual' && result.orderId && result.pix_key) {
         setOrderId(result.orderId);
+        setPixKey(result.pix_key);
         setShowPixModal(true);
         toast({ title: "Pedido criado com sucesso!" });
       } else {
@@ -166,8 +168,8 @@ const Cart = () => {
               
               <div className="bg-muted p-4 rounded-lg space-y-2">
                 <div>
-                  <span className="font-semibold">Chave PIX (CNPJ):</span>
-                  <div className="font-mono text-sm">54.128.027/0001-93</div>
+                  <span className="font-semibold">Chave PIX:</span>
+                  <div className="font-mono text-sm">{pixKey}</div>
                 </div>
                 <div>
                   <span className="font-semibold">Titular:</span>
@@ -193,12 +195,12 @@ const Cart = () => {
               <div className="flex flex-col gap-2">
                 <Button 
                   onClick={() => {
-                    navigator.clipboard.writeText("54.128.027/0001-93");
-                    toast({ title: "CNPJ copiado para a área de transferência" });
+                    navigator.clipboard.writeText(pixKey);
+                    toast({ title: "Chave PIX copiada para a área de transferência" });
                   }}
                   variant="outline"
                 >
-                  Copiar CNPJ
+                  Copiar Chave PIX
                 </Button>
                 
                 <Button 
