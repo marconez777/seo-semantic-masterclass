@@ -44,12 +44,15 @@ const Carrinho = () => {
       }));
 
       const res = await createCheckout(orders as any, customer as any);
+      console.log('createCheckout result:', res); // Debug log
       if (res.mode === 'manual' && res.orderId) {
         setOrderId(res.orderId);
         setShowPixModal(true);
         setLoading(false);
+        console.log('Modal PIX opened'); // Debug log
       } else {
         setLoading(false);
+        console.log('Modal PIX not opened, res:', res); // Debug log
       }
     } catch (e) {
       console.error('Falha ao finalizar compra', e);
