@@ -65,6 +65,10 @@ const Cart = () => {
       
       console.log('Checkout result:', result);
 
+      if (result.error) {
+        throw new Error(result.error);
+      }
+
       if (result.mode === 'manual' && result.orderId) {
         setOrderId(result.orderId);
         setShowPixModal(true);

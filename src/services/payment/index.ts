@@ -1,12 +1,11 @@
-// Neutral payment service facade
-// Uses manual checkout mode for PIX payments
-
+// Manual payment service for PIX payments
 import { supabase } from '@/integrations/supabase/client';
 
 export type CheckoutResult = {
   url?: string;
   mode: 'manual' | 'redirect';
   orderId?: string;
+  error?: string;
 };
 
 type OrderInput = {
@@ -22,58 +21,88 @@ type OrderInput = {
   targetUrl?: string;
 };
 
-export async function createCheckout(orders: OrderInput[], customer?: { name?: string; phone?: string; cpf?: string; email?: string; }): Promise<CheckoutResult> {
+export async function createCheckout(
+  orders: OrderInput[], 
+  customer?: { 
+    name?: string; 
+    phone?: string; 
+    cpf?: string; 
+    email?: string; 
+  }
+): Promise<CheckoutResult> {
   try {
-    // Map generic orders to products shape
-    const products = (orders ?? []).map((o: OrderInput) => ({
-      externalId: String(o?.externalId ?? o?.id ?? crypto.randomUUID()),
-      name: String(o?.name ?? 'Item'),
-      description: o?.description ?? undefined,
-      quantity: Number(o?.quantity ?? 1),
-      price: Number(o?.price_cents ?? o?.priceCents ?? o?.price ?? 0), // in cents
+    console.log('=== CHECKOUT START ===');
+    console.log('Orders:', orders);
+    console.log('Customer:', customer);
+
+    // Validate input
+    if (!orders || orders.length === 0) {
+      throw new Error('No orders provided');
+    }
+
+    // Map orders to products format
+    const products = orders.map((order) => ({
+      externalId: String(order.externalId || order.id || crypto.randomUUID()),
+      name: String(order.name || 'Item'),
+      description: order.description || undefined,
+      quantity: Number(order.quantity || 1),
+      price: Number(order.price_cents || order.priceCents || order.price || 0), // in cents
     }));
 
-    // Provide metadata to also persist anchor/target per item
-    const metaItems = (orders ?? []).map((o: OrderInput) => ({
-      externalId: String(o?.externalId ?? o?.id ?? ''),
-      anchorText: o?.anchorText,
-      targetUrl: o?.targetUrl,
+    // Map metadata for anchor text and target URL
+    const metaItems = orders.map((order) => ({
+      externalId: String(order.externalId || order.id || ''),
+      anchorText: order.anchorText,
+      targetUrl: order.targetUrl,
     }));
 
-    console.log('Creating checkout with:', { products, customer, metaItems });
-
-    const { data, error } = await supabase.functions.invoke('manual-create-order', {
-      body: {
-        products,
-        customer: customer?.name
-          ? {
-              name: String(customer.name),
-              phone: customer.phone,
-              email: customer.email,
-              cpf: customer.cpf,
-            }
-          : undefined,
-        metadata: {
-          items: metaItems,
-        },
+    const requestBody = {
+      products,
+      customer: customer?.name ? {
+        name: String(customer.name),
+        phone: customer.phone,
+        email: customer.email,
+        cpf: customer.cpf,
+      } : undefined,
+      metadata: {
+        items: metaItems,
       },
+    };
+
+    console.log('Request body:', JSON.stringify(requestBody, null, 2));
+
+    // Call edge function
+    const { data, error } = await supabase.functions.invoke('manual-create-order', {
+      body: requestBody,
     });
 
+    console.log('Function response:', { data, error });
+
     if (error) {
-      console.error('Checkout error:', error);
-      throw error;
+      console.error('Edge function error:', error);
+      throw new Error(`Checkout failed: ${error.message || 'Unknown error'}`);
     }
 
-    if (!data?.ok || !data?.orderId) {
-      console.error('Invalid response from checkout:', data);
-      throw new Error('Invalid checkout response');
+    if (!data || !data.ok || !data.orderId) {
+      console.error('Invalid response data:', data);
+      throw new Error('Invalid response from server');
     }
 
-    const orderId = data.orderId;
-    console.log('Checkout successful, orderId:', orderId);
-    return { mode: 'manual', orderId };
+    console.log('=== CHECKOUT SUCCESS ===');
+    console.log('Order ID:', data.orderId);
+
+    return {
+      mode: 'manual',
+      orderId: data.orderId,
+    };
+
   } catch (error) {
-    console.error('Checkout failed:', error);
-    throw error;
+    console.error('=== CHECKOUT ERROR ===');
+    console.error('Error details:', error);
+    
+    return {
+      mode: 'manual',
+      error: error instanceof Error ? error.message : 'Unknown error occurred',
+    };
   }
 }
