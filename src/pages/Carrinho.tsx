@@ -1,4 +1,3 @@
-
 import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -21,11 +20,25 @@ const Carrinho = () => {
   const finalize = async () => {
     try {
       setLoading(true);
-      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Check authentication
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      if (sessionError) {
+        console.error('Session error:', sessionError);
+        toast({ title: "Erro de autenticação", description: "Erro ao verificar sessão" });
+        setLoading(false);
+        return;
+      }
+      
       if (!session) {
+        console.log('No session, redirecting to auth');
         window.location.href = "/auth";
         return;
       }
+
+      console.log('Session found, user:', session.user.email);
+
+      // Prepare customer data
       const customer = {
         name: (session.user.user_metadata as any)?.name,
         phone: (session.user.user_metadata as any)?.phone,
@@ -33,6 +46,7 @@ const Carrinho = () => {
         email: session.user.email,
       };
 
+      // Prepare orders
       const orders = items.map((it) => ({
         id: it.id,
         name: it.name,
@@ -43,16 +57,27 @@ const Carrinho = () => {
         targetUrl: it.url_destino,
       }));
 
-      const res = await createCheckout(orders as any, customer as any);
-      if (res.mode === 'manual' && res.orderId) {
-        setOrderId(res.orderId);
+      console.log('Finalizing order with:', { orders, customer });
+
+      // Create checkout
+      const result = await createCheckout(orders as any, customer as any);
+      
+      console.log('Checkout result:', result);
+
+      if (result.mode === 'manual' && result.orderId) {
+        setOrderId(result.orderId);
         setShowPixModal(true);
-        setLoading(false);
+        toast({ title: "Pedido criado com sucesso!" });
       } else {
-        setLoading(false);
+        throw new Error('Resposta inválida do checkout');
       }
-    } catch (e) {
-      console.error('Falha ao finalizar compra', e);
+    } catch (error) {
+      console.error('Falha ao finalizar compra:', error);
+      toast({ 
+        title: "Erro ao finalizar compra", 
+        description: error instanceof Error ? error.message : "Erro desconhecido" 
+      });
+    } finally {
       setLoading(false);
     }
   };
@@ -107,7 +132,7 @@ const Carrinho = () => {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" d="M4 12a8 8 0 018-8" stroke="currentColor" strokeWidth="4" strokeLinecap="round"></path>
                     </svg>
-                    Redirecionando...
+                    Processando...
                   </>
                 ) : (
                   'Finalizar compra'
@@ -147,6 +172,12 @@ const Carrinho = () => {
                   <span className="font-semibold">Total:</span>
                   <div className="text-lg font-semibold">{totalBRL}</div>
                 </div>
+                {orderId && (
+                  <div>
+                    <span className="font-semibold">Pedido:</span>
+                    <div className="text-sm font-mono">{orderId}</div>
+                  </div>
+                )}
               </div>
 
               <div className="text-sm">
