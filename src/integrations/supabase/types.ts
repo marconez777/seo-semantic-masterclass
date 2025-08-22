@@ -503,16 +503,19 @@ export type Database = {
         Row: {
           created_at: string | null
           id: string
+          is_admin: boolean
           role: Database["public"]["Enums"]["user_role"]
         }
         Insert: {
           created_at?: string | null
           id: string
+          is_admin?: boolean
           role?: Database["public"]["Enums"]["user_role"]
         }
         Update: {
           created_at?: string | null
           id?: string
+          is_admin?: boolean
           role?: Database["public"]["Enums"]["user_role"]
         }
         Relationships: []

@@ -30,6 +30,16 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Sanidade: verificar token de autorização primeiro
+    const auth = req.headers.get('authorization');
+    if (!auth?.toLowerCase().startsWith('bearer ')) {
+      console.error('Missing Authorization Bearer token');
+      return new Response(
+        JSON.stringify({ error: 'Missing Authorization Bearer token' }),
+        { status: 401, headers: corsHeaders }
+      );
+    }
+
     // Get environment variables
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
@@ -157,10 +167,18 @@ Deno.serve(async (req) => {
       };
     });
 
-    await supabaseUser
+    // Hard-fail se order_items não inserir
+    const { error: itemsErr } = await supabaseUser
       .from('order_items')
-      .insert(orderItems)
-      .catch(err => console.error('Order items insert error:', err));
+      .insert(orderItems);
+
+    if (itemsErr) {
+      console.error('Order items insert error:', itemsErr);
+      return new Response(
+        JSON.stringify({ ok: false, error: 'FAILED_TO_CREATE_ORDER_ITEMS' }),
+        { status: 500, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
+      );
+    }
 
     console.log(`Order ${order.id} completed successfully`);
 
@@ -170,7 +188,7 @@ Deno.serve(async (req) => {
         orderId: order.id,
         mode: 'manual'
       }),
-      { status: 200, headers: corsHeaders }
+      { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
     );
 
   } catch (error) {
