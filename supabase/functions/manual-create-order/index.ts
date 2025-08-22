@@ -30,14 +30,13 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Sanidade: verificar token de autorização primeiro
+    // 1) Sanidade de Authorization
     const auth = req.headers.get('authorization');
     if (!auth?.toLowerCase().startsWith('bearer ')) {
-      console.error('Missing Authorization Bearer token');
-      return new Response(
-        JSON.stringify({ error: 'Missing Authorization Bearer token' }),
-        { status: 401, headers: corsHeaders }
-      );
+      return new Response(JSON.stringify({ error: 'Missing Authorization Bearer token' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders }
+      });
     }
 
     // Get environment variables
@@ -53,17 +52,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Get authorization token
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      console.error('Missing or invalid authorization header');
-      return new Response(
-        JSON.stringify({ error: 'Unauthorized' }),
-        { status: 401, headers: corsHeaders }
-      );
-    }
-
-    const token = authHeader.replace('Bearer ', '');
+    const token = auth.replace('Bearer ', '');
 
     // Validate user
     const supabaseAuth = createClient(supabaseUrl, supabaseAnonKey, {
@@ -167,7 +156,7 @@ Deno.serve(async (req) => {
       };
     });
 
-    // Hard-fail se order_items não inserir
+    // ... depois do insert em 'pedidos' e cálculo de orderItems:
     const { error: itemsErr } = await supabaseUser
       .from('order_items')
       .insert(orderItems);
@@ -182,14 +171,10 @@ Deno.serve(async (req) => {
 
     console.log(`Order ${order.id} completed successfully`);
 
-    return new Response(
-      JSON.stringify({
-        ok: true,
-        orderId: order.id,
-        mode: 'manual'
-      }),
-      { status: 200, headers: { 'Content-Type': 'application/json', ...corsHeaders } }
-    );
+    return new Response(JSON.stringify({ ok: true, orderId: order.id }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    });
 
   } catch (error) {
     console.error('Unexpected error:', error);
