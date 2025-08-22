@@ -6,8 +6,8 @@ import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import { noopBuyCTA } from "@/utils/noopBuyCTA";
 import { Circle, BookText } from "lucide-react";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 
@@ -54,9 +54,6 @@ export default function ComprarBacklinksCategoria() {
   const [minTraffic, setMinTraffic] = useState<number | "">("");
   const [maxPrice, setMaxPrice] = useState<number | "">("");
 
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<{ id: string; name: string; price_cents: number } | null>(null);
-
   const rawSlug = useMemo(() => decodeURIComponent(String(categoria ?? "")), [categoria]);
   const normalized = useMemo(() => normalizeCat(rawSlug.replace(/-/g, " ")), [rawSlug]);
   const canonicalCategory = useMemo(() => toCanonicalCategory(normalized), [normalized]);
@@ -96,11 +93,6 @@ export default function ComprarBacklinksCategoria() {
       return true;
     });
   }, [backlinks, minDR, minTraffic, maxPrice]);
-
-  const onBuy = (b: any) => {
-    setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
-    setOpen(true);
-  };
 
   return (
     <>
@@ -176,7 +168,7 @@ export default function ComprarBacklinksCategoria() {
                   <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
                 ) : (
                   filtered.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={noopBuyCTA} />
                   ))
                 )}
               </tbody>
@@ -190,9 +182,6 @@ export default function ComprarBacklinksCategoria() {
         </section>
       </main>
       <Footer />
-      {selected && (
-        <PurchaseModal open={open} onOpenChange={setOpen} product={selected} />
-      )}
     </>
   );
 }

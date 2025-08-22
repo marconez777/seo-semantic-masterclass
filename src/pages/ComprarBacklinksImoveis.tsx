@@ -25,9 +25,6 @@ export default function ComprarBacklinksImoveis() {
   const [sortKey, setSortKey] = useState<'site_name' | 'dr' | 'da' | 'traffic' | 'category' | 'price_cents' | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
-  // Modal state
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<{ id: string; name: string; price_cents: number } | null>(null);
 
   // Paginação
   const [page, setPage] = useState(1);
@@ -141,9 +138,6 @@ export default function ComprarBacklinksImoveis() {
     return sorted.slice(start, start + itemsPerPage);
   }, [sorted, currentPage, itemsPerPage]);
 
-  const onBuy = (b: any) => {
-    setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
-    setOpen(true);
   };
 
   return (
@@ -349,7 +343,7 @@ export default function ComprarBacklinksImoveis() {
                   <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={noopBuyCTA} />
                   ))
                 )}
               </tbody>
@@ -388,9 +382,6 @@ export default function ComprarBacklinksImoveis() {
         </section>
       </main>
       <Footer />
-      {selected && (
-        <PurchaseModal
-          open={open}
           onOpenChange={setOpen}
           product={selected}
         />

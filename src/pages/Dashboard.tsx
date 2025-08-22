@@ -90,8 +90,8 @@ function PurchasesTable({ userId }: { userId: string }) {
 
       // compute publication summary per order and get sites
       const orderIds = pedidos.map((p) => p.id);
-      let summary: Record<string, { total: number; published: number; inProgress: number; rejected: number }> = {};
-      let sites: Record<string, string[]> = {};
+      const summary: Record<string, { total: number; published: number; inProgress: number; rejected: number }> = {};
+      const sites: Record<string, string[]> = {};
       
       if (orderIds.length) {
         const { data: items, error: itemsErr } = await supabase
@@ -102,7 +102,7 @@ function PurchasesTable({ userId }: { userId: string }) {
         
         // Get unique backlink IDs
         const backlinkIds = Array.from(new Set((items ?? []).map((i) => i.backlink_id)));
-        let backlinkMap: Record<string, string> = {};
+        const backlinkMap: Record<string, string> = {};
         
         if (backlinkIds.length) {
           const { data: backs } = await supabase
@@ -219,7 +219,7 @@ function PublicationsTable({ userId }: { userId: string }) {
       if (error) console.error('Erro itens/publicações', error);
 
       const backlinkIds = Array.from(new Set((items ?? []).map((i) => i.backlink_id)));
-      let backlinkMap: Record<string, { site: string }> = {};
+      const backlinkMap: Record<string, { site: string }> = {};
       if (backlinkIds.length) {
         const { data: backs } = await supabase
           .from('backlinks')
@@ -299,7 +299,7 @@ function FavoritesTable({ userId }: { userId: string }) {
         .order('created_at', { ascending: false });
       if (error) console.error('Erro favoritos', error);
       const backlinkIds = (favs ?? []).map((f) => f.backlink_id);
-      let backlinkMap: Record<string,string> = {};
+      const backlinkMap: Record<string,string> = {};
       if (backlinkIds.length) {
         const { data: backs } = await supabase
           .from('backlinks')

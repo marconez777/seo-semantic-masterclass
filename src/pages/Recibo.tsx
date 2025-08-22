@@ -40,7 +40,7 @@ export default function Recibo() {
         console.error('Erro ao chamar função segura de PII', error);
       }
       const backlinkIds = Array.from(new Set((it ?? []).map((i) => i.backlink_id)));
-      let m: Record<string, { name: string; url: string }> = {};
+      const m: Record<string, { name: string; url: string }> = {};
       if (backlinkIds.length) {
         const { data: backs } = await supabase
           .from('backlinks')

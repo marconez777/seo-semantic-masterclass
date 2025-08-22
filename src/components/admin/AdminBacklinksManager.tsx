@@ -65,7 +65,7 @@ export default function AdminBacklinksManager() {
 
   useEffect(() => {
     fetchRows(debouncedQ);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+
   }, [debouncedQ]);
 
   const countText = useMemo(() => {

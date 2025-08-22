@@ -35,7 +35,7 @@ export default function AdminPublicacoes() {
       
       if (itemsErr) console.error('Erro ao carregar itens', itemsErr);
       
-      let itemsMap: Record<string, OrderItem[]> = {};
+      const itemsMap: Record<string, OrderItem[]> = {};
       const backlinkIds = Array.from(new Set((items ?? []).map((i: any) => i.backlink_id)));
       
       (items ?? []).forEach((it: any) => {

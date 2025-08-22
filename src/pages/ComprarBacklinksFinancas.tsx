@@ -39,9 +39,6 @@ export default function ComprarBacklinksFinancas() {
   >(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
 
-  // Modal state
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<
     { id: string; name: string; price_cents: number } | null
   >(null);
 
@@ -174,13 +171,10 @@ export default function ComprarBacklinksFinancas() {
     return sorted.slice(start, start + itemsPerPage);
   }, [sorted, currentPage, itemsPerPage]);
 
-  const onBuy = (b: any) => {
-    setSelected({
-      id: b.id,
       name: b.site_name ?? b.site_url ?? "Backlink",
       price_cents: b.price_cents,
     });
-    setOpen(true);
+
   };
 
   return (
@@ -513,7 +507,7 @@ export default function ComprarBacklinksFinancas() {
                   </tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={noopBuyCTA} />
                   ))
                 )}
               </tbody>
@@ -609,9 +603,6 @@ export default function ComprarBacklinksFinancas() {
       </main>
       <Footer />
 
-      {selected && (
-        <PurchaseModal
-          open={open}
           onOpenChange={setOpen}
           product={selected}
         />

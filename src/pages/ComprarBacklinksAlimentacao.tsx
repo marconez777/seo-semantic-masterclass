@@ -3,11 +3,11 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import StructuredData from "@/components/seo/StructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
+import { noopBuyCTA } from "@/utils/noopBuyCTA";
 import { Folder } from "lucide-react";
 
 // Helper to format BRL
@@ -36,12 +36,6 @@ export default function ComprarBacklinksAlimentacao() {
     null
   );
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-
-  // Modal state
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<
-    { id: string; name: string; price_cents: number } | null
-  >(null);
 
   // Paginação
   const [page, setPage] = useState(1);
@@ -173,15 +167,6 @@ export default function ComprarBacklinksAlimentacao() {
     const start = (currentPage - 1) * itemsPerPage;
     return sorted.slice(start, start + itemsPerPage);
   }, [sorted, currentPage, itemsPerPage]);
-
-  const onBuy = (b: any) => {
-    setSelected({
-      id: b.id,
-      name: b.site_name ?? b.site_url ?? "Backlink",
-      price_cents: b.price_cents,
-    });
-    setOpen(true);
-  };
 
   return (
     <>
@@ -528,7 +513,7 @@ export default function ComprarBacklinksAlimentacao() {
                   </tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={noopBuyCTA} />
                   ))
                 )}
               </tbody>
@@ -581,14 +566,6 @@ export default function ComprarBacklinksAlimentacao() {
         </section>
       </main>
       <Footer />
-
-      {selected && (
-        <PurchaseModal
-          open={open}
-          onOpenChange={setOpen}
-          product={selected}
-        />
-      )}
     </>
   );
 }
