@@ -73,6 +73,7 @@ function ProfileSection() {
 
 
 function PurchasesTable({ userId }: { userId: string }) {
+  const navigate = useNavigate();
   const [rows, setRows] = useState<any[]>([]);
   const [pubSummary, setPubSummary] = useState<Record<string, { total: number; published: number; inProgress: number; rejected: number }>>({});
   const [orderSites, setOrderSites] = useState<Record<string, string[]>>({});
@@ -193,8 +194,12 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">
                 {r.status === 'paid' ? (
                   <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
+                ) : r.status === 'pending' ? (
+                  <Button onClick={() => navigate(`/carrinho?order=${r.id}`)}>
+                    Ver dados de pagamento
+                  </Button>
                 ) : (
-                  <span className="text-muted-foreground">Aguardando pagamento PIX</span>
+                  <span className="text-muted-foreground">—</span>
                 )}
               </td>
             </tr>

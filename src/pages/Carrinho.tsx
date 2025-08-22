@@ -3,9 +3,10 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
+import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout } from "@/services/payment";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
@@ -16,6 +17,16 @@ const Carrinho = () => {
   const [orderId, setOrderId] = useState<string>("");
   const { toast } = useToast();
   const totalBRL = (totalCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const order = searchParams.get('order');
+    if (order) {
+      setOrderId(order);
+      setShowPixModal(true);
+    }
+  }, [searchParams]);
 
   const finalize = async () => {
     try {
