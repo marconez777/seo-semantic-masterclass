@@ -62,7 +62,8 @@ export function RequireRole({ role, children }: RequireRoleProps) {
   }
 
   if (!user) {
-    return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
+    const redirectTo = role === 'admin' ? '/admin/login' : '/auth';
+    return <Navigate to={redirectTo} state={{ from: location.pathname }} replace />;
   }
 
   if (role === 'admin' && userRole !== 'admin') {

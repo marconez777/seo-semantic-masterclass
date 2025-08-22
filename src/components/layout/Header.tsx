@@ -186,7 +186,7 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-3">
           {isPanelRoute ? (
             <>
-              <Link to="/cart" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
+              <Link to="/carrinho" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
                 <ShoppingCart className="h-5 w-5" />
                 {itemsCount > 0 && (
                   <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none ring-2 ring-background">

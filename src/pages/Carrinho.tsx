@@ -5,7 +5,8 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout } from "@/services/payment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,7 +16,26 @@ const Carrinho = () => {
   const [showPixModal, setShowPixModal] = useState(false);
   const [orderId, setOrderId] = useState<string>("");
   const { toast } = useToast();
+  const location = useLocation();
+  const [existingOrderTotalBRL, setExistingOrderTotalBRL] = useState<string | null>(null);
   const totalBRL = (totalCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const orderIdParam = params.get('order');
+    if (orderIdParam) {
+      setOrderId(orderIdParam);
+      setShowPixModal(true);
+
+      // Fetch order total
+      supabase.from('pedidos').select('total_cents').eq('id', orderIdParam).single().then(({ data }) => {
+        if (data) {
+          const total = (data.total_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+          setExistingOrderTotalBRL(total);
+        }
+      });
+    }
+  }, [location.search]);
 
   const finalize = async () => {
     try {
@@ -64,16 +84,12 @@ const Carrinho = () => {
       
       console.log('Checkout result:', result);
 
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      if (result.mode === 'manual' && result.orderId) {
+      if (result.ok && result.orderId) {
         setOrderId(result.orderId);
         setShowPixModal(true);
         toast({ title: "Pedido criado com sucesso!" });
       } else {
-        throw new Error('Resposta inválida do checkout');
+        throw new Error(result.error || 'Resposta inválida do checkout');
       }
     } catch (error) {
       console.error('Falha ao finalizar compra:', error);
@@ -174,7 +190,7 @@ const Carrinho = () => {
                 </div>
                 <div>
                   <span className="font-semibold">Total:</span>
-                  <div className="text-lg font-semibold">{totalBRL}</div>
+                  <div className="text-lg font-semibold">{existingOrderTotalBRL || totalBRL}</div>
                 </div>
                 {orderId && (
                   <div>

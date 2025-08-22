@@ -191,10 +191,14 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">{renderOrderStatusBadge(r.status)}</td>
               <td className="p-3">{renderPubBadge(r.id)}</td>
               <td className="p-3">
-                {r.status === 'paid' ? (
+                {r.status === 'pending' ? (
+                  <Button asChild variant="link" className="p-0 h-auto">
+                    <a href={`/carrinho?order=${r.id}`}>Ver dados de pagamento</a>
+                  </Button>
+                ) : r.status === 'paid' ? (
                   <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
                 ) : (
-                  <span className="text-muted-foreground">Aguardando pagamento PIX</span>
+                  <span className="text-muted-foreground">—</span>
                 )}
               </td>
             </tr>

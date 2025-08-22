@@ -2,8 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 
 export type CheckoutResult = {
-  url?: string;
-  mode: 'manual' | 'redirect';
+  ok: boolean;
   orderId?: string;
   error?: string;
 };
@@ -92,7 +91,7 @@ export async function createCheckout(
     console.log('Order ID:', data.orderId);
 
     return {
-      mode: 'manual',
+      ok: true,
       orderId: data.orderId,
     };
 
@@ -101,7 +100,7 @@ export async function createCheckout(
     console.error('Error details:', error);
     
     return {
-      mode: 'manual',
+      ok: false,
       error: error instanceof Error ? error.message : 'Unknown error occurred',
     };
   }
