@@ -3,7 +3,6 @@ import Index from "./pages/Index";
 import Contact from "./pages/Contact";
 import AgenciaBacklinks from "./pages/AgenciaBacklinks";
 import ConsultoriaSeo from "./pages/ConsultoriaSeo";
-import Auth from "./pages/Auth";
 // import Painel from "./pages/Painel";
 import Carrinho from "./pages/Carrinho";
 import Cart from "./pages/Cart";
@@ -26,9 +25,7 @@ import ComprarBacklinksDireito from "./pages/ComprarBacklinksDireito";
 import ComprarBacklinksImoveis from "./pages/ComprarBacklinksImoveis";
 import ComprarBacklinksMaternidade from "./pages/ComprarBacklinksMaternidade";
 import ComprarBacklinksSaude from "./pages/ComprarBacklinksSaude";
-import Dashboard from "./pages/Dashboard";
 import { CartProvider } from "./contexts/CartContext";
-import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import NotFound from "./pages/NotFound";
@@ -65,11 +62,7 @@ const App = () => (
         <Route path="/comprar-backlinks-categoria/:categoria" element={<ComprarBacklinksCategoria />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/painel" element={<Dashboard />} />
         <Route path="/403" element={<Forbidden />} />
-        
-        <Route path="/recibo/:orderId" element={<Recibo />} />
         
         <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/cart" element={<Cart />} />

@@ -1,22 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
-import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { ShoppingCart } from "lucide-react";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useLocation, Link } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 
 const Header = () => {
-  const [isAdmin, setIsAdmin] = useState(false);
-  const [userName, setUserName] = useState<string | null>(null);
   const [backlinksOpen, setBacklinksOpen] = useState(false);
   const openTimer = useRef<number | null>(null);
   const closeTimer = useRef<number | null>(null);
   const location = useLocation();
   
-  const isPanelRoute = location.pathname.startsWith("/painel");
-  const isLoggedIn = !!userName;
   const { itemsCount } = useCart();
   
   const openBacklinks = () => {
@@ -30,27 +23,6 @@ const Header = () => {
     closeTimer.current = window.setTimeout(() => setBacklinksOpen(false), 500);
   };
 
-
-  useEffect(() => {
-    (async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) return;
-      
-      // Check role from JWT first, then fallback to database
-      const jwtRole = user.app_metadata?.role || user.user_metadata?.role;
-      
-      if (jwtRole === 'admin') {
-        setIsAdmin(true);
-      } else {
-        // Fallback: check database
-        const { data } = await supabase.rpc('is_admin', { uid: user.id });
-        setIsAdmin(!!data);
-      }
-      
-      setUserName((user.user_metadata as any)?.name || user.email || null);
-    })();
-  }, []);
-
   // Cleanup timers on unmount
   useEffect(() => {
     return () => {
@@ -58,19 +30,6 @@ const Header = () => {
       if (closeTimer.current) window.clearTimeout(closeTimer.current);
     };
   }, []);
-
-  if (location.pathname === "/auth") {
-    return (
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b">
-        <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png" alt="Logo MK Art" className="w-12 h-12" />
-          </div>
-          <div />
-        </nav>
-      </header>
-    );
-  }
 
   if (location.pathname === "/carrinho") {
     return (
@@ -80,15 +39,6 @@ const Header = () => {
             <img src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png" alt="Logo MK Art" className="w-12 h-12" />
           </div>
           <div className="hidden md:flex items-center gap-3">
-            {isLoggedIn ? (
-              <Button asChild>
-                <Link to="/painel" aria-label="Ir para o Painel">Painel</Link>
-              </Button>
-            ) : (
-              <Button asChild>
-                <Link to="/auth" aria-label="Ir para Login">Login</Link>
-              </Button>
-            )}
           </div>
         </nav>
       </header>
@@ -184,25 +134,6 @@ const Header = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
-          {isPanelRoute ? (
-            <>
-              <Link to="/cart" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
-                <ShoppingCart className="h-5 w-5" />
-                {itemsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none ring-2 ring-background">
-                    {itemsCount}
-                  </span>
-                )}
-              </Link>
-              <UserProfileDropdown
-                name={userName ?? 'Visitante'}
-                role={isAdmin ? 'Admin' : 'Cliente'}
-                onSignOut={() => supabase.auth.signOut()}
-                showActions={false}
-              />
-            </>
-          ) : (
-            <>
               <Link to="/carrinho" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
                 <ShoppingCart className="h-5 w-5" />
                 {itemsCount > 0 && (
@@ -211,17 +142,6 @@ const Header = () => {
                   </span>
                 )}
               </Link>
-              {isLoggedIn ? (
-                <Button asChild>
-                  <Link to="/painel" aria-label="Ir para o Painel">Painel</Link>
-                </Button>
-              ) : (
-                <Button asChild>
-                  <Link to="/auth" aria-label="Ir para Login">Login</Link>
-                </Button>
-              )}
-            </>
-          )}
         </div>
 
       </nav>
