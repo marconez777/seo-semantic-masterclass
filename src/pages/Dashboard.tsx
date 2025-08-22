@@ -429,16 +429,6 @@ export default function Dashboard() {
                       <span>Perfil</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  {isAdmin && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <a href="/admin">
-                          <Shield className="mr-2" />
-                          <span>Admin</span>
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
                 </SidebarMenu>
               </SidebarGroup>
             </SidebarContent>
