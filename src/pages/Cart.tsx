@@ -6,13 +6,33 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { createCheckout } from "@/services/payment";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const Cart = () => {
   const { items, totalCents, itemsCount, clearCart, removeFromCart } = useCart();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const jwtRole = user.app_metadata?.role || user.user_metadata?.role;
+        if (jwtRole === 'admin') {
+          navigate('/admin', { replace: true });
+        } else {
+          const { data } = await supabase.rpc('is_admin', { uid: user.id });
+          if (data) {
+            navigate('/admin', { replace: true });
+          }
+        }
+      }
+    };
+    checkAdmin();
+  }, [navigate]);
   const [showPixModal, setShowPixModal] = useState(false);
   const [orderId, setOrderId] = useState<string>("");
   const { toast } = useToast();
