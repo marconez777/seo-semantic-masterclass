@@ -72,7 +72,15 @@ function ProfileSection() {
 }
 
 
-function PurchasesTable({ userId }: { userId: string }) {
+import { useToast } from "@/hooks/use-toast";
+
+function PurchasesTable({
+  userId,
+  onShowPix,
+}: {
+  userId: string;
+  onShowPix: (orderId: string, totalBRL: string) => void;
+}) {
   const [rows, setRows] = useState<any[]>([]);
   const [pubSummary, setPubSummary] = useState<Record<string, { total: number; published: number; inProgress: number; rejected: number }>>({});
   const [orderSites, setOrderSites] = useState<Record<string, string[]>>({});
@@ -191,10 +199,12 @@ function PurchasesTable({ userId }: { userId: string }) {
               <td className="p-3">{renderOrderStatusBadge(r.status)}</td>
               <td className="p-3">{renderPubBadge(r.id)}</td>
               <td className="p-3">
-                {r.status === 'paid' ? (
-                  <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
+                {r.status === 'pending' ? (
+                  <Button variant="outline" size="sm" onClick={() => onShowPix(r.id, (r.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'}))}>
+                    Ver dados de pagamento
+                  </Button>
                 ) : (
-                  <span className="text-muted-foreground">Aguardando pagamento PIX</span>
+                  <a className="story-link text-primary" href={`/recibo/${r.id}`} target="_blank" rel="noopener noreferrer">Ver recibo</a>
                 )}
               </td>
             </tr>
@@ -349,13 +359,18 @@ export default function Dashboard() {
   const { clearCart } = useCart();
   const [userId, setUserId] = useState<string | null>(null);
   const [tab, setTab] = useState<string>("pedidos");
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [showPixModal, setShowPixModal] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [selectedTotalBRL, setSelectedTotalBRL] = useState<string | null>(null);
+  const { toast } = useToast();
+
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('paid') === '1') {
       clearCart();
     }
   }, [location.search, clearCart]);
+
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       const id = session?.user?.id ?? null;
@@ -370,22 +385,11 @@ export default function Dashboard() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  useEffect(() => {
-    if (!userId) return;
-    
-    // Verificar se o usuário tem role de admin usando nova estrutura
-    const checkAdminRole = async () => {
-      try {
-        const { data } = await supabase.rpc('is_admin', { uid: userId });
-        setIsAdmin(!!data);
-      } catch (error) {
-        console.error('Erro ao verificar role de admin:', error);
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdminRole();
-  }, [userId]);
+  const handleShowPix = (orderId: string, totalBRL: string) => {
+    setSelectedOrderId(orderId);
+    setSelectedTotalBRL(totalBRL);
+    setShowPixModal(true);
+  };
 
   if (!userId) return null;
 
@@ -429,16 +433,6 @@ export default function Dashboard() {
                       <span>Perfil</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
-                  {isAdmin && (
-                    <SidebarMenuItem>
-                      <SidebarMenuButton asChild>
-                        <a href="/admin">
-                          <Shield className="mr-2" />
-                          <span>Admin</span>
-                        </a>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  )}
                 </SidebarMenu>
               </SidebarGroup>
             </SidebarContent>
@@ -471,7 +465,7 @@ export default function Dashboard() {
 
                 <TabsContent value="pedidos" className="space-y-4">
                   <h2 className="text-xl font-semibold">Pedidos</h2>
-                  <PurchasesTable userId={userId} />
+                  <PurchasesTable userId={userId} onShowPix={handleShowPix} />
                 </TabsContent>
 
                 <TabsContent value="publicacoes" className="space-y-4">
@@ -493,6 +487,76 @@ export default function Dashboard() {
           </SidebarInset>
         </div>
       </SidebarProvider>
+
+      {/* Modal PIX */}
+      <Dialog open={showPixModal} onOpenChange={setShowPixModal}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Finalize o pagamento por PIX</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Por favor, realize o PIX do valor total do seu pedido na chave abaixo.
+              Após identificarmos o pagamento, inicia a contagem de 7 dias para publicação de todos os backlinks.
+            </p>
+
+            <div className="bg-muted p-4 rounded-lg space-y-2">
+              <div>
+                <span className="font-semibold">Chave PIX (CNPJ):</span>
+                <div className="font-mono text-sm">54.128.027/0001-93</div>
+              </div>
+              <div>
+                <span className="font-semibold">Titular:</span>
+                <div className="text-sm">Keila de Oliveira Castellini</div>
+              </div>
+              <div>
+                <span className="font-semibold">Total:</span>
+                <div className="text-lg font-semibold">{selectedTotalBRL}</div>
+              </div>
+              {selectedOrderId && (
+                <div>
+                  <span className="font-semibold">Pedido:</span>
+                  <div className="text-sm font-mono">{selectedOrderId}</div>
+                </div>
+              )}
+            </div>
+
+            <div className="text-sm">
+              <span className="font-semibold">Contato WhatsApp (dúvidas):</span>
+              <div>11 99179-5436</div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <Button
+                onClick={() => {
+                  navigator.clipboard.writeText("54.128.027/0001-93");
+                  toast({ title: "CNPJ copiado para a área de transferência" });
+                }}
+                variant="outline"
+              >
+                Copiar CNPJ
+              </Button>
+
+              <Button
+                onClick={() => {
+                  window.open("https://wa.me/5511991795436", "_blank");
+                }}
+                variant="outline"
+              >
+                Ir ao WhatsApp
+              </Button>
+
+              <Button
+                onClick={() => {
+                  setShowPixModal(false);
+                }}
+              >
+                Fechar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }

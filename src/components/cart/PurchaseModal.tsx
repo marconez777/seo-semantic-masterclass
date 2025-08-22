@@ -51,7 +51,7 @@ const PurchaseModal = ({ open, onOpenChange, product }: PurchaseModalProps) => {
     setSubmitting(false);
     if (goToCart) {
       onOpenChange(false);
-      navigate("/carrinho");
+      navigate("/cart");
     } else {
       onOpenChange(false);
       toast({ title: "Adicionado ao Carrinho" });

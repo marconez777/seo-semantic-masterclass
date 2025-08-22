@@ -71,9 +71,18 @@ export async function createCheckout(
 
     console.log('Request body:', JSON.stringify(requestBody, null, 2));
 
+    // Get current session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      throw new Error("User not authenticated");
+    }
+
     // Call edge function
     const { data, error } = await supabase.functions.invoke('manual-create-order', {
       body: requestBody,
+      headers: {
+        Authorization: `Bearer ${session.access_token}`,
+      }
     });
 
     console.log('Function response:', { data, error });

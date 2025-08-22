@@ -5,7 +5,6 @@ import AgenciaBacklinks from "./pages/AgenciaBacklinks";
 import ConsultoriaSeo from "./pages/ConsultoriaSeo";
 import Auth from "./pages/Auth";
 // import Painel from "./pages/Painel";
-import Carrinho from "./pages/Carrinho";
 import Cart from "./pages/Cart";
 import ComprarBacklinks from "./pages/ComprarBacklinks";
 import ComprarBacklinksCategoria from "./pages/ComprarBacklinksCategoria";
@@ -41,7 +40,7 @@ import BlogPost from "./pages/BlogPost";
 import AdminBlogNew from "./pages/AdminBlogNew";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
-import { RequireRole } from "./components/auth/RequireRole";
+import AdminRouteGuard from "./components/route-guards/AdminRouteGuard";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
  
@@ -82,9 +81,9 @@ const App = () => (
         <Route path="/admin/login" element={<AdminAuth />} />
         
         <Route path="/admin" element={
-          <RequireRole role="admin">
+          <AdminRouteGuard>
             <AdminLayout />
-          </RequireRole>
+          </AdminRouteGuard>
         }>
           <Route index element={<AdminPedidos />} />
           <Route path="sites" element={<AdminSites />} />
@@ -94,7 +93,6 @@ const App = () => (
         </Route>
         <Route path="/recibo/:orderId" element={<Recibo />} />
         
-        <Route path="/carrinho" element={<Carrinho />} />
         <Route path="/cart" element={<Cart />} />
         
         {/* Catch-all route for 404 */}
