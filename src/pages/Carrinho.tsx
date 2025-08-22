@@ -4,8 +4,8 @@ import Footer from "@/components/layout/Footer";
 import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { createCheckout } from "@/services/payment";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
@@ -15,6 +15,7 @@ const Carrinho = () => {
   const [showPixModal, setShowPixModal] = useState(false);
   const [orderId, setOrderId] = useState<string>("");
   const { toast } = useToast();
+  const navigate = useNavigate();
   const totalBRL = (totalCents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
   const finalize = async () => {
@@ -30,50 +31,42 @@ const Carrinho = () => {
         return;
       }
       
-      if (!session) {
-        console.log('No session, redirecting to auth');
-        window.location.href = "/auth";
+      if (!session?.access_token) {
+        navigate('/login?redirect=/carrinho');
         return;
       }
 
       console.log('Session found, user:', session.user.email);
 
-      // Prepare customer data
-      const customer = {
-        name: (session.user.user_metadata as any)?.name,
-        phone: (session.user.user_metadata as any)?.phone,
-        cpf: (session.user.user_metadata as any)?.cpf,
-        email: session.user.email,
-      };
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/manual-create-order`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session.access_token}`,
+          },
+          body: JSON.stringify({
+            items: items.map(i => ({
+              product_id: i.id,
+              quantity: i.quantity,
+              price_cents: i.price_cents,
+            })),
+            metadata: { source: 'web', note: 'pix-manual' },
+          }),
+        }
+      );
 
-      // Prepare orders
-      const orders = items.map((it) => ({
-        id: it.id,
-        name: it.name,
-        quantity: it.quantity,
-        priceCents: it.price_cents,
-        description: `Ancora: ${it.texto_ancora} | URL: ${it.url_destino}`,
-        anchorText: it.texto_ancora,
-        targetUrl: it.url_destino,
-      }));
-
-      console.log('Finalizing order with:', { orders, customer });
-
-      // Create checkout
-      const result = await createCheckout(orders as any, customer as any);
-      
-      console.log('Checkout result:', result);
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      if (result.mode === 'manual' && result.orderId) {
-        setOrderId(result.orderId);
+      const json = await res.json();
+      if (res.ok && json?.ok && json?.orderId) {
+        setOrderId(json.orderId);
         setShowPixModal(true);
-        toast({ title: "Pedido criado com sucesso!" });
       } else {
-        throw new Error('Resposta inválida do checkout');
+        toast({
+          title: 'Erro ao criar pedido',
+          description: json?.error ?? 'Erro ao criar pedido',
+          variant: 'destructive',
+        });
       }
     } catch (error) {
       console.error('Falha ao finalizar compra:', error);
