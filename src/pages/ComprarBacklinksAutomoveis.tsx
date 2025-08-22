@@ -3,7 +3,6 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import PurchaseModal from "@/components/cart/PurchaseModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import StructuredData from "@/components/seo/StructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
@@ -39,12 +38,6 @@ export default function ComprarBacklinksAutomoveis() {
     | null
   >(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-
-  // Modal state
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<
-    { id: string; name: string; price_cents: number } | null
-  >(null);
 
   // Paginação
   const [page, setPage] = useState(1);
@@ -178,12 +171,13 @@ export default function ComprarBacklinksAutomoveis() {
   }, [sorted, currentPage, itemsPerPage]);
 
   const onBuy = (b: any) => {
-    setSelected({
-      id: b.id,
-      name: b.site_name ?? b.site_url ?? "Backlink",
-      price_cents: b.price_cents,
-    });
-    setOpen(true);
+    // setSelected({
+    //   id: b.id,
+    //   name: b.site_name ?? b.site_url ?? "Backlink",
+    //   price_cents: b.price_cents,
+    // });
+    // setOpen(true);
+    alert("Funcionalidade de compra removida temporariamente.");
   };
 
   return (
@@ -635,14 +629,6 @@ export default function ComprarBacklinksAutomoveis() {
         </section>
       </main>
       <Footer />
-
-      {selected && (
-        <PurchaseModal
-          open={open}
-          onOpenChange={setOpen}
-          product={selected}
-        />
-      )}
     </>
   );
 }
