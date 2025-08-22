@@ -28,20 +28,11 @@ import ComprarBacklinksMaternidade from "./pages/ComprarBacklinksMaternidade";
 import ComprarBacklinksSaude from "./pages/ComprarBacklinksSaude";
 import Dashboard from "./pages/Dashboard";
 import { CartProvider } from "./contexts/CartContext";
-
-import AdminLayout from "./layouts/AdminLayout";
-import AdminPedidos from "./pages/admin/AdminPedidos";
-import AdminSites from "./pages/admin/AdminSites";
-import AdminPublicacoes from "./pages/admin/AdminPublicacoes";
-import AdminBlog from "./pages/admin/AdminBlog";
-import AdminAuth from "./pages/admin/AdminAuth";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
-import AdminBlogNew from "./pages/AdminBlogNew";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
-import { RequireRole } from "./components/auth/RequireRole";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
  
@@ -78,20 +69,6 @@ const App = () => (
         <Route path="/painel" element={<Dashboard />} />
         <Route path="/403" element={<Forbidden />} />
         
-        {/* Admin auth route */}
-        <Route path="/admin/login" element={<AdminAuth />} />
-        
-        <Route path="/admin" element={
-          <RequireRole role="admin">
-            <AdminLayout />
-          </RequireRole>
-        }>
-          <Route index element={<AdminPedidos />} />
-          <Route path="sites" element={<AdminSites />} />
-          <Route path="publicacoes" element={<AdminPublicacoes />} />
-          <Route path="blog" element={<AdminBlog />} />
-          <Route path="blog/novo" element={<AdminBlogNew />} />
-        </Route>
         <Route path="/recibo/:orderId" element={<Recibo />} />
         
         <Route path="/carrinho" element={<Carrinho />} />
