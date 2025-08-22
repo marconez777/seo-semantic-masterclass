@@ -2,9 +2,7 @@ import * as React from "react"
 import { Button, type ButtonProps } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 
-export interface FABProps extends ButtonProps {}
-
-export function FAB({ className, children, ...props }: FABProps) {
+export function FAB({ className, children, ...props }: ButtonProps) {
   return (
     <Button
       variant="destructive"

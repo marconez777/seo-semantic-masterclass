@@ -6,6 +6,7 @@ import OptimizedImage from "@/components/seo/OptimizedImage";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { SITE_URL } from "@/lib/utils";
 
 interface PostDb {
   id: string;
@@ -39,7 +40,7 @@ const Blog = () => {
       <SEOHead
         title="Blog de SEO e Marketing Digital | MK Art"
         description="Insights práticos sobre SEO, backlinks e marketing digital. Guias, tendências e estudos de caso para aumentar tráfego e vendas."
-        canonicalUrl="https://mkart.com.br/blog"
+        canonicalUrl={`${SITE_URL}/blog`}
         keywords="blog seo, marketing digital, backlinks, link building, tendências seo"
         ogType="website"
       />

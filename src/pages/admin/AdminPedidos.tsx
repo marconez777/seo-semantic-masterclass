@@ -52,7 +52,7 @@ export default function AdminPedidos() {
     const orderIds = pedidos.map((p: any) => p.id);
 
     // Load PII snapshot for each order (admin only) - using secure edge function
-    let piiMap: Record<string, PedidoPII> = {};
+    const piiMap: Record<string, PedidoPII> = {};
     if (orderIds.length) {
       try {
         const { data: piiResponse, error: piiErr } = await supabase.functions.invoke('get-pii-data', {

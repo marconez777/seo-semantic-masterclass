@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
+import { SITE_URL } from "@/lib/utils";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -154,7 +155,7 @@ export default function ComprarBacklinksMaternidade() {
       <SEOHead
         title="Comprar Backlinks de Qualidade no Nicho de Maternidade | MK"
         description="Comprar Backlinks de qualidade no Nicho infantil e maternidade. Apareça no Topo do Google enas IAs."
-        canonicalUrl="https://mkart.com.br/comprar-backlinks-maternidade"
+        canonicalUrl={`${SITE_URL}/comprar-backlinks-maternidade`}
         keywords="comprar backlinks maternidade, backlinks infantil, DR, DA, tráfego, preço"
       />
       <StructuredData
@@ -162,7 +163,7 @@ export default function ComprarBacklinksMaternidade() {
         data={{
           name: "Comprar Backlinks de Qualidade no Nicho de Maternidade",
           description: "Comprar Backlinks de qualidade no Nicho infantil e maternidade. Apareça no Topo do Google enas IAs.",
-          url: "https://mkart.com.br/comprar-backlinks-maternidade"
+          url: `${SITE_URL}/comprar-backlinks-maternidade`
         }}
       />
       <Header />

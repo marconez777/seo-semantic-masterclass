@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
+import { SITE_URL } from "@/lib/utils";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -152,7 +153,7 @@ export default function ComprarBacklinks() {
       <SEOHead
         title="Comprar Backlinks de em Grandes Portais | MK"
         description="Comprar Backlinks de qualidade no Nicho que você escolher. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl="https://mkart.com.br/comprar-backlinks"
+        canonicalUrl={`${SITE_URL}/comprar-backlinks`}
         keywords="comprar backlinks, link building, DR, DA, tráfego, preço"
       />
       <Header />

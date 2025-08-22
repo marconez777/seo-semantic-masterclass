@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
+import { SITE_URL } from "@/lib/utils";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -191,17 +192,17 @@ export default function ComprarBacklinksAutomoveis() {
       <SEOHead
         title="Backlinks de Qualidade de Automóveis para Seu Site | MK"
         description="Venda de backlinks de qualidade em Blogs de Automóveis. Melhor Loja onde comprar backlinks para aumentar sua autoridade online!"
-        canonicalUrl="https://mkart.com.br/comprar-backlinks-automoveis"
+        canonicalUrl={`${SITE_URL}/comprar-backlinks-automoveis`}
         keywords="backlinks de automóveis, comprar backlinks automotivos, backlinks de qualidade"
       />
       <StructuredData
         type="breadcrumb"
         data={{
           items: [
-            { name: "Início", url: `${window.location.origin}/` },
+            { name: "Início", url: SITE_URL },
             {
               name: "Comprar Backlinks de Automóveis",
-              url: `${window.location.origin}/comprar-backlinks-automoveis`,
+              url: `${SITE_URL}/comprar-backlinks-automoveis`,
             },
           ],
         }}

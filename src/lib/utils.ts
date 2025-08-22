@@ -22,7 +22,7 @@ export function normalizeString(str: string) {
 }
 
 // Site URL configuration
-export const SITE_URL = "https://mkart.com.br";
+export const SITE_URL = import.meta.env.VITE_SITE_URL ?? 'http://localhost:5173';
 
 export function getCanonicalUrl(path: string): string {
   return `${SITE_URL}${path}`;

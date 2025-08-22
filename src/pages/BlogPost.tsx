@@ -3,6 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/seo/SEOHead";
+import { SITE_URL } from "@/lib/utils";
 import OptimizedImage from "@/components/seo/OptimizedImage";
 import StructuredData from "@/components/seo/StructuredData";
 import { supabase } from "@/integrations/supabase/client";
@@ -22,7 +23,7 @@ interface DbPost {
   updated_at: string;
 }
 
-const siteBase = "https://mkart.com.br";
+const siteBase = SITE_URL;
 
 function usePost(slug?: string) {
   const [post, setPost] = useState<DbPost | null>(null);
@@ -53,9 +54,9 @@ function excerpt(md?: string, len = 150) {
   const text = md
     .replace(/```[\s\S]*?```/g, " ")
     .replace(/`[^`]*`/g, " ")
-    .replace(/\!\[[^\]]*\]\([^)]*\)/g, " ")
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, " ")
     .replace(/\[[^\]]*\]\([^)]*\)/g, " ")
-    .replace(/[\*_>#-]/g, " ")
+    .replace(/[*_>#-]/g, " ")
     .replace(/\s+/g, " ")
     .trim();
   return text.slice(0, len);

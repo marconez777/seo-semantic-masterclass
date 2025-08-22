@@ -61,7 +61,7 @@ SEO_HEALTH_SECRET=sua-chave-secreta-123
 
 #### 1. Supabase Edge Function
 ```
-GET https://lvinoytvsyloccajnrwp.supabase.co/functions/v1/seo-health-check
+GET <YOUR_SUPABASE_URL>/functions/v1/seo-health-check
 Headers: X-Secret-Key: sua-chave-secreta-123
 ```
 
@@ -124,7 +124,7 @@ SELECT cron.schedule(
   '0 6 * * *', -- 6h da manhã todos os dias
   $$
   SELECT net.http_get(
-    url := 'https://lvinoytvsyloccajnrwp.supabase.co/functions/v1/seo-health-check',
+    url := '<YOUR_SUPABASE_URL>/functions/v1/seo-health-check',
     headers := '{"X-Secret-Key": "sua-chave-secreta"}'::jsonb
   );
   $$

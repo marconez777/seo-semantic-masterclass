@@ -9,9 +9,9 @@ Sistema completo de geração de páginas estáticas com SEO otimizado para o Lo
 Configure no painel Lovable em **Settings → Environment Variables**:
 
 ```
-SUPABASE_URL=https://lvinoytvsyloccajnrwp.supabase.co
-SUPABASE_ANON_KEY=sua_chave_aqui
-SITE_URL=https://seu-site.lovable.app
+SUPABASE_URL=<YOUR_SUPABASE_URL>
+SUPABASE_ANON_KEY=<YOUR_SUPABASE_ANON_KEY>
+SITE_URL=<YOUR_SITE_URL>
 ```
 
 ### 2. Build Commands

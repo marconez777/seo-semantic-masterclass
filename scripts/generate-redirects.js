@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -7,22 +8,36 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuração do Supabase
-const SUPABASE_URL = "https://lvinoytvsyloccajnrwp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aW5veXR2c3lsb2NjYWpucndwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3ODgwNDUsImV4cCI6MjA3MDM2NDA0NX0.SlXouoiD_epPlYwPJVodUMOg7tK0NIWJwD2s70rmAsc";
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseReady = SUPABASE_URL && !SUPABASE_URL.includes('PLACEHOLDER') && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes('PLACEHOLDER');
+
+let supabase;
+if (supabaseReady) {
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+    console.warn('⚠️  Supabase environment variables not set or are placeholders in your .env file.');
+    console.warn('Dynamic category routes will not be included in the redirects.');
+}
+
 
 async function generateRedirectConfigs() {
   console.log('🔧 Gerando configurações de redirecionamento...\n');
 
-  // Buscar categorias do Supabase
-  const { data: categories, error } = await supabase
-    .from('categories')
-    .select('slug');
-  
-  if (error) {
-    console.error('Erro ao buscar categorias:', error);
-    return;
+  let categories = [];
+  if (supabaseReady) {
+      // Buscar categorias do Supabase
+      const { data, error } = await supabase
+        .from('categories')
+        .select('slug');
+
+      if (error) {
+        console.error('Erro ao buscar categorias:', error);
+        // Don't stop the whole script, just proceed without categories
+      } else {
+        categories = data || [];
+      }
   }
 
   // Páginas estáticas fixas

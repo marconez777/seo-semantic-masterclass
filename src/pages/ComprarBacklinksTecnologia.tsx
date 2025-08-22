@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
+import { SITE_URL } from "@/lib/utils";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -188,17 +189,17 @@ export default function ComprarBacklinksTecnologia() {
       <SEOHead
         title="Comprar Backlinks de Qualidade Nicho de Tecnologia | MK"
         description="Melhores backlinks de qualidade em Blogs de Tecnologia. Compre backlinks para aparecer no Topo do Google e nas IAs."
-        canonicalUrl="https://mkart.com.br/comprar-backlinks-tecnologia"
+        canonicalUrl={`${SITE_URL}/comprar-backlinks-tecnologia`}
         keywords="backlinks de tecnologia, comprar backlinks tecnologia, backlinks de qualidade"
       />
       <StructuredData
         type="breadcrumb"
         data={{
           items: [
-            { name: "Início", url: `${window.location.origin}/` },
+            { name: "Início", url: SITE_URL },
             {
               name: "Comprar Backlinks de Tecnologia",
-              url: `${window.location.origin}/comprar-backlinks-tecnologia`,
+              url: `${SITE_URL}/comprar-backlinks-tecnologia`,
             },
           ],
         }}

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
+import { SITE_URL } from "@/lib/utils";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -191,17 +192,17 @@ export default function ComprarBacklinksEsportes() {
       <SEOHead
         title="Comprar Backlinks Brasileiros no Nicho de Esportes | MK"
         description="Comprar Backlinks de qualidade no Nicho de Esportes. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl="https://mkart.com.br/comprar-backlinks-esportes"
+        canonicalUrl={`${SITE_URL}/comprar-backlinks-esportes`}
         keywords="backlinks esportes, comprar backlinks esportivos, backlinks brasileiros, futebol"
       />
       <StructuredData
         type="breadcrumb"
         data={{
           items: [
-            { name: "Início", url: `${window.location.origin}/` },
+            { name: "Início", url: SITE_URL },
             {
               name: "Backlinks de Esportes",
-              url: `${window.location.origin}/comprar-backlinks-esportes`,
+              url: `${SITE_URL}/comprar-backlinks-esportes`,
             },
           ],
         }}

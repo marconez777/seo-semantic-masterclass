@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -8,15 +9,26 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuração do Supabase
-const SUPABASE_URL = "https://lvinoytvsyloccajnrwp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aW5veXR2c3lsb2NjYWpucndwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ3ODgwNDUsImV4cCI6MjA3MDM2NDA0NX0.SlXouoiD_epPlYwPJVodUMOg7tK0NIWJwD2s70rmAsc";
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+const SITE_URL = process.env.SITE_URL || 'http://localhost:5173';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseReady = SUPABASE_URL && !SUPABASE_URL.includes('PLACEHOLDER') && SUPABASE_ANON_KEY && !SUPABASE_ANON_KEY.includes('PLACEHOLDER');
+
+let supabase;
+if (supabaseReady) {
+    supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} else {
+    console.warn('⚠️  Supabase environment variables not set or are placeholders in your .env file.');
+    console.warn('Dynamic category pages will not be generated.');
+}
+
 
 console.log('🚀 Gerando páginas estáticas com SEO específico do Supabase...\n');
 
 // Buscar categorias do Supabase
 async function fetchCategories() {
+  if (!supabaseReady) return [];
   const { data: categories, error } = await supabase
     .from('categories')
     .select('slug, title, description, image, schema_data, h1, intro, seo_html');
@@ -61,7 +73,7 @@ const staticPageData = {
       "@context": "https://schema.org",
       "@type": "WebSite",
       "name": "MK Art SEO",
-      "url": "https://mkart.com.br",
+      "url": SITE_URL,
       "description": "Especialista em backlinks brasileiros de qualidade para melhorar o posicionamento no Google"
     }
   },
@@ -139,8 +151,8 @@ async function generateStaticPages() {
     const pageData = {
       title: data.title,
       description: data.description,
-      canonical: `https://mkart.com.br${path}`,
-      url: `https://mkart.com.br${path}`,
+      canonical: `${SITE_URL}${path}`,
+      url: `${SITE_URL}${path}`,
       h1: data.title,
       intro: '',
       seoBody: '',
@@ -160,7 +172,7 @@ async function generateStaticPages() {
     const stats = await fetchBacklinkStats(category.slug);
     
     const urlPath = `/comprar-backlinks-${category.slug}`;
-    const canonical = `https://mkart.com.br${urlPath}`;
+    const canonical = `${SITE_URL}${urlPath}`;
     
     const pageData = {
       title: `Comprar Backlinks ${category.title} - Backlinks Premium`,

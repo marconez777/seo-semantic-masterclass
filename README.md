@@ -18,23 +18,33 @@ Changes made via Lovable will be committed automatically to this repo.
 
 If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### Requirements
+- Node.js (v22 or higher)
+- pnpm (v10 or higher)
 
-Follow these steps:
+### Local Development Setup
+
+Follow these steps to run the project locally:
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Step 1: Clone the repository
 git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
 cd <YOUR_PROJECT_NAME>
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Step 2: Install dependencies using pnpm
+pnpm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# Step 3: Set up environment variables
+# Copy the example file to create your local environment file.
+cp .env.example .env.local
+
+# Step 4: Start the development server
+pnpm dev
 ```
+
+**Note on Supabase Integration:**
+
+The project is configured to run without requiring real Supabase credentials. When using the placeholder values from `.env.example`, any features that depend on Supabase (such as dynamic data loading, user authentication, etc.) will be disabled or run in a mocked/degraded mode. This allows for frontend development and testing without needing access to the backend.
 
 **Edit a file directly in GitHub**
 

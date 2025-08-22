@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
+import { SITE_URL } from "@/lib/utils";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -151,7 +152,7 @@ export default function ComprarBacklinksImoveis() {
       <SEOHead
         title="Comprar Backlinks Brasileiros de Imóveis e Construção | MK"
         description="Comprar Backlinks de qualidade no Nicho Casa e Construção. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl="https://mkart.com.br/comprar-backlinks-imoveis"
+        canonicalUrl={`${SITE_URL}/comprar-backlinks-imoveis`}
         keywords="comprar backlinks imóveis, backlinks construção, DR, DA, tráfego, preço"
       />
       <StructuredData
@@ -159,7 +160,7 @@ export default function ComprarBacklinksImoveis() {
         data={{
           name: "Comprar Backlinks Brasileiros de Imóveis e Construção",
           description: "Comprar Backlinks de qualidade no Nicho Casa e Construção. Apareça no Topo do Google e nas Respostas das IAs.",
-          url: "https://mkart.com.br/comprar-backlinks-imoveis"
+          url: `${SITE_URL}/comprar-backlinks-imoveis`
         }}
       />
       <Header />

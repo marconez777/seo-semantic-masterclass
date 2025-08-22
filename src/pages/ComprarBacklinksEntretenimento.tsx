@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
+import { SITE_URL } from "@/lib/utils";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -194,7 +195,7 @@ export default function ComprarBacklinksEntretenimento() {
       <SEOHead
         title="Comprar Backlinks Brasileiros no Nicho de Entretenimento | MK"
         description="Comprar Backlinks de qualidade no Nicho de Entretenimento. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl="https://mkart.com.br/comprar-backlinks-entretenimento"
+        canonicalUrl={`${SITE_URL}/comprar-backlinks-entretenimento`}
         keywords="backlinks entretenimento, comprar backlinks musica, filmes, series, games, backlinks brasileiros"
       />
       <StructuredData
@@ -202,7 +203,7 @@ export default function ComprarBacklinksEntretenimento() {
         data={{
           name: "Comprar Backlinks Brasileiros no Nicho de Entretenimento",
           description: "Comprar Backlinks de qualidade no Nicho de Entretenimento. Apareça no Topo do Google e nas Respostas das IAs.",
-          url: "https://mkart.com.br/comprar-backlinks-entretenimento"
+          url: `${SITE_URL}/comprar-backlinks-entretenimento`
         }}
       />
       <Header />
