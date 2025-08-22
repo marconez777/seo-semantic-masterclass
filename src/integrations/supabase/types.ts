@@ -226,6 +226,44 @@ export type Database = {
           },
         ]
       }
+      order_items_new: {
+        Row: {
+          created_at: string | null
+          id: string
+          order_id: string | null
+          product_id: string | null
+          qty: number
+          title: string | null
+          unit_price_cents: number
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          order_id?: string | null
+          product_id?: string | null
+          qty?: number
+          title?: string | null
+          unit_price_cents: number
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          order_id?: string | null
+          product_id?: string | null
+          qty?: number
+          title?: string | null
+          unit_price_cents?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_new_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_new"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       order_receipts: {
         Row: {
           amount_cents: number
@@ -263,6 +301,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      orders_new: {
+        Row: {
+          created_at: string | null
+          expires_at: string | null
+          id: string
+          pix_key: string | null
+          pix_qr: string | null
+          status: string
+          total_cents: number
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          pix_key?: string | null
+          pix_qr?: string | null
+          status: string
+          total_cents?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          expires_at?: string | null
+          id?: string
+          pix_key?: string | null
+          pix_qr?: string | null
+          status?: string
+          total_cents?: number
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
       }
       pedidos: {
         Row: {
