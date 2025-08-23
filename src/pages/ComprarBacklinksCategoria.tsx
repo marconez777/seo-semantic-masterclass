@@ -6,7 +6,7 @@ import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import PurchaseModal from "@/components/cart/PurchaseModal";
+import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import { Circle, BookText } from "lucide-react";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
@@ -97,8 +97,14 @@ export default function ComprarBacklinksCategoria() {
     });
   }, [backlinks, minDR, minTraffic, maxPrice]);
 
-  const onBuy = (b: any) => {
-    setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
+  const itemToProduct = (item: any) => ({
+    id: item.id,
+    name: item.site_name ?? item.site_url ?? item.name ?? "Backlink",
+    price_cents: item.price_cents ?? 0,
+  });
+
+  const onBuy = (item: any) => {
+    setSelected(itemToProduct(item));
     setOpen(true);
   };
 
@@ -191,7 +197,7 @@ export default function ComprarBacklinksCategoria() {
       </main>
       <Footer />
       {selected && (
-        <PurchaseModal open={open} onOpenChange={setOpen} product={selected} />
+        <ContactModal open={open} onOpenChange={setOpen} product={selected} />
       )}
     </>
   );

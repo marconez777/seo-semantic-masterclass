@@ -3,7 +3,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import PurchaseModal from "@/components/cart/PurchaseModal";
+import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
@@ -144,8 +144,14 @@ export default function ComprarBacklinksSaude() {
     return sorted.slice(start, start + itemsPerPage);
   }, [sorted, currentPage, itemsPerPage]);
 
-  const onBuy = (b: any) => {
-    setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
+  const itemToProduct = (item: any) => ({
+    id: item.id,
+    name: item.site_name ?? item.site_url ?? item.name ?? "Backlink",
+    price_cents: item.price_cents ?? 0,
+  });
+
+  const onBuy = (item: any) => {
+    setSelected(itemToProduct(item));
     setOpen(true);
   };
 
@@ -424,11 +430,13 @@ export default function ComprarBacklinksSaude() {
         </section>
       </main>
       <Footer />
-      <PurchaseModal
-        open={open}
-        onOpenChange={setOpen}
-        product={selected || { id: '', name: '', price_cents: 0 }}
-      />
+      {selected && (
+        <ContactModal
+          open={open}
+          onOpenChange={setOpen}
+          product={selected}
+        />
+      )}
     </>
   );
 }
