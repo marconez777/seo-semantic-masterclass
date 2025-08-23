@@ -3,7 +3,7 @@ import { Helmet } from "react-helmet-async";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import PurchaseModal from "@/components/cart/PurchaseModal";
+import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
@@ -483,7 +483,7 @@ const AgenciaBacklinks = () => {
       <Footer />
 
       {selected && (
-        <PurchaseModal open={open} onOpenChange={setOpen} product={selected} />
+        <ContactModal open={open} onOpenChange={setOpen} product={selected} />
       )}
     </>
   );

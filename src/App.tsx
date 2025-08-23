@@ -5,8 +5,6 @@ import AgenciaBacklinks from "./pages/AgenciaBacklinks";
 import ConsultoriaSeo from "./pages/ConsultoriaSeo";
 import Auth from "./pages/Auth";
 // import Painel from "./pages/Painel";
-import Carrinho from "./pages/Carrinho";
-import Cart from "./pages/Cart";
 import ComprarBacklinks from "./pages/ComprarBacklinks";
 import ComprarBacklinksCategoria from "./pages/ComprarBacklinksCategoria";
 import ComprarBacklinksNoticias from "./pages/ComprarBacklinksNoticias";
@@ -27,7 +25,7 @@ import ComprarBacklinksImoveis from "./pages/ComprarBacklinksImoveis";
 import ComprarBacklinksMaternidade from "./pages/ComprarBacklinksMaternidade";
 import ComprarBacklinksSaude from "./pages/ComprarBacklinksSaude";
 import Dashboard from "./pages/Dashboard";
-import { CartProvider } from "./contexts/CartContext";
+
 
 import AdminLayout from "./layouts/AdminLayout";
 import AdminPedidos from "./pages/admin/AdminPedidos";
@@ -47,8 +45,7 @@ import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
  
 const App = () => (
   <BrowserRouter>
-    <CartProvider>
-      <Routes>
+    <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/contato" element={<Contact />} />
         <Route path="/agencia-de-backlinks" element={<AgenciaBacklinks />} />
@@ -94,15 +91,12 @@ const App = () => (
         </Route>
         <Route path="/recibo/:orderId" element={<Recibo />} />
         
-        <Route path="/carrinho" element={<Carrinho />} />
-        <Route path="/cart" element={<Cart />} />
         
         {/* Catch-all route for 404 */}
         <Route path="*" element={<NotFound />} />
       </Routes>
-      <Toaster />
-      <WhatsAppFAB />
-    </CartProvider>
+    <Toaster />
+    <WhatsAppFAB />
   </BrowserRouter>
 );
  

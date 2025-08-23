@@ -5,7 +5,7 @@ import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { ShoppingCart } from "lucide-react";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useLocation, Link } from "react-router-dom";
-import { useCart } from "@/contexts/CartContext";
+
 
 const Header = () => {
   const [isAdmin, setIsAdmin] = useState(false);
@@ -17,7 +17,7 @@ const Header = () => {
   
   const isPanelRoute = location.pathname.startsWith("/painel");
   const isLoggedIn = !!userName;
-  const { itemsCount } = useCart();
+  const itemsCount = 0;
   
   const openBacklinks = () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
@@ -72,28 +72,6 @@ const Header = () => {
     );
   }
 
-  if (location.pathname === "/carrinho") {
-    return (
-      <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b">
-        <nav className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <img src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png" alt="Logo MK Art" className="w-12 h-12" />
-          </div>
-          <div className="hidden md:flex items-center gap-3">
-            {isLoggedIn ? (
-              <Button asChild>
-                <Link to="/painel" aria-label="Ir para o Painel">Painel</Link>
-              </Button>
-            ) : (
-              <Button asChild>
-                <Link to="/auth" aria-label="Ir para Login">Login</Link>
-              </Button>
-            )}
-          </div>
-        </nav>
-      </header>
-    );
-  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm border-b">
@@ -186,13 +164,8 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-3">
           {isPanelRoute ? (
             <>
-              <Link to="/cart" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
-                <ShoppingCart className="h-5 w-5" />
-                {itemsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none ring-2 ring-background">
-                    {itemsCount}
-                  </span>
-                )}
+              <Link to="/contato" aria-label="Contato" className="text-foreground hover:text-primary transition-colors">
+                Contato
               </Link>
               <UserProfileDropdown
                 name={userName ?? 'Visitante'}
@@ -203,14 +176,6 @@ const Header = () => {
             </>
           ) : (
             <>
-              <Link to="/carrinho" aria-label="Carrinho" className="relative inline-flex items-center justify-center rounded-md h-10 w-10 hover:bg-accent">
-                <ShoppingCart className="h-5 w-5" />
-                {itemsCount > 0 && (
-                  <span className="absolute -top-1 -right-1 inline-flex items-center justify-center h-5 min-w-[20px] px-1 rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold leading-none ring-2 ring-background">
-                    {itemsCount}
-                  </span>
-                )}
-              </Link>
               {isLoggedIn ? (
                 <Button asChild>
                   <Link to="/painel" aria-label="Ir para o Painel">Painel</Link>
