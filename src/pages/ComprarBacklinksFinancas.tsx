@@ -1,621 +1,133 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import PurchaseModal from "@/components/cart/PurchaseModal";
+import NewBuyModal from "@/components/checkout/NewBuyModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import StructuredData from "@/components/seo/StructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
-import { getCategoryIcon } from "@/lib/category-icons";
 
-// Helper to format BRL
-const brl = (v: number) =>
-  (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-// Ícones por categoria (mesmo mapeamento do dropdown do Header)
-
-const normalize = (s: string) =>
-  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+const CATEGORY = "Finanças";
 
 export default function ComprarBacklinksFinancas() {
   const [backlinks, setBacklinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // Filters
-  const [drRange, setDrRange] = useState<string>("todos");
-  const [trafficRange, setTrafficRange] = useState<string>("todos");
-  const [maxPrice, setMaxPrice] = useState<number | "">("");
-
-  // Sorting
-  const [sortKey, setSortKey] = useState<
-    | "site_name"
-    | "dr"
-    | "da"
-    | "traffic"
-    | "category"
-    | "price_cents"
-    | null
-  >(null);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-
-  // Modal state
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<
-    { id: string; name: string; price_cents: number } | null
-  >(null);
+  const [current, setCurrent] = useState<{ sku?: string; titulo?: string; preco?: string | number; categoria?: string }>();
 
-  // Paginação
-  const [page, setPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(20);
+  function handleComprar(item: any) {
+    setCurrent({
+      sku: item.id,
+      titulo: item.site_name || item.site_url,
+      preco: (item.price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+      categoria: item.category
+    });
+    setOpen(true);
+  }
+
+  function handleContinue(item?: typeof current) {
+    const sku = item?.sku ? `sku=${encodeURIComponent(item.sku)}` : "";
+    const categoria = item?.categoria ? `&categoria=${encodeURIComponent(item.categoria)}` : "";
+    window.location.href = `/proximo?${sku}${categoria}`;
+  }
 
   useEffect(() => {
     let mounted = true;
     (async () => {
       const { data, error } = await supabase
-        .from("backlinks_public")
-        .select("*")
-        .eq("is_active", true)
-        .order("dr", { ascending: false });
+        .from('backlinks_public')
+        .select('*')
+        .eq('is_active', true)
+        .eq('category', CATEGORY);
       if (mounted) {
-        if (error) console.error("Erro ao buscar backlinks", error);
+        if (error) console.error('Erro ao buscar backlinks', error);
         setBacklinks(data ?? []);
         setLoading(false);
       }
     })();
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    (backlinks ?? []).forEach((b) => {
-      if (b.category) set.add(String(b.category));
-    });
-    return Array.from(set).sort();
-  }, [backlinks]);
-
-  // Helpers
-  const parseRange = (value: string): [number, number] | null => {
-    if (!value || value === "todos") return null;
-    if (value === "gt-100000") return [100001, Number.POSITIVE_INFINITY];
-    const [minStr, maxStr] = value.split("-");
-    const min = Number(minStr.replace(/\./g, ""));
-    const max = Number(maxStr.replace(/\./g, ""));
-    if (Number.isNaN(min) || Number.isNaN(max)) return null;
-    return [min, max];
-  };
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const dr = params.get("dr");
-    const traffic = params.get("traffic");
-    if (dr) setDrRange(dr);
-    if (traffic) setTrafficRange(traffic);
-  }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (drRange && drRange !== "todos") params.set("dr", drRange);
-    else params.delete("dr");
-    if (trafficRange && trafficRange !== "todos")
-      params.set("traffic", trafficRange);
-    else params.delete("traffic");
-    const query = params.toString();
-    const url = `${window.location.pathname}${query ? `?${query}` : ""}`;
-    window.history.replaceState({}, "", url);
-  }, [drRange, trafficRange]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [drRange, trafficRange, maxPrice, sortKey, sortDir, itemsPerPage]);
-
-  const filtered = useMemo(() => {
-    const drParsed = parseRange(drRange);
-    const trafficParsed = parseRange(trafficRange);
-
-    return (backlinks ?? []).filter((b) => {
-      // Restrito a Finanças
-      const cat = normalize(String(b.category ?? ""));
-      if (!(cat === "financas")) return false;
-
-      if (drParsed) {
-        const [min, max] = drParsed;
-        if (typeof b.dr !== "number") return false;
-        if (b.dr < min || b.dr > max) return false;
+  const structuredData = useMemo(() => ({
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": `Backlinks de ${CATEGORY}`,
+    "description": `Lista de backlinks para sites de ${CATEGORY}.`,
+    "itemListElement": backlinks.map((b, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "item": {
+        "@type": "Product",
+        "name": b.site_name || b.site_url,
+        "description": `Backlink do site ${b.site_name || b.site_url} com DR ${b.dr} e tráfego de ${b.traffic}.`,
+        "sku": b.id,
+        "offers": {
+          "@type": "Offer",
+          "price": (b.price_cents / 100).toFixed(2),
+          "priceCurrency": "BRL",
+          "availability": "https://schema.org/InStock"
+        }
       }
-      if (trafficParsed) {
-        const [minT, maxT] = trafficParsed;
-        if (typeof b.traffic !== "number") return false;
-        if (b.traffic < minT || b.traffic > maxT) return false;
-      }
-      if (
-        maxPrice !== "" &&
-        typeof b.price_cents === "number" &&
-        b.price_cents > Number(maxPrice)
-      )
-        return false;
-      return true;
-    });
-  }, [backlinks, drRange, trafficRange, maxPrice]);
-
-  const sorted = useMemo(() => {
-    const arr = [...filtered];
-    if (!sortKey) return arr;
-    arr.sort((a, b) => {
-      const av =
-        sortKey === "site_name"
-          ? (a.site_name ?? a.site_url ?? "").toString().toLowerCase()
-          : (a as any)[sortKey!];
-      const bv =
-        sortKey === "site_name"
-          ? (b.site_name ?? b.site_url ?? "").toString().toLowerCase()
-          : (b as any)[sortKey!];
-      if (av == null && bv == null) return 0;
-      if (av == null) return 1;
-      if (bv == null) return -1;
-      if (typeof av === "number" && typeof bv === "number") {
-        return sortDir === "desc"
-          ? (bv as number) - (av as number)
-          : (av as number) - (bv as number);
-      }
-      const as = String(av);
-      const bs = String(bv);
-      return sortDir === "desc" ? bs.localeCompare(as) : as.localeCompare(bs);
-    });
-    return arr;
-  }, [filtered, sortKey, sortDir]);
-
-  const pageCount = Math.max(1, Math.ceil(sorted.length / itemsPerPage));
-  const currentPage = Math.min(page, pageCount);
-  const visible = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return sorted.slice(start, start + itemsPerPage);
-  }, [sorted, currentPage, itemsPerPage]);
-
-  const onBuy = (b: any) => {
-    setSelected({
-      id: b.id,
-      name: b.site_name ?? b.site_url ?? "Backlink",
-      price_cents: b.price_cents,
-    });
-    setOpen(true);
-  };
+    }))
+  }), [backlinks]);
 
   return (
     <>
       <SEOHead
-        title="Onde Comprar Backlinks de Qualidade para Finanças | MK"
-        description="Loja de backlinks de qualidade em Blogs de Finanças. Melhor Loja onde conseguir backlinks para aparecer no Topo do Google e nas IAs."
-        canonicalUrl="https://mkart.com.br/comprar-backlinks-financas"
-        keywords="backlinks de finanças, comprar backlinks finanças, backlinks de qualidade"
+        title={`Comprar Backlinks de ${CATEGORY} | MK Art SEO`}
+        description={`Fortaleça seu site de ${CATEGORY} com backlinks de alta qualidade. Melhore seu SEO e aumente sua autoridade online.`}
+        canonicalUrl={`https://mkartseo.com.br/comprar-backlinks-financas`}
       />
-      <StructuredData
-        type="breadcrumb"
-        data={{
-          items: [
-            { name: "Início", url: `${window.location.origin}/` },
-            {
-              name: "Comprar Backlinks de Finanças",
-              url: `${window.location.origin}/comprar-backlinks-financas`,
-            },
-          ],
-        }}
-      />
+      <StructuredData data={structuredData} />
       <Header />
-      <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
-        {/* Sidebar filters */}
-        <aside className="md:col-span-2 space-y-8 md:sticky md:top-24 self-start h-max">
-          <section>
-            <h2 className="text-base font-semibold mb-2">Filtros</h2>
+      <main className="container mx-auto px-4 py-28">
+        <Breadcrumbs
+          items={[
+            { name: "Início", url: "/" },
+            { name: "Comprar Backlinks", url: "/comprar-backlinks" },
+            { name: CATEGORY, url: "/comprar-backlinks-financas" },
+          ]}
+        />
+        <h1 className="text-4xl font-bold mb-2">Backlinks de {CATEGORY}</h1>
+        <p className="text-muted-foreground mb-6">
+          Explore nossa seleção de backlinks de alta qualidade para sites de {CATEGORY}.
+        </p>
 
-            <div className="mb-4">
-              <h3 className="text-base font-semibold mb-1">DR</h3>
-              <ul className="text-sm leading-none">
-                {[
-                  { v: "todos", label: "Todos" },
-                  { v: "10-20", label: "10 a 20" },
-                  { v: "20-30", label: "20 a 30" },
-                  { v: "30-40", label: "30 a 40" },
-                  { v: "40-50", label: "40 a 50" },
-                  { v: "50-60", label: "50 a 60" },
-                  { v: "60-70", label: "60 a 70" },
-                  { v: "70-80", label: "70 a 80" },
-                  { v: "80-90", label: "80 a 90" },
-                  { v: "90-99", label: "90 a 99" },
-                ].map(({ v, label }) => (
-                  <li key={v}>
-                    <button
-                      className={`block text-left w-full py-0.5 ${
-                        drRange === v ? "font-semibold text-primary" : ""
-                      }`}
-                      onClick={() => setDrRange(v)}
-                    >
-                      {label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className="mb-4">
-              <h3 className="text-base font-semibold mb-1">Tráfego</h3>
-              <ul className="text-sm leading-none">
-                {[
-                  { v: "todos", label: "Todos" },
-                  { v: "0-100", label: "0 a 100" },
-                  { v: "100-1000", label: "100 a 1.000" },
-                  { v: "1000-10000", label: "1.000 a 10.000" },
-                  { v: "10000-100000", label: "10.000 a 100.000" },
-                  { v: "gt-100000", label: "mais de 100.000" },
-                ].map(({ v, label }) => (
-                  <li key={v}>
-                    <button
-                      className={`block text-left w-full py-0.5 ${
-                        trafficRange === v ? "font-semibold text-primary" : ""
-                      }`}
-                      onClick={() => setTrafficRange(v)}
-                    >
-                      {label}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div>
-              <h3 className="text-base font-semibold mb-1">Preço máximo</h3>
-              <ul className="text-sm leading-none">
-                <li>
-                  <button
-                    className="block text-left w-full py-0.5"
-                    onClick={() => setMaxPrice("")}
-                  >
-                    Todos
-                  </button>
-                </li>
-                {[5000, 10000, 20000, 50000, 100000, 500000, 1000000, 10000000].map(
-                  (v) => (
-                    <li key={v}>
-                      <button
-                        className={`block text-left w-full py-0.5 ${
-                          maxPrice === v ? "font-semibold" : ""
-                        }`}
-                        onClick={() => setMaxPrice(v)}
-                      >
-                        Até {brl(v)}
-                      </button>
-                    </li>
-                  )
-                )}
-              </ul>
-            </div>
-          </section>
-        </aside>
-
-        {/* Main list */}
-        <section className="md:col-span-10">
-          <Breadcrumbs
-            className="mb-3"
-            items={[
-              { name: "Início", url: "/" },
-              { name: "Backlinks de Finanças", url: "/comprar-backlinks-financas" },
-            ]}
-          />
-          <h1 className="text-4xl font-bold mb-6">
-            Comprar Backlinks de Finanças
-          </h1>
-
-          {categories.length > 0 && (
-            <section className="mb-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {categories.slice(0, 16).map((cat) => {
-                  const slug = String(cat)
-                    .toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/\s+/g, "-");
-                  const IconComp = getCategoryIcon(String(cat));
-                  return (
-                    <a
-                      key={cat}
-                      href={`/comprar-backlinks-${slug}`}
-                      className="group flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors"
-                    >
-                      <span className="inline-flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary shadow-sm">
-                        <IconComp className="size-4" aria-hidden="true" />
-                      </span>
-                      <span className="flex flex-col">
-                        <span className="text-[11px] uppercase tracking-wide text-muted-foreground leading-none">
-                          Backlinks de
-                        </span>
-                        <span className="text-sm font-semibold leading-none mt-1">
-                          {String(cat)}
-                        </span>
-                      </span>
-                    </a>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="bg-accent/40">
-                <tr className="text-left">
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "site_name")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("site_name");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "site_name")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("site_name");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    SITE
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "dr")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("dr");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "dr")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("dr");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    DR
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "da")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("da");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "da")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("da");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    DA
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "traffic")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("traffic");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "traffic")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("traffic");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    TRÁFEGO/Mês
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "category")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("category");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "category")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("category");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    CATEGORIA
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "price_cents")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("price_cents");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "price_cents")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("price_cents");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    VALOR
-                  </th>
-                  <th className="p-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td className="p-6" colSpan={7}>
-                      Carregando...
-                    </td>
-                  </tr>
-                ) : filtered.length === 0 ? (
-                  <tr>
-                    <td className="p-6" colSpan={7}>
-                      Nenhum resultado encontrado.
-                    </td>
-                  </tr>
-                ) : (
-                  visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <label className="text-sm">Itens por página:</label>
-              <select
-                className="bg-card text-foreground border rounded-md px-2 py-1"
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setPage(1);
-                }}
-              >
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={150}>150</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-2 md:ml-auto">
-              <button
-                className="px-3 py-1 border rounded-md disabled:opacity-50"
-                disabled={currentPage <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                Anterior
-              </button>
-              <span className="text-sm">
-                Página {currentPage} de {pageCount}
-              </span>
-              <button
-                className="px-3 py-1 border rounded-md disabled:opacity-50"
-                disabled={currentPage >= pageCount}
-                onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              >
-                Próxima
-              </button>
-            </div>
-          </div>
-
-          {/* Conteúdo SEO */}
-          <section className="mt-10 space-y-6">
-            <h2 className="text-2xl font-semibold">O Papel dos Backlinks no SEO</h2>
-            <p className="text-muted-foreground">
-              Os backlinks são links de outros sites que direcionam para o seu, e são vistos pelo Google como votos de confiança. Quando um site de autoridade com conteúdo relevante aponta para o seu, isso indica ao Google que seu site possui informações valiosas, aumentando assim sua posição nos mecanismos de busca.
-            </p>
-
-            <h2 className="text-2xl font-semibold">Importância de um Representante de Backlinks</h2>
-            <p className="text-muted-foreground">
-              Um representante de backlinks pode ser um aliado indispensável para qualquer empresa no setor financeiro. Este profissional ou serviço especializado entende as nuances do SEO e possui uma rede estabelecida de sites parceiros que pode ser utilizada para a construção de uma estratégia eficaz de backlinks. Eles garantem que os links obtidos sejam de sites relevantes e de alta qualidade, assegurando que cada backlink adquirido realmente contribua para o crescimento da autoridade de seu site.
-            </p>
-
-            <h2 className="text-2xl font-semibold">Como Comprar Backlinks de Qualidade</h2>
-            <p className="text-muted-foreground">
-              Pesquise Bem o Mercado: Antes de decidir onde comprar backlinks, entenda quais são os sites que oferecem os melhores resultados no setor financeiro. Sites especializados em fintechs, bancos digitais e criptomoedas são preferíveis.
-            </p>
-            <p className="text-muted-foreground">
-              Atenção aos Backlinks Brasileiros: Se o seu público-alvo é majoritariamente brasileiro, é essencial focar em conseguir backlinks nacionais. Isso não apenas melhora o SEO local, mas também aumenta a relevância cultural do seu conteúdo.
-            </p>
-            <p className="text-muted-foreground">
-              Qualidade VS Quantidade: Ao comprar backlinks de qualidade, foque sempre em links provenientes de sites renomados e com boa reputação. Um único backlink de um site de alta confiança pode valer mais do que dezenas de links de sites irrelevantes.
-            </p>
-
-            <h2 className="text-2xl font-semibold">Benefícios de Backlinks para Fintechs e Bancos Digitais</h2>
-            <p className="text-muted-foreground">
-              Aumento da Autoridade de Domínio: Links de qualidade de sites reconhecidos no setor podem sustentar a reputação de sua fintech no mercado digital.
-              Maior Visibilidade: Backlinks adequados podem colocar seu site à frente nos resultados de busca, tornando-o mais visível para potenciais clientes e investidores.
-            </p>
-            <p className="text-muted-foreground">
-              Tráfego Qualificado: Combinar backlinks com conteúdo relevante pode atrair um público mais engajado e com maior probabilidade de converter.
-            </p>
-
-            <h2 className="text-2xl font-semibold">Dicas Práticas para Comprar Backlinks Brasil</h2>
-            <p className="text-muted-foreground">
-              Explore Plataformas de Conteúdo Especializado: Envolva-se com blogs voltados ao setor financeiro brasileiro e ofereça conteúdo de guest post em troca de backlinks.
-            </p>
-            <p className="text-muted-foreground">Parcerias com Influenciadores: Colabore com influenciadores do nicho financeiro, pois eles frequentemente possuem sites ou blogs onde podem incluir backlinks.</p>
-            <p className="text-muted-foreground">
-              Artigos Patrocinados: Utilize artigos patrocinados em portais respeitados para garantir backlinks robustos e aumentar a visibilidade da sua marca no Brasil.
-            </p>
-
-            <p className="text-muted-foreground">
-              Finalmente, para qualquer fintech, banco digital, ou empresa contábil que busca avançar no mercado competitivo online, é vital colaborar com um representante de backlinks de confiança. Comece hoje mesmo a investir em backlinks de qualidade e veja sua presença digital crescer significativamente.
-            </p>
-            <p className="text-muted-foreground">
-              Para mais informações, entre em contato com nossa equipe especializada e descubra como podemos transformar a visibilidade online do seu negócio!
-            </p>
-          </section>
-        </section>
+        <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
+          <table className="w-full text-sm">
+            <thead className="bg-accent/40">
+              <tr className="text-left">
+                <th className="p-4">SITE</th>
+                <th className="p-4">DR</th>
+                <th className="p-4">DA</th>
+                <th className="p-4">TRÁFEGO/Mês</th>
+                <th className="p-4">CATEGORIA</th>
+                <th className="p-4">VALOR</th>
+                <th className="p-4"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {loading ? (
+                <tr><td className="p-6 text-center" colSpan={7}>Carregando...</td></tr>
+              ) : backlinks.length === 0 ? (
+                <tr><td className="p-6 text-center" colSpan={7}>Nenhum backlink encontrado.</td></tr>
+              ) : (
+                backlinks.map((b) => (
+                  <BacklinkTableRow key={b.id} item={b} onBuy={handleComprar} />
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </main>
       <Footer />
-
-      {selected && (
-        <PurchaseModal
-          open={open}
-          onOpenChange={setOpen}
-          product={selected}
-        />
-      )}
+      <NewBuyModal
+        open={open}
+        item={current}
+        onClose={() => setOpen(false)}
+        onContinue={handleContinue}
+      />
     </>
   );
 }

@@ -3,7 +3,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import PurchaseModal from "@/components/cart/PurchaseModal";
+import NewBuyModal from "@/components/checkout/NewBuyModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
@@ -27,7 +27,23 @@ export default function ComprarBacklinksImoveis() {
 
   // Modal state
   const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<{ id: string; name: string; price_cents: number } | null>(null);
+  const [current, setCurrent] = useState<{ sku?: string; titulo?: string; preco?: string | number; categoria?: string }>();
+
+  function handleComprar(item: any) {
+    setCurrent({
+      sku: item.id,
+      titulo: item.site_name || item.site_url,
+      preco: (item.price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+      categoria: item.category
+    });
+    setOpen(true);
+  }
+
+  function handleContinue(item?: typeof current) {
+    const sku = item?.sku ? `sku=${encodeURIComponent(item.sku)}` : "";
+    const categoria = item?.categoria ? `&categoria=${encodeURIComponent(item.categoria)}` : "";
+    window.location.href = `/proximo?${sku}${categoria}`;
+  }
 
   // Paginação
   const [page, setPage] = useState(1);
@@ -140,11 +156,6 @@ export default function ComprarBacklinksImoveis() {
     const start = (currentPage - 1) * itemsPerPage;
     return sorted.slice(start, start + itemsPerPage);
   }, [sorted, currentPage, itemsPerPage]);
-
-  const onBuy = (b: any) => {
-    setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
-    setOpen(true);
-  };
 
   return (
     <>
@@ -349,7 +360,7 @@ export default function ComprarBacklinksImoveis() {
                   <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={handleComprar} />
                   ))
                 )}
               </tbody>
@@ -388,13 +399,12 @@ export default function ComprarBacklinksImoveis() {
         </section>
       </main>
       <Footer />
-      {selected && (
-        <PurchaseModal
-          open={open}
-          onOpenChange={setOpen}
-          product={selected}
-        />
-      )}
+      <NewBuyModal
+        open={open}
+        item={current}
+        onClose={() => setOpen(false)}
+        onContinue={handleContinue}
+      />
     </>
   );
 }

@@ -37,6 +37,7 @@ import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlogNew from "./pages/AdminBlogNew";
+import Proximo from "./pages/Proximo";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
 import { RequireRole } from "./components/auth/RequireRole";
@@ -73,6 +74,7 @@ const App = () => (
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/auth" element={<Auth />} />
         <Route path="/painel" element={<Dashboard />} />
+        <Route path="/proximo" element={<Proximo />} />
         <Route path="/403" element={<Forbidden />} />
         
         {/* Admin auth route */}
