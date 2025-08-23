@@ -169,63 +169,6 @@ export type Database = {
           },
         ]
       }
-      order_items: {
-        Row: {
-          anchor_text: string | null
-          backlink_id: string
-          created_at: string
-          id: string
-          order_id: string
-          price_cents: number
-          publication_status: Database["public"]["Enums"]["publication_status"]
-          publication_url: string | null
-          quantity: number
-          target_url: string | null
-          updated_at: string
-        }
-        Insert: {
-          anchor_text?: string | null
-          backlink_id: string
-          created_at?: string
-          id?: string
-          order_id: string
-          price_cents: number
-          publication_status?: Database["public"]["Enums"]["publication_status"]
-          publication_url?: string | null
-          quantity?: number
-          target_url?: string | null
-          updated_at?: string
-        }
-        Update: {
-          anchor_text?: string | null
-          backlink_id?: string
-          created_at?: string
-          id?: string
-          order_id?: string
-          price_cents?: number
-          publication_status?: Database["public"]["Enums"]["publication_status"]
-          publication_url?: string | null
-          quantity?: number
-          target_url?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_items_backlink_id_fkey"
-            columns: ["backlink_id"]
-            isOneToOne: false
-            referencedRelation: "backlinks"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "order_items_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "pedidos"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       order_items_new: {
         Row: {
           created_at: string | null
@@ -264,44 +207,6 @@ export type Database = {
           },
         ]
       }
-      order_receipts: {
-        Row: {
-          amount_cents: number
-          created_at: string
-          created_by: string | null
-          file_url: string | null
-          id: string
-          note: string | null
-          order_id: string
-        }
-        Insert: {
-          amount_cents: number
-          created_at?: string
-          created_by?: string | null
-          file_url?: string | null
-          id?: string
-          note?: string | null
-          order_id: string
-        }
-        Update: {
-          amount_cents?: number
-          created_at?: string
-          created_by?: string | null
-          file_url?: string | null
-          id?: string
-          note?: string | null
-          order_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "order_receipts_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: false
-            referencedRelation: "pedidos"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       orders_new: {
         Row: {
           created_at: string | null
@@ -335,125 +240,6 @@ export type Database = {
           total_cents?: number
           updated_at?: string | null
           user_id?: string | null
-        }
-        Relationships: []
-      }
-      pedidos: {
-        Row: {
-          cancelled_at: string | null
-          created_at: string
-          id: string
-          paid_at: string | null
-          payment_method: string | null
-          publish_due_at: string | null
-          status: Database["public"]["Enums"]["order_status"]
-          total_cents: number
-          updated_at: string
-          user_id: string
-        }
-        Insert: {
-          cancelled_at?: string | null
-          created_at?: string
-          id?: string
-          paid_at?: string | null
-          payment_method?: string | null
-          publish_due_at?: string | null
-          status?: Database["public"]["Enums"]["order_status"]
-          total_cents: number
-          updated_at?: string
-          user_id: string
-        }
-        Update: {
-          cancelled_at?: string | null
-          created_at?: string
-          id?: string
-          paid_at?: string | null
-          payment_method?: string | null
-          publish_due_at?: string | null
-          status?: Database["public"]["Enums"]["order_status"]
-          total_cents?: number
-          updated_at?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      pedidos_pii: {
-        Row: {
-          created_at: string
-          customer_cpf: string | null
-          customer_cpf_enc: string | null
-          customer_email: string | null
-          customer_email_enc: string | null
-          customer_name: string | null
-          customer_name_enc: string | null
-          customer_phone: string | null
-          customer_phone_enc: string | null
-          order_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          customer_cpf?: string | null
-          customer_cpf_enc?: string | null
-          customer_email?: string | null
-          customer_email_enc?: string | null
-          customer_name?: string | null
-          customer_name_enc?: string | null
-          customer_phone?: string | null
-          customer_phone_enc?: string | null
-          order_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          customer_cpf?: string | null
-          customer_cpf_enc?: string | null
-          customer_email?: string | null
-          customer_email_enc?: string | null
-          customer_name?: string | null
-          customer_name_enc?: string | null
-          customer_phone?: string | null
-          customer_phone_enc?: string | null
-          order_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "pedidos_pii_order_id_fkey"
-            columns: ["order_id"]
-            isOneToOne: true
-            referencedRelation: "pedidos"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      pedidos_pii_masked: {
-        Row: {
-          created_at: string
-          customer_cpf_masked: string | null
-          customer_email_masked: string | null
-          customer_first_name: string | null
-          customer_phone_masked: string | null
-          order_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          customer_cpf_masked?: string | null
-          customer_email_masked?: string | null
-          customer_first_name?: string | null
-          customer_phone_masked?: string | null
-          order_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          customer_cpf_masked?: string | null
-          customer_email_masked?: string | null
-          customer_first_name?: string | null
-          customer_phone_masked?: string | null
-          order_id?: string
-          updated_at?: string
         }
         Relationships: []
       }
@@ -550,34 +336,6 @@ export type Database = {
         Args: { p_order_id: string }
         Returns: undefined
       }
-      decrypt_pii: {
-        Args: { encrypted_data: string }
-        Returns: string
-      }
-      encrypt_pii: {
-        Args: { data: string }
-        Returns: string
-      }
-      get_decrypted_pii_secure: {
-        Args: { p_order_id: string }
-        Returns: {
-          customer_cpf: string
-          customer_email: string
-          customer_name: string
-          customer_phone: string
-          order_id: string
-        }[]
-      }
-      get_multiple_decrypted_pii_secure: {
-        Args: { p_order_ids: string[] }
-        Returns: {
-          customer_cpf: string
-          customer_email: string
-          customer_name: string
-          customer_phone: string
-          order_id: string
-        }[]
-      }
       get_pedidos_pii_decrypted: {
         Args: { p_order_ids: string[] }
         Returns: {
@@ -613,16 +371,6 @@ export type Database = {
         }
         Returns: undefined
       }
-      insert_encrypted_pii_secure: {
-        Args: {
-          p_customer_cpf?: string
-          p_customer_email?: string
-          p_customer_name?: string
-          p_customer_phone?: string
-          p_order_id: string
-        }
-        Returns: undefined
-      }
       insert_pedidos_pii_encrypted: {
         Args: {
           p_customer_cpf?: string
@@ -640,8 +388,6 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "moderator" | "user"
-      order_status: "pending" | "paid" | "cancelled" | "refunded"
-      publication_status: "pending" | "in_progress" | "published" | "rejected"
       user_role: "user" | "admin"
     }
     CompositeTypes: {
@@ -771,8 +517,6 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "moderator", "user"],
-      order_status: ["pending", "paid", "cancelled", "refunded"],
-      publication_status: ["pending", "in_progress", "published", "rejected"],
       user_role: ["user", "admin"],
     },
   },
