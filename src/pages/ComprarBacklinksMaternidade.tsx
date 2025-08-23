@@ -3,7 +3,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import PurchaseModal from "@/components/cart/PurchaseModal";
+import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
@@ -424,11 +424,13 @@ export default function ComprarBacklinksMaternidade() {
         </section>
       </main>
       <Footer />
-      <PurchaseModal
-        open={open}
-        onOpenChange={setOpen}
-        product={selected || { id: '', name: '', price_cents: 0 }}
-      />
+      {selected && (
+        <ContactModal
+          open={open}
+          onOpenChange={setOpen}
+          product={{ id: selected.id, name: selected.name, price_cents: selected.price_cents }}
+        />
+      )}
     </>
   );
 }

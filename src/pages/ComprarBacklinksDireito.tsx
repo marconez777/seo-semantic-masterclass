@@ -3,7 +3,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-import PurchaseModal from "@/components/cart/PurchaseModal";
+import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import StructuredData from "@/components/seo/StructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
@@ -545,7 +545,7 @@ export default function ComprarBacklinksDireito() {
       <Footer />
 
       {selected && (
-        <PurchaseModal
+        <ContactModal
           open={open}
           onOpenChange={setOpen}
           product={{ id: selected.id, name: selected.name, price_cents: selected.price_cents }}
