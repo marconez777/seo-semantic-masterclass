@@ -16,13 +16,13 @@ export default function Recibo() {
     let mounted = true;
     (async () => {
       const { data: pedido } = await supabase
-        .from('pedidos')
+        .from('orders_new')
         .select('*')
         .eq('id', orderId)
         .maybeSingle();
       if (!pedido) return;
       const { data: it } = await supabase
-        .from('order_items')
+        .from('order_items_new')
         .select('*')
         .eq('order_id', orderId);
       // Load PII data using secure edge function
@@ -39,7 +39,7 @@ export default function Recibo() {
       } catch (error) {
         console.error('Erro ao chamar função segura de PII', error);
       }
-      const backlinkIds = Array.from(new Set((it ?? []).map((i) => i.backlink_id)));
+      const backlinkIds = Array.from(new Set((it ?? []).map((i) => i.product_id)));
       let m: Record<string, { name: string; url: string }> = {};
       if (backlinkIds.length) {
         const { data: backs } = await supabase
@@ -53,7 +53,7 @@ export default function Recibo() {
     return () => { mounted = false; };
   }, [orderId]);
 
-  const total = useMemo(() => (items.reduce((acc, i) => acc + i.price_cents * i.quantity, 0) / 100), [items]);
+  const total = useMemo(() => (items.reduce((acc, i) => acc + i.unit_price_cents * i.qty, 0) / 100), [items]);
 
   if (!order) return null;
 
@@ -95,11 +95,11 @@ export default function Recibo() {
             <tbody>
               {items.map((i) => (
                 <tr key={i.id} className="border-t">
-                  <td className="p-3">{siteMap[i.backlink_id]?.name ?? i.backlink_id}</td>
-                  <td className="p-3">{i.anchor_text ?? '—'}</td>
-                  <td className="p-3">{i.target_url ?? '—'}</td>
-                  <td className="p-3">{i.quantity}</td>
-                  <td className="p-3">{(i.price_cents/100).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' })}</td>
+                  <td className="p-3">{siteMap[i.product_id]?.name ?? i.product_id}</td>
+                  <td className="p-3">—</td>
+                  <td className="p-3">—</td>
+                  <td className="p-3">{i.qty}</td>
+                  <td className="p-3">{(i.unit_price_cents/100).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' })}</td>
                 </tr>
               ))}
             </tbody>

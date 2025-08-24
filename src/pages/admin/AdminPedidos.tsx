@@ -41,8 +41,8 @@ export default function AdminPedidos() {
   const loadData = async () => {
     setLoading(true);
     // Pedidos (todos)
-    const { data: pedidosData, error: pedidosErr } = await supabase
-      .from('pedidos')
+        const { data: pedidosData, error: pedidosErr } = await supabase
+      .from('orders_new')
       .select('*')
       .order('created_at', { ascending: false });
     if (pedidosErr) console.error('Erro ao carregar pedidos', pedidosErr);
@@ -76,7 +76,7 @@ export default function AdminPedidos() {
 
   const handleApprovePayment = async (orderId: string) => {
     const { error } = await supabase
-      .from('pedidos')
+      .from('orders_new')
       .update({ status: 'paid' })
       .eq('id', orderId);
     
@@ -91,7 +91,7 @@ export default function AdminPedidos() {
 
   const handleCancelOrder = async (orderId: string) => {
     const { error } = await supabase
-      .from('pedidos')
+      .from('orders_new')
       .update({ status: 'cancelled' })
       .eq('id', orderId);
     
@@ -117,25 +117,12 @@ export default function AdminPedidos() {
       return;
     }
 
-    const { error } = await supabase
-      .from('order_receipts')
-      .insert({
-        order_id: selectedOrderId,
-        amount_cents: Math.round(amount * 100),
-        note: receiptNote || null,
-        created_by: user.id,
-      });
-
-    if (error) {
-      console.error('Erro ao adicionar recibo', error);
-      toast({ title: "Erro ao adicionar recibo", description: error.message });
-    } else {
-      toast({ title: "Recibo adicionado com sucesso" });
-      setShowReceiptDialog(false);
-      setReceiptAmount("");
-      setReceiptNote("");
-      setSelectedOrderId("");
-    }
+    // Since order_receipts table is legacy, we'll just show a message
+    toast({ title: "Funcionalidade desabilitada", description: "Sistema de recibos foi descontinuado" });
+    setShowReceiptDialog(false);
+    setReceiptAmount("");
+    setReceiptNote("");
+    setSelectedOrderId("");
   };
 
   const getStatusBadgeVariant = (status: string) => {
