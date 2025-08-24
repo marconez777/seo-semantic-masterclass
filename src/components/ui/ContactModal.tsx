@@ -29,7 +29,7 @@ Detalhes:
 
 Gostaria de mais informações sobre como proceder com a compra.`;
 
-    const whatsappUrl = `https://wa.me/5511999999999?text=${encodeURIComponent(message)}`;
+    const whatsappUrl = `https://wa.me/5511991795436?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
     onOpenChange(false);
   };
