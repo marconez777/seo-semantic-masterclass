@@ -200,7 +200,7 @@ const createHTML = (route) => `<!DOCTYPE html>
         "availableLanguage": "Portuguese"
       },
       "sameAs": [
-        "https://wa.me/5511999999999"
+        "https://wa.me/5511991795436"
       ]
     }
     </script>

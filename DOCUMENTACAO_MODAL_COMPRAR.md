@@ -97,7 +97,7 @@ const ContactModal = ({ open, onOpenChange, product }: ContactModalProps) => {
 
 A função `handleContact` constrói uma mensagem personalizada com os detalhes do produto e os dados inseridos pelo usuário. Em seguida, ela codifica essa mensagem e a utiliza para montar uma URL do WhatsApp (`wa.me`).
 
-O número de telefone para o contato está fixo no código (`5511999999999`).
+O número de telefone para o contato está fixo no código (`5511991795436`).
 
 Finalmente, o `window.open` é usado para abrir o link do WhatsApp em uma nova aba, e o modal é fechado.
 
@@ -113,7 +113,7 @@ Detalhes:
 
 Gostaria de mais informações sobre como proceder com a compra.`;
 
-  const whatsappUrl = `https://wa.me/5511999999999?text=${encodeURIComponent(message)}`;
+  const whatsappUrl = `https://wa.me/5511991795436?text=${encodeURIComponent(message)}`;
   window.open(whatsappUrl, '_blank');
   onOpenChange(false);
 };
