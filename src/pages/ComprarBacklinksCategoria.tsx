@@ -15,22 +15,10 @@ const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency"
 
 // Lista padrão de categorias e normalização para manter acentos corretamente
 const ALLOWED_CATEGORIES = [
-  "Notícias",
-  "Negócios",
-  "Saúde",
-  "Educação",
-  "Tecnologia",
-  "Finanças",
-  "Casa",
-  "Moda",
-  "Turismo",
-  "Alimentação",
-  "Pets",
-  "Automotivo",
-  "Esportes",
-  "Entretenimento",
-  "Marketing",
-  "Direito",
+  "Notícias", "Negócios", "Saúde", "Educação", "Tecnologia",
+  "Finanças", "Imóveis", "Moda", "Turismo", "Alimentação",
+  "Pets", "Automotivo", "Esportes", "Entretenimento",
+  "Marketing", "Direito", "Maternidade"
 ] as const;
 
 const normalizeCat = (s: string) => s

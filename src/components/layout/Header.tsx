@@ -111,22 +111,10 @@ const Header = () => {
                   <div className="px-2 pb-2 text-xs font-medium tracking-wide text-muted-foreground uppercase">Categorias</div>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-1">
                     {[
-                      "Notícias",
-                      "Negócios",
-                      "Saúde",
-                      "Educação",
-                      "Tecnologia",
-                      "Finanças",
-                      "Casa",
-                      "Moda",
-                      "Turismo",
-                      "Alimentação",
-                      "Pets",
-                      "Automotivo",
-                      "Esportes",
-                      "Entretenimento",
-                      "Marketing",
-                      "Direito",
+                      "Notícias", "Negócios", "Saúde", "Educação", "Tecnologia",
+                      "Finanças", "Imóveis", "Moda", "Turismo", "Alimentação",
+                      "Pets", "Automotivo", "Esportes", "Entretenimento",
+                      "Marketing", "Direito", "Maternidade"
                     ].map((categoria) => {
                       const slug = categoria
                         .toLowerCase()
