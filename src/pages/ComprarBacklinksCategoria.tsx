@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-import { Circle, BookText } from "lucide-react";
+import { Circle, BookText, Menu } from "lucide-react";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
@@ -50,6 +52,7 @@ export default function ComprarBacklinksCategoria() {
   const { categoria } = useParams();
   const [backlinks, setBacklinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   const [minDR, setMinDR] = useState<number | "">("");
   const [minTraffic, setMinTraffic] = useState<number | "">("");
@@ -57,6 +60,7 @@ export default function ComprarBacklinksCategoria() {
 
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<{ id: string; name: string; price_cents: number } | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const rawSlug = useMemo(() => decodeURIComponent(String(categoria ?? "")), [categoria]);
   const normalized = useMemo(() => normalizeCat(rawSlug.replace(/-/g, " ")), [rawSlug]);
@@ -112,42 +116,79 @@ export default function ComprarBacklinksCategoria() {
         keywords={`comprar backlinks, ${categoryLabel}`}
       />
       <Header />
-      <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
-        {/* Sidebar filters */}
-        <aside className="md:col-span-3 space-y-6">
-          <section>
-            <h2 className="text-lg font-semibold mb-3">Filter by Category</h2>
-            <nav className="space-y-2">
-              <a className="flex items-center gap-2 hover:underline" href="/comprar-backlinks">
-                <Circle size={16} /> <span>All</span>
-              </a>
-              {categories.map((cat) => (
-                <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
-                  <BookText size={16} /> <span>{cat}</span>
-                </a>
-              ))}
-            </nav>
-          </section>
+      <main className="container mx-auto px-4 py-28">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* Desktop Sidebar */}
+          {!isMobile && (
+            <aside className="md:col-span-3 space-y-6">
+              <section>
+                <h2 className="text-lg font-semibold mb-3">Filter by Category</h2>
+                <nav className="space-y-2">
+                  <a className="flex items-center gap-2 hover:underline" href="/comprar-backlinks">
+                    <Circle size={16} /> <span>All</span>
+                  </a>
+                  {categories.map((cat) => (
+                    <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
+                      <BookText size={16} /> <span>{cat}</span>
+                    </a>
+                  ))}
+                </nav>
+              </section>
 
-          <section className="space-y-3">
-            <h2 className="text-lg font-semibold">Filtros</h2>
-            <div className="grid gap-2">
-              <label className="text-sm">DR mínimo</label>
-              <Input type="number" min={0} value={minDR} onChange={(e) => setMinDR(e.target.value === '' ? '' : Number(e.target.value))} />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm">Tráfego mínimo</label>
-              <Input type="number" min={0} value={minTraffic} onChange={(e) => setMinTraffic(e.target.value === '' ? '' : Number(e.target.value))} />
-            </div>
-            <div className="grid gap-2">
-              <label className="text-sm">Preço máximo (centavos)</label>
-              <Input type="number" min={0} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value === '' ? '' : Number(e.target.value))} />
-            </div>
-          </section>
-        </aside>
+              <section className="space-y-3">
+                <h2 className="text-lg font-semibold">Filtros</h2>
+                <div className="grid gap-2">
+                  <label className="text-sm">DR mínimo</label>
+                  <Input type="number" min={0} value={minDR} onChange={(e) => setMinDR(e.target.value === '' ? '' : Number(e.target.value))} />
+                </div>
+                <div className="grid gap-2">
+                  <label className="text-sm">Tráfego mínimo</label>
+                  <Input type="number" min={0} value={minTraffic} onChange={(e) => setMinTraffic(e.target.value === '' ? '' : Number(e.target.value))} />
+                </div>
+                <div className="grid gap-2">
+                  <label className="text-sm">Preço máximo (centavos)</label>
+                  <Input type="number" min={0} value={maxPrice} onChange={(e) => setMaxPrice(e.target.value === '' ? '' : Number(e.target.value))} />
+                </div>
+              </section>
+            </aside>
+          )}
 
-        {/* Main list */}
-        <section className="md:col-span-9">
+          {/* Mobile Filter Button */}
+          {isMobile && (
+            <div className="mb-4">
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <Menu className="mr-2 h-4 w-4" />
+                    Categorias e Filtros
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80">
+                  <SheetHeader>
+                    <SheetTitle>Categorias e Filtros</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-6">
+                    <section>
+                      <h2 className="text-lg font-semibold mb-3">Filter by Category</h2>
+                      <nav className="space-y-2">
+                        <a className="flex items-center gap-2 hover:underline" href="/comprar-backlinks" onClick={() => setMobileMenuOpen(false)}>
+                          <Circle size={16} /> <span>All</span>
+                        </a>
+                        {categories.map((cat) => (
+                          <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`} onClick={() => setMobileMenuOpen(false)}>
+                            <BookText size={16} /> <span>{cat}</span>
+                          </a>
+                        ))}
+                      </nav>
+                    </section>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          )}
+
+          {/* Main list */}
+          <section className={isMobile ? "col-span-1" : "md:col-span-9"}>
           <Breadcrumbs
             className="mb-3"
             items={[
@@ -189,6 +230,7 @@ export default function ComprarBacklinksCategoria() {
             <p className="text-muted-foreground">Texto SEO com 500 palavras e títulos h2, h3 e listagens</p>
           </section>
         </section>
+        </div>
       </main>
       <Footer />
       {selected && (

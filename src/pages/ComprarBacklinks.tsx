@@ -9,6 +9,10 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Menu } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Button } from "@/components/ui/button";
 
 
 // Helper to format BRL
@@ -19,6 +23,7 @@ const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency"
 export default function ComprarBacklinks() {
   const [backlinks, setBacklinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const isMobile = useIsMobile();
 
   // Filters
   const [drRange, setDrRange] = useState<string>('todos');
@@ -32,6 +37,7 @@ export default function ComprarBacklinks() {
   // Modal state
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<{ id: string; name: string; price_cents: number } | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Paginação
   const [page, setPage] = useState(1);
@@ -156,9 +162,11 @@ export default function ComprarBacklinks() {
         keywords="comprar backlinks, link building, DR, DA, tráfego, preço"
       />
       <Header />
-      <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
-        {/* Sidebar filters */}
-        <aside className="md:col-span-2 space-y-8 md:sticky md:top-24 self-start h-max">
+      <main className="container mx-auto px-4 py-28">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+          {/* Desktop Sidebar filters */}
+          {!isMobile && (
+            <aside className="md:col-span-2 space-y-8 md:sticky md:top-24 self-start h-max">
 
           <section>
             <h2 className="text-base font-semibold mb-2">Filtros</h2>
@@ -230,10 +238,102 @@ export default function ComprarBacklinks() {
               </ul>
             </div>
           </section>
-        </aside>
+            </aside>
+          )}
+
+          {/* Mobile Filter Button */}
+          {isMobile && (
+            <div className="mb-4">
+              <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+                <SheetTrigger asChild>
+                  <Button variant="outline" className="w-full">
+                    <Menu className="mr-2 h-4 w-4" />
+                    Filtros
+                  </Button>
+                </SheetTrigger>
+                <SheetContent side="left" className="w-80">
+                  <SheetHeader>
+                    <SheetTitle>Filtros</SheetTitle>
+                  </SheetHeader>
+                  <div className="mt-6 space-y-8">
+                    <section>
+                      <h2 className="text-base font-semibold mb-2">Filtros</h2>
+
+                      <div className="mb-4">
+                        <h3 className="text-base font-semibold mb-1">DR</h3>
+                        <ul className="text-sm leading-none">
+                          {[
+                            { v: 'todos', label: 'Todos' },
+                            { v: '10-20', label: '10 a 20' },
+                            { v: '20-30', label: '20 a 30' },
+                            { v: '30-40', label: '30 a 40' },
+                            { v: '40-50', label: '40 a 50' },
+                            { v: '50-60', label: '50 a 60' },
+                            { v: '60-70', label: '60 a 70' },
+                            { v: '70-80', label: '70 a 80' },
+                            { v: '80-90', label: '80 a 90' },
+                            { v: '90-99', label: '90 a 99' },
+                          ].map(({ v, label }) => (
+                            <li key={v}>
+                              <button
+                                className={`block text-left w-full py-0.5 ${drRange === v ? 'font-semibold text-primary' : ''}`}
+                                onClick={() => { setDrRange(v); setMobileMenuOpen(false); }}
+                              >
+                                {label}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div className="mb-4">
+                        <h3 className="text-base font-semibold mb-1">Tráfego</h3>
+                        <ul className="text-sm leading-none">
+                          {[
+                            { v: 'todos', label: 'Todos' },
+                            { v: '0-100', label: '0 a 100' },
+                            { v: '100-1000', label: '100 a 1.000' },
+                            { v: '1000-10000', label: '1.000 a 10.000' },
+                            { v: '10000-100000', label: '10.000 a 100.000' },
+                            { v: 'gt-100000', label: 'mais de 100.000' },
+                          ].map(({ v, label }) => (
+                            <li key={v}>
+                              <button
+                                className={`block text-left w-full py-0.5 ${trafficRange === v ? 'font-semibold text-primary' : ''}`}
+                                onClick={() => { setTrafficRange(v); setMobileMenuOpen(false); }}
+                              >
+                                {label}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+
+                      <div>
+                        <h3 className="text-base font-semibold mb-1">Preço máximo</h3>
+                        <ul className="text-sm leading-none">
+                          <li><button className="block text-left w-full py-0.5" onClick={() => { setMaxPrice(""); setMobileMenuOpen(false); }}>Todos</button></li>
+                          {[5000,10000,20000,50000,100000,500000,1000000,10000000].map((v) => (
+                            <li key={v}>
+                              <button
+                                className={`block text-left w-full py-0.5 ${maxPrice === v ? 'font-semibold' : ''}`}
+                                onClick={() => { setMaxPrice(v); setMobileMenuOpen(false); }}
+                              >
+                                Até {brl(v)}
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    </section>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </div>
+          )}
 
         {/* Main list */}
-        <section className="md:col-span-10">
+        <section className={isMobile ? "col-span-1" : "md:col-span-10"}>
           <Breadcrumbs
             className="mb-3"
             items={[
@@ -442,6 +542,7 @@ export default function ComprarBacklinks() {
             <p className="text-muted-foreground">Entre em contato agora com a nossa equipe e veja qual o melhor plano para sua estratégia de SEO hoje!</p>
           </section>
         </section>
+        </div>
       </main>
       <Footer />
 
