@@ -117,7 +117,7 @@ const Header = () => {
                       "Educação",
                       "Tecnologia",
                       "Finanças",
-                      "Casa",
+                      "Imóveis",
                       "Moda",
                       "Turismo",
                       "Alimentação",
@@ -126,8 +126,9 @@ const Header = () => {
                       "Esportes",
                       "Entretenimento",
                       "Marketing",
-                      "Direito",
-                    ].map((categoria) => {
+                       "Direito",
+                       "Maternidade",
+                     ].map((categoria) => {
                       const slug = categoria
                         .toLowerCase()
                         .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
