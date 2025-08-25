@@ -17,7 +17,7 @@ export const getCategoryIcon = (name: string): LucideIcon => {
       return Cpu;
     case "Finanças":
       return Wallet;
-    case "Casa":
+    case "Imóveis":
       return Home;
     case "Moda":
       return Shirt;
@@ -37,7 +37,6 @@ export const getCategoryIcon = (name: string): LucideIcon => {
       return Megaphone;
     case "Direito":
       return Scale;
-    case "Imóveis":
     case "Imoveis":
       return Home;
     case "Maternidade":

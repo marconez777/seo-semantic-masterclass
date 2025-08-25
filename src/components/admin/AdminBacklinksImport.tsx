@@ -31,7 +31,7 @@ const ALLOWED_CATEGORIES = [
   "Educação",
   "Tecnologia",
   "Finanças",
-  "Casa",
+  "Imóveis",
   "Moda",
   "Turismo",
   "Alimentação",
@@ -41,6 +41,7 @@ const ALLOWED_CATEGORIES = [
   "Entretenimento",
   "Marketing",
   "Direito",
+  "Maternidade",
 ] as const;
 
 const normalizeCat = (s: string) => s
