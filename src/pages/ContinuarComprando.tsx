@@ -337,10 +337,10 @@ export default function ContinuarComprando() {
             className="mb-3"
             items={[
               { name: 'Início', url: '/' },
-              { name: 'Comprar Backlinks', url: '/comprar-backlinks' },
+              { name: 'Continuar Comprando', url: '/continuar-comprando' },
             ]}
           />
-          <h1 className="text-4xl font-bold mb-6">Comprar Backlinks em Grandes Portais</h1>
+          <h1 className="text-4xl font-bold mb-6">Continue Comprando</h1>
           {categories.length > 0 && (
             <section className="mb-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">

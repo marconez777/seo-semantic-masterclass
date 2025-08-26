@@ -31,6 +31,7 @@ Gostaria de mais informações sobre como proceder com a compra.`;
 
     const whatsappUrl = `https://wa.me/5511991795436?text=${encodeURIComponent(message)}`;
     window.open(whatsappUrl, '_blank');
+    window.location.href = '/continuar-comprando';
     onOpenChange(false);
   };
 
