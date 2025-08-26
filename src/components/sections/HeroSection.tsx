@@ -22,9 +22,11 @@ const HeroSection = () => {
           Analisamos o seu site e concorrentes e mostramos a melhor estratégia
         </p>
         
-        <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-lg">
-          Auditoria Grátis
-        </Button>
+        <a href="/consultoria-seo">
+          <Button size="lg" className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 text-lg rounded-lg">
+            Auditoria Grátis
+          </Button>
+        </a>
       </div>
     </section>
   );

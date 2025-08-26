@@ -62,7 +62,7 @@ const CaseStudyCard = ({
               </div>
             </div>
             
-            <a href="#hero-form">
+            <a href="/consultoria-seo">
               <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3">
                 RECEBER AUDITORIA GRÁTIS
               </Button>
