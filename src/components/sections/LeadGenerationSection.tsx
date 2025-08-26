@@ -1,8 +1,73 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 
 const LeadGenerationSection = () => {
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    whatsapp: "",
+    revenue: ""
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.name || !formData.email || !formData.whatsapp) {
+      toast({
+        title: "Campos obrigatórios",
+        description: "Por favor, preencha nome, e-mail e WhatsApp."
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
+    try {
+      const message = `Olá! Tenho interesse na consultoria de SEO.
+
+Meus dados:
+- Nome: ${formData.name}
+- Email: ${formData.email}
+- WhatsApp: ${formData.whatsapp}
+- Faturamento Mensal: ${formData.revenue || "Não informado"}
+
+Gostaria de receber uma análise grátis do meu SEO.`;
+
+      const whatsappUrl = `https://wa.me/5511991795436?text=${encodeURIComponent(message)}`;
+      window.open(whatsappUrl, '_blank');
+      
+      toast({
+        title: "Redirecionado para WhatsApp",
+        description: "Você será redirecionado para conversar conosco!"
+      });
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        whatsapp: "",
+        revenue: ""
+      });
+
+    } catch (error) {
+      toast({
+        title: "Erro",
+        description: "Ocorreu um erro. Tente novamente."
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
       <div className="absolute inset-0 opacity-20">
@@ -51,23 +116,32 @@ const LeadGenerationSection = () => {
               e um plano de ação para aparecer nas respostas da IA e no topo do Google
             </p>
             
-            <form className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <Input
                 type="text"
                 placeholder="Nome"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
+                required
               />
               <Input
                 type="email"
                 placeholder="E-mail"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
+                required
               />
               <Input
                 type="tel"
                 placeholder="WhatsApp"
+                value={formData.whatsapp}
+                onChange={(e) => handleInputChange('whatsapp', e.target.value)}
                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
+                required
               />
-              <Select>
+              <Select value={formData.revenue} onValueChange={(value) => handleInputChange('revenue', value)}>
                 <SelectTrigger className="bg-white/20 border-white/30 text-white">
                   <SelectValue placeholder="Faturamento Mensal" />
                 </SelectTrigger>
@@ -80,8 +154,12 @@ const LeadGenerationSection = () => {
                   <SelectItem value="over-10000">Mais de R$ 10.000</SelectItem>
                 </SelectContent>
               </Select>
-              <Button className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-semibold">
-                ENVIAR
+              <Button 
+                type="submit"
+                disabled={isSubmitting}
+                className="w-full bg-green-600 hover:bg-green-700 text-white py-4 text-lg font-semibold disabled:opacity-50"
+              >
+                {isSubmitting ? "ENVIANDO..." : "ENVIAR"}
               </Button>
             </form>
             
