@@ -23,10 +23,11 @@ const NewsletterSection = () => {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch('/functions/v1/send-guest-post-list', {
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-guest-post-list`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
         },
         body: JSON.stringify({ email }),
       });
