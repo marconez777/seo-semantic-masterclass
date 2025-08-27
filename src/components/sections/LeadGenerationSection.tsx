@@ -12,8 +12,7 @@ const LeadGenerationSection = ({ customHeadline }: LeadGenerationSectionProps = 
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
-    email: "",
-    whatsapp: "",
+    site: "",
     revenue: ""
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -25,10 +24,10 @@ const LeadGenerationSection = ({ customHeadline }: LeadGenerationSectionProps = 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!formData.name || !formData.email || !formData.whatsapp) {
+    if (!formData.name || !formData.site) {
       toast({
         title: "Campos obrigatórios",
-        description: "Por favor, preencha nome, e-mail e WhatsApp."
+        description: "Por favor, preencha nome e site."
       });
       return;
     }
@@ -40,8 +39,7 @@ const LeadGenerationSection = ({ customHeadline }: LeadGenerationSectionProps = 
 
 Meus dados:
 - Nome: ${formData.name}
-- Email: ${formData.email}
-- WhatsApp: ${formData.whatsapp}
+- Site: ${formData.site}
 - Faturamento Mensal: ${formData.revenue || "Não informado"}
 
 Gostaria de receber uma análise grátis do meu SEO.`;
@@ -57,8 +55,7 @@ Gostaria de receber uma análise grátis do meu SEO.`;
       // Reset form
       setFormData({
         name: "",
-        email: "",
-        whatsapp: "",
+        site: "",
         revenue: ""
       });
 
@@ -134,18 +131,10 @@ Gostaria de receber uma análise grátis do meu SEO.`;
                 required
               />
               <Input
-                type="email"
-                placeholder="E-mail"
-                value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
-                className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
-                required
-              />
-              <Input
-                type="tel"
-                placeholder="WhatsApp"
-                value={formData.whatsapp}
-                onChange={(e) => handleInputChange('whatsapp', e.target.value)}
+                type="url"
+                placeholder="Site (https://exemplo.com)"
+                value={formData.site}
+                onChange={(e) => handleInputChange('site', e.target.value)}
                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
                 required
               />
