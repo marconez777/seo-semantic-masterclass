@@ -52,7 +52,7 @@ const App = () => (
         <Route path="/contato" element={<Contact />} />
         <Route path="/agencia-de-backlinks" element={<AgenciaBacklinks />} />
         <Route path="/consultoria-seo" element={<ConsultoriaSeo />} />
-        <Route path="/consultoria-saas" element={<ConsultoriaSaas />} />
+        <Route path="/consultoria-seo-saas" element={<ConsultoriaSaas />} />
         <Route path="/comprar-backlinks" element={<ComprarBacklinks />} />
         <Route path="/continuar-comprando" element={<ContinuarComprando />} />
         <Route path="/comprar-backlinks-noticias" element={<ComprarBacklinksNoticias />} />

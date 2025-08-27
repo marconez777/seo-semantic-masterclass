@@ -12,7 +12,7 @@ const ConsultoriaSaas = () => {
   
   const pageData = {
     name: "Consultoria de SEO e GEO para SAAS - MK Art",
-    url: "https://mkart.com.br/consultoria-saas",
+    url: "https://mkart.com.br/consultoria-seo-saas",
     description: "Com centenas de SAAS atendidos, temos um método validado focado em performance e vendas. Solicite uma análise grátis agora!"
   };
 
@@ -21,7 +21,7 @@ const ConsultoriaSaas = () => {
       <SEOHead
         title="Consultoria de SEO e GEO para SAAS | MK"
         description="Com centenas de SAAS atendidos, temos um método validado focado em performance e vendas. Solicite uma análise grátis agora!"
-        canonicalUrl="https://mkart.com.br/consultoria-saas"
+        canonicalUrl="https://mkart.com.br/consultoria-seo-saas"
         keywords="consultoria seo saas, seo para saas, marketing digital saas, posicionamento google saas"
       />
       <StructuredData type="website" data={pageData} />
@@ -43,10 +43,11 @@ const ConsultoriaSaas = () => {
           description="Em 3 meses, o Sistema Kronoos alcançou a 1ª página do Google com uma estratégia focada e assertiva."
           videoId="B35Poq_3xDM"
           keywords={[
-            "listas restritivas",
-            "compliance contratual",
-            "puxar ficha da pessoa pelo cpf",
-            "listas restritivas internacionais"
+            "1° ferramenta de background check",
+            "1° compliance criminal",
+            "1° compliance ambiental",
+            "1° compliance bancário",
+            "2° software compliance"
           ]}
           backlinks={88}
           monthlyTraffic="7.563"
