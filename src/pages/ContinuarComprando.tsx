@@ -404,7 +404,7 @@ export default function ContinuarComprando() {
                     className="p-4 cursor-pointer select-none"
                     role="button"
                     tabIndex={0}
-                    onClick={() => { if (sortKey === 'traffic') setSortDir(sort_dir === 'asc' ? 'desc' : 'asc'); else { setSortKey('traffic'); setSortDir('desc'); } }}
+                    onClick={() => { if (sortKey === 'traffic') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('traffic'); setSortDir('desc'); } }}
                     onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'traffic') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('traffic'); setSortDir('desc'); } } }}
                   >
                     TRÁFEGO/Mês

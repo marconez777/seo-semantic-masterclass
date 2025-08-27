@@ -4,7 +4,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 
-const LeadGenerationSection = () => {
+interface LeadGenerationSectionProps {
+  customHeadline?: string;
+}
+
+const LeadGenerationSection = ({ customHeadline }: LeadGenerationSectionProps = {}) => {
   const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
@@ -79,8 +83,12 @@ Gostaria de receber uma análise grátis do meu SEO.`;
         <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
           <div>
             <h2 className="text-3xl md:text-4xl font-bold mb-8">
-              Você em Destaque nas IAs<br />
-              e em 1º no Google!
+              {customHeadline || (
+                <>
+                  Você em Destaque nas IAs<br />
+                  e em 1º no Google!
+                </>
+              )}
             </h2>
             
             <p className="text-lg text-gray-300 mb-12">
