@@ -8,7 +8,7 @@ const ServicesSection = () => {
     <section id="servicos" className="py-20 bg-gray-50">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
-          <Link to="/consultoria-de-seo" className="block">
+          <Link to="/consultoria-seo" className="block">
             <Card className="p-8 border-0 shadow-lg hover:shadow-xl transition-shadow cursor-pointer">
               <CardContent className="text-center space-y-6">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto">
