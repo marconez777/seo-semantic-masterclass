@@ -39,9 +39,9 @@ Gostaria de mais informações sobre como proceder com a compra.`;
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Solicitar Orçamento</DialogTitle>
+          <DialogTitle>Comprar Backlink Nesse Site</DialogTitle>
           <DialogDescription>
-            Preencha os dados abaixo para solicitar um orçamento para este backlink.
+            Preencha a ancora e URL que você deseja e finalize o pagamento no WhatsApp, via PIX ou cartão.
           </DialogDescription>
         </DialogHeader>
         
