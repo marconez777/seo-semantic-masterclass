@@ -5,6 +5,7 @@ import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { ShoppingCart } from "lucide-react";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useLocation, Link } from "react-router-dom";
+import { MobileMenu } from "./MobileMenu";
 
 
 const Header = () => {
@@ -189,6 +190,14 @@ const Header = () => {
             </>
           )}
         </div>
+
+        {/* Mobile Menu */}
+        <MobileMenu 
+          isLoggedIn={isLoggedIn}
+          userName={userName}
+          isAdmin={isAdmin}
+          onSignOut={() => supabase.auth.signOut()}
+        />
 
       </nav>
     </header>
