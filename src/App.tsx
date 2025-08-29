@@ -44,9 +44,11 @@ import Forbidden from "./pages/Forbidden";
 import { RequireRole } from "./components/auth/RequireRole";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
+import ScrollToTop from "./components/layout/ScrollToTop";
  
 const App = () => (
   <BrowserRouter>
+    <ScrollToTop />
     <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/contato" element={<Contact />} />
