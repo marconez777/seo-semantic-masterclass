@@ -25,9 +25,18 @@ const ConsultoriaSeo = () => {
         <LeadGenerationSection />
         
         {/* Video Section */}
-        <section className="py-16 bg-background">
-          <div className="container mx-auto px-4 text-center">
+        <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
+          <div className="absolute inset-0 opacity-20">
+            <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500 rounded-full filter blur-3xl"></div>
+            <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500 rounded-full filter blur-3xl"></div>
+          </div>
+          
+          <div className="container mx-auto px-4 text-center relative z-10">
             <div className="max-w-4xl mx-auto">
+              <h2 className="text-3xl md:text-4xl font-bold mb-12 text-white">
+                Maquina de Vendas Orgânicas com a IA e o Google
+              </h2>
+              
               <div className="aspect-video w-full max-w-3xl mx-auto mb-8">
                 <iframe 
                   width="100%" 
@@ -42,8 +51,8 @@ const ConsultoriaSeo = () => {
                 ></iframe>
               </div>
               <a 
-                href="#hero" 
-                className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                href="#hero-form" 
+                className="inline-flex items-center justify-center rounded-md bg-green-600 hover:bg-green-700 text-white h-11 px-8 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 Receber Auditoria Grátis
               </a>
