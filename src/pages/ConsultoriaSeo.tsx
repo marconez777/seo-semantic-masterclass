@@ -24,6 +24,33 @@ const ConsultoriaSeo = () => {
         {/* Hero Section - Lead Generation */}
         <LeadGenerationSection />
         
+        {/* Video Section */}
+        <section className="py-16 bg-background">
+          <div className="container mx-auto px-4 text-center">
+            <div className="max-w-4xl mx-auto">
+              <div className="aspect-video w-full max-w-3xl mx-auto mb-8">
+                <iframe 
+                  width="100%" 
+                  height="100%" 
+                  src="https://www.youtube.com/embed/I-urTlQK3bc?si=qnuTwmbnfTch3M0x" 
+                  title="YouTube video player" 
+                  frameBorder="0" 
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+                  referrerPolicy="strict-origin-when-cross-origin" 
+                  allowFullScreen
+                  className="rounded-lg shadow-lg"
+                ></iframe>
+              </div>
+              <a 
+                href="#hero" 
+                className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground hover:bg-primary/90 h-11 px-8 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                Receber Auditoria Grátis
+              </a>
+            </div>
+          </div>
+        </section>
+        
         {/* Delivery Process */}
         <DeliveryProcessSection />
         
