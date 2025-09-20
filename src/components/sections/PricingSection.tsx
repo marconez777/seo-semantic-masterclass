@@ -3,6 +3,14 @@ import { Badge } from "@/components/ui/badge";
 import { Check, Star, Zap, Crown } from "lucide-react";
 
 const PricingSection = () => {
+  const handlePlanClick = (planName: string) => {
+    const message = `Olá! Quero contratar o plano ${planName}.
+
+Gostaria de mais informações sobre os detalhes e como começar.`;
+    
+    const whatsappUrl = `https://wa.me/5511991795436?text=${encodeURIComponent(message)}`;
+    window.open(whatsappUrl, '_blank');
+  };
   const plans = [
     {
       name: "Discovery",
@@ -129,7 +137,10 @@ const PricingSection = () => {
                   ))}
                 </ul>
                 
-                <button className="w-full mt-8 py-3 px-6 rounded-lg font-semibold transition-all duration-300 bg-purple-500 text-white hover:bg-purple-600 hover:shadow-lg hover:shadow-purple-500/25 transform hover:-translate-y-1">
+                <button 
+                  onClick={() => handlePlanClick(plan.name)}
+                  className="w-full mt-8 py-3 px-6 rounded-lg font-semibold transition-all duration-300 bg-purple-500 text-white hover:bg-purple-600 hover:shadow-lg hover:shadow-purple-500/25 transform hover:-translate-y-1"
+                >
                   Começar Agora
                 </button>
               </CardContent>
