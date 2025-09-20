@@ -64,9 +64,6 @@ const ConsultoriaSeo = () => {
         {/* Delivery Process */}
         <DeliveryProcessSection />
         
-        {/* Pricing Section */}
-        <PricingSection />
-        
         {/* Case Studies */}
         <CaseStudyCard
           title="Mais de 100 Mil Visitas no Site do Dr. Gabriel"
@@ -114,6 +111,9 @@ const ConsultoriaSeo = () => {
           backlinks={35}
           monthlyTraffic="50.230"
         />
+        
+        {/* Pricing Section */}
+        <PricingSection />
       </main>
       
       <Footer />

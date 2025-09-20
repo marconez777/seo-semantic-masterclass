@@ -18,8 +18,7 @@ const PricingSection = () => {
         "10 Posts para o Blog",
         "Média Taxa de Resultados"
       ],
-      isPopular: false,
-      color: "from-blue-500 to-cyan-500"
+      isPopular: false
     },
     {
       name: "Enterprise",
@@ -36,8 +35,7 @@ const PricingSection = () => {
         "Alta Taxa de Resultados",
         "Rastreio de Leads"
       ],
-      isPopular: true,
-      color: "from-purple-500 to-pink-500"
+      isPopular: true
     },
     {
       name: "Supreme",
@@ -54,8 +52,7 @@ const PricingSection = () => {
         "Suprema Taxa de Resultados",
         "Rastreio de Leads"
       ],
-      isPopular: false,
-      color: "from-yellow-500 to-orange-500"
+      isPopular: false
     }
   ];
 
@@ -89,14 +86,14 @@ const PricingSection = () => {
             >
               {plan.isPopular && (
                 <div className="absolute top-0 left-0 right-0">
-                  <div className={`bg-gradient-to-r ${plan.color} text-white text-center py-2 text-sm font-semibold`}>
+                  <div className="bg-purple-500 text-white text-center py-2 text-sm font-semibold">
                     MAIS POPULAR
                   </div>
                 </div>
               )}
               
               <CardHeader className={`text-center ${plan.isPopular ? 'pt-12' : 'pt-8'}`}>
-                <div className={`mx-auto w-16 h-16 rounded-full bg-gradient-to-r ${plan.color} flex items-center justify-center text-white mb-4`}>
+                <div className="mx-auto w-16 h-16 rounded-full bg-purple-500 flex items-center justify-center text-white mb-4">
                   {plan.icon}
                 </div>
                 <CardTitle className="text-2xl font-bold text-foreground">
@@ -132,11 +129,7 @@ const PricingSection = () => {
                   ))}
                 </ul>
                 
-                <button className={`w-full mt-8 py-3 px-6 rounded-lg font-semibold transition-all duration-300 ${
-                  plan.isPopular
-                    ? `bg-gradient-to-r ${plan.color} text-white hover:shadow-lg hover:shadow-purple-500/25 transform hover:-translate-y-1`
-                    : 'bg-secondary text-secondary-foreground hover:bg-secondary/80'
-                }`}>
+                <button className="w-full mt-8 py-3 px-6 rounded-lg font-semibold transition-all duration-300 bg-purple-500 text-white hover:bg-purple-600 hover:shadow-lg hover:shadow-purple-500/25 transform hover:-translate-y-1">
                   Começar Agora
                 </button>
               </CardContent>
