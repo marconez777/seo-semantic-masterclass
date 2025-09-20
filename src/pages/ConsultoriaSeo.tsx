@@ -5,6 +5,7 @@ import StructuredData from "@/components/seo/StructuredData";
 import DeliveryProcessSection from "@/components/sections/DeliveryProcessSection";
 import CaseStudyCard from "@/components/sections/CaseStudyCard";
 import LeadGenerationSection from "@/components/sections/LeadGenerationSection";
+import PricingSection from "@/components/sections/PricingSection";
 
 const ConsultoriaSeo = () => {
   console.log("ConsultoriaSeo component rendering");
@@ -62,6 +63,9 @@ const ConsultoriaSeo = () => {
         
         {/* Delivery Process */}
         <DeliveryProcessSection />
+        
+        {/* Pricing Section */}
+        <PricingSection />
         
         {/* Case Studies */}
         <CaseStudyCard
