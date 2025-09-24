@@ -44,7 +44,7 @@ Meus dados:
 
 Gostaria de receber uma análise grátis do meu SEO.`;
 
-      const whatsappUrl = `https://wa.me/5511991795436?text=${encodeURIComponent(message)}`;
+      const whatsappUrl = `https://wa.me/5511989151997?text=${encodeURIComponent(message)}`;
       window.open(whatsappUrl, '_blank');
       
       toast({
