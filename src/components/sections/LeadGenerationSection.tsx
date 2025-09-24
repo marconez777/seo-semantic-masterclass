@@ -131,8 +131,8 @@ Gostaria de receber uma análise grátis do meu SEO.`;
                 required
               />
               <Input
-                type="url"
-                placeholder="Site (https://exemplo.com)"
+                type="text"
+                placeholder="Site"
                 value={formData.site}
                 onChange={(e) => handleInputChange('site', e.target.value)}
                 className="bg-white/20 border-white/30 text-white placeholder:text-gray-300"
