@@ -3,7 +3,7 @@ import { FAB } from "@/components/ui/fab"
 export function WhatsAppFAB() {
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent("Olá! Gostaria de saber mais sobre os serviços de SEO e backlinks.")
-    const whatsappUrl = `https://wa.me/5511999999999?text=${message}`
+    const whatsappUrl = `https://wa.me/5511989151997?text=${message}`
     window.open(whatsappUrl, '_blank')
   }
 
