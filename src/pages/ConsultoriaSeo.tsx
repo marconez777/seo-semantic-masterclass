@@ -22,9 +22,6 @@ const ConsultoriaSeo = () => {
       <Header />
       
       <main className="pt-20 min-h-screen bg-background">
-        {/* Hero Section - Lead Generation */}
-        <LeadGenerationSection />
-        
         {/* Video Section */}
         <section className="py-20 bg-slate-900 text-white relative overflow-hidden">
           <div className="absolute inset-0 opacity-20">
@@ -60,6 +57,9 @@ const ConsultoriaSeo = () => {
             </div>
           </div>
         </section>
+        
+        {/* Hero Section - Lead Generation */}
+        <LeadGenerationSection />
         
         {/* Delivery Process */}
         <DeliveryProcessSection />
