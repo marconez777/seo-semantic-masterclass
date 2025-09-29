@@ -2,9 +2,10 @@ import { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/seo/SEOHead";
-import OptimizedImage from "@/components/seo/OptimizedImage";
-import { Card, CardContent } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
+import StructuredData from "@/components/seo/StructuredData";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import BlogCard from "@/components/blog/BlogCard";
+import BlogSidebar from "@/components/blog/BlogSidebar";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PostDb {
@@ -44,55 +45,78 @@ const Blog = () => {
         ogType="website"
       />
 
+      <StructuredData
+        type="website"
+        data={{
+          name: "Blog MK Art SEO",
+          url: "https://mkart.com.br/blog",
+          description: "Blog especializado em SEO, backlinks e marketing digital com guias práticos e estratégias."
+        }}
+      />
+
       <Header />
-      <main className="pt-20">
-        <header className="container mx-auto px-4 py-8">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+      <main className="pt-20 min-h-screen">
+        {/* Breadcrumbs */}
+        <div className="container mx-auto px-4 py-4">
+          <Breadcrumbs
+            items={[
+              { name: "Início", url: "/" },
+              { name: "Blog", url: "/blog" }
+            ]}
+          />
+        </div>
+
+        {/* Hero Section */}
+        <header className="container mx-auto px-4 py-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
             Blog de SEO e Marketing Digital
           </h1>
-          <p className="mt-2 text-muted-foreground max-w-2xl">
-            Aprenda com guias práticos, novidades e estratégias para crescer com SEO.
+          <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            Aprenda com guias práticos, novidades e estratégias para crescer com SEO e aumentar o tráfego do seu site.
           </p>
         </header>
 
+        {/* Main Content */}
         <section className="container mx-auto px-4 py-8">
-          {loading && <p>Carregando…</p>}
-          {error && <p className="text-destructive">{error}</p>}
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Blog Posts */}
+            <div className="lg:col-span-2">
+              {loading && (
+                <div className="flex justify-center items-center py-12">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  <span className="ml-2 text-muted-foreground">Carregando posts...</span>
+                </div>
+              )}
+              
+              {error && (
+                <div className="text-center py-12">
+                  <p className="text-destructive">Erro ao carregar posts: {error}</p>
+                </div>
+              )}
 
-          {!loading && posts.length === 0 && (
-            <p className="text-muted-foreground">Nenhum post publicado ainda.</p>
-          )}
+              {!loading && posts.length === 0 && (
+                <div className="text-center py-12">
+                  <div className="text-6xl mb-4">📝</div>
+                  <h3 className="text-xl font-semibold mb-2">Nenhum post encontrado</h3>
+                  <p className="text-muted-foreground">Em breve publicaremos novos conteúdos sobre SEO e marketing digital.</p>
+                </div>
+              )}
 
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map((post) => (
-              <article key={post.id}>
-                <Card className="overflow-hidden">
-                  <a href={`/blog/${post.slug}`} aria-label={post.title}>
-                    <OptimizedImage
-                      src={post.featured_image_url || "/placeholder.svg"}
-                      alt={`Imagem do post: ${post.title}`}
-                      className="h-48 w-full object-cover"
-                      sizes="(max-width: 1024px) 100vw, 33vw"
-                    />
-                  </a>
-                  <CardContent className="p-4">
-                    <a href={`/blog/${post.slug}`} aria-label={post.title}>
-                      <h3 className="mt-1 text-lg font-semibold leading-snug hover:text-primary transition-colors">
-                        {post.title}
-                      </h3>
-                    </a>
-                    <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                      {post.seo_description || ""}
-                    </p>
-                    <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
-                      <span className="inline-flex items-center gap-1">
-                        <Calendar className="h-4 w-4" /> {new Date(post.created_at).toLocaleDateString("pt-BR")}
-                      </span>
-                    </div>
-                  </CardContent>
-                </Card>
-              </article>
-            ))}
+              <div className="grid gap-8">
+                {posts.map((post, index) => (
+                  <BlogCard
+                    key={post.id}
+                    post={post}
+                    variant={index === 0 ? "featured" : "default"}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Sidebar */}
+            <div className="lg:col-span-1">
+              <BlogSidebar />
+            </div>
           </div>
         </section>
       </main>

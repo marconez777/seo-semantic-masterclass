@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/seo/SEOHead";
-import OptimizedImage from "@/components/seo/OptimizedImage";
 import StructuredData from "@/components/seo/StructuredData";
+import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import BlogPostHeader from "@/components/blog/BlogPostHeader";
+import SocialShare from "@/components/blog/SocialShare";
+import BlogSidebar from "@/components/blog/BlogSidebar";
 import { supabase } from "@/integrations/supabase/client";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { Calendar } from "lucide-react";
 
 interface DbPost {
   id: string;
@@ -20,9 +22,8 @@ interface DbPost {
   seo_description: string | null;
   created_at: string;
   updated_at: string;
+  category?: string;
 }
-
-const siteBase = "https://mkart.com.br";
 
 function usePost(slug?: string) {
   const [post, setPost] = useState<DbPost | null>(null);
@@ -48,94 +49,143 @@ function usePost(slug?: string) {
   return { post, loading, error };
 }
 
-function excerpt(md?: string, len = 150) {
-  if (!md) return "";
-  const text = md
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/`[^`]*`/g, " ")
-    .replace(/\!\[[^\]]*\]\([^)]*\)/g, " ")
-    .replace(/\[[^\]]*\]\([^)]*\)/g, " ")
-    .replace(/[\*_>#-]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim();
-  return text.slice(0, len);
-}
-
 export default function BlogPost() {
   const { slug } = useParams<{ slug: string }>();
   const { post, loading, error } = usePost(slug);
 
-  const metaTitle = useMemo(() => post?.seo_title || post?.title || "Post do Blog", [post]);
-  const metaDesc = useMemo(() => post?.seo_description || excerpt(post?.content_md, 160), [post]);
-  const canonical = useMemo(() => `${siteBase}/blog/${slug ?? ""}`.replace(/\/$/, ""), [slug]);
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="pt-20 min-h-screen">
+          <div className="container mx-auto px-4 py-8 flex justify-center items-center">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-2 text-muted-foreground">Carregando post...</span>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error) {
+    return (
+      <>
+        <Header />
+        <main className="pt-20 min-h-screen">
+          <div className="container mx-auto px-4 py-8 text-center">
+            <div className="text-6xl mb-4">⚠️</div>
+            <h1 className="text-2xl font-bold mb-2">Erro ao carregar post</h1>
+            <p className="text-muted-foreground">{error}</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (!post) {
+    return (
+      <>
+        <Header />
+        <main className="pt-20 min-h-screen">
+          <div className="container mx-auto px-4 py-8 text-center">
+            <div className="text-6xl mb-4">📄</div>
+            <h1 className="text-2xl font-bold mb-2">Post não encontrado</h1>
+            <p className="text-muted-foreground">O post que você está procurando não existe.</p>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  const postUrl = `${window.location.origin}/blog/${post.slug}`;
 
   return (
     <>
       <SEOHead
-        title={`${metaTitle} | MK Art`}
-        description={metaDesc}
-        canonicalUrl={canonical}
+        title={post.seo_title || post.title}
+        description={post.seo_description || ""}
+        canonicalUrl={postUrl}
         keywords="blog seo, marketing digital, backlinks, link building"
+        ogImage={post.featured_image_url || undefined}
         ogType="article"
       />
-      {post && (
-        <StructuredData
-          type="article"
-          data={{
-            headline: post.title,
-            description: metaDesc,
-            datePublished: post.created_at,
-            dateModified: post.updated_at,
-            image: post.featured_image_url || "/placeholder.svg",
-            publisher: "MK Art - Agência de SEO",
-            publisherLogo: "/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png",
-          }}
-        />
-      )}
+
+      <StructuredData
+        type="article"
+        data={{
+          headline: post.title,
+          description: post.seo_description,
+          author: "MK Art SEO",
+          datePublished: post.created_at,
+          dateModified: post.updated_at,
+          image: post.featured_image_url,
+          publisher: "MK Art SEO",
+          publisherLogo: "https://mkart.com.br/logo.png"
+        }}
+      />
 
       <Header />
-      <main className="pt-20">
-        <header className="container mx-auto px-4 py-8">
-          <nav className="mb-4 text-sm text-muted-foreground">
-            <Link to="/" className="hover:text-primary transition-colors">Início</Link>
-            <span className="mx-2">/</span>
-            <Link to="/blog" className="hover:text-primary transition-colors">Blog</Link>
-          </nav>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-            {loading ? "Carregando…" : post?.title || "Post não encontrado"}
-          </h1>
-          {post && (
-            <p className="mt-2 text-muted-foreground inline-flex items-center gap-2">
-              <Calendar className="h-4 w-4" /> {new Date(post.created_at).toLocaleDateString("pt-BR")}
-            </p>
-          )}
-        </header>
+      <main className="pt-20 min-h-screen">
+        {/* Breadcrumbs */}
+        <div className="container mx-auto px-4 py-4">
+          <Breadcrumbs
+            items={[
+              { name: "Início", url: "/" },
+              { name: "Blog", url: "/blog" },
+              { name: post.title, url: `/blog/${post.slug}` }
+            ]}
+          />
+        </div>
 
-        {error && (
-          <section className="container mx-auto px-4 pb-12">
-            <p className="text-destructive">{error}</p>
-          </section>
-        )}
+        <div className="container mx-auto px-4 py-8">
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <article className="lg:col-span-2">
+              <BlogPostHeader
+                title={post.title}
+                category={post.category}
+                publishDate={post.created_at}
+                readTime="8"
+                featuredImage={post.featured_image_url}
+              />
 
-        {post && (
-          <article className="container mx-auto px-4 pb-16">
-            {post.featured_image_url && (
-              <div className="overflow-hidden rounded-xl border bg-card mb-6">
-                <OptimizedImage
-                  src={post.featured_image_url}
-                  alt={`Imagem do post: ${post.title}`}
-                  className="h-72 w-full object-cover"
-                  sizes="(max-width: 1024px) 100vw, 960px"
+              {/* Social Share */}
+              <SocialShare
+                url={postUrl}
+                title={post.title}
+                views={5332}
+                comments={0}
+              />
+
+              {/* Content */}
+              <div className="prose prose-lg max-w-none dark:prose-invert mt-8">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {post.content_md}
+                </ReactMarkdown>
+              </div>
+
+              {/* Bottom Social Share */}
+              <div className="mt-8">
+                <SocialShare
+                  url={postUrl}
+                  title={post.title}
+                  views={5332}
+                  comments={0}
                 />
               </div>
-            )}
+            </article>
 
-            <div className="prose max-w-none dark:prose-invert">
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content_md}</ReactMarkdown>
-            </div>
-          </article>
-        )}
+            {/* Sidebar */}
+            <aside className="lg:col-span-1">
+              <BlogSidebar />
+            </aside>
+          </div>
+        </div>
       </main>
+      
       <Footer />
     </>
   );
