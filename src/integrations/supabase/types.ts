@@ -140,6 +140,24 @@ export type Database = {
         }
         Relationships: []
       }
+      contatos: {
+        Row: {
+          id: number
+          nome: string | null
+          zap: string | null
+        }
+        Insert: {
+          id?: number
+          nome?: string | null
+          zap?: string | null
+        }
+        Update: {
+          id?: number
+          nome?: string | null
+          zap?: string | null
+        }
+        Relationships: []
+      }
       favoritos: {
         Row: {
           backlink_id: string
