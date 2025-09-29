@@ -22,17 +22,20 @@ const Blog = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const fetchPosts = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("posts")
+      .select("id,title,slug,featured_image_url,seo_description,created_at")
+      .eq("published", true)
+      .order("created_at", { ascending: false });
+    if (error) setError(error.message);
+    setPosts(data || []);
+    setLoading(false);
+  };
+
   useEffect(() => {
-    (async () => {
-      const { data, error } = await supabase
-        .from("posts")
-        .select("id,title,slug,featured_image_url,seo_description,created_at")
-        .eq("published", true)
-        .order("created_at", { ascending: false });
-      if (error) setError(error.message);
-      setPosts(data || []);
-      setLoading(false);
-    })();
+    fetchPosts();
   }, []);
 
   return (
