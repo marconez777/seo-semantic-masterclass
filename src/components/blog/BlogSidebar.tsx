@@ -12,36 +12,7 @@ interface PopularPost {
   color: string;
 }
 
-const popularPosts: PopularPost[] = [
-  {
-    title: "Como Conseguir Backlinks de Qualidade para SEO",
-    slug: "backlinks-qualidade-seo",
-    category: "SEO",
-    readTime: "8 min",
-    color: "bg-blue-500"
-  },
-  {
-    title: "Estratégias de Link Building que Funcionam em 2024",
-    slug: "link-building-estrategias-2024",
-    category: "Link Building",
-    readTime: "12 min", 
-    color: "bg-green-500"
-  },
-  {
-    title: "Análise de Concorrentes: Ferramentas e Técnicas",
-    slug: "analise-concorrentes-ferramentas",
-    category: "Marketing",
-    readTime: "6 min",
-    color: "bg-purple-500"
-  },
-  {
-    title: "Como Medir o ROI de Campanhas de SEO",
-    slug: "roi-campanhas-seo",
-    category: "Analytics",
-    readTime: "10 min",
-    color: "bg-orange-500"
-  }
-];
+const popularPosts: PopularPost[] = [];
 
 const BlogSidebar = () => {
   const [email, setEmail] = useState("");
@@ -58,7 +29,7 @@ const BlogSidebar = () => {
       {/* Newsletter Section */}
       <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl font-bold">Newsletter Subscribe</CardTitle>
+          <CardTitle className="text-xl font-bold">Assinar Newsletter</CardTitle>
           <p className="text-sm text-muted-foreground">
             Receba os últimos posts e artigos em seu email
           </p>
@@ -77,7 +48,7 @@ const BlogSidebar = () => {
               type="submit" 
               className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90"
             >
-              Subscribe ✉️
+              Assinar ✉️
             </Button>
           </form>
         </CardContent>
@@ -95,7 +66,7 @@ const BlogSidebar = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Popular
+              Populares
             </button>
             <button
               onClick={() => setActiveTab("trending")}
@@ -105,37 +76,46 @@ const BlogSidebar = () => {
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              Trending
+              Em Alta
             </button>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {popularPosts.map((post, index) => (
-            <article key={index} className="flex space-x-3 group">
-              <div className={`w-12 h-12 rounded-lg ${post.color} flex-shrink-0 flex items-center justify-center`}>
-                <span className="text-white font-bold text-lg">
-                  {post.category.charAt(0)}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="font-medium text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">
-                  <a href={`/blog/${post.slug}`}>
-                    {post.title}
-                  </a>
-                </h3>
-                <div className="flex items-center space-x-2 mt-1">
-                  <Badge variant="secondary" className="text-xs">
-                    {post.category}
-                  </Badge>
-                  {post.readTime && (
-                    <span className="text-xs text-muted-foreground">
-                      {post.readTime}
-                    </span>
-                  )}
+          {popularPosts.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="text-4xl mb-2">📝</div>
+              <p className="text-sm text-muted-foreground">
+                Em breve teremos posts populares aqui
+              </p>
+            </div>
+          ) : (
+            popularPosts.map((post, index) => (
+              <article key={index} className="flex space-x-3 group">
+                <div className={`w-12 h-12 rounded-lg ${post.color} flex-shrink-0 flex items-center justify-center`}>
+                  <span className="text-white font-bold text-lg">
+                    {post.category.charAt(0)}
+                  </span>
                 </div>
-              </div>
-            </article>
-          ))}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-medium text-sm leading-snug group-hover:text-primary transition-colors line-clamp-2">
+                    <a href={`/blog/${post.slug}`}>
+                      {post.title}
+                    </a>
+                  </h3>
+                  <div className="flex items-center space-x-2 mt-1">
+                    <Badge variant="secondary" className="text-xs">
+                      {post.category}
+                    </Badge>
+                    {post.readTime && (
+                      <span className="text-xs text-muted-foreground">
+                        {post.readTime}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </article>
+            ))
+          )}
         </CardContent>
       </Card>
 
@@ -146,15 +126,15 @@ const BlogSidebar = () => {
             <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-2">
               <span className="text-2xl">🚀</span>
             </div>
-            <h3 className="font-bold text-lg">Super Flexible</h3>
-            <h4 className="font-bold text-lg">Blog & Magazine</h4>
+            <h3 className="font-bold text-lg">Consultoria SEO</h3>
+            <h4 className="font-bold text-lg">Personalizada</h4>
           </div>
           <Button 
             variant="secondary" 
             size="sm"
             className="bg-white text-blue-600 hover:bg-white/90"
           >
-            Purchase
+            Contratar
           </Button>
           <div className="mt-4 text-sm opacity-75">
             Ad 300 x 300
