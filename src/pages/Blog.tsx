@@ -23,14 +23,28 @@ const Blog = () => {
   const [error, setError] = useState<string | null>(null);
 
   const fetchPosts = async () => {
+    console.log('🔍 Iniciando busca por posts...');
     setLoading(true);
-    const { data, error } = await supabase
-      .from("posts")
-      .select("id,title,slug,featured_image_url,seo_description,created_at")
-      .eq("published", true)
-      .order("created_at", { ascending: false });
-    if (error) setError(error.message);
-    setPosts(data || []);
+    try {
+      const { data, error } = await supabase
+        .from("posts")
+        .select("id,title,slug,featured_image_url,seo_description,created_at")
+        .eq("published", true)
+        .order("created_at", { ascending: false });
+      
+      console.log('📊 Resultado da query:', { data, error });
+      
+      if (error) {
+        console.error('❌ Erro ao buscar posts:', error);
+        setError(error.message);
+      } else {
+        console.log('✅ Posts encontrados:', data?.length || 0);
+        setPosts(data || []);
+      }
+    } catch (err) {
+      console.error('💥 Erro inesperado:', err);
+      setError('Erro inesperado ao carregar posts');
+    }
     setLoading(false);
   };
 
