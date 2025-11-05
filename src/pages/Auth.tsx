@@ -20,7 +20,6 @@ const Auth = () => {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
-  const [cpf, setCpf] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -62,7 +61,7 @@ const Auth = () => {
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { name, phone, cpf },
+        data: { name, phone },
       },
     });
     
@@ -174,10 +173,6 @@ const Auth = () => {
               <div className="grid gap-2">
                 <Label htmlFor="phone">Telefone</Label>
                 <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 99999-9999" />
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="cpf">CPF</Label>
-                <Input id="cpf" value={cpf} onChange={(e) => setCpf(e.target.value)} placeholder="000.000.000-00" />
               </div>
             </div>
           )}
