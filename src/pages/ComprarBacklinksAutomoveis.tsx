@@ -10,7 +10,7 @@ import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { Folder } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { AuthGate } from "@/components/auth/AuthGate";
+import TableAuthGate from "@/components/auth/TableAuthGate";
 
 // Helper to format BRL
 const brl = (v: number) =>
@@ -178,8 +178,16 @@ export default function ComprarBacklinksAutomoveis() {
   const visible = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     const items = sorted.slice(start, start + itemsPerPage);
-    // Limit to 5 items for non-authenticated users
-    return !isAuthenticated ? items.slice(0, 5) : items;
+    
+    if (isAuthenticated) {
+      return items;
+    }
+    
+    // For non-authenticated users: show first 4 complete + 3 with blur
+    return items.slice(0, 7).map((item, index) => ({
+      ...item,
+      shouldBlur: index >= 4
+    }));
   }, [sorted, currentPage, itemsPerPage, isAuthenticated]);
 
   const onBuy = (b: any) => {
@@ -538,11 +546,12 @@ export default function ComprarBacklinksAutomoveis() {
                   </tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} isAuthenticated={isAuthenticated} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} shouldBlur={b.shouldBlur} />
                   ))
                 )}
               </tbody>
             </table>
+            {!isAuthenticated && !authLoading && <TableAuthGate />}
           </div>
 
           <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -640,8 +649,6 @@ export default function ComprarBacklinksAutomoveis() {
         </section>
       </main>
       <Footer />
-
-      {!isAuthenticated && !authLoading && <AuthGate />}
 
       {selected && (
         <ContactModal open={open} onOpenChange={setOpen} />

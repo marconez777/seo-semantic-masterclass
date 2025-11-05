@@ -10,7 +10,7 @@ import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { Folder } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { AuthGate } from "@/components/auth/AuthGate";
+import TableAuthGate from "@/components/auth/TableAuthGate";
 
 // Helper to format BRL
 const brl = (v: number) =>
@@ -175,8 +175,16 @@ export default function ComprarBacklinksAlimentacao() {
   const visible = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     const items = sorted.slice(start, start + itemsPerPage);
-    // Limit to 5 items for non-authenticated users
-    return !isAuthenticated ? items.slice(0, 5) : items;
+    
+    if (isAuthenticated) {
+      return items;
+    }
+    
+    // For non-authenticated users: show first 4 complete + 3 with blur
+    return items.slice(0, 7).map((item, index) => ({
+      ...item,
+      shouldBlur: index >= 4
+    }));
   }, [sorted, currentPage, itemsPerPage, isAuthenticated]);
 
   const onBuy = (b: any) => {
@@ -361,160 +369,16 @@ export default function ComprarBacklinksAlimentacao() {
             </section>
           )}
 
-          <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
+          <div className="relative overflow-x-auto border rounded-xl bg-card shadow-sm">
             <table className="w-full text-sm">
               <thead className="bg-accent/40">
                 <tr className="text-left">
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "site_name")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("site_name");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "site_name")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("site_name");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    SITE
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "dr")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("dr");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "dr")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("dr");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    DR
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "da")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("da");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "da")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("da");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    DA
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "traffic")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("traffic");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "traffic")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("traffic");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    TRÁFEGO/Mês
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "category")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("category");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "category")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("category");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    CATEGORIA
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "price_cents")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("price_cents");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "price_cents")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("price_cents");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    VALOR
-                  </th>
+                  <th className="p-4">SITE</th>
+                  <th className="p-4">DR</th>
+                  <th className="p-4">DA</th>
+                  <th className="p-4">TRÁFEGO</th>
+                  <th className="p-4">CATEGORIA</th>
+                  <th className="p-4">VALOR</th>
                   <th className="p-4"></th>
                 </tr>
               </thead>
@@ -533,11 +397,12 @@ export default function ComprarBacklinksAlimentacao() {
                   </tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} isAuthenticated={isAuthenticated} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} shouldBlur={b.shouldBlur} />
                   ))
                 )}
               </tbody>
             </table>
+            {!isAuthenticated && !authLoading && <TableAuthGate />}
           </div>
 
           <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -586,8 +451,6 @@ export default function ComprarBacklinksAlimentacao() {
         </section>
       </main>
       <Footer />
-
-      {!isAuthenticated && !authLoading && <AuthGate />}
 
       {selected && (
         <ContactModal open={open} onOpenChange={setOpen} />

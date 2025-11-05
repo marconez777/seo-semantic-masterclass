@@ -9,7 +9,7 @@ import StructuredData from "@/components/seo/StructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useAuth } from "@/hooks/useAuth";
-import { AuthGate } from "@/components/auth/AuthGate";
+import TableAuthGate from "@/components/auth/TableAuthGate";
 
 // Helper to format BRL
 const brl = (v: number) =>
@@ -174,8 +174,18 @@ export default function ComprarBacklinksFinancas() {
   const currentPage = Math.min(page, pageCount);
   const visible = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return sorted.slice(start, start + itemsPerPage);
-  }, [sorted, currentPage, itemsPerPage]);
+    const items = sorted.slice(start, start + itemsPerPage);
+    
+    if (isAuthenticated) {
+      return items;
+    }
+    
+    // For non-authenticated users: show first 4 complete + 3 with blur
+    return items.slice(0, 7).map((item, index) => ({
+      ...item,
+      shouldBlur: index >= 4
+    }));
+  }, [sorted, currentPage, itemsPerPage, isAuthenticated]);
 
   const onBuy = (b: any) => {
     setSelected({
@@ -516,11 +526,12 @@ export default function ComprarBacklinksFinancas() {
                   </tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} shouldBlur={b.shouldBlur} />
                   ))
                 )}
               </tbody>
             </table>
+            {!isAuthenticated && !authLoading && <TableAuthGate />}
           </div>
 
           <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
