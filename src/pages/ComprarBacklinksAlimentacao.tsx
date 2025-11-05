@@ -9,6 +9,8 @@ import StructuredData from "@/components/seo/StructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { Folder } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthGate } from "@/components/auth/AuthGate";
 
 // Helper to format BRL
 const brl = (v: number) =>
@@ -22,6 +24,7 @@ const normalize = (s: string) =>
 export default function ComprarBacklinksAlimentacao() {
   const [backlinks, setBacklinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   // Filters
   const [drRange, setDrRange] = useState<string>("todos");
@@ -171,8 +174,10 @@ export default function ComprarBacklinksAlimentacao() {
   const currentPage = Math.min(page, pageCount);
   const visible = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return sorted.slice(start, start + itemsPerPage);
-  }, [sorted, currentPage, itemsPerPage]);
+    const items = sorted.slice(start, start + itemsPerPage);
+    // Limit to 5 items for non-authenticated users
+    return !isAuthenticated ? items.slice(0, 5) : items;
+  }, [sorted, currentPage, itemsPerPage, isAuthenticated]);
 
   const onBuy = (b: any) => {
     setSelected({
@@ -528,7 +533,7 @@ export default function ComprarBacklinksAlimentacao() {
                   </tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} isAuthenticated={isAuthenticated} />
                   ))
                 )}
               </tbody>
@@ -581,6 +586,8 @@ export default function ComprarBacklinksAlimentacao() {
         </section>
       </main>
       <Footer />
+
+      {!isAuthenticated && !authLoading && <AuthGate />}
 
       {selected && (
         <ContactModal open={open} onOpenChange={setOpen} />

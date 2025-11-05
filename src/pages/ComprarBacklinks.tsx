@@ -13,6 +13,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthGate } from "@/components/auth/AuthGate";
 
 
 // Helper to format BRL
@@ -24,6 +26,7 @@ export default function ComprarBacklinks() {
   const [backlinks, setBacklinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   // Filters
   const [drRange, setDrRange] = useState<string>('todos');
@@ -145,8 +148,10 @@ export default function ComprarBacklinks() {
   const currentPage = Math.min(page, pageCount);
   const visible = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return sorted.slice(start, start + itemsPerPage);
-  }, [sorted, currentPage, itemsPerPage]);
+    const items = sorted.slice(start, start + itemsPerPage);
+    // Limit to 5 items for non-authenticated users
+    return !isAuthenticated ? items.slice(0, 5) : items;
+  }, [sorted, currentPage, itemsPerPage, isAuthenticated]);
 
   const onBuy = (b: any) => {
     setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
@@ -438,7 +443,7 @@ export default function ComprarBacklinks() {
                   <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} isAuthenticated={isAuthenticated} />
                   ))
                 )}
               </tbody>
@@ -545,6 +550,8 @@ export default function ComprarBacklinks() {
         </div>
       </main>
       <Footer />
+
+      {!isAuthenticated && !authLoading && <AuthGate />}
 
       {selected && (
         <ContactModal open={open} onOpenChange={setOpen} product={selected} />

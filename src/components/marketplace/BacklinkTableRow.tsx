@@ -39,7 +39,7 @@ const getCategoryBadgeClass = (category: string) => {
   return categoryColors[category] || 'bg-gray-100 text-gray-800 border-gray-200';
 };
 
-export default function BacklinkTableRow({ item, onBuy }: { item: BacklinkItem; onBuy: (b: BacklinkItem) => void }) {
+export default function BacklinkTableRow({ item, onBuy, isAuthenticated = true }: { item: BacklinkItem; onBuy: (b: BacklinkItem) => void; isAuthenticated?: boolean }) {
   const [favId, setFavId] = useState<string | null>(null);
 
   useEffect(() => {
@@ -83,9 +83,29 @@ export default function BacklinkTableRow({ item, onBuy }: { item: BacklinkItem; 
     }
   };
 
+  const maskDomain = (url: string | null) => {
+    if (!url) return '-';
+    try {
+      const domain = new URL(url.startsWith('http') ? url : `https://${url}`).hostname;
+      const parts = domain.split('.');
+      if (parts.length >= 2) {
+        return `${parts[0].substring(0, 3)}*****${parts[parts.length - 1]}`;
+      }
+      return url.substring(0, 3) + '*****';
+    } catch {
+      return url.substring(0, 3) + '*****';
+    }
+  };
+
+  const displaySite = isAuthenticated 
+    ? (item.site_name || item.site_url) 
+    : maskDomain(item.site_url);
+
   return (
     <tr className="border-t">
-      <td className="p-4">{item.site_name || item.site_url}</td>
+      <td className={`p-4 ${!isAuthenticated ? 'blur-sm select-none' : ''}`}>
+        {displaySite}
+      </td>
       <td className="p-4 text-primary font-medium">{item.dr ?? '-'}</td>
       <td className="p-4 text-muted-foreground">{item.da ?? '-'}</td>
       <td className="p-4">{item.traffic?.toLocaleString('pt-BR') ?? '-'}</td>

@@ -8,6 +8,8 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import StructuredData from "@/components/seo/StructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
+import { useAuth } from "@/hooks/useAuth";
+import { AuthGate } from "@/components/auth/AuthGate";
 
 // Helper to format BRL
 const brl = (v: number) =>
@@ -21,6 +23,7 @@ const normalize = (s: string) =>
 export default function ComprarBacklinksFinancas() {
   const [backlinks, setBacklinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isAuthenticated, loading: authLoading } = useAuth();
 
   // Filters
   const [drRange, setDrRange] = useState<string>("todos");
