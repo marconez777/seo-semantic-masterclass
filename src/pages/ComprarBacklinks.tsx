@@ -3,10 +3,10 @@ import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
-
 import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
-
+import StructuredData from "@/components/seo/StructuredData";
+import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useIsMobile } from "@/hooks/use-mobile";

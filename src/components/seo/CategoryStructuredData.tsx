@@ -3,11 +3,12 @@ import { Helmet } from "react-helmet-async";
 interface Backlink {
   id: string;
   site_url: string;
-  valor: number;
-  categoria: string;
-  dr: number;
-  da: number;
-  trafego_mensal: number;
+  site_name?: string;
+  price_cents: number;
+  category: string;
+  dr: number | null;
+  da: number | null;
+  traffic: number | null;
 }
 
 interface CategoryStructuredDataProps {
@@ -32,51 +33,59 @@ const CategoryStructuredData = ({
     "mainEntity": {
       "@type": "ItemList",
       "numberOfItems": backlinks.length,
-      "itemListElement": backlinks.slice(0, 20).map((backlink, index) => ({
-        "@type": "ListItem",
-        "position": index + 1,
-        "item": {
-          "@type": "Product",
-          "name": `Backlink - ${new URL(backlink.site_url).hostname.replace('www.', '')}`,
-          "description": `Site da categoria ${backlink.categoria} com DR ${backlink.dr}, DA ${backlink.da} e ${backlink.trafego_mensal.toLocaleString()} visitas mensais`,
-          "category": backlink.categoria,
-          "url": backlink.site_url,
-          "offers": {
-            "@type": "Offer",
-            "price": backlink.valor.toFixed(2),
-            "priceCurrency": "BRL",
-            "availability": "https://schema.org/InStock",
-            "seller": {
-              "@type": "Organization",
-              "name": "MK Art SEO"
-            }
-          },
-          "aggregateRating": {
-            "@type": "AggregateRating",
-            "ratingValue": Math.min(5, Math.max(1, (backlink.dr + backlink.da) / 20)),
-            "reviewCount": Math.floor(backlink.trafego_mensal / 1000),
-            "bestRating": 5,
-            "worstRating": 1
-          },
-          "additionalProperty": [
-            {
-              "@type": "PropertyValue",
-              "name": "Domain Rating (DR)",
-              "value": backlink.dr
+      "itemListElement": backlinks.slice(0, 20).map((backlink, index) => {
+        const dr = backlink.dr ?? 0;
+        const da = backlink.da ?? 0;
+        const traffic = backlink.traffic ?? 0;
+        const priceInReais = backlink.price_cents / 100;
+        const siteName = backlink.site_name || new URL(backlink.site_url).hostname.replace('www.', '');
+        
+        return {
+          "@type": "ListItem",
+          "position": index + 1,
+          "item": {
+            "@type": "Product",
+            "name": `Backlink - ${siteName}`,
+            "description": `Site da categoria ${backlink.category} com DR ${dr}, DA ${da} e ${traffic.toLocaleString('pt-BR')} visitas mensais`,
+            "category": backlink.category,
+            "url": backlink.site_url,
+            "offers": {
+              "@type": "Offer",
+              "price": priceInReais.toFixed(2),
+              "priceCurrency": "BRL",
+              "availability": "https://schema.org/InStock",
+              "seller": {
+                "@type": "Organization",
+                "name": "MK Art SEO"
+              }
             },
-            {
-              "@type": "PropertyValue", 
-              "name": "Domain Authority (DA)",
-              "value": backlink.da
+            "aggregateRating": {
+              "@type": "AggregateRating",
+              "ratingValue": Math.min(5, Math.max(1, (dr + da) / 20)).toFixed(1),
+              "reviewCount": Math.max(1, Math.floor(traffic / 1000)),
+              "bestRating": 5,
+              "worstRating": 1
             },
-            {
-              "@type": "PropertyValue",
-              "name": "Tráfego Mensal",
-              "value": backlink.trafego_mensal
-            }
-          ]
-        }
-      }))
+            "additionalProperty": [
+              {
+                "@type": "PropertyValue",
+                "name": "Domain Rating (DR)",
+                "value": dr
+              },
+              {
+                "@type": "PropertyValue", 
+                "name": "Domain Authority (DA)",
+                "value": da
+              },
+              {
+                "@type": "PropertyValue",
+                "name": "Tráfego Mensal",
+                "value": traffic
+              }
+            ]
+          }
+        };
+      })
     },
     "breadcrumb": {
       "@type": "BreadcrumbList",
