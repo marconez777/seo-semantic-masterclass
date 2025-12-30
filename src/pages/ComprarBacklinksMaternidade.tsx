@@ -5,9 +5,12 @@ import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import StructuredData from "@/components/seo/StructuredData";
+import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
-import StructuredData from "@/components/seo/StructuredData";
+import { useAuth } from "@/hooks/useAuth";
+import TableAuthGate from "@/components/auth/TableAuthGate";
 
 // Helper to format BRL
 const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

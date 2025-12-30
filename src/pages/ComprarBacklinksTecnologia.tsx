@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import StructuredData from "@/components/seo/StructuredData";
+import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useAuth } from "@/hooks/useAuth";
@@ -215,6 +216,12 @@ export default function ComprarBacklinksTecnologia() {
             },
           ],
         }}
+      />
+      <CategoryStructuredData
+        categoryName="Backlinks de Tecnologia"
+        categoryUrl="https://mkart.com.br/comprar-backlinks-tecnologia"
+        backlinks={filtered}
+        description="Compre backlinks de qualidade em blogs e portais de tecnologia. Links com alta autoridade para melhorar seu SEO."
       />
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
