@@ -209,6 +209,12 @@ export default function ComprarBacklinksMarketing() {
           ],
         }}
       />
+      <CategoryStructuredData
+        categoryName="Backlinks de Marketing"
+        categoryUrl="https://mkart.com.br/comprar-backlinks-marketing"
+        backlinks={filtered}
+        description="Compre backlinks de qualidade em blogs e portais de marketing digital. Links com alta autoridade para melhorar seu SEO."
+      />
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar filters */}
