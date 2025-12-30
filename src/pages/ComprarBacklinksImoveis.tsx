@@ -158,12 +158,22 @@ export default function ComprarBacklinksImoveis() {
         keywords="comprar backlinks imóveis, backlinks construção, DR, DA, tráfego, preço"
       />
       <StructuredData
-        type="website"
+        type="breadcrumb"
         data={{
-          name: "Comprar Backlinks Brasileiros de Imóveis e Construção",
-          description: "Comprar Backlinks de qualidade no Nicho Casa e Construção. Apareça no Topo do Google e nas Respostas das IAs.",
-          url: "https://mkart.com.br/comprar-backlinks-imoveis"
+          items: [
+            { name: "Início", url: `${window.location.origin}/` },
+            {
+              name: "Backlinks de Imóveis",
+              url: `${window.location.origin}/comprar-backlinks-imoveis`,
+            },
+          ],
         }}
+      />
+      <CategoryStructuredData
+        categoryName="Backlinks de Imóveis"
+        categoryUrl="https://mkart.com.br/comprar-backlinks-imoveis"
+        backlinks={filtered}
+        description="Compre backlinks de qualidade em blogs e portais imobiliários e de construção. Links com alta autoridade para melhorar seu SEO."
       />
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">

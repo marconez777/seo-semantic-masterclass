@@ -212,6 +212,12 @@ export default function ComprarBacklinksDireito() {
           ],
         }}
       />
+      <CategoryStructuredData
+        categoryName="Backlinks de Direito"
+        categoryUrl="https://mkart.com.br/comprar-backlinks-direito"
+        backlinks={filtered}
+        description="Compre backlinks de qualidade em blogs e portais jurídicos e de advocacia. Links com alta autoridade para melhorar seu SEO."
+      />
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar filters */}

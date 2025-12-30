@@ -161,12 +161,22 @@ export default function ComprarBacklinksMaternidade() {
         keywords="comprar backlinks maternidade, backlinks infantil, DR, DA, tráfego, preço"
       />
       <StructuredData
-        type="website"
+        type="breadcrumb"
         data={{
-          name: "Comprar Backlinks de Qualidade no Nicho de Maternidade",
-          description: "Comprar Backlinks de qualidade no Nicho infantil e maternidade. Apareça no Topo do Google enas IAs.",
-          url: "https://mkart.com.br/comprar-backlinks-maternidade"
+          items: [
+            { name: "Início", url: `${window.location.origin}/` },
+            {
+              name: "Backlinks de Maternidade",
+              url: `${window.location.origin}/comprar-backlinks-maternidade`,
+            },
+          ],
         }}
+      />
+      <CategoryStructuredData
+        categoryName="Backlinks de Maternidade"
+        categoryUrl="https://mkart.com.br/comprar-backlinks-maternidade"
+        backlinks={filtered}
+        description="Compre backlinks de qualidade em blogs e portais de maternidade e infantil. Links com alta autoridade para melhorar seu SEO."
       />
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">

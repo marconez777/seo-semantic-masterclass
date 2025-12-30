@@ -203,6 +203,12 @@ export default function ComprarBacklinksPets() {
           ],
         }}
       />
+      <CategoryStructuredData
+        categoryName="Backlinks de Pets"
+        categoryUrl="https://mkart.com.br/comprar-backlinks-pets"
+        backlinks={filtered}
+        description="Compre backlinks de qualidade em blogs e portais veterinários e de animais de estimação. Links com alta autoridade para melhorar seu SEO."
+      />
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar filters */}

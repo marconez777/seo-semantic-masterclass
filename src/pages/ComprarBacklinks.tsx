@@ -174,6 +174,12 @@ export default function ComprarBacklinks() {
         canonicalUrl="https://mkart.com.br/comprar-backlinks"
         keywords="comprar backlinks, link building, DR, DA, tráfego, preço"
       />
+      <CategoryStructuredData
+        categoryName="Comprar Backlinks"
+        categoryUrl="https://mkart.com.br/comprar-backlinks"
+        backlinks={filtered}
+        description="Compre backlinks de qualidade em grandes portais brasileiros. Links com alta autoridade para melhorar seu posicionamento no Google."
+      />
       <Header />
       <main className="container mx-auto px-4 py-28">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">

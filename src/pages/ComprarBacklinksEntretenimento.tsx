@@ -201,12 +201,22 @@ export default function ComprarBacklinksEntretenimento() {
         keywords="backlinks entretenimento, comprar backlinks musica, filmes, series, games, backlinks brasileiros"
       />
       <StructuredData
-        type="website"
+        type="breadcrumb"
         data={{
-          name: "Comprar Backlinks Brasileiros no Nicho de Entretenimento",
-          description: "Comprar Backlinks de qualidade no Nicho de Entretenimento. Apareça no Topo do Google e nas Respostas das IAs.",
-          url: "https://mkart.com.br/comprar-backlinks-entretenimento"
+          items: [
+            { name: "Início", url: `${window.location.origin}/` },
+            {
+              name: "Backlinks de Entretenimento",
+              url: `${window.location.origin}/comprar-backlinks-entretenimento`,
+            },
+          ],
         }}
+      />
+      <CategoryStructuredData
+        categoryName="Backlinks de Entretenimento"
+        categoryUrl="https://mkart.com.br/comprar-backlinks-entretenimento"
+        backlinks={filtered}
+        description="Compre backlinks de qualidade em blogs e portais de entretenimento. Links com alta autoridade para melhorar seu SEO."
       />
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">

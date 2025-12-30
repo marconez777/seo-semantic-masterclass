@@ -161,12 +161,22 @@ export default function ComprarBacklinksSaude() {
         keywords="comprar backlinks saúde, backlinks médicos, DR, DA, tráfego, preço"
       />
       <StructuredData
-        type="website"
+        type="breadcrumb"
         data={{
-          name: "Comprar Backlinks Brasileiros no Nicho de Saúde",
-          description: "Comprar Backlinks de qualidade no Nicho de Saúde. Apareça no Topo do Google e nas Respostas das IAs.",
-          url: "https://mkart.com.br/comprar-backlinks-saude"
+          items: [
+            { name: "Início", url: `${window.location.origin}/` },
+            {
+              name: "Backlinks de Saúde",
+              url: `${window.location.origin}/comprar-backlinks-saude`,
+            },
+          ],
         }}
+      />
+      <CategoryStructuredData
+        categoryName="Backlinks de Saúde"
+        categoryUrl="https://mkart.com.br/comprar-backlinks-saude"
+        backlinks={filtered}
+        description="Compre backlinks de qualidade em blogs e portais de saúde e medicina. Links com alta autoridade para melhorar seu SEO."
       />
       <Header />
       <main className="container mx-auto px-4 py-28 grid grid-cols-1 md:grid-cols-12 gap-8">
