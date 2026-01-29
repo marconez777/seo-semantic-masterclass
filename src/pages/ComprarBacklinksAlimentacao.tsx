@@ -12,6 +12,8 @@ import { getCategoryIcon } from "@/lib/category-icons";
 import { Folder } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import TableAuthGate from "@/components/auth/TableAuthGate";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { BacklinkFiltersSidebar } from "@/components/marketplace/BacklinkFilters";
 
 // Helper to format BRL
 const brl = (v: number) =>
