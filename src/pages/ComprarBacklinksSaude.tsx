@@ -140,12 +140,23 @@ export default function ComprarBacklinksSaude() {
     return arr;
   }, [filtered, sortKey, sortDir]);
 
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  
   const pageCount = Math.max(1, Math.ceil(sorted.length / itemsPerPage));
   const currentPage = Math.min(page, pageCount);
   const visible = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return sorted.slice(start, start + itemsPerPage);
-  }, [sorted, currentPage, itemsPerPage]);
+    const items = sorted.slice(start, start + itemsPerPage);
+    
+    if (isAuthenticated) {
+      return items;
+    }
+    
+    return items.slice(0, 7).map((item, index) => ({
+      ...item,
+      shouldBlur: index >= 4
+    }));
+  }, [sorted, currentPage, itemsPerPage, isAuthenticated]);
 
   const onBuy = (b: any) => {
     setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
@@ -386,11 +397,12 @@ export default function ComprarBacklinksSaude() {
                   <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
                 ) : (
                   visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
+                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} shouldBlur={b.shouldBlur} />
                   ))
                 )}
               </tbody>
             </table>
+            {!isAuthenticated && !authLoading && <TableAuthGate />}
           </div>
 
           <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">

@@ -8,7 +8,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Menu } from "lucide-react";
+import { Menu, Folder } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
@@ -414,7 +414,19 @@ const AgenciaBacklinks = () => {
           {categories.length > 0 && (
             <section className="mb-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {categories.slice(0,16).map((cat) => {
+                <a
+                  href="/comprar-backlinks"
+                  className="group flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors"
+                >
+                  <span className="inline-flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary shadow-sm">
+                    <Folder className="size-4" aria-hidden="true" />
+                  </span>
+                  <span className="flex flex-col">
+                    <span className="text-[11px] uppercase tracking-wide text-muted-foreground leading-none">Ver Todas</span>
+                    <span className="text-sm font-semibold leading-none mt-1">Categorias</span>
+                  </span>
+                </a>
+                {categories.slice(0,15).map((cat) => {
                   const slug = String(cat)
                     .toLowerCase()
                     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
