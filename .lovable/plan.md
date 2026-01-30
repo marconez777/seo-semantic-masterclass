@@ -1,126 +1,70 @@
 
 
-## Categoria "Geral" + Trafego Opcional
+## Remover Coluna DR da Listagem
 
 ### Resumo
-1. Sites importados sem categoria serao automaticamente atribuidos a categoria "Geral"
-2. "Geral" NAO aparecera no grid de categorias publico
-3. Sites com "Geral" aparecerao na listagem "Todas Categorias"
-4. Trafego pode ser importado vazio (fica como `null`)
-5. Na listagem, trafego `0` ou `null` mostrara "-" (traco)
+Excluir completamente a coluna DR (Domain Rating) da tabela de backlinks, pois essa informação não está sendo importada.
 
 ---
 
 ### Arquivos a Modificar
 
-| Arquivo | Mudanca |
+| Arquivo | Mudança |
 |---------|---------|
-| `src/components/admin/AdminBacklinksImport.tsx` | Adicionar "Geral" as categorias, atribuir automaticamente quando vazio, atualizar textos de ajuda |
-| `src/components/marketplace/BacklinkTableRow.tsx` | Mostrar "-" quando trafego for `0` ou `null` |
-| `src/pages/ComprarBacklinks.tsx` | Filtrar "Geral" do grid de categorias |
-| `src/pages/ComprarBacklinksCategoria.tsx` | Adicionar "Geral" a lista de categorias permitidas + filtrar do grid |
+| `src/components/marketplace/BacklinkTableRow.tsx` | Remover a célula `<td>` que exibe DR |
+| `src/pages/ComprarBacklinks.tsx` | Remover cabeçalho `<th>` do DR, atualizar colSpan de 7 para 6 |
+| `src/pages/ComprarBacklinksCategoria.tsx` | Remover cabeçalho `<th>` do DR, atualizar colSpan de 7 para 6 |
 
 ---
 
-### Detalhes Tecnicos
+### Detalhes Técnicos
 
-#### 1. AdminBacklinksImport.tsx
+#### 1. BacklinkTableRow.tsx
 
-**Adicionar "Geral" ao array de categorias:**
+**Remover linha 110:**
 ```typescript
-const ALLOWED_CATEGORIES = [
-  "Geral",  // <-- Nova categoria (sera oculta no frontend)
-  "Noticias",
-  // ... resto
-] as const;
+// REMOVER esta linha:
+<td className="p-4 text-primary font-medium">{item.dr ?? '-'}</td>
 ```
 
-**Atribuir automaticamente quando vazio:**
+A tabela fica com: SITE | DA | TRÁFEGO | CATEGORIA | VALOR | (ações)
+
+#### 2. ComprarBacklinks.tsx
+
+**Remover cabeçalho DR (linhas 404-412):**
 ```typescript
-// Na funcao startImport, ajustar a logica:
-const canonical = toCanonicalCategory(categoryRaw || "") || "Geral";
-// Assim, se categoryRaw estiver vazio, usa "Geral"
+// REMOVER todo este bloco:
+<th
+  className="p-4 cursor-pointer select-none"
+  role="button"
+  tabIndex={0}
+  onClick={() => { if (sortKey === 'dr') ... }}
+  onKeyDown={(e) => { ... }}
+>
+  DR
+</th>
 ```
 
-**Atualizar texto de ajuda:**
-```
-"Colunas: URL, Categoria (opcional), DA, Trafego Mensal (opcional), Valor"
-"Se categoria estiver vazia, sera atribuida como 'Geral'"
-```
-
-#### 2. BacklinkTableRow.tsx
-
-**Linha 112 - Ajustar exibicao de trafego:**
+**Atualizar colSpan (linhas 454, 456):**
 ```typescript
 // De:
-<td className="p-4">{item.traffic?.toLocaleString('pt-BR') ?? '-'}</td>
+<td className="p-6" colSpan={7}>
 
 // Para:
-<td className="p-4">{item.traffic ? item.traffic.toLocaleString('pt-BR') : '-'}</td>
+<td className="p-6" colSpan={6}>
 ```
 
-Isso faz com que `0`, `null` e `undefined` mostrem "-".
+#### 3. ComprarBacklinksCategoria.tsx
 
-#### 3. ComprarBacklinks.tsx
-
-**Filtrar "Geral" do grid de categorias (linha ~366):**
-```typescript
-// De:
-{categories.slice(0,16).map((cat) => {
-
-// Para:
-{categories.filter(c => c !== 'Geral').slice(0,16).map((cat) => {
-```
-
-#### 4. ComprarBacklinksCategoria.tsx
-
-**Adicionar "Geral" a lista de categorias permitidas:**
-```typescript
-const ALLOWED_CATEGORIES = [
-  "Geral",  // <-- Adicionar aqui
-  "Noticias",
-  // ... resto
-] as const;
-```
-
-**Filtrar "Geral" do grid de categorias na sidebar (se existir).**
+**Remover cabeçalho DR e atualizar colSpan de 7 para 6.**
 
 ---
 
-### Resultado Visual
+### Resultado Final
 
-**Grid de categorias (publico):**
-```
-+-------------+-------------+-------------+-------------+
-| Noticias    | Negocios    | Saude       | Educacao    |
-+-------------+-------------+-------------+-------------+
-| Tecnologia  | Financas    | Imoveis     | Moda        |
-+-------------+-------------+-------------+-------------+
-(Geral NAO aparece aqui)
-```
+A tabela terá as seguintes colunas:
 
-**Listagem "Todas Categorias":**
-```
-| SITE           | DR | DA | TRAFEGO   | CATEGORIA  | VALOR   |
-|----------------|----|----|-----------|------------|---------|
-| exemplo.com    | 45 | 38 | 15.000    | Tecnologia | R$ 350  |
-| siteimportado  | 30 | 25 | -         | Geral      | R$ 200  |  <-- trafego vazio
-| outrosite.com  | 55 | 42 | 50.000    | Saude      | R$ 600  |
-```
-
-**Importacao:**
-```
-Planilha:
-| URL                    | Categoria | DA | Trafego | Valor |
-|------------------------|-----------|----| --------|-------|
-| site1.com              |           | 30 |         | 200   |  <- sera "Geral", trafego null
-| site2.com              | Saude     | 45 | 15000   | 350   |  <- normal
-```
-
----
-
-### Observacoes
-- Nenhuma alteracao de banco de dados necessaria (colunas ja sao nullable)
-- A categoria "Geral" pode ser alterada posteriormente no admin se desejado
-- Sites com "Geral" aparecem normalmente na busca e listagem principal
+| SITE | DA | TRÁFEGO/Mês | CATEGORIA | VALOR | (Ações) |
+|------|----|-----------:|-----------|-------|---------|
+| gazetadopovo.com.br | 92 | 13.888.896 | Notícias | R$ 16.000,00 | [Comprar] |
 
