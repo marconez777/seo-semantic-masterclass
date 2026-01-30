@@ -1,233 +1,182 @@
 
 
-# Plano de Correção do Painel Administrativo
+# Plano: Campo WhatsApp Obrigatorio no Cadastro
 
-## Resumo do Problema
+## Resumo
 
-O painel administrativo possui incompatibilidades entre os componentes frontend e a estrutura do banco de dados. Isso impede a importacao de backlinks, criacao de posts e o acesso ao painel admin.
-
----
-
-## 1. Corrigir AdminBacklinksImport.tsx
-
-**Problema**: Os campos usados no componente nao existem na tabela `backlinks`.
-
-**Mapeamento necessario**:
-| Frontend (atual) | Banco de dados (correto) |
-|------------------|--------------------------|
-| `site_url` | `url` |
-| `site_name` | `domain` |
-| `price_cents` | `price` (em reais, nao centavos) |
-| `is_active: true` | `status: 'ativo'` |
-
-**Alteracoes**:
-- Atualizar interface `ParsedRow` para usar `url`, `domain`, `price`
-- Atualizar mapeamento no payload de insert
-- Converter preco: deixar em reais (dividir centavos por 100)
-- Usar `status: 'ativo'` ao inves de `is_active: true`
+Adicionar campo de WhatsApp obrigatorio no cadastro para que o admin possa entrar em contato com o cliente e enviar o QR code do PIX.
 
 ---
 
-## 2. Corrigir AdminBacklinksManager.tsx
+## Alteracoes Necessarias
 
-**Problema**: A interface `Backlink` e as queries usam campos inexistentes.
+### 1. Banco de Dados - Adicionar coluna `whatsapp` em `profiles`
 
-**Mapeamento necessario**:
-| Frontend (atual) | Banco de dados (correto) |
-|------------------|--------------------------|
-| `site_url` | `url` |
-| `site_name` | `domain` |
-| `price_cents` | `price` |
-| `is_active` | `status` |
+Adicionar nova coluna na tabela `profiles`:
 
-**Alteracoes**:
-- Atualizar interface `Backlink` com os campos corretos
-- Atualizar a query para usar `site_url → url` etc
-- Atualizar a exibicao na tabela
-- Ajustar formatacao do preco (ja esta em reais)
-- Exibir `status` ao inves de `is_active`
+| Campo | Tipo | Descricao |
+|-------|------|-----------|
+| whatsapp | TEXT | Numero de WhatsApp do cliente (obrigatorio via app) |
 
----
+### 2. Frontend - Formulario de Cadastro (Auth.tsx)
 
-## 3. Corrigir AdminBlogNew.tsx e AdminBlogPublisher.tsx
+**Alteracoes:**
+- Renomear label de "Telefone" para "WhatsApp" 
+- Adicionar validacao: campo obrigatorio
+- Adicionar mascara/placeholder: (11) 99999-9999
+- Exibir mensagem de erro se nao preenchido
+- Continuar salvando em `user_metadata` E criar/atualizar registro em `profiles`
 
-**Problema**: Os campos usados no insert nao existem na tabela `posts`.
+### 3. Criar Perfil ao Cadastrar
 
-**Mapeamento necessario**:
-| Frontend (atual) | Banco de dados (correto) |
-|------------------|--------------------------|
-| `content_md` | `content` |
-| `featured_image_url` | `cover_image` |
-| `seo_title` | Nao existe (usar `title`) |
-| `seo_description` | `excerpt` |
+Apos o signup, criar automaticamente o registro na tabela `profiles` com:
+- `user_id` = ID do usuario autenticado
+- `email` = email do usuario
+- `full_name` = nome informado
+- `whatsapp` = numero informado
 
-**Alteracoes**:
-- Substituir `content_md` por `content`
-- Substituir `featured_image_url` por `cover_image`
-- Remover `seo_title` (nao existe na tabela)
-- Usar `excerpt` para descricao SEO
-- Adicionar `published_at: new Date().toISOString()` quando publicado
+**Opcoes de implementacao:**
+1. **Trigger no banco** (recomendado): Criar trigger que escuta `auth.users` e cria perfil automaticamente
+2. **No frontend**: Apos signup bem sucedido, fazer insert na tabela `profiles`
 
----
+### 4. Edge Function - Retornar dados do cliente
 
-## 4. Corrigir RequireRole.tsx
+Atualizar `get-pii-data/index.ts` para buscar dados reais da tabela `profiles`:
+- Consultar `profiles` pelo `user_id` do pedido
+- Retornar `email`, `full_name` e `whatsapp`
 
-**Problema**: O componente busca `profiles.role` que nao existe. O campo correto e `is_admin` (boolean).
+### 5. Painel Admin - Exibir WhatsApp
 
-**Alteracoes**:
-- Remover busca por `role` no JWT/metadata
-- Consultar `profiles.is_admin` ao inves de `profiles.role`
-- Verificar se `is_admin === true` para role admin
+O `AdminPedidos.tsx` ja esta preparado para exibir `customer_phone` - basta garantir que a edge function retorne o dado corretamente.
 
 ---
 
-## 5. Corrigir AdminAuth.tsx
+## Fluxo Completo
 
-**Problema**: Tambem busca `profiles.role` que nao existe.
-
-**Alteracoes**:
-- Mudar `.select('role')` para `.select('is_admin')`
-- Mudar `.eq('id', ...)` para `.eq('user_id', ...)` (campo correto)
-- Verificar `profile?.is_admin === true`
-
----
-
-## 6. Corrigir AdminBlogNew.tsx - Verificacao de Admin
-
-**Problema**: Usa RPC `is_admin` que nao existe no banco.
-
-**Alteracoes**:
-- Remover chamada `supabase.rpc('is_admin', ...)`
-- Consultar `profiles.is_admin` diretamente
-- Usar `.eq('user_id', userId)` ao inves de `.eq('id', userId)`
+```text
+1. Usuario acessa /auth e seleciona "Sou novo por aqui"
+2. Preenche: Nome, WhatsApp*, Email, Senha
+3. Se WhatsApp vazio → erro "WhatsApp e obrigatorio"
+4. Ao clicar "Cadastrar":
+   a) Supabase cria usuario em auth.users (com metadata)
+   b) Trigger cria registro em profiles (com whatsapp)
+5. Usuario confirma email e faz login
+6. Ao fazer pedido, admin ve WhatsApp na tela de pedidos
+7. Admin entra em contato via WhatsApp para enviar PIX
+```
 
 ---
 
-## 7. Corrigir get-pii-data Edge Function
+## Arquivos a Modificar
 
-**Problema**: Depende de RPC `get_masked_pii_secure` que nao existe.
-
-**Opcao escolhida**: Simplificar a Edge Function para retornar dados diretamente sem a RPC, ja que o admin ja tem acesso via service role key.
-
-**Alteracoes**:
-- Remover chamada `supabase.rpc('get_masked_pii_secure', ...)`
-- Consultar dados diretamente via Supabase client com service role
-- Manter validacao de admin no inicio
-- Corrigir query para usar `.eq('user_id', ...)` na verificacao de admin
+| Arquivo | Alteracao |
+|---------|-----------|
+| Migracao SQL | Adicionar coluna `whatsapp` em `profiles` |
+| Migracao SQL | Criar trigger para auto-criar perfil |
+| `src/pages/Auth.tsx` | Validacao obrigatoria + label WhatsApp |
+| `supabase/functions/get-pii-data/index.ts` | Buscar dados de `profiles` |
 
 ---
 
-## 8. Criar Admin Inicial (Migracao SQL)
+## Secao Tecnica
 
-**Problema**: O banco esta vazio, nenhum usuario tem `is_admin = true`.
-
-**Solucao**: Criar uma migracao que adiciona um trigger para auto-criar perfil e uma funcao para promover usuarios a admin.
+### Migracao SQL - Coluna WhatsApp
 
 ```sql
--- Funcao para promover usuario a admin por email
-CREATE OR REPLACE FUNCTION promote_to_admin(user_email TEXT)
-RETURNS VOID AS $$
-DECLARE
-  target_user_id UUID;
+-- Adicionar coluna whatsapp na tabela profiles
+ALTER TABLE public.profiles 
+ADD COLUMN whatsapp TEXT;
+
+-- Criar funcao para auto-criar perfil quando usuario e criado
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
 BEGIN
-  SELECT id INTO target_user_id FROM auth.users WHERE email = user_email;
-  IF target_user_id IS NULL THEN
-    RAISE EXCEPTION 'Usuario nao encontrado';
-  END IF;
-  
-  INSERT INTO public.profiles (user_id, email, is_admin)
-  VALUES (target_user_id, user_email, true)
-  ON CONFLICT (user_id) 
-  DO UPDATE SET is_admin = true;
+  INSERT INTO public.profiles (user_id, email, full_name, whatsapp)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    NEW.raw_user_meta_data->>'name',
+    NEW.raw_user_meta_data->>'phone'
+  )
+  ON CONFLICT (user_id) DO UPDATE SET
+    email = EXCLUDED.email,
+    full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
+    whatsapp = COALESCE(EXCLUDED.whatsapp, profiles.whatsapp),
+    updated_at = now();
+  RETURN NEW;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
+
+-- Criar trigger (apenas se nao existir)
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
 ```
 
-**Apos a migracao**: Voce precisara:
-1. Criar uma conta via /auth (signup)
-2. Executar no SQL Editor do Lovable Cloud: `SELECT promote_to_admin('seu@email.com');`
+### Validacao no Frontend (Auth.tsx)
+
+```typescript
+const handleSignup = async () => {
+  // Validacao
+  if (!name.trim()) {
+    setError("Nome e obrigatorio");
+    return;
+  }
+  if (!phone.trim()) {
+    setError("WhatsApp e obrigatorio para receber o PIX");
+    return;
+  }
+  if (!email.trim()) {
+    setError("E-mail e obrigatorio");
+    return;
+  }
+  if (password.length < 6) {
+    setError("Senha deve ter no minimo 6 caracteres");
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+  // ... resto do codigo
+};
+```
+
+### Edge Function Atualizada
+
+```typescript
+// Buscar dados de profiles para cada order
+const orderUserIds = orders.map(o => o.user_id);
+
+const { data: profiles } = await supabaseClient
+  .from('profiles')
+  .select('user_id, email, full_name, whatsapp')
+  .in('user_id', orderUserIds);
+
+const profileMap = new Map(profiles?.map(p => [p.user_id, p]) ?? []);
+
+const result = orders.map(order => ({
+  order_id: order.id,
+  customer_email: profileMap.get(order.user_id)?.email ?? null,
+  customer_name: profileMap.get(order.user_id)?.full_name ?? null,
+  customer_phone: profileMap.get(order.user_id)?.whatsapp ?? null,
+  customer_cpf: null // Removido do sistema
+}));
+
+return new Response(JSON.stringify({ data: result }), ...);
+```
 
 ---
 
-## Ordem de Implementacao
+## Integracao com Plano Principal
 
-1. **Migracao SQL** - Criar funcao para promover admin
-2. **RequireRole.tsx** - Corrigir verificacao de admin
-3. **AdminAuth.tsx** - Corrigir login admin
-4. **AdminBacklinksImport.tsx** - Corrigir mapeamento de campos
-5. **AdminBacklinksManager.tsx** - Corrigir interface e queries
-6. **AdminBlogNew.tsx** - Corrigir campos e verificacao admin
-7. **AdminBlogPublisher.tsx** - Corrigir campos do post
-8. **get-pii-data Edge Function** - Simplificar sem RPC
-
----
-
-## Resumo das Alteracoes
-
-| Arquivo | Tipo de Alteracao |
-|---------|-------------------|
-| Migracao SQL | Criar funcao `promote_to_admin` |
-| RequireRole.tsx | Usar `is_admin` boolean |
-| AdminAuth.tsx | Usar `is_admin` e `user_id` |
-| AdminBacklinksImport.tsx | Mapear campos corretamente |
-| AdminBacklinksManager.tsx | Mapear campos corretamente |
-| AdminBlogNew.tsx | Mapear campos e verificacao |
-| AdminBlogPublisher.tsx | Mapear campos |
-| get-pii-data/index.ts | Remover RPC inexistente |
-
----
-
-## Secao Tecnica - Detalhes de Implementacao
-
-### Tabela backlinks (estrutura real)
-```typescript
-{
-  id: string
-  url: string          // antes: site_url
-  domain: string       // antes: site_name  
-  category: string
-  price: number        // antes: price_cents (agora em reais)
-  da: number
-  dr: number
-  traffic: number
-  status: string       // antes: is_active (boolean)
-  tipo: string
-  observacoes: string
-  created_at: string
-  updated_at: string
-}
-```
-
-### Tabela posts (estrutura real)
-```typescript
-{
-  id: string
-  title: string
-  slug: string
-  content: string      // antes: content_md
-  cover_image: string  // antes: featured_image_url
-  excerpt: string      // usar para SEO description
-  category: string
-  tags: string[]
-  published: boolean
-  published_at: string
-  user_id: string
-  created_at: string
-  updated_at: string
-}
-```
-
-### Tabela profiles (estrutura real)
-```typescript
-{
-  id: string
-  user_id: string      // referencia auth.users.id
-  email: string
-  full_name: string
-  avatar_url: string
-  is_admin: boolean    // antes: role (enum)
-  created_at: string
-  updated_at: string
-}
-```
+Esta alteracao se integra ao plano do Marketplace v2.0:
+- Garante que todo cliente tenha WhatsApp cadastrado
+- Admin pode entrar em contato para enviar PIX
+- Dados ficam na tabela `profiles` (nao em tabela PII separada - simplificacao)
 
