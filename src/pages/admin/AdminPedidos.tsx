@@ -1,12 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import SEOHead from "@/components/seo/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { ChevronDown, ChevronUp, ExternalLink, MessageCircle } from "lucide-react";
+import { OrderStats } from "@/components/admin/OrderStats";
+import { AdminOrderFilters } from "@/components/admin/AdminOrderFilters";
 
 interface Pedido {
   id: string;
@@ -95,6 +99,8 @@ export default function AdminPedidos() {
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null);
   const [newStatus, setNewStatus] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos");
+  const [searchQuery, setSearchQuery] = useState("");
   const { toast } = useToast();
 
   const loadData = async () => {
@@ -184,6 +190,28 @@ export default function AdminPedidos() {
     setLoading(false);
   };
 
+  const filteredPedidos = useMemo(() => {
+    return pedidos.filter((pedido) => {
+      // Status filter
+      if (statusFilter !== "todos" && pedido.status !== statusFilter) {
+        return false;
+      }
+      // Search filter
+      if (searchQuery) {
+        const pii = piiByOrder[pedido.id];
+        const query = searchQuery.toLowerCase();
+        const matchesName = pii?.customer_name?.toLowerCase().includes(query);
+        const matchesEmail = pii?.customer_email?.toLowerCase().includes(query);
+        const matchesPhone = pii?.customer_phone?.includes(query);
+        const matchesId = pedido.id.toLowerCase().includes(query);
+        if (!matchesName && !matchesEmail && !matchesPhone && !matchesId) {
+          return false;
+        }
+      }
+      return true;
+    });
+  }, [pedidos, statusFilter, searchQuery, piiByOrder]);
+
   const updateOrderStatus = async (orderId: string, status: string) => {
     const updateData: any = { status };
     if (status === "pago") {
@@ -248,17 +276,35 @@ export default function AdminPedidos() {
           </Button>
         </div>
 
+        {/* Stats Cards */}
+        <OrderStats pedidos={pedidos} />
+
+        {/* Filters */}
+        <AdminOrderFilters
+          statusFilter={statusFilter}
+          onStatusChange={setStatusFilter}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+        />
+
         <div className="space-y-4">
           {loading ? (
-            <div className="border rounded-md p-8 text-center text-muted-foreground">
-              Carregando pedidos...
+            <div className="space-y-4">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="border rounded-lg p-4">
+                  <Skeleton className="h-5 w-48 mb-2" />
+                  <Skeleton className="h-4 w-64" />
+                </div>
+              ))}
             </div>
-          ) : pedidos.length === 0 ? (
+          ) : filteredPedidos.length === 0 ? (
             <div className="border rounded-md p-8 text-center text-muted-foreground">
-              Nenhum pedido encontrado.
+              {searchQuery || statusFilter !== "todos"
+                ? "Nenhum pedido encontrado com esses filtros."
+                : "Nenhum pedido encontrado."}
             </div>
           ) : (
-            pedidos.map((pedido) => {
+            filteredPedidos.map((pedido) => {
               const pii = piiByOrder[pedido.id];
               const isExpanded = expandedOrder === pedido.id;
 
@@ -302,7 +348,7 @@ export default function AdminPedidos() {
                     </div>
 
                     {/* Customer Info Summary */}
-                    <div className="mt-3 flex items-center gap-6 text-sm">
+                    <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
                       <div>
                         <span className="text-muted-foreground">Cliente: </span>
                         <span className="font-medium">{pii?.customer_name || "—"}</span>
@@ -322,7 +368,7 @@ export default function AdminPedidos() {
                   {isExpanded && (
                     <div className="border-t p-4 bg-muted/20 space-y-4">
                       {/* Actions */}
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-3">
                         <Button
                           size="sm"
                           onClick={(e) => {
@@ -453,7 +499,7 @@ export default function AdminPedidos() {
           <DialogHeader>
             <DialogTitle>Alterar Status do Pedido</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="py-4">
             <Select value={newStatus} onValueChange={setNewStatus}>
               <SelectTrigger>
                 <SelectValue placeholder="Selecione o status" />
@@ -466,17 +512,17 @@ export default function AdminPedidos() {
                 ))}
               </SelectContent>
             </Select>
-            <div className="flex gap-2">
-              <Button
-                onClick={() => selectedOrder && updateOrderStatus(selectedOrder.id, newStatus)}
-                disabled={!newStatus}
-              >
-                Salvar
-              </Button>
-              <Button variant="outline" onClick={() => setStatusDialogOpen(false)}>
-                Cancelar
-              </Button>
-            </div>
+          </div>
+          <div className="flex justify-end gap-2">
+            <Button variant="outline" onClick={() => setStatusDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => selectedOrder && updateOrderStatus(selectedOrder.id, newStatus)}
+              disabled={!newStatus}
+            >
+              Salvar
+            </Button>
           </div>
         </DialogContent>
       </Dialog>

@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ChevronDown, ChevronUp, Package } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronDown, ChevronUp, Package, ExternalLink } from "lucide-react";
+import { OrderFilters } from "./OrderFilters";
 
 interface Order {
   id: string;
@@ -54,6 +56,7 @@ export function OrdersList({ userId }: { userId: string }) {
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState("todos");
 
   useEffect(() => {
     let mounted = true;
@@ -144,145 +147,175 @@ export function OrdersList({ userId }: { userId: string }) {
     };
   }, [userId]);
 
+  const filteredOrders = useMemo(() => {
+    if (statusFilter === "todos") return orders;
+    return orders.filter((o) => o.status === statusFilter);
+  }, [orders, statusFilter]);
+
   if (loading) {
     return (
-      <div className="border rounded-md p-8 bg-card text-center">
-        <p className="text-muted-foreground">Carregando pedidos...</p>
-      </div>
-    );
-  }
-
-  if (orders.length === 0) {
-    return (
-      <div className="border rounded-md p-8 bg-card text-center">
-        <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium mb-2">Nenhum pedido encontrado</h3>
-        <p className="text-muted-foreground mb-4">
-          Você ainda não fez nenhum pedido.
-        </p>
-        <Button asChild>
-          <a href="/comprar-backlinks">Ver backlinks disponíveis</a>
-        </Button>
+      <div className="space-y-4">
+        <div className="flex justify-end">
+          <Skeleton className="h-10 w-48" />
+        </div>
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="border rounded-lg p-4 bg-card">
+            <div className="flex justify-between items-center mb-3">
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-5 w-24" />
+              </div>
+              <div className="space-y-2 text-right">
+                <Skeleton className="h-4 w-16 ml-auto" />
+                <Skeleton className="h-6 w-20 ml-auto" />
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      {orders.map((order) => (
-        <div
-          key={order.id}
-          className="border rounded-lg bg-card overflow-hidden"
-        >
-          {/* Order Header */}
-          <div
-            className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors"
-            onClick={() =>
-              setExpandedOrder(expandedOrder === order.id ? null : order.id)
-            }
-          >
-            <div className="flex items-center gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">
-                  Pedido #{order.id.slice(0, 8).toUpperCase()}
-                </p>
-                <p className="font-medium">
-                  {new Date(order.created_at).toLocaleDateString("pt-BR", {
-                    day: "2-digit",
-                    month: "short",
-                    year: "numeric",
-                  })}
-                </p>
-              </div>
-            </div>
+      <OrderFilters statusFilter={statusFilter} onStatusChange={setStatusFilter} />
 
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="text-sm text-muted-foreground">
-                  {order.items.length} {order.items.length === 1 ? "item" : "itens"}
-                </p>
-                <p className="font-semibold text-primary">{brl(order.total)}</p>
-              </div>
-              {getStatusBadge(order.status)}
-              {expandedOrder === order.id ? (
-                <ChevronUp className="h-5 w-5 text-muted-foreground" />
-              ) : (
-                <ChevronDown className="h-5 w-5 text-muted-foreground" />
-              )}
-            </div>
-          </div>
-
-          {/* Order Details (Expanded) */}
-          {expandedOrder === order.id && (
-            <div className="border-t p-4 bg-muted/20">
-              <h4 className="font-medium mb-3">Itens do Pedido</h4>
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead className="bg-muted/60">
-                    <tr className="text-left">
-                      <th className="p-2 font-medium">Site</th>
-                      <th className="p-2 font-medium">Âncora</th>
-                      <th className="p-2 font-medium">URL Destino</th>
-                      <th className="p-2 font-medium">Status</th>
-                      <th className="p-2 font-medium text-right">Preço</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {order.items.map((item) => (
-                      <tr key={item.id} className="border-t">
-                        <td className="p-2">
-                          {item.backlink?.domain || item.backlink?.url || "Site não encontrado"}
-                        </td>
-                        <td className="p-2 text-muted-foreground">
-                          {item.mk_will_choose ? (
-                            <span className="italic">MK Art escolherá</span>
-                          ) : (
-                            item.anchor_text || "-"
-                          )}
-                        </td>
-                        <td className="p-2 text-muted-foreground">
-                          {item.mk_will_choose ? (
-                            <span className="italic">MK Art escolherá</span>
-                          ) : item.target_url ? (
-                            <a
-                              href={item.target_url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-primary hover:underline truncate block max-w-[200px]"
-                            >
-                              {item.target_url}
-                            </a>
-                          ) : (
-                            "-"
-                          )}
-                        </td>
-                        <td className="p-2">{getStatusBadge(item.item_status)}</td>
-                        <td className="p-2 text-right font-medium">
-                          {brl(item.price)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="mt-4 pt-4 border-t flex items-center justify-between">
-                <div className="text-sm text-muted-foreground">
-                  <span>Método: </span>
-                  <span className="font-medium">
-                    {order.payment_method === "pix_whatsapp"
-                      ? "PIX via WhatsApp"
-                      : "Cartão de Crédito"}
-                  </span>
-                </div>
-                <div className="font-semibold text-lg">
-                  Total: {brl(order.total)}
-                </div>
-              </div>
-            </div>
+      {filteredOrders.length === 0 ? (
+        <div className="border rounded-md p-8 bg-card text-center">
+          <Package className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+          <h3 className="text-lg font-medium mb-2">
+            {statusFilter === "todos"
+              ? "Nenhum pedido encontrado"
+              : "Nenhum pedido com este status"}
+          </h3>
+          <p className="text-muted-foreground mb-4">
+            {statusFilter === "todos"
+              ? "Você ainda não fez nenhum pedido."
+              : "Tente mudar o filtro de status."}
+          </p>
+          {statusFilter === "todos" && (
+            <Button asChild>
+              <a href="/comprar-backlinks">Ver backlinks disponíveis</a>
+            </Button>
           )}
         </div>
-      ))}
+      ) : (
+        filteredOrders.map((order) => (
+          <div
+            key={order.id}
+            className="border rounded-lg bg-card overflow-hidden"
+          >
+            {/* Order Header */}
+            <div
+              className="p-4 flex items-center justify-between cursor-pointer hover:bg-muted/50 transition-colors"
+              onClick={() =>
+                setExpandedOrder(expandedOrder === order.id ? null : order.id)
+              }
+            >
+              <div className="flex items-center gap-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Pedido #{order.id.slice(0, 8).toUpperCase()}
+                  </p>
+                  <p className="font-medium">
+                    {new Date(order.created_at).toLocaleDateString("pt-BR", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric",
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4">
+                <div className="text-right">
+                  <p className="text-sm text-muted-foreground">
+                    {order.items.length} {order.items.length === 1 ? "item" : "itens"}
+                  </p>
+                  <p className="font-semibold text-primary">{brl(order.total)}</p>
+                </div>
+                {getStatusBadge(order.status)}
+                {expandedOrder === order.id ? (
+                  <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                ) : (
+                  <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                )}
+              </div>
+            </div>
+
+            {/* Order Details (Expanded) */}
+            {expandedOrder === order.id && (
+              <div className="border-t p-4 bg-muted/20">
+                <h4 className="font-medium mb-3">Itens do Pedido</h4>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-muted/60">
+                      <tr className="text-left">
+                        <th className="p-2 font-medium">Site</th>
+                        <th className="p-2 font-medium">Âncora</th>
+                        <th className="p-2 font-medium">URL Destino</th>
+                        <th className="p-2 font-medium">Status</th>
+                        <th className="p-2 font-medium text-right">Preço</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {order.items.map((item) => (
+                        <tr key={item.id} className="border-t">
+                          <td className="p-2">
+                            {item.backlink?.domain || item.backlink?.url || "Site não encontrado"}
+                          </td>
+                          <td className="p-2 text-muted-foreground">
+                            {item.mk_will_choose ? (
+                              <span className="italic">MK Art escolherá</span>
+                            ) : (
+                              item.anchor_text || "-"
+                            )}
+                          </td>
+                          <td className="p-2 text-muted-foreground">
+                            {item.mk_will_choose ? (
+                              <span className="italic">MK Art escolherá</span>
+                            ) : item.target_url ? (
+                              <a
+                                href={item.target_url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline truncate block max-w-[200px] flex items-center gap-1"
+                              >
+                                {item.target_url.slice(0, 30)}...
+                                <ExternalLink className="h-3 w-3 flex-shrink-0" />
+                              </a>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+                          <td className="p-2">{getStatusBadge(item.item_status)}</td>
+                          <td className="p-2 text-right font-medium">
+                            {brl(item.price)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                  <div className="text-sm text-muted-foreground">
+                    <span>Método: </span>
+                    <span className="font-medium">
+                      {order.payment_method === "pix_whatsapp"
+                        ? "PIX via WhatsApp"
+                        : "Cartão de Crédito"}
+                    </span>
+                  </div>
+                  <div className="font-semibold text-lg">
+                    Total: {brl(order.total)}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   );
 }

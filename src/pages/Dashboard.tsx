@@ -15,60 +15,9 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Heart, UserCircle, Shield, Package } from "lucide-react";
 import { OrdersList } from "@/components/dashboard/OrdersList";
-
-function ProfileSection() {
-  const [email, setEmail] = useState<string | null>(null);
-  const [name, setName] = useState<string | null>(null);
-  const [open, setOpen] = useState(false);
-  const [pwd1, setPwd1] = useState("");
-  const [pwd2, setPwd2] = useState("");
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => {
-      const user = data.user;
-      setEmail(user?.email ?? null);
-      setName((user?.user_metadata as any)?.name ?? null);
-    });
-  }, []);
-
-  const changePassword = async () => {
-    if (pwd1.length < 6 || pwd1 !== pwd2) return;
-    await supabase.auth.updateUser({ password: pwd1 });
-    setOpen(false);
-    setPwd1(""); setPwd2("");
-  };
-
-  return (
-    <div className="border rounded-md p-4 bg-card space-y-4">
-      <div>
-        <p><strong>Nome:</strong> {name ?? "—"}</p>
-        <p><strong>E-mail:</strong> {email ?? "—"}</p>
-      </div>
-      <Dialog open={open} onOpenChange={setOpen}>
-        <DialogTrigger asChild>
-          <Button>Alterar senha</Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Alterar senha</DialogTitle>
-            <DialogDescription>Defina sua nova senha de acesso.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-3">
-            <Input type="password" placeholder="Nova senha" value={pwd1} onChange={(e) => setPwd1(e.target.value)} />
-            <Input type="password" placeholder="Confirmar senha" value={pwd2} onChange={(e) => setPwd2(e.target.value)} />
-          </div>
-          <DialogFooter>
-            <Button onClick={changePassword} disabled={!pwd1 || pwd1 !== pwd2}>Salvar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
-}
+import { ProfileSection } from "@/components/dashboard/ProfileSection";
 
 function FavoritesTable({ userId }: { userId: string }) {
   const [rows, setRows] = useState<any[]>([]);
@@ -150,15 +99,27 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userId) return;
     
-    // Check is_admin from profiles table
+    // Check is_admin from user_roles table (RBAC)
     const checkAdminRole = async () => {
       try {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
           .eq('user_id', userId)
-          .single();
-        setIsAdmin(profile?.is_admin === true);
+          .eq('role', 'admin')
+          .maybeSingle();
+        
+        if (roleData) {
+          setIsAdmin(true);
+        } else {
+          // Fallback to profiles.is_admin for backwards compatibility
+          const { data: profile } = await supabase
+            .from('profiles')
+            .select('is_admin')
+            .eq('user_id', userId)
+            .single();
+          setIsAdmin(profile?.is_admin === true);
+        }
       } catch (error) {
         console.error('Erro ao verificar role de admin:', error);
         setIsAdmin(false);

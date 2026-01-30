@@ -38,6 +38,7 @@ export default function AdminLayout() {
 
   const adminMenuItems = [
     { title: "Pedidos", url: "/admin", icon: ClipboardList },
+    { title: "Clientes", url: "/admin/clientes", icon: Users },
     { title: "Gerenciar Sites", url: "/admin/sites", icon: Settings },
     { title: "Publicações", url: "/admin/publicacoes", icon: PenTool },
     { title: "Blog", url: "/admin/blog", icon: Upload },

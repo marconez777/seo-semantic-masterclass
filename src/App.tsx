@@ -33,6 +33,7 @@ import Dashboard from "./pages/Dashboard";
 
 import AdminLayout from "./layouts/AdminLayout";
 import AdminPedidos from "./pages/admin/AdminPedidos";
+import AdminClientes from "./pages/admin/AdminClientes";
 import AdminSites from "./pages/admin/AdminSites";
 import AdminPublicacoes from "./pages/admin/AdminPublicacoes";
 import AdminBlog from "./pages/admin/AdminBlog";
@@ -95,6 +96,7 @@ const App = () => (
             </RequireRole>
           }>
             <Route index element={<AdminPedidos />} />
+            <Route path="clientes" element={<AdminClientes />} />
             <Route path="sites" element={<AdminSites />} />
             <Route path="publicacoes" element={<AdminPublicacoes />} />
             <Route path="blog" element={<AdminBlog />} />
