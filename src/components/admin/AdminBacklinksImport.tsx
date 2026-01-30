@@ -1,9 +1,10 @@
 import { useMemo, useState } from "react";
 import * as XLSX from "xlsx";
 import { supabase } from "@/integrations/supabase/client";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { Download, Upload } from "lucide-react";
 
 interface ParsedRow {
   url?: string;
@@ -14,6 +15,37 @@ interface ParsedRow {
   traffic?: number | null;
   price?: number | null;
 }
+
+// Template data for download
+const TEMPLATE_DATA = [
+  {
+    "URL": "https://exemplo.com.br",
+    "Nome do Site": "Exemplo Blog",
+    "Categoria": "Tecnologia",
+    "DA": 45,
+    "DR": 52,
+    "Tráfego Mensal": 15000,
+    "Valor": 350.00
+  },
+  {
+    "URL": "https://noticiasagora.com.br",
+    "Nome do Site": "Notícias Agora",
+    "Categoria": "Notícias",
+    "DA": 38,
+    "DR": 41,
+    "Tráfego Mensal": 25000,
+    "Valor": 450.00
+  },
+  {
+    "URL": "https://saudebemestar.com.br",
+    "Nome do Site": "Saúde e Bem Estar",
+    "Categoria": "Saúde",
+    "DA": 55,
+    "DR": 60,
+    "Tráfego Mensal": 50000,
+    "Valor": 600.00
+  }
+];
 
 function normalizeHeader(h: string) {
   return h
@@ -111,6 +143,32 @@ export default function AdminBacklinksImport() {
   const [invalidCategoryRows, setInvalidCategoryRows] = useState<ParsedRow[]>([]);
 
   const preview = useMemo(() => rows.slice(0, 5), [rows]);
+
+  function downloadTemplate() {
+    const ws = XLSX.utils.json_to_sheet(TEMPLATE_DATA);
+    
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 35 }, // URL
+      { wch: 25 }, // Nome do Site
+      { wch: 15 }, // Categoria
+      { wch: 8 },  // DA
+      { wch: 8 },  // DR
+      { wch: 15 }, // Tráfego Mensal
+      { wch: 12 }, // Valor
+    ];
+    
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Sites");
+    
+    // Generate and download
+    XLSX.writeFile(wb, "template-importacao-sites.xlsx");
+    
+    toast({
+      title: "Template baixado!",
+      description: "Preencha a planilha e faça o upload para importar.",
+    });
+  }
 
   async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -245,15 +303,39 @@ async function startImport() {
     <Card className="shadow-sm">
       <CardHeader>
         <CardTitle>Importar Sites (CSV/XLSX)</CardTitle>
+        <CardDescription>
+          Baixe o template, preencha com seus sites e faça o upload para importar em massa.
+        </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
+        {/* Template download section */}
+        <div className="flex flex-col sm:flex-row gap-3 p-4 bg-muted/50 rounded-lg border border-dashed">
+          <div className="flex-1">
+            <h4 className="font-medium text-sm mb-1">Modelo de Planilha</h4>
+            <p className="text-xs text-muted-foreground">
+              Colunas: URL, Nome do Site, Categoria, DA, DR, Tráfego Mensal, Valor
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Categorias válidas: {ALLOWED_CATEGORIES.join(", ")}
+            </p>
+          </div>
+          <Button variant="outline" onClick={downloadTemplate} className="shrink-0">
+            <Download className="h-4 w-4 mr-2" />
+            Baixar Template
+          </Button>
+        </div>
+
+        {/* File upload section */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4">
-          <input
-            type="file"
-            accept=".xlsx,.xls,.csv"
-            onChange={handleFile}
-            className="block"
-          />
+          <div className="flex items-center gap-2">
+            <Upload className="h-4 w-4 text-muted-foreground" />
+            <input
+              type="file"
+              accept=".xlsx,.xls,.csv"
+              onChange={handleFile}
+              className="block text-sm"
+            />
+          </div>
           {fileName && <span className="text-sm text-muted-foreground">{fileName}</span>}
           <div className="ml-auto flex gap-2">
             <Button variant="secondary" onClick={reset} disabled={!rows.length || parsing || importing}>Limpar</Button>
