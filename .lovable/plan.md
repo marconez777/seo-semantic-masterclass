@@ -1,102 +1,126 @@
 
-Objetivo: destravar o login em `/admin/login` (fica em “Verificando…”) e evitar novos travamentos relacionados a autenticação/roles.
 
-## Diagnóstico (por que está travando)
-1) O request de login (senha) está retornando **200 OK** (autenticação funciona).
-2) O travamento acontece logo depois, por dois motivos prováveis (e combináveis):
-   - **Deadlock/Freeze por callback async em `onAuthStateChange`:** o `AdminAuth.tsx` está usando `supabase.auth.onAuthStateChange(async (...) => { await ... })`. Esse padrão pode travar o fluxo interno do SDK (é um problema conhecido e já documentado nas boas práticas: não usar callback async e não fazer chamadas do backend dentro do callback).
-   - **RLS bloqueando a leitura de `user_roles`:** a migration criou políticas em `user_roles` permitindo SELECT apenas para admins (e o check atual tenta fazer `.from('user_roles').select(...)`). Isso gera um “ciclo”: para descobrir se é admin, o app tenta ler `user_roles`, mas ler `user_roles` exige já ser admin.
+## Categoria "Geral" + Trafego Opcional
 
-Resultado típico: UI fica “Verificando…” porque o código fica aguardando uma promise que não resolve corretamente (ou nunca chega a disparar a query seguinte), e o `setLoading(false)` não é atingido.
+### Resumo
+1. Sites importados sem categoria serao automaticamente atribuidos a categoria "Geral"
+2. "Geral" NAO aparecera no grid de categorias publico
+3. Sites com "Geral" aparecerao na listagem "Todas Categorias"
+4. Trafego pode ser importado vazio (fica como `null`)
+5. Na listagem, trafego `0` ou `null` mostrara "-" (traco)
 
-## Mudanças propostas (alto nível)
-A) Padronizar checagem de admin para **RPC `has_role()`** (em vez de SELECT direto em `user_roles`)
-- Isso usa a função `SECURITY DEFINER`, que não depende das permissões de SELECT do usuário na tabela.
-- Também evita expor lógica de roles via query na tabela.
+---
 
-B) Eliminar callbacks async dentro de `onAuthStateChange`
-- Callback deve ser **síncrono** e apenas atualizar estado/acionar side-effects deferidos.
-- Qualquer chamada ao backend (RPC/queries) deve ocorrer fora do callback ou com `setTimeout(..., 0)`.
+### Arquivos a Modificar
 
-C) Garantir que o botão nunca fique preso em “Verificando…”
-- Envolver `handleLogin` em `try/catch/finally` para garantir `setLoading(false)` mesmo em erros inesperados.
-- Mostrar mensagem amigável quando a checagem de role falhar (ex.: erro de rede).
+| Arquivo | Mudanca |
+|---------|---------|
+| `src/components/admin/AdminBacklinksImport.tsx` | Adicionar "Geral" as categorias, atribuir automaticamente quando vazio, atualizar textos de ajuda |
+| `src/components/marketplace/BacklinkTableRow.tsx` | Mostrar "-" quando trafego for `0` ou `null` |
+| `src/pages/ComprarBacklinks.tsx` | Filtrar "Geral" do grid de categorias |
+| `src/pages/ComprarBacklinksCategoria.tsx` | Adicionar "Geral" a lista de categorias permitidas + filtrar do grid |
 
-## Implementação (passo a passo)
+---
 
-### 1) Corrigir `src/pages/admin/AdminAuth.tsx`
-1.1 Criar helper reutilizável no componente:
-- `checkAdminRole(userId: string): Promise<boolean>`
-- Internamente chamar:
-  - `supabase.rpc('has_role', { _user_id: userId, _role: 'admin' })`
-- Tratar erro: se der erro, retornar `false` e setar mensagem amigável.
+### Detalhes Tecnicos
 
-1.2 Ajustar o `useEffect` para evitar callback async:
-- Substituir:
-  - `supabase.auth.onAuthStateChange(async (...) => { await checkAdminRole(...) })`
-- Por:
-  - `supabase.auth.onAuthStateChange((_, session) => {`
-    - se `session?.user`, disparar `setTimeout(() => redirectIfAdmin(session.user.id), 0)`
-  - `})`
-- `redirectIfAdmin` faz `await checkAdminRole()` e navega se for admin.
+#### 1. AdminBacklinksImport.tsx
 
-1.3 Ajustar `handleLogin`:
-- `setLoading(true)` no início
-- `try`:
-  - `signInWithPassword`
-  - se ok, chamar `checkAdminRole(userId)` via RPC
-  - se admin: toast + navigate
-  - se não admin: erro + signOut
-- `catch`: setError com texto amigável
-- `finally`: `setLoading(false)`
+**Adicionar "Geral" ao array de categorias:**
+```typescript
+const ALLOWED_CATEGORIES = [
+  "Geral",  // <-- Nova categoria (sera oculta no frontend)
+  "Noticias",
+  // ... resto
+] as const;
+```
 
-Benefício: remove deadlock e remove dependência de SELECT em `user_roles`.
+**Atribuir automaticamente quando vazio:**
+```typescript
+// Na funcao startImport, ajustar a logica:
+const canonical = toCanonicalCategory(categoryRaw || "") || "Geral";
+// Assim, se categoryRaw estiver vazio, usa "Geral"
+```
 
-### 2) Corrigir `src/components/auth/RequireRole.tsx` (prevenir travas ao acessar `/admin`)
-Mesmo que o login funcione, ao entrar em `/admin` o guard pode travar por padrão semelhante.
+**Atualizar texto de ajuda:**
+```
+"Colunas: URL, Categoria (opcional), DA, Trafego Mensal (opcional), Valor"
+"Se categoria estiver vazia, sera atribuida como 'Geral'"
+```
 
-2.1 Remover `onAuthStateChange(checkAuth)` onde `checkAuth` é async.
-- Fazer `onAuthStateChange((event, session) => { setUser(session?.user ?? null); setLoading(false); /* nada async aqui */ })`
+#### 2. BacklinkTableRow.tsx
 
-2.2 Mover a checagem de role para um `useEffect` separado:
-- Quando `user` mudar:
-  - se role requerido é `admin`, chamar `supabase.rpc('has_role', ...)`
-  - setar `hasRole`
-- Também remover fallback para `profiles.is_admin` (vocês já migraram para RBAC); manter apenas RBAC para consistência e segurança.
+**Linha 112 - Ajustar exibicao de trafego:**
+```typescript
+// De:
+<td className="p-4">{item.traffic?.toLocaleString('pt-BR') ?? '-'}</td>
 
-2.3 (Opcional, mas recomendado) Evitar `console.error` com detalhes sensíveis em produção:
-- Trocar por mensagens mais neutras ou usar logs apenas em dev.
+// Para:
+<td className="p-4">{item.traffic ? item.traffic.toLocaleString('pt-BR') : '-'}</td>
+```
 
-### 3) Validação rápida pós-correção (checklist)
-3.1 Login admin:
-- Acessar `/admin/login`, entrar com `contato@mkart.com.br`, deve redirecionar para `/admin` rapidamente.
-- Se senha inválida, deve mostrar erro e reabilitar botão (sem travar).
+Isso faz com que `0`, `null` e `undefined` mostrem "-".
 
-3.2 Acesso direto:
-- Se já estiver logado e acessar `/admin/login`, deve redirecionar automaticamente para `/admin`.
+#### 3. ComprarBacklinks.tsx
 
-3.3 Usuário não-admin:
-- Login com usuário comum deve:
-  - autenticar,
-  - falhar na checagem de role,
-  - mostrar “Acesso negado…”,
-  - e fazer signOut.
+**Filtrar "Geral" do grid de categorias (linha ~366):**
+```typescript
+// De:
+{categories.slice(0,16).map((cat) => {
 
-3.4 Guard de rota:
-- Acessar `/admin` sem sessão deve redirecionar para `/auth` (ou `/admin/login`, dependendo do fluxo desejado).
-- Acessar `/admin` com usuário não-admin deve ir para `/403`.
+// Para:
+{categories.filter(c => c !== 'Geral').slice(0,16).map((cat) => {
+```
 
-## Observações técnicas (importante)
-- A policy atual em `user_roles` (“Admins can view user_roles”) é compatível com essa abordagem, porque a checagem de admin será via `has_role()` e não precisa SELECT na tabela.
-- O principal bug do travamento é o uso de callback async dentro de `onAuthStateChange` somado ao uso de query direta na tabela com RLS restritivo.
+#### 4. ComprarBacklinksCategoria.tsx
 
-## Escopo (o que vou mudar)
-- `src/pages/admin/AdminAuth.tsx`: refatorar checagem de admin para RPC + remover callback async + robustez no loading.
-- `src/components/auth/RequireRole.tsx`: mesma refatoração para evitar travas ao entrar no painel.
-- (Sem mudanças de banco necessárias para destravar o login; aproveitamos a função `has_role` já criada.)
+**Adicionar "Geral" a lista de categorias permitidas:**
+```typescript
+const ALLOWED_CATEGORIES = [
+  "Geral",  // <-- Adicionar aqui
+  "Noticias",
+  // ... resto
+] as const;
+```
 
-## Critérios de aceite
-- Botão “Entrar no Painel Admin” nunca fica preso em “Verificando…”.
-- Login admin redireciona para `/admin`.
-- Não-admin não consegue entrar no painel e recebe feedback adequado.
-- Nenhum fluxo depende de SELECT em `user_roles` para descobrir role do usuário.
+**Filtrar "Geral" do grid de categorias na sidebar (se existir).**
+
+---
+
+### Resultado Visual
+
+**Grid de categorias (publico):**
+```
++-------------+-------------+-------------+-------------+
+| Noticias    | Negocios    | Saude       | Educacao    |
++-------------+-------------+-------------+-------------+
+| Tecnologia  | Financas    | Imoveis     | Moda        |
++-------------+-------------+-------------+-------------+
+(Geral NAO aparece aqui)
+```
+
+**Listagem "Todas Categorias":**
+```
+| SITE           | DR | DA | TRAFEGO   | CATEGORIA  | VALOR   |
+|----------------|----|----|-----------|------------|---------|
+| exemplo.com    | 45 | 38 | 15.000    | Tecnologia | R$ 350  |
+| siteimportado  | 30 | 25 | -         | Geral      | R$ 200  |  <-- trafego vazio
+| outrosite.com  | 55 | 42 | 50.000    | Saude      | R$ 600  |
+```
+
+**Importacao:**
+```
+Planilha:
+| URL                    | Categoria | DA | Trafego | Valor |
+|------------------------|-----------|----| --------|-------|
+| site1.com              |           | 30 |         | 200   |  <- sera "Geral", trafego null
+| site2.com              | Saude     | 45 | 15000   | 350   |  <- normal
+```
+
+---
+
+### Observacoes
+- Nenhuma alteracao de banco de dados necessaria (colunas ja sao nullable)
+- A categoria "Geral" pode ser alterada posteriormente no admin se desejado
+- Sites com "Geral" aparecem normalmente na busca e listagem principal
+
