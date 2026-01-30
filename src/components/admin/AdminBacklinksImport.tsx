@@ -22,7 +22,6 @@ const TEMPLATE_DATA = [
     "URL": "https://exemplo.com.br",
     "Categoria": "Tecnologia",
     "DA": 45,
-    "DR": 52,
     "Tráfego Mensal": 15000,
     "Valor": 350.00
   },
@@ -30,7 +29,6 @@ const TEMPLATE_DATA = [
     "URL": "https://noticiasagora.com.br",
     "Categoria": "Notícias",
     "DA": 38,
-    "DR": 41,
     "Tráfego Mensal": 25000,
     "Valor": 450.00
   },
@@ -38,7 +36,6 @@ const TEMPLATE_DATA = [
     "URL": "https://saudebemestar.com.br",
     "Categoria": "Saúde",
     "DA": 55,
-    "DR": 60,
     "Tráfego Mensal": 50000,
     "Valor": 600.00
   }
@@ -149,7 +146,6 @@ export default function AdminBacklinksImport() {
       { wch: 35 }, // URL
       { wch: 15 }, // Categoria
       { wch: 8 },  // DA
-      { wch: 8 },  // DR
       { wch: 15 }, // Tráfego Mensal
       { wch: 12 }, // Valor
     ];
@@ -309,7 +305,7 @@ async function startImport() {
           <div className="flex-1">
             <h4 className="font-medium text-sm mb-1">Modelo de Planilha</h4>
             <p className="text-xs text-muted-foreground">
-              Colunas: URL, Categoria, DA, DR, Tráfego Mensal, Valor (domínio é extraído automaticamente)
+              Colunas: URL, Categoria, DA, Tráfego Mensal, Valor
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Categorias válidas: {ALLOWED_CATEGORIES.join(", ")}
