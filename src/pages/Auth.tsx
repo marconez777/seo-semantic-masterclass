@@ -51,6 +51,24 @@ const Auth = () => {
   }, [navigate, redirectTo]);
 
   const handleSignup = async () => {
+    // Validação obrigatória
+    if (!name.trim()) {
+      setError("Nome é obrigatório");
+      return;
+    }
+    if (!phone.trim()) {
+      setError("WhatsApp é obrigatório para receber o PIX");
+      return;
+    }
+    if (!email.trim()) {
+      setError("E-mail é obrigatório");
+      return;
+    }
+    if (password.length < 6) {
+      setError("Senha deve ter no mínimo 6 caracteres");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(null);
@@ -171,8 +189,9 @@ const Auth = () => {
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Seu nome" />
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="phone">Telefone</Label>
-                <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 99999-9999" />
+                <Label htmlFor="phone">WhatsApp *</Label>
+                <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 99999-9999" required />
+                <span className="text-xs text-muted-foreground">Necessário para envio do PIX</span>
               </div>
             </div>
           )}
