@@ -1,135 +1,233 @@
 
 
-## Plano de Padronizacao das Categorias
+# Plano de Correção do Painel Administrativo
 
-### Contexto
+## Resumo do Problema
 
-O site possui **17 categorias padrao** definidas no menu do Header, mas as paginas de categoria dependem dinamicamente dos dados do banco de dados. Isso causa problemas como:
-
-1. Categorias com nomes errados aparecendo (ex: "Justica" ao inves de "Direito")
-2. Categorias faltando (ex: "Pets", "Alimentacao") quando nao ha backlinks cadastrados
-3. Icones genericos (Folder) aparecendo para categorias com nomes diferentes do esperado
+O painel administrativo possui incompatibilidades entre os componentes frontend e a estrutura do banco de dados. Isso impede a importacao de backlinks, criacao de posts e o acesso ao painel admin.
 
 ---
 
-### Solucao em 3 Fases
+## 1. Corrigir AdminBacklinksImport.tsx
 
-#### Fase 1: Criar Lista Fixa de Categorias
+**Problema**: Os campos usados no componente nao existem na tabela `backlinks`.
 
-Adicionar uma constante em `src/lib/category-icons.ts` com as 17 categorias padrao:
+**Mapeamento necessario**:
+| Frontend (atual) | Banco de dados (correto) |
+|------------------|--------------------------|
+| `site_url` | `url` |
+| `site_name` | `domain` |
+| `price_cents` | `price` (em reais, nao centavos) |
+| `is_active: true` | `status: 'ativo'` |
 
+**Alteracoes**:
+- Atualizar interface `ParsedRow` para usar `url`, `domain`, `price`
+- Atualizar mapeamento no payload de insert
+- Converter preco: deixar em reais (dividir centavos por 100)
+- Usar `status: 'ativo'` ao inves de `is_active: true`
+
+---
+
+## 2. Corrigir AdminBacklinksManager.tsx
+
+**Problema**: A interface `Backlink` e as queries usam campos inexistentes.
+
+**Mapeamento necessario**:
+| Frontend (atual) | Banco de dados (correto) |
+|------------------|--------------------------|
+| `site_url` | `url` |
+| `site_name` | `domain` |
+| `price_cents` | `price` |
+| `is_active` | `status` |
+
+**Alteracoes**:
+- Atualizar interface `Backlink` com os campos corretos
+- Atualizar a query para usar `site_url → url` etc
+- Atualizar a exibicao na tabela
+- Ajustar formatacao do preco (ja esta em reais)
+- Exibir `status` ao inves de `is_active`
+
+---
+
+## 3. Corrigir AdminBlogNew.tsx e AdminBlogPublisher.tsx
+
+**Problema**: Os campos usados no insert nao existem na tabela `posts`.
+
+**Mapeamento necessario**:
+| Frontend (atual) | Banco de dados (correto) |
+|------------------|--------------------------|
+| `content_md` | `content` |
+| `featured_image_url` | `cover_image` |
+| `seo_title` | Nao existe (usar `title`) |
+| `seo_description` | `excerpt` |
+
+**Alteracoes**:
+- Substituir `content_md` por `content`
+- Substituir `featured_image_url` por `cover_image`
+- Remover `seo_title` (nao existe na tabela)
+- Usar `excerpt` para descricao SEO
+- Adicionar `published_at: new Date().toISOString()` quando publicado
+
+---
+
+## 4. Corrigir RequireRole.tsx
+
+**Problema**: O componente busca `profiles.role` que nao existe. O campo correto e `is_admin` (boolean).
+
+**Alteracoes**:
+- Remover busca por `role` no JWT/metadata
+- Consultar `profiles.is_admin` ao inves de `profiles.role`
+- Verificar se `is_admin === true` para role admin
+
+---
+
+## 5. Corrigir AdminAuth.tsx
+
+**Problema**: Tambem busca `profiles.role` que nao existe.
+
+**Alteracoes**:
+- Mudar `.select('role')` para `.select('is_admin')`
+- Mudar `.eq('id', ...)` para `.eq('user_id', ...)` (campo correto)
+- Verificar `profile?.is_admin === true`
+
+---
+
+## 6. Corrigir AdminBlogNew.tsx - Verificacao de Admin
+
+**Problema**: Usa RPC `is_admin` que nao existe no banco.
+
+**Alteracoes**:
+- Remover chamada `supabase.rpc('is_admin', ...)`
+- Consultar `profiles.is_admin` diretamente
+- Usar `.eq('user_id', userId)` ao inves de `.eq('id', userId)`
+
+---
+
+## 7. Corrigir get-pii-data Edge Function
+
+**Problema**: Depende de RPC `get_masked_pii_secure` que nao existe.
+
+**Opcao escolhida**: Simplificar a Edge Function para retornar dados diretamente sem a RPC, ja que o admin ja tem acesso via service role key.
+
+**Alteracoes**:
+- Remover chamada `supabase.rpc('get_masked_pii_secure', ...)`
+- Consultar dados diretamente via Supabase client com service role
+- Manter validacao de admin no inicio
+- Corrigir query para usar `.eq('user_id', ...)` na verificacao de admin
+
+---
+
+## 8. Criar Admin Inicial (Migracao SQL)
+
+**Problema**: O banco esta vazio, nenhum usuario tem `is_admin = true`.
+
+**Solucao**: Criar uma migracao que adiciona um trigger para auto-criar perfil e uma funcao para promover usuarios a admin.
+
+```sql
+-- Funcao para promover usuario a admin por email
+CREATE OR REPLACE FUNCTION promote_to_admin(user_email TEXT)
+RETURNS VOID AS $$
+DECLARE
+  target_user_id UUID;
+BEGIN
+  SELECT id INTO target_user_id FROM auth.users WHERE email = user_email;
+  IF target_user_id IS NULL THEN
+    RAISE EXCEPTION 'Usuario nao encontrado';
+  END IF;
+  
+  INSERT INTO public.profiles (user_id, email, is_admin)
+  VALUES (target_user_id, user_email, true)
+  ON CONFLICT (user_id) 
+  DO UPDATE SET is_admin = true;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+```
+
+**Apos a migracao**: Voce precisara:
+1. Criar uma conta via /auth (signup)
+2. Executar no SQL Editor do Lovable Cloud: `SELECT promote_to_admin('seu@email.com');`
+
+---
+
+## Ordem de Implementacao
+
+1. **Migracao SQL** - Criar funcao para promover admin
+2. **RequireRole.tsx** - Corrigir verificacao de admin
+3. **AdminAuth.tsx** - Corrigir login admin
+4. **AdminBacklinksImport.tsx** - Corrigir mapeamento de campos
+5. **AdminBacklinksManager.tsx** - Corrigir interface e queries
+6. **AdminBlogNew.tsx** - Corrigir campos e verificacao admin
+7. **AdminBlogPublisher.tsx** - Corrigir campos do post
+8. **get-pii-data Edge Function** - Simplificar sem RPC
+
+---
+
+## Resumo das Alteracoes
+
+| Arquivo | Tipo de Alteracao |
+|---------|-------------------|
+| Migracao SQL | Criar funcao `promote_to_admin` |
+| RequireRole.tsx | Usar `is_admin` boolean |
+| AdminAuth.tsx | Usar `is_admin` e `user_id` |
+| AdminBacklinksImport.tsx | Mapear campos corretamente |
+| AdminBacklinksManager.tsx | Mapear campos corretamente |
+| AdminBlogNew.tsx | Mapear campos e verificacao |
+| AdminBlogPublisher.tsx | Mapear campos |
+| get-pii-data/index.ts | Remover RPC inexistente |
+
+---
+
+## Secao Tecnica - Detalhes de Implementacao
+
+### Tabela backlinks (estrutura real)
 ```typescript
-export const FIXED_CATEGORIES = [
-  "Noticias",
-  "Negocios",
-  "Saude",
-  "Educacao",
-  "Tecnologia",
-  "Financas",
-  "Imoveis",
-  "Moda",
-  "Turismo",
-  "Alimentacao",
-  "Pets",
-  "Automotivo",
-  "Esportes",
-  "Entretenimento",
-  "Marketing",
-  "Direito",
-  "Maternidade"
-] as const;
+{
+  id: string
+  url: string          // antes: site_url
+  domain: string       // antes: site_name  
+  category: string
+  price: number        // antes: price_cents (agora em reais)
+  da: number
+  dr: number
+  traffic: number
+  status: string       // antes: is_active (boolean)
+  tipo: string
+  observacoes: string
+  created_at: string
+  updated_at: string
+}
 ```
 
-#### Fase 2: Atualizar Mapeamento de Icones
-
-Adicionar aliases no `getCategoryIcon` para nomes alternativos que podem existir no banco:
-
+### Tabela posts (estrutura real)
 ```typescript
-case "Automoveis":
-case "Automotivo":
-  return Car;
-case "Justica":
-case "Direito":
-  return Scale;
-case "Entreterimento":
-case "Entretenimento":
-  return Clapperboard;
-case "Imoveis":
-case "Imoveis":
-  return Home;
+{
+  id: string
+  title: string
+  slug: string
+  content: string      // antes: content_md
+  cover_image: string  // antes: featured_image_url
+  excerpt: string      // usar para SEO description
+  category: string
+  tags: string[]
+  published: boolean
+  published_at: string
+  user_id: string
+  created_at: string
+  updated_at: string
+}
 ```
 
-#### Fase 3: Padronizar Grid de Categorias
-
-Alterar todas as paginas para usar a lista fixa ao inves de depender do banco.
-
-**De (dinamico - problematico):**
-```jsx
-{categories.slice(0,16).map((cat) => ...)}
-```
-
-**Para (fixo - consistente):**
-```jsx
-import { FIXED_CATEGORIES } from "@/lib/category-icons";
-...
-{FIXED_CATEGORIES.map((cat) => ...)}
-```
-
----
-
-### Arquivos a Modificar
-
-| Arquivo | Alteracao |
-|---------|-----------|
-| `src/lib/category-icons.ts` | Adicionar `FIXED_CATEGORIES` e aliases de icones |
-| `src/pages/ComprarBacklinks.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksDireito.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksTecnologia.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksFinancas.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksModa.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksNoticias.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksAutomoveis.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksEducacao.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksPets.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksEsportes.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksEntretenimento.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksMarketing.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksImoveis.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksMaternidade.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksNegocios.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksSaude.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksTurismo.tsx` | Usar `FIXED_CATEGORIES` |
-| `src/pages/ComprarBacklinksAlimentacao.tsx` | Usar `FIXED_CATEGORIES` |
-
-**Total: 19 arquivos**
-
----
-
-### Resultado Esperado
-
-Apos a implementacao:
-
-- Todas as 17 categorias aparecerao em todas as paginas
-- Todas as categorias terao o icone correto (nenhum Folder generico)
-- "Justica" nao aparecera mais (nao esta na lista fixa)
-- "Pets" e "Alimentacao" aparecerao mesmo sem backlinks
-- Ordem e visual consistentes com o menu superior
-
----
-
-### Detalhes Tecnicos
-
-O grid atual depende do `useMemo` que extrai categorias unicas dos backlinks:
-
+### Tabela profiles (estrutura real)
 ```typescript
-const categories = useMemo(() => {
-  const set = new Set<string>();
-  (backlinks ?? []).forEach((b) => {
-    if (b.category) set.add(String(b.category));
-  });
-  return Array.from(set).sort();
-}, [backlinks]);
+{
+  id: string
+  user_id: string      // referencia auth.users.id
+  email: string
+  full_name: string
+  avatar_url: string
+  is_admin: boolean    // antes: role (enum)
+  created_at: string
+  updated_at: string
+}
 ```
-
-Este codigo sera mantido apenas para filtragem de dados, mas a renderizacao do grid usara a lista fixa.
 
