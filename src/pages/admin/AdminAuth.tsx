@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, ShieldCheck, AlertTriangle } from "lucide-react";
+import { ShieldCheck, AlertTriangle } from "lucide-react";
 
 const AdminAuth = () => {
   const [loading, setLoading] = useState(false);
@@ -21,14 +21,14 @@ const AdminAuth = () => {
     // Check if user is already logged in and redirect to admin panel
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
       if (session?.user) {
-        // Check if user is admin
+        // Check if user is admin using is_admin field
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
-          .eq('id', session.user.id)
+          .select('is_admin')
+          .eq('user_id', session.user.id)
           .single();
 
-        if (profile?.role === 'admin') {
+        if (profile?.is_admin === true) {
           navigate('/admin', { replace: true });
         } else {
           setError('Acesso negado. Você não tem permissão de administrador.');
@@ -40,11 +40,11 @@ const AdminAuth = () => {
       if (data.session?.user) {
         const { data: profile } = await supabase
           .from('profiles')
-          .select('role')
-          .eq('id', data.session.user.id)
+          .select('is_admin')
+          .eq('user_id', data.session.user.id)
           .single();
 
-        if (profile?.role === 'admin') {
+        if (profile?.is_admin === true) {
           navigate('/admin', { replace: true });
         } else {
           setError('Acesso negado. Você não tem permissão de administrador.');
@@ -71,16 +71,16 @@ const AdminAuth = () => {
     }
 
     if (data.user) {
-      // Check if user is admin
+      // Check if user is admin using is_admin field
       const { data: profile } = await supabase
         .from('profiles')
-        .select('role')
-        .eq('id', data.user.id)
+        .select('is_admin')
+        .eq('user_id', data.user.id)
         .single();
 
       setLoading(false);
 
-      if (profile?.role === 'admin') {
+      if (profile?.is_admin === true) {
         toast({
           title: "Login realizado!",
           description: "Bem-vindo ao painel administrativo.",

@@ -7,18 +7,18 @@ import { toast } from "@/hooks/use-toast";
 
 interface Backlink {
   id: string;
-  created_at: string;
-  updated_at: string;
-  site_name: string;
-  site_url: string;
-  category: string;
-  price_cents: number;
+  created_at: string | null;
+  updated_at: string | null;
+  domain: string | null;
+  url: string;
+  category: string | null;
+  price: number | null;
   dr: number | null;
   da: number | null;
   traffic: number | null;
-  is_active: boolean;
-  requirements: string[] | null;
-  link_type: string | null;
+  status: string | null;
+  tipo: string | null;
+  observacoes: string | null;
 }
 
 export default function AdminBacklinksManager() {
@@ -47,7 +47,7 @@ export default function AdminBacklinksManager() {
         query = supabase
           .from("backlinks")
           .select("*")
-          .or(`site_name.ilike.%${term}%,site_url.ilike.%${term}%`)
+          .or(`domain.ilike.%${term}%,url.ilike.%${term}%`)
           .order("created_at", { ascending: false })
           .limit(200);
       }
@@ -124,7 +124,7 @@ export default function AdminBacklinksManager() {
           <Input
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar site (nome ou URL)…"
+            placeholder="Buscar site (domínio ou URL)…"
             className="w-72"
           />
           <Button variant="secondary" onClick={() => fetchRows(debouncedQ)} disabled={loading}>
@@ -142,7 +142,7 @@ export default function AdminBacklinksManager() {
         <table className="w-full text-sm">
           <thead className="bg-accent/40">
             <tr className="text-left">
-              <th className="p-3">Nome</th>
+              <th className="p-3">Domínio</th>
               <th className="p-3">URL</th>
               <th className="p-3">Categoria</th>
               <th className="p-3">DR/DA</th>
@@ -168,28 +168,30 @@ export default function AdminBacklinksManager() {
             ) : (
               rows.map((b) => (
                 <tr key={b.id} className="border-t align-top">
-                  <td className="p-3 font-medium">{b.site_name}</td>
+                  <td className="p-3 font-medium">{b.domain ?? "—"}</td>
                   <td className="p-3">
                     <a
-                      href={b.site_url}
+                      href={b.url}
                       className="text-primary hover:underline break-all"
                       target="_blank"
                       rel="noopener noreferrer"
                     >
-                      {b.site_url}
+                      {b.url}
                     </a>
                   </td>
-                  <td className="p-3">{b.category}</td>
+                  <td className="p-3">{b.category ?? "—"}</td>
                   <td className="p-3">{[b.dr ?? "—", b.da ?? "—"].join("/")}</td>
                   <td className="p-3">{b.traffic?.toLocaleString("pt-BR") ?? "—"}</td>
                   <td className="p-3">
-                    {(b.price_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}
+                    {b.price != null
+                      ? b.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
+                      : "—"}
                   </td>
                   <td className="p-3">
-                    {b.is_active ? (
+                    {b.status === "ativo" ? (
                       <Badge className="bg-green-600 text-white hover:bg-green-600">Ativo</Badge>
                     ) : (
-                      <Badge variant="outline">Inativo</Badge>
+                      <Badge variant="outline">{b.status ?? "Inativo"}</Badge>
                     )}
                   </td>
                   <td className="p-3">

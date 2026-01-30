@@ -6,13 +6,13 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 
 interface ParsedRow {
-  site_url?: string;
-  site_name?: string;
+  url?: string;
+  domain?: string;
   category?: string;
   da?: number | null;
   dr?: number | null;
   traffic?: number | null;
-  price_cents?: number | null;
+  price?: number | null;
 }
 
 function normalizeHeader(h: string) {
@@ -64,7 +64,7 @@ function toCanonicalCategory(cat?: string): string | undefined {
   return found;
 }
 
-function parseMoneyToCents(value: any): number | null {
+function parseMoneyToReais(value: any): number | null {
   if (value == null) return null;
   let s = String(value).trim();
   if (!s) return null;
@@ -78,7 +78,7 @@ function parseMoneyToCents(value: any): number | null {
   }
   const num = Number.parseFloat(s);
   if (Number.isNaN(num)) return null;
-  return Math.round(num * 100);
+  return num; // Return in reais, not cents
 }
 
 function toNumber(val: any): number | null {
@@ -135,25 +135,25 @@ export default function AdminBacklinksImport() {
         }
 
         // Possible headers in PT/EN
-        const siteUrl = mapped["site url"] ?? mapped["url"] ?? mapped["site"] ?? mapped["dominio"] ?? mapped["dominio/host"] ?? mapped["domain"] ?? "";
-        const siteName = mapped["site name"] ?? mapped["nome"] ?? mapped["nome do site"] ?? mapped["site"] ?? "";
+        const urlValue = mapped["site url"] ?? mapped["url"] ?? mapped["site"] ?? mapped["dominio"] ?? mapped["dominio/host"] ?? mapped["domain"] ?? "";
+        const domainValue = mapped["site name"] ?? mapped["nome"] ?? mapped["nome do site"] ?? mapped["site"] ?? "";
         const category = mapped["categoria"] ?? mapped["category"] ?? "";
         const da = toNumber(mapped["da"] ?? mapped["domain authority"]);
         const dr = toNumber(mapped["dr"] ?? mapped["domain rating"]);
         const traffic = toNumber(mapped["trafego"] ?? mapped["trafego mensal"] ?? mapped["tráfego"] ?? mapped["tráfego mensal"] ?? mapped["traffic"]);
-        const price_cents = parseMoneyToCents(mapped["valor"] ?? mapped["preco"] ?? mapped["preço"] ?? mapped["price"] ?? mapped["value"]);
+        const price = parseMoneyToReais(mapped["valor"] ?? mapped["preco"] ?? mapped["preço"] ?? mapped["price"] ?? mapped["value"]);
 
-        const urlStr = String(siteUrl || "").trim();
-        const nameStr = String(siteName || "").trim();
+        const urlStr = String(urlValue || "").trim();
+        const domainStr = String(domainValue || "").trim();
 
         return {
-          site_url: urlStr || undefined,
-          site_name: nameStr || extractHost(urlStr) || undefined,
+          url: urlStr || undefined,
+          domain: domainStr || extractHost(urlStr) || undefined,
           category: String(category || "").trim() || undefined,
           da,
           dr,
           traffic,
-          price_cents,
+          price,
         } as ParsedRow;
       });
 
@@ -182,28 +182,28 @@ async function startImport() {
     // Filtra e prepara; ignora categorias fora do padrão
     const payload = chunk
       .map((r) => {
-        const site_url = r.site_url?.trim();
-        const site_name = r.site_name?.trim() || extractHost(site_url);
+        const url = r.url?.trim();
+        const domain = r.domain?.trim() || extractHost(url);
         const categoryRaw = r.category?.trim();
         const canonical = toCanonicalCategory(categoryRaw || "");
-        const price_cents = r.price_cents ?? null;
+        const price = r.price ?? null;
         const da = r.da ?? null;
         const dr = r.dr ?? null;
         const traffic = r.traffic ?? null;
-        if (!site_url && !site_name) return null;
+        if (!url && !domain) return null;
         if (!canonical) {
           invalids.push(r);
           return null;
         }
         return {
-          site_url: site_url || null,
-          site_name: site_name || null,
+          url: url || null,
+          domain: domain || null,
           category: canonical,
-          price_cents,
+          price,
           da,
           dr,
           traffic,
-          is_active: true,
+          status: 'ativo',
         };
       })
       .filter(Boolean) as any[];
@@ -272,13 +272,13 @@ async function startImport() {
             <table className="w-full text-xs">
               <thead className="bg-accent/40">
                 <tr className="text-left">
-                  <th className="p-2">Site URL</th>
-                  <th className="p-2">Site Nome</th>
+                  <th className="p-2">URL</th>
+                  <th className="p-2">Domínio</th>
                   <th className="p-2">Categoria</th>
                   <th className="p-2">DA</th>
                   <th className="p-2">DR</th>
                   <th className="p-2">Tráfego</th>
-                  <th className="p-2">Valor (centavos)</th>
+                  <th className="p-2">Valor (R$)</th>
                 </tr>
               </thead>
               <tbody>
@@ -286,8 +286,8 @@ async function startImport() {
                   const invalid = !isValidCategory(r.category);
                   return (
                     <tr key={idx} className={`border-t ${invalid ? 'bg-destructive/10' : ''}`}>
-                      <td className="p-2">{r.site_url || "—"}</td>
-                      <td className="p-2">{r.site_name || (r.site_url ? extractHost(r.site_url) : "—")}</td>
+                      <td className="p-2">{r.url || "—"}</td>
+                      <td className="p-2">{r.domain || (r.url ? extractHost(r.url) : "—")}</td>
                       <td className="p-2">
                         {r.category || "—"}
                         {invalid && <span className="ml-2 text-[10px] text-destructive font-semibold">categoria inválida</span>}
@@ -295,7 +295,7 @@ async function startImport() {
                       <td className="p-2">{r.da ?? "—"}</td>
                       <td className="p-2">{r.dr ?? "—"}</td>
                       <td className="p-2">{r.traffic ?? "—"}</td>
-                      <td className="p-2">{r.price_cents ?? "—"}</td>
+                      <td className="p-2">{r.price != null ? r.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—"}</td>
                     </tr>
                   );
                 })}
@@ -312,7 +312,7 @@ async function startImport() {
             <ul className="list-disc pl-5 text-sm">
               {invalidCategoryRows.slice(0, 50).map((r, i) => (
                 <li key={i}>
-                  {(r.site_name || r.site_url || '—')} — categoria: "{r.category || '—'}"
+                  {(r.domain || r.url || '—')} — categoria: "{r.category || '—'}"
                 </li>
               ))}
             </ul>

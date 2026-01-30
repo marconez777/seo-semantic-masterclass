@@ -26,7 +26,6 @@ export default function AdminBlogNew() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [seoTitle, setSeoTitle] = useState("");
   const [seoDesc, setSeoDesc] = useState("");
   const [slug, setSlug] = useState("");
   const [featuredUrl, setFeaturedUrl] = useState<string | null>(null);
@@ -53,8 +52,13 @@ export default function AdminBlogNew() {
   useEffect(() => {
     if (!userId) return;
     (async () => {
-      const { data } = await supabase.rpc('is_admin', { uid: userId });
-      setIsAdmin(!!data);
+      // Check is_admin from profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('user_id', userId)
+        .single();
+      setIsAdmin(profile?.is_admin ?? false);
     })();
   }, [userId]);
 
@@ -128,7 +132,6 @@ export default function AdminBlogNew() {
   const resetForm = () => {
     setTitle("");
     setContent("");
-    setSeoTitle("");
     setSeoDesc("");
     setSlug("");
     setFeaturedUrl(null);
@@ -148,12 +151,12 @@ export default function AdminBlogNew() {
       const { error } = await supabase.from('posts').insert({
         user_id: userId,
         title: title.trim(),
-        content_md: content,
-        featured_image_url: featuredUrl,
-        seo_title: seoTitle || title.trim(),
-        seo_description: seoDesc || undefined,
+        content: content,
+        cover_image: featuredUrl,
+        excerpt: seoDesc || undefined,
         slug: slugify(slug),
         published: true,
+        published_at: new Date().toISOString(),
       });
       if (error) throw error;
       toast({ title: "Post publicado", description: "Seu post foi salvo com sucesso." });
@@ -226,15 +229,11 @@ export default function AdminBlogNew() {
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm font-medium">Título SEO</label>
-            <Input value={seoTitle} onChange={(e) => setSeoTitle(e.target.value)} placeholder="Até ~60 caracteres" />
-          </div>
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">Descrição SEO</label>
+            <label className="text-sm font-medium">Descrição SEO (Excerpt)</label>
             <Textarea value={seoDesc} onChange={(e) => setSeoDesc(e.target.value)} rows={3} placeholder="Até ~160 caracteres" />
           </div>
           <div className="grid gap-2">
-            <label className="text-sm font-medium">URL SEO</label>
+            <label className="text-sm font-medium">URL SEO (Slug)</label>
             <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={autoSlug || "minha-url-seo"} />
             <p className="text-xs text-muted-foreground">URL final: {window.location.origin}/blog/{slugify(slug || autoSlug)}</p>
           </div>

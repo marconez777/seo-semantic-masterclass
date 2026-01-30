@@ -9,7 +9,7 @@ interface RequireRoleProps {
 
 export function RequireRole({ role, children }: RequireRoleProps) {
   const [user, setUser] = useState<any>(null);
-  const [userRole, setUserRole] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
@@ -24,23 +24,15 @@ export function RequireRole({ role, children }: RequireRoleProps) {
 
         setUser(session.user);
 
-        // Check role from JWT first, then fallback to database
-        const jwtRole = session.user.app_metadata?.role || session.user.user_metadata?.role;
-        
-        if (jwtRole) {
-          setUserRole(jwtRole);
-          setLoading(false);
-        } else {
-          // Fallback: check database
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('role')
-            .eq('id', session.user.id)
-            .single();
+        // Check is_admin from profiles table
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('user_id', session.user.id)
+          .single();
 
-          setUserRole(profile?.role || 'user');
-          setLoading(false);
-        }
+        setIsAdmin(profile?.is_admin ?? false);
+        setLoading(false);
       } catch (error) {
         console.error('Error checking auth:', error);
         setLoading(false);
@@ -65,7 +57,7 @@ export function RequireRole({ role, children }: RequireRoleProps) {
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
   }
 
-  if (role === 'admin' && userRole !== 'admin') {
+  if (role === 'admin' && !isAdmin) {
     return <Navigate to="/403" replace />;
   }
 
