@@ -1,97 +1,135 @@
 
-## Plano de Correcao do Posicionamento do TableAuthGate
 
-### Problema Identificado
+## Plano de Padronizacao das Categorias
 
-O componente `TableAuthGate` usa posicionamento `absolute` para exibir o overlay de bloqueio no final da tabela. Para funcionar corretamente, o container pai (a `div` que envolve a tabela) precisa ter `position: relative`.
+### Contexto
 
-**No codigo do TableAuthGate (linha 18):**
+O site possui **17 categorias padrao** definidas no menu do Header, mas as paginas de categoria dependem dinamicamente dos dados do banco de dados. Isso causa problemas como:
+
+1. Categorias com nomes errados aparecendo (ex: "Justica" ao inves de "Direito")
+2. Categorias faltando (ex: "Pets", "Alimentacao") quando nao ha backlinks cadastrados
+3. Icones genericos (Folder) aparecendo para categorias com nomes diferentes do esperado
+
+---
+
+### Solucao em 3 Fases
+
+#### Fase 1: Criar Lista Fixa de Categorias
+
+Adicionar uma constante em `src/lib/category-icons.ts` com as 17 categorias padrao:
+
+```typescript
+export const FIXED_CATEGORIES = [
+  "Noticias",
+  "Negocios",
+  "Saude",
+  "Educacao",
+  "Tecnologia",
+  "Financas",
+  "Imoveis",
+  "Moda",
+  "Turismo",
+  "Alimentacao",
+  "Pets",
+  "Automotivo",
+  "Esportes",
+  "Entretenimento",
+  "Marketing",
+  "Direito",
+  "Maternidade"
+] as const;
+```
+
+#### Fase 2: Atualizar Mapeamento de Icones
+
+Adicionar aliases no `getCategoryIcon` para nomes alternativos que podem existir no banco:
+
+```typescript
+case "Automoveis":
+case "Automotivo":
+  return Car;
+case "Justica":
+case "Direito":
+  return Scale;
+case "Entreterimento":
+case "Entretenimento":
+  return Clapperboard;
+case "Imoveis":
+case "Imoveis":
+  return Home;
+```
+
+#### Fase 3: Padronizar Grid de Categorias
+
+Alterar todas as paginas para usar a lista fixa ao inves de depender do banco.
+
+**De (dinamico - problematico):**
 ```jsx
-<div className="absolute bottom-0 left-0 right-0 h-64 bg-gradient-to-t...">
+{categories.slice(0,16).map((cat) => ...)}
 ```
 
-**Problema:** Sem `relative` no container pai, o overlay se posiciona em relacao ao ancestral mais proximo com position definida, causando:
-1. A sombra do gradiente "vazando" para a sidebar (primeira seta)
-2. O overlay aparecendo no topo da tabela ao inves do final (segunda seta)
-
----
-
-### Analise das Paginas
-
-**Paginas COM `relative` (corretas):**
-- ComprarBacklinks.tsx (pagina padrao)
-- ComprarBacklinksAlimentacao.tsx
-
-**Paginas SEM `relative` (com problema) - Total: 18 paginas:**
-
-1. ComprarBacklinksDireito.tsx
-2. ComprarBacklinksTecnologia.tsx
-3. ComprarBacklinksFinancas.tsx
-4. ComprarBacklinksModa.tsx
-5. ComprarBacklinksNoticias.tsx
-6. ComprarBacklinksAutomoveis.tsx
-7. ComprarBacklinksEducacao.tsx
-8. ComprarBacklinksPets.tsx
-9. ComprarBacklinksEsportes.tsx
-10. ComprarBacklinksEntretenimento.tsx
-11. ComprarBacklinksMarketing.tsx
-12. ComprarBacklinksImoveis.tsx
-13. ComprarBacklinksMaternidade.tsx
-14. ComprarBacklinksNegocios.tsx
-15. ComprarBacklinksSaude.tsx
-16. ComprarBacklinksTurismo.tsx
-17. AgenciaBacklinks.tsx
-18. ContinuarComprando.tsx
-
----
-
-### Correcao Necessaria
-
-Para cada pagina com problema, alterar:
-
-**De:**
-```html
-<div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
-```
-
-**Para:**
-```html
-<div className="relative overflow-x-auto border rounded-xl bg-card shadow-sm">
+**Para (fixo - consistente):**
+```jsx
+import { FIXED_CATEGORIES } from "@/lib/category-icons";
+...
+{FIXED_CATEGORIES.map((cat) => ...)}
 ```
 
 ---
 
-### Implementacao em 3 Etapas
+### Arquivos a Modificar
 
-**Etapa 1 - Corrigir 6 paginas:**
-- ComprarBacklinksDireito.tsx (linha 321)
-- ComprarBacklinksTecnologia.tsx (linha 293)
-- ComprarBacklinksFinancas.tsx (linha 293)
-- ComprarBacklinksModa.tsx (linha 293)
-- ComprarBacklinksNoticias.tsx (linha 309)
-- ComprarBacklinksAutomoveis.tsx (linha 312)
+| Arquivo | Alteracao |
+|---------|-----------|
+| `src/lib/category-icons.ts` | Adicionar `FIXED_CATEGORIES` e aliases de icones |
+| `src/pages/ComprarBacklinks.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksDireito.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksTecnologia.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksFinancas.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksModa.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksNoticias.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksAutomoveis.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksEducacao.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksPets.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksEsportes.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksEntretenimento.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksMarketing.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksImoveis.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksMaternidade.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksNegocios.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksSaude.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksTurismo.tsx` | Usar `FIXED_CATEGORIES` |
+| `src/pages/ComprarBacklinksAlimentacao.tsx` | Usar `FIXED_CATEGORIES` |
 
-**Etapa 2 - Corrigir 6 paginas:**
-- ComprarBacklinksEducacao.tsx (linha 312)
-- ComprarBacklinksPets.tsx (linha 304)
-- ComprarBacklinksEsportes.tsx (linha 316)
-- ComprarBacklinksEntretenimento.tsx (linha 319)
-- ComprarBacklinksMarketing.tsx (linha 316)
-- ComprarBacklinksImoveis.tsx (linha 264)
-
-**Etapa 3 - Corrigir 6 paginas:**
-- ComprarBacklinksMaternidade.tsx (linha 276)
-- ComprarBacklinksNegocios.tsx (linha 307)
-- ComprarBacklinksSaude.tsx (linha 276)
-- ComprarBacklinksTurismo.tsx (linha 304)
-- AgenciaBacklinks.tsx (linha 454)
-- ContinuarComprando.tsx (linha 372)
+**Total: 19 arquivos**
 
 ---
 
 ### Resultado Esperado
 
-Apos a correcao:
-- O overlay do TableAuthGate ficara posicionado corretamente no final da tabela
-- A sombra do gradiente ficara contida dentro do container da tabela
-- O bloqueio funcionara igual em todas as paginas, como na pagina `/comprar-backlinks`
+Apos a implementacao:
+
+- Todas as 17 categorias aparecerao em todas as paginas
+- Todas as categorias terao o icone correto (nenhum Folder generico)
+- "Justica" nao aparecera mais (nao esta na lista fixa)
+- "Pets" e "Alimentacao" aparecerao mesmo sem backlinks
+- Ordem e visual consistentes com o menu superior
+
+---
+
+### Detalhes Tecnicos
+
+O grid atual depende do `useMemo` que extrai categorias unicas dos backlinks:
+
+```typescript
+const categories = useMemo(() => {
+  const set = new Set<string>();
+  (backlinks ?? []).forEach((b) => {
+    if (b.category) set.add(String(b.category));
+  });
+  return Array.from(set).sort();
+}, [backlinks]);
+```
+
+Este codigo sera mantido apenas para filtragem de dados, mas a renderizacao do grid usara a lista fixa.
+
