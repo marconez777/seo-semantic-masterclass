@@ -203,7 +203,6 @@ export default function ComprarBacklinksCategoria() {
               <thead className="bg-accent/40">
                 <tr className="text-left">
                   <th className="p-4">SITE</th>
-                  <th className="p-4">DR</th>
                   <th className="p-4">DA</th>
                   <th className="p-4">TRÁFEGO/Mês</th>
                   <th className="p-4">CATEGORIA</th>
@@ -213,9 +212,9 @@ export default function ComprarBacklinksCategoria() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td className="p-6" colSpan={7}>Carregando...</td></tr>
+                  <tr><td className="p-6" colSpan={6}>Carregando...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
+                  <tr><td className="p-6" colSpan={6}>Nenhum resultado encontrado.</td></tr>
                 ) : (
                   filtered.map((b) => (
                     <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
