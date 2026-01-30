@@ -51,6 +51,7 @@ function normalizeHeader(h: string) {
 
 // Categorias permitidas (padrão fixo)
 const ALLOWED_CATEGORIES = [
+  "Geral",
   "Notícias",
   "Negócios",
   "Saúde",
@@ -79,7 +80,8 @@ const normalizeCat = (s: string) => s
 const ALLOWED_NORMALIZED = new Set(Array.from(ALLOWED_CATEGORIES).map(normalizeCat));
 
 function isValidCategory(cat?: string) {
-  if (!cat) return false;
+  // Categoria vazia é válida (será atribuída como "Geral")
+  if (!cat) return true;
   return ALLOWED_NORMALIZED.has(normalizeCat(cat));
 }
 
@@ -234,17 +236,14 @@ async function startImport() {
       .map((r) => {
         const url = r.url?.trim();
         const domain = r.domain?.trim() || extractHost(url);
-        const categoryRaw = r.category?.trim();
-        const canonical = toCanonicalCategory(categoryRaw || "");
+      const categoryRaw = r.category?.trim();
+        // Se categoria vazia ou não reconhecida, usa "Geral"
+        const canonical = toCanonicalCategory(categoryRaw || "") || "Geral";
         const price = r.price ?? null;
         const da = r.da ?? null;
         const dr = r.dr ?? null;
         const traffic = r.traffic ?? null;
         if (!url && !domain) return null;
-        if (!canonical) {
-          invalids.push(r);
-          return null;
-        }
         return {
           url: url || null,
           domain: domain || null,
@@ -305,10 +304,13 @@ async function startImport() {
           <div className="flex-1">
             <h4 className="font-medium text-sm mb-1">Modelo de Planilha</h4>
             <p className="text-xs text-muted-foreground">
-              Colunas: URL, Categoria, DA, Tráfego Mensal, Valor
+              Colunas: URL, Categoria (opcional), DA, Tráfego Mensal (opcional), Valor
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Categorias válidas: {ALLOWED_CATEGORIES.join(", ")}
+              Se categoria estiver vazia, será atribuída como "Geral"
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Categorias válidas: {ALLOWED_CATEGORIES.filter(c => c !== 'Geral').join(", ")}
             </p>
           </div>
           <Button variant="outline" onClick={downloadTemplate} className="shrink-0">

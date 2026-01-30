@@ -17,6 +17,7 @@ const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency"
 
 // Lista padrão de categorias e normalização para manter acentos corretamente
 const ALLOWED_CATEGORIES = [
+  "Geral",
   "Notícias",
   "Negócios",
   "Saúde",
@@ -126,7 +127,7 @@ export default function ComprarBacklinksCategoria() {
                   <a className="flex items-center gap-2 hover:underline" href="/comprar-backlinks">
                     <Circle size={16} /> <span>All</span>
                   </a>
-                  {categories.map((cat) => (
+                  {categories.filter(c => c !== 'Geral').map((cat) => (
                     <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
                       <BookText size={16} /> <span>{cat}</span>
                     </a>
@@ -173,7 +174,7 @@ export default function ComprarBacklinksCategoria() {
                         <a className="flex items-center gap-2 hover:underline" href="/comprar-backlinks" onClick={() => setMobileMenuOpen(false)}>
                           <Circle size={16} /> <span>All</span>
                         </a>
-                        {categories.map((cat) => (
+                        {categories.filter(c => c !== 'Geral').map((cat) => (
                           <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`} onClick={() => setMobileMenuOpen(false)}>
                             <BookText size={16} /> <span>{cat}</span>
                           </a>
