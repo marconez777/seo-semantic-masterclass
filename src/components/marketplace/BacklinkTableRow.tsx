@@ -39,7 +39,7 @@ const getCategoryBadgeClass = (category: string) => {
   return categoryColors[category] || 'bg-gray-100 text-gray-800 border-gray-200';
 };
 
-export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { item: BacklinkItem; onBuy: (b: BacklinkItem) => void; shouldBlur?: boolean }) {
+export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { item: BacklinkItem; onBuy?: (b: BacklinkItem) => void; shouldBlur?: boolean }) {
   const [favId, setFavId] = useState<string | null>(null);
   const { addItem, isInCart, removeItem } = useCart();
   const inCart = isInCart(item.id);

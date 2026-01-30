@@ -32,18 +32,28 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Check if user is admin using is_admin field
-    const { data: profile } = await supabaseClient
-      .from('profiles')
-      .select('is_admin')
+    // Check if user is admin using user_roles table (RBAC)
+    const { data: roleData } = await supabaseClient
+      .from('user_roles')
+      .select('role')
       .eq('user_id', user.id)
-      .single()
+      .eq('role', 'admin')
+      .maybeSingle()
 
-    if (profile?.is_admin !== true) {
-      return new Response(
-        JSON.stringify({ error: 'Admin access required' }),
-        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      )
+    if (!roleData) {
+      // Fallback to profiles.is_admin for backwards compatibility during migration
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('is_admin')
+        .eq('user_id', user.id)
+        .single()
+
+      if (profile?.is_admin !== true) {
+        return new Response(
+          JSON.stringify({ error: 'Admin access required' }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
     }
 
     const body = await req.json()

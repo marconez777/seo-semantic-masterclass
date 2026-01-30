@@ -52,6 +52,7 @@ export function CartModal() {
           errors[item.backlink_id] = "URL inválida";
         }
       }
+      // Anchor text is now optional - no validation needed
     });
 
     setValidationErrors(errors);
@@ -171,7 +172,7 @@ export function CartModal() {
             Carrinho de Compras ({items.length} {items.length === 1 ? "item" : "itens"})
           </DialogTitle>
           <DialogDescription>
-            Preencha o texto âncora e URL de destino para cada backlink.
+            Preencha a URL de destino para cada backlink. O texto âncora é opcional.
           </DialogDescription>
         </DialogHeader>
 
@@ -182,7 +183,7 @@ export function CartModal() {
                 <tr className="text-left">
                   <th className="p-3 font-semibold">Site</th>
                   <th className="p-3 font-semibold">DR</th>
-                  <th className="p-3 font-semibold hidden sm:table-cell">Texto Âncora</th>
+                  <th className="p-3 font-semibold hidden sm:table-cell">Âncora (opcional)</th>
                   <th className="p-3 font-semibold hidden sm:table-cell">URL de Destino</th>
                   <th className="p-3 font-semibold text-right">Preço</th>
                   <th className="p-3 font-semibold w-10"></th>
@@ -197,7 +198,7 @@ export function CartModal() {
                       {/* Mobile inputs */}
                       <div className="sm:hidden mt-2 space-y-2">
                         <Input
-                          placeholder="Texto âncora"
+                          placeholder="Âncora (opcional)"
                           value={item.anchor_text}
                           onChange={(e) => updateItem(item.backlink_id, { anchor_text: e.target.value })}
                           disabled={mkWillChoose}
@@ -230,7 +231,7 @@ export function CartModal() {
                     <td className="p-3 text-primary font-medium">{item.dr ?? "-"}</td>
                     <td className="p-3 hidden sm:table-cell">
                       <Input
-                        placeholder="palavra-chave"
+                        placeholder="Âncora (opcional)"
                         value={item.anchor_text}
                         onChange={(e) => updateItem(item.backlink_id, { anchor_text: e.target.value })}
                         disabled={mkWillChoose}
