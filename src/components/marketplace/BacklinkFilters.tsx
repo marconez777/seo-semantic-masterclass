@@ -13,8 +13,8 @@ const brl = (v: number) =>
   (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 
 interface BacklinkFiltersProps {
-  drRange: string;
-  setDrRange: (v: string) => void;
+  daRange: string;
+  setDaRange: (v: string) => void;
   trafficRange: string;
   setTrafficRange: (v: string) => void;
   maxPrice: number | "";
@@ -22,7 +22,7 @@ interface BacklinkFiltersProps {
   closeMobileMenu?: () => void;
 }
 
-const drOptions = [
+const daOptions = [
   { v: "todos", label: "Todos" },
   { v: "10-20", label: "10 a 20" },
   { v: "20-30", label: "20 a 30" },
@@ -47,8 +47,8 @@ const trafficOptions = [
 const priceOptions = [5000, 10000, 20000, 50000, 100000, 500000, 1000000, 10000000];
 
 function FilterContent({
-  drRange,
-  setDrRange,
+  daRange,
+  setDaRange,
   trafficRange,
   setTrafficRange,
   maxPrice,
@@ -60,16 +60,16 @@ function FilterContent({
       <h2 className="text-base font-semibold mb-2">Filtros</h2>
 
       <div className="mb-4">
-        <h3 className="text-base font-semibold mb-1">DR</h3>
+        <h3 className="text-base font-semibold mb-1">DA</h3>
         <ul className="text-sm leading-none">
-          {drOptions.map(({ v, label }) => (
+          {daOptions.map(({ v, label }) => (
             <li key={v}>
               <button
                 className={`block text-left w-full py-0.5 ${
-                  drRange === v ? "font-semibold text-primary" : ""
+                  daRange === v ? "font-semibold text-primary" : ""
                 }`}
                 onClick={() => {
-                  setDrRange(v);
+                  setDaRange(v);
                   closeMobileMenu?.();
                 }}
               >

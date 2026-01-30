@@ -32,7 +32,7 @@ export default function ComprarBacklinksTecnologia() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Filters
-  const [drRange, setDrRange] = useState<string>("todos");
+  const [daRange, setDaRange] = useState<string>("todos");
   const [trafficRange, setTrafficRange] = useState<string>("todos");
   const [maxPrice, setMaxPrice] = useState<number | "">("");
 

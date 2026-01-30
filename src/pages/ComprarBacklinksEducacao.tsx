@@ -31,7 +31,7 @@ export default function ComprarBacklinksEducacao() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Filters
-  const [drRange, setDrRange] = useState<string>("todos");
+  const [daRange, setDaRange] = useState<string>("todos");
   const [trafficRange, setTrafficRange] = useState<string>("todos");
   const [maxPrice, setMaxPrice] = useState<number | "">("");
 
@@ -98,30 +98,30 @@ export default function ComprarBacklinksEducacao() {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const dr = params.get("dr");
+    const da = params.get("da");
     const traffic = params.get("traffic");
-    if (dr) setDrRange(dr);
+    if (da) setDaRange(da);
     if (traffic) setTrafficRange(traffic);
   }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (drRange && drRange !== "todos") params.set("dr", drRange);
-    else params.delete("dr");
+    if (daRange && daRange !== "todos") params.set("da", daRange);
+    else params.delete("da");
     if (trafficRange && trafficRange !== "todos")
       params.set("traffic", trafficRange);
     else params.delete("traffic");
     const query = params.toString();
     const url = `${window.location.pathname}${query ? `?${query}` : ""}`;
     window.history.replaceState({}, "", url);
-  }, [drRange, trafficRange]);
+  }, [daRange, trafficRange]);
 
   useEffect(() => {
     setPage(1);
-  }, [drRange, trafficRange, maxPrice, sortKey, sortDir, itemsPerPage]);
+  }, [daRange, trafficRange, maxPrice, sortKey, sortDir, itemsPerPage]);
 
   const filtered = useMemo(() => {
-    const drParsed = parseRange(drRange);
+    const daParsed = parseRange(daRange);
     const trafficParsed = parseRange(trafficRange);
 
     return (backlinks ?? []).filter((b) => {
@@ -129,10 +129,10 @@ export default function ComprarBacklinksEducacao() {
       const cat = normalize(String(b.category ?? ""));
       if (!(cat === "educacao")) return false;
 
-      if (drParsed) {
-        const [min, max] = drParsed;
-        if (typeof b.dr !== "number") return false;
-        if (b.dr < min || b.dr > max) return false;
+      if (daParsed) {
+        const [min, max] = daParsed;
+        if (typeof b.da !== "number") return false;
+        if (b.da < min || b.da > max) return false;
       }
       if (trafficParsed) {
         const [minT, maxT] = trafficParsed;
@@ -147,7 +147,7 @@ export default function ComprarBacklinksEducacao() {
         return false;
       return true;
     });
-  }, [backlinks, drRange, trafficRange, maxPrice]);
+  }, [backlinks, daRange, trafficRange, maxPrice]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -236,8 +236,8 @@ export default function ComprarBacklinksEducacao() {
             isMobile={isMobile}
             mobileMenuOpen={mobileMenuOpen}
             setMobileMenuOpen={setMobileMenuOpen}
-            drRange={drRange}
-            setDrRange={setDrRange}
+            daRange={daRange}
+            setDaRange={setDaRange}
             trafficRange={trafficRange}
             setTrafficRange={setTrafficRange}
             maxPrice={maxPrice}
