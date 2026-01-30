@@ -55,7 +55,14 @@ export default function ComprarBacklinks() {
         .order('dr', { ascending: false });
       if (mounted) {
         if (error) console.error('Erro ao buscar backlinks', error);
-        setBacklinks(data ?? []);
+        // Adapter: mapear campos do backend para formato da UI
+        const adapted = (data ?? []).map((row: any) => ({
+          ...row,
+          site_name: row.domain ?? null,
+          site_url: row.url ?? null,
+          price_cents: Math.round(Number(row.price || 0) * 100),
+        }));
+        setBacklinks(adapted);
         setLoading(false);
       }
     })();
