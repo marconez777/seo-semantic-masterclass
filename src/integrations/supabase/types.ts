@@ -14,10 +14,288 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      backlinks: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          da: number | null
+          domain: string | null
+          dr: number | null
+          id: string
+          observacoes: string | null
+          price: number | null
+          status: string | null
+          tipo: string | null
+          traffic: number | null
+          updated_at: string | null
+          url: string
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          da?: number | null
+          domain?: string | null
+          dr?: number | null
+          id?: string
+          observacoes?: string | null
+          price?: number | null
+          status?: string | null
+          tipo?: string | null
+          traffic?: number | null
+          updated_at?: string | null
+          url: string
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          da?: number | null
+          domain?: string | null
+          dr?: number | null
+          id?: string
+          observacoes?: string | null
+          price?: number | null
+          status?: string | null
+          tipo?: string | null
+          traffic?: number | null
+          updated_at?: string | null
+          url?: string
+        }
+        Relationships: []
+      }
+      favoritos: {
+        Row: {
+          backlink_id: string
+          created_at: string | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          backlink_id: string
+          created_at?: string | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          backlink_id?: string
+          created_at?: string | null
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "favoritos_backlink_id_fkey"
+            columns: ["backlink_id"]
+            isOneToOne: false
+            referencedRelation: "backlinks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "favoritos_backlink_id_fkey"
+            columns: ["backlink_id"]
+            isOneToOne: false
+            referencedRelation: "backlinks_public"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_items_new: {
+        Row: {
+          backlink_id: string | null
+          created_at: string | null
+          id: string
+          order_id: string
+          price: number | null
+        }
+        Insert: {
+          backlink_id?: string | null
+          created_at?: string | null
+          id?: string
+          order_id: string
+          price?: number | null
+        }
+        Update: {
+          backlink_id?: string | null
+          created_at?: string | null
+          id?: string
+          order_id?: string
+          price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_new_backlink_id_fkey"
+            columns: ["backlink_id"]
+            isOneToOne: false
+            referencedRelation: "backlinks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_new_backlink_id_fkey"
+            columns: ["backlink_id"]
+            isOneToOne: false
+            referencedRelation: "backlinks_public"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_new_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders_new"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders_new: {
+        Row: {
+          created_at: string | null
+          id: string
+          notes: string | null
+          status: string | null
+          total: number | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          total?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          notes?: string | null
+          status?: string | null
+          total?: number | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      posts: {
+        Row: {
+          category: string | null
+          content: string | null
+          cover_image: string | null
+          created_at: string | null
+          excerpt: string | null
+          id: string
+          published: boolean | null
+          published_at: string | null
+          slug: string
+          tags: string[] | null
+          title: string
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          category?: string | null
+          content?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          published?: boolean | null
+          published_at?: string | null
+          slug: string
+          tags?: string[] | null
+          title: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          category?: string | null
+          content?: string | null
+          cover_image?: string | null
+          created_at?: string | null
+          excerpt?: string | null
+          id?: string
+          published?: boolean | null
+          published_at?: string | null
+          slug?: string
+          tags?: string[] | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string | null
+          email: string | null
+          full_name: string | null
+          id: string
+          is_admin: boolean | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_admin?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          is_admin?: boolean | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
-      [_ in never]: never
+      backlinks_public: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          da: number | null
+          domain: string | null
+          dr: number | null
+          id: string | null
+          price: number | null
+          tipo: string | null
+          traffic: number | null
+          url: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          da?: number | null
+          domain?: string | null
+          dr?: number | null
+          id?: string | null
+          price?: number | null
+          tipo?: string | null
+          traffic?: number | null
+          url?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          da?: number | null
+          domain?: string | null
+          dr?: number | null
+          id?: string | null
+          price?: number | null
+          tipo?: string | null
+          traffic?: number | null
+          url?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       [_ in never]: never
