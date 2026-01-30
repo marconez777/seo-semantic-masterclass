@@ -298,6 +298,7 @@ export type Database = {
       }
     }
     Functions: {
+      is_admin: { Args: { _user_id: string }; Returns: boolean }
       promote_to_admin: { Args: { user_email: string }; Returns: undefined }
     }
     Enums: {
