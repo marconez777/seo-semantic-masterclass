@@ -232,6 +232,7 @@ export type Database = {
           is_admin: boolean | null
           updated_at: string | null
           user_id: string | null
+          whatsapp: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -242,6 +243,7 @@ export type Database = {
           is_admin?: boolean | null
           updated_at?: string | null
           user_id?: string | null
+          whatsapp?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -252,6 +254,7 @@ export type Database = {
           is_admin?: boolean | null
           updated_at?: string | null
           user_id?: string | null
+          whatsapp?: string | null
         }
         Relationships: []
       }

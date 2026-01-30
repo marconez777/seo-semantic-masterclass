@@ -51,8 +51,34 @@ Deno.serve(async (req) => {
 
     // Handle single order ID (for receipts)
     if (single_order_id) {
-      // For now, return empty data since we don't have PII stored separately
-      // In a real implementation, you would query a secure PII table here
+      // Fetch order to get user_id
+      const { data: order } = await supabaseClient
+        .from('orders_new')
+        .select('user_id')
+        .eq('id', single_order_id)
+        .single()
+      
+      if (order?.user_id) {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('email, full_name, whatsapp')
+          .eq('user_id', order.user_id)
+          .single()
+        
+        return new Response(
+          JSON.stringify({ 
+            data: [{
+              order_id: single_order_id,
+              customer_email: profile?.email ?? null,
+              customer_name: profile?.full_name ?? null,
+              customer_phone: profile?.whatsapp ?? null,
+              customer_cpf: null
+            }] 
+          }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        )
+      }
+      
       return new Response(
         JSON.stringify({ data: [] }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -66,10 +92,41 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Return empty data since we don't have a PII table
-    // This is a simplified version that doesn't expose any sensitive data
+    // Fetch orders to get user_ids
+    const { data: orders } = await supabaseClient
+      .from('orders_new')
+      .select('id, user_id')
+      .in('id', order_ids)
+
+    if (!orders || orders.length === 0) {
+      return new Response(
+        JSON.stringify({ data: [] }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      )
+    }
+
+    // Get unique user_ids
+    const userIds = [...new Set(orders.map(o => o.user_id).filter(Boolean))]
+
+    // Fetch profiles for all users
+    const { data: profiles } = await supabaseClient
+      .from('profiles')
+      .select('user_id, email, full_name, whatsapp')
+      .in('user_id', userIds)
+
+    const profileMap = new Map(profiles?.map(p => [p.user_id, p]) ?? [])
+
+    // Map order data with customer info
+    const result = orders.map(order => ({
+      order_id: order.id,
+      customer_email: profileMap.get(order.user_id)?.email ?? null,
+      customer_name: profileMap.get(order.user_id)?.full_name ?? null,
+      customer_phone: profileMap.get(order.user_id)?.whatsapp ?? null,
+      customer_cpf: null
+    }))
+
     return new Response(
-      JSON.stringify({ data: [] }),
+      JSON.stringify({ data: result }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
 

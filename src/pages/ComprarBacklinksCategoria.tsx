@@ -73,8 +73,7 @@ export default function ComprarBacklinksCategoria() {
     (async () => {
       const q = supabase
         .from('backlinks_public')
-        .select('*')
-        .eq('is_active', true);
+        .select('*');
       const { data, error } = canonicalCategory
         ? await q.eq('category', filterName)
         : await q.ilike('category', filterName);
