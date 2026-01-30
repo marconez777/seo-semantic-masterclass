@@ -1,71 +1,218 @@
 
-# Alterar Filtro de DR para DA na Barra Lateral
+# Plano: Corrigir Grid de Categorias e Migrar Filtro para DA
 
-## Resumo
-O filtro da barra lateral que atualmente filtra por **DR (Domain Rating)** será alterado para filtrar por **DA (Domain Authority)**.
+## Resumo das Alteracoes
 
-## O que será alterado
+Duas correcoes principais serao implementadas:
 
-### 1. Componente de Filtros Reutilizável (`BacklinkFilters.tsx`)
-- Renomear `drRange` / `setDrRange` para `daRange` / `setDaRange`
-- Alterar o título de "DR" para "DA"
-- Manter as mesmas faixas de valores (10-20, 20-30, etc.)
+1. **Grid de categorias completo e padronizado**: O quadro de categorias em todas as paginas sera atualizado para mostrar as 17 categorias oficiais do menu, mais um botao "Todas Categorias" que leva a `/comprar-backlinks`.
 
-### 2. Página Principal (`ComprarBacklinks.tsx`)
-- Trocar o state de `drRange` para `daRange`
-- Alterar a lógica de filtragem: em vez de filtrar por `b.dr`, filtrar por `b.da`
-- Alterar o parâmetro da URL de `?dr=` para `?da=`
-- Atualizar os filtros tanto na versão desktop quanto mobile
+2. **Migracao do filtro DR para DA**: A barra lateral de filtros passara a filtrar por DA (Domain Authority) em vez de DR (Domain Rating).
 
-### 3. Página de Categoria (`ComprarBacklinksCategoria.tsx`)
-- Trocar o filtro de `minDR` para `minDA`
-- Alterar a lógica de filtragem para usar `b.da`
-- Atualizar o label do input de "DR mínimo" para "DA mínimo"
+---
 
-### 4. Páginas de Categorias Específicas (ex: `ComprarBacklinksImoveis.tsx`)
-- Aplicar as mesmas alterações: `drRange` → `daRange`, filtrar por `b.da`
+## Parte 1: Grid de Categorias Completo
 
-## Arquivos afetados
+### Problema Atual
+- As paginas de categoria geram a lista de categorias dinamicamente a partir dos dados do banco
+- Isso faz com que algumas categorias fiquem faltando se nao houver backlinks naquela categoria
+- Nao ha consistencia com o menu do Header
 
-| Arquivo | Alterações |
-|---------|------------|
-| `src/components/marketplace/BacklinkFilters.tsx` | Props, interface, título da seção |
-| `src/pages/ComprarBacklinks.tsx` | State, filtro, URL params, labels |
-| `src/pages/ComprarBacklinksCategoria.tsx` | State, filtro, labels |
-| `src/pages/ComprarBacklinksImoveis.tsx` | State, filtro, URL params |
+### Solucao
+Criar uma lista fixa das 17 categorias oficiais (mesmas do menu) e usar essa lista em todas as paginas de categoria.
 
-## Detalhes Técnicos
+### Lista Oficial de Categorias (17 itens)
+1. Noticias
+2. Negocios
+3. Saude
+4. Educacao
+5. Tecnologia
+6. Financas
+7. Imoveis
+8. Moda
+9. Turismo
+10. Alimentacao
+11. Pets
+12. Automotivo
+13. Esportes
+14. Entretenimento
+15. Marketing
+16. Direito
+17. Maternidade
 
-### Mudança no state
+### Mudanca no Codigo
+Em cada pagina de categoria, o grid de categorias sera substituido por uma lista fixa com:
+- Primeiro item: "Todas Categorias" apontando para `/comprar-backlinks`
+- Seguido das 17 categorias oficiais com seus icones
+
+---
+
+## Parte 2: Migracao do Filtro de DR para DA
+
+### Problema Atual
+- O componente `BacklinkFilters.tsx` exibe "DR" e usa `drRange`/`setDrRange`
+- As paginas de categoria filtram por `b.dr` na logica de filtragem
+- A URL usa `?dr=` como parametro
+
+### Solucao
+- Renomear props e state de `drRange` para `daRange`
+- Alterar labels de "DR" para "DA"
+- Alterar a logica de filtragem para usar `b.da`
+- Alterar parametro URL de `?dr=` para `?da=`
+
+---
+
+## Arquivos a Serem Modificados
+
+### Componente de Filtros
+| Arquivo | Alteracoes |
+|---------|-----------|
+| `src/components/marketplace/BacklinkFilters.tsx` | Renomear props drRange->daRange, label "DR"->"DA" |
+
+### Pagina Principal
+| Arquivo | Alteracoes |
+|---------|-----------|
+| `src/pages/ComprarBacklinks.tsx` | State drRange->daRange, filtro b.da, URL ?da= |
+
+### Paginas de Categoria (17 arquivos)
+Cada arquivo recebera as seguintes alteracoes:
+- Grid de categorias com lista fixa das 17 categorias oficiais + "Todas Categorias"
+- State: `drRange` -> `daRange`
+- Filtro: `b.dr` -> `b.da`
+- URL: `?dr=` -> `?da=`
+
+Lista de arquivos:
+1. ComprarBacklinksAlimentacao.tsx
+2. ComprarBacklinksAutomoveis.tsx
+3. ComprarBacklinksDireito.tsx
+4. ComprarBacklinksEducacao.tsx
+5. ComprarBacklinksEntretenimento.tsx
+6. ComprarBacklinksEsportes.tsx
+7. ComprarBacklinksFinancas.tsx
+8. ComprarBacklinksImoveis.tsx
+9. ComprarBacklinksMarketing.tsx
+10. ComprarBacklinksMaternidade.tsx
+11. ComprarBacklinksModa.tsx
+12. ComprarBacklinksNegocios.tsx
+13. ComprarBacklinksNoticias.tsx
+14. ComprarBacklinksPets.tsx
+15. ComprarBacklinksSaude.tsx
+16. ComprarBacklinksTecnologia.tsx
+17. ComprarBacklinksTurismo.tsx
+
+---
+
+## Detalhes Tecnicos
+
+### Constante de Categorias Oficiais
+Sera criada uma constante reutilizavel:
+
 ```text
-Antes:  const [drRange, setDrRange] = useState<string>('todos');
-Depois: const [daRange, setDaRange] = useState<string>('todos');
+const OFFICIAL_CATEGORIES = [
+  "Noticias",
+  "Negocios",
+  "Saude",
+  "Educacao",
+  "Tecnologia",
+  "Financas",
+  "Imoveis",
+  "Moda",
+  "Turismo",
+  "Alimentacao",
+  "Pets",
+  "Automotivo",
+  "Esportes",
+  "Entretenimento",
+  "Marketing",
+  "Direito",
+  "Maternidade",
+];
 ```
 
-### Mudança na lógica de filtragem
+### Estrutura do Grid de Categorias
 ```text
-Antes:  if (typeof b.dr !== 'number') return false;
-        if (b.dr < min || b.dr > max) return false;
-
-Depois: if (typeof b.da !== 'number') return false;
-        if (b.da < min || b.da > max) return false;
+<section className="mb-6">
+  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+    {/* Primeiro: link "Todas Categorias" */}
+    <a href="/comprar-backlinks">
+      <Folder icon />
+      "Ver Todas" / "Categorias"
+    </a>
+    
+    {/* Depois: 17 categorias oficiais */}
+    {OFFICIAL_CATEGORIES.map((cat) => (
+      <a href={`/comprar-backlinks-${slug(cat)}`}>
+        <CategoryIcon />
+        "Backlinks de" / {cat}
+      </a>
+    ))}
+  </div>
+</section>
 ```
 
-### Mudança na URL
+### Mudanca no BacklinkFilters.tsx
 ```text
-Antes:  ?dr=20-30&traffic=1000-10000
-Depois: ?da=20-30&traffic=1000-10000
+// Interface - ANTES
+interface BacklinkFiltersProps {
+  drRange: string;
+  setDrRange: (v: string) => void;
+  ...
+}
+
+// Interface - DEPOIS  
+interface BacklinkFiltersProps {
+  daRange: string;
+  setDaRange: (v: string) => void;
+  ...
+}
+
+// Label - ANTES
+<h3>DR</h3>
+
+// Label - DEPOIS
+<h3>DA</h3>
 ```
 
-### Mudança no label visual
+### Mudanca na Logica de Filtragem
 ```text
-Antes:  <h3>DR</h3>
-Depois: <h3>DA</h3>
+// ANTES
+const drParsed = parseRange(drRange);
+if (drParsed) {
+  if (b.dr < min || b.dr > max) return false;
+}
+
+// DEPOIS
+const daParsed = parseRange(daRange);
+if (daParsed) {
+  if (b.da < min || b.da > max) return false;
+}
 ```
 
-## Resultado esperado
-Após a implementação:
-- A barra lateral mostrará "DA" em vez de "DR"
-- O filtro usará o campo `da` do banco de dados
-- A URL usará `?da=` para persistir o filtro
-- Todas as páginas de listagem de backlinks terão o filtro consistente
+### Mudanca na URL
+```text
+// ANTES
+params.set("dr", drRange);
+const dr = params.get("dr");
+
+// DEPOIS
+params.set("da", daRange);
+const da = params.get("da");
+```
+
+---
+
+## Resultado Esperado
+
+Apos a implementacao:
+
+1. **Grid de categorias**: Todas as paginas de categoria mostrarao:
+   - Primeiro item: "Todas Categorias" com icone de pasta
+   - 17 categorias oficiais (mesmas do menu dropdown)
+   - Consistencia visual entre todas as paginas
+
+2. **Filtro por DA**: 
+   - Label "DA" na barra lateral (desktop e mobile)
+   - Filtragem usando o campo `da` do banco de dados
+   - URL com parametro `?da=` para persistencia
+
+3. **Consistencia**: As mesmas categorias do menu aparecerao no grid de cada pagina de categoria.
