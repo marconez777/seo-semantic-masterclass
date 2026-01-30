@@ -97,7 +97,8 @@ export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { 
         da: item.da ?? null,
         traffic: item.traffic ?? null,
         category: item.category,
-        price: item.price_cents,
+        // Converter de centavos para reais para o carrinho (o contexto trabalha em reais)
+        price: Math.round(item.price_cents) / 100,
       });
     }
   };
