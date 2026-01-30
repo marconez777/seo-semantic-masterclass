@@ -20,7 +20,6 @@ interface ParsedRow {
 const TEMPLATE_DATA = [
   {
     "URL": "https://exemplo.com.br",
-    "Nome do Site": "Exemplo Blog",
     "Categoria": "Tecnologia",
     "DA": 45,
     "DR": 52,
@@ -29,7 +28,6 @@ const TEMPLATE_DATA = [
   },
   {
     "URL": "https://noticiasagora.com.br",
-    "Nome do Site": "Notícias Agora",
     "Categoria": "Notícias",
     "DA": 38,
     "DR": 41,
@@ -38,7 +36,6 @@ const TEMPLATE_DATA = [
   },
   {
     "URL": "https://saudebemestar.com.br",
-    "Nome do Site": "Saúde e Bem Estar",
     "Categoria": "Saúde",
     "DA": 55,
     "DR": 60,
@@ -150,7 +147,6 @@ export default function AdminBacklinksImport() {
     // Set column widths
     ws['!cols'] = [
       { wch: 35 }, // URL
-      { wch: 25 }, // Nome do Site
       { wch: 15 }, // Categoria
       { wch: 8 },  // DA
       { wch: 8 },  // DR
@@ -313,7 +309,7 @@ async function startImport() {
           <div className="flex-1">
             <h4 className="font-medium text-sm mb-1">Modelo de Planilha</h4>
             <p className="text-xs text-muted-foreground">
-              Colunas: URL, Nome do Site, Categoria, DA, DR, Tráfego Mensal, Valor
+              Colunas: URL, Categoria, DA, DR, Tráfego Mensal, Valor (domínio é extraído automaticamente)
             </p>
             <p className="text-xs text-muted-foreground mt-1">
               Categorias válidas: {ALLOWED_CATEGORIES.join(", ")}
