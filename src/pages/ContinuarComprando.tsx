@@ -369,7 +369,7 @@ export default function ContinuarComprando() {
               </div>
             </section>
           )}
-          <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
+          <div className="relative overflow-x-auto border rounded-xl bg-card shadow-sm">
             <table className="w-full text-sm">
               <thead className="bg-accent/40">
                 <tr className="text-left">
