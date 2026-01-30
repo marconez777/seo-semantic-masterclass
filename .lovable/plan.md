@@ -1,194 +1,102 @@
 
-# Analise dos Paineis - Erros e Melhorias
+Objetivo: destravar o login em `/admin/login` (fica em “Verificando…”) e evitar novos travamentos relacionados a autenticação/roles.
 
-Apos uma analise detalhada do codigo, identifiquei varios problemas e oportunidades de melhoria nos paineis do sistema.
+## Diagnóstico (por que está travando)
+1) O request de login (senha) está retornando **200 OK** (autenticação funciona).
+2) O travamento acontece logo depois, por dois motivos prováveis (e combináveis):
+   - **Deadlock/Freeze por callback async em `onAuthStateChange`:** o `AdminAuth.tsx` está usando `supabase.auth.onAuthStateChange(async (...) => { await ... })`. Esse padrão pode travar o fluxo interno do SDK (é um problema conhecido e já documentado nas boas práticas: não usar callback async e não fazer chamadas do backend dentro do callback).
+   - **RLS bloqueando a leitura de `user_roles`:** a migration criou políticas em `user_roles` permitindo SELECT apenas para admins (e o check atual tenta fazer `.from('user_roles').select(...)`). Isso gera um “ciclo”: para descobrir se é admin, o app tenta ler `user_roles`, mas ler `user_roles` exige já ser admin.
 
----
+Resultado típico: UI fica “Verificando…” porque o código fica aguardando uma promise que não resolve corretamente (ou nunca chega a disparar a query seguinte), e o `setLoading(false)` não é atingido.
 
-## 1. Erros e Inconsistencias Identificados
+## Mudanças propostas (alto nível)
+A) Padronizar checagem de admin para **RPC `has_role()`** (em vez de SELECT direto em `user_roles`)
+- Isso usa a função `SECURITY DEFINER`, que não depende das permissões de SELECT do usuário na tabela.
+- Também evita expor lógica de roles via query na tabela.
 
-### 1.1 Inconsistencia na Verificacao de Admin
+B) Eliminar callbacks async dentro de `onAuthStateChange`
+- Callback deve ser **síncrono** e apenas atualizar estado/acionar side-effects deferidos.
+- Qualquer chamada ao backend (RPC/queries) deve ocorrer fora do callback ou com `setTimeout(..., 0)`.
 
-**Problema**: O sistema possui DUAS formas diferentes de verificar se um usuario e admin, criando inconsistencia:
+C) Garantir que o botão nunca fique preso em “Verificando…”
+- Envolver `handleLogin` em `try/catch/finally` para garantir `setLoading(false)` mesmo em erros inesperados.
+- Mostrar mensagem amigável quando a checagem de role falhar (ex.: erro de rede).
 
-| Local | Metodo Utilizado |
-|-------|------------------|
-| `Dashboard.tsx` (linha 156) | Usa `profiles.is_admin` |
-| `RequireRole.tsx` | Usa `user_roles` com fallback para `profiles.is_admin` |
-| `get-pii-data/index.ts` (linha 36) | Usa `profiles.is_admin` |
+## Implementação (passo a passo)
 
-**Impacto**: Um admin pode ter acesso em um local mas nao em outro se os dados nao estiverem sincronizados.
+### 1) Corrigir `src/pages/admin/AdminAuth.tsx`
+1.1 Criar helper reutilizável no componente:
+- `checkAdminRole(userId: string): Promise<boolean>`
+- Internamente chamar:
+  - `supabase.rpc('has_role', { _user_id: userId, _role: 'admin' })`
+- Tratar erro: se der erro, retornar `false` e setar mensagem amigável.
 
-**Correcao**: Padronizar para usar APENAS a tabela `user_roles` em todos os locais.
+1.2 Ajustar o `useEffect` para evitar callback async:
+- Substituir:
+  - `supabase.auth.onAuthStateChange(async (...) => { await checkAdminRole(...) })`
+- Por:
+  - `supabase.auth.onAuthStateChange((_, session) => {`
+    - se `session?.user`, disparar `setTimeout(() => redirectIfAdmin(session.user.id), 0)`
+  - `})`
+- `redirectIfAdmin` faz `await checkAdminRole()` e navega se for admin.
 
----
+1.3 Ajustar `handleLogin`:
+- `setLoading(true)` no início
+- `try`:
+  - `signInWithPassword`
+  - se ok, chamar `checkAdminRole(userId)` via RPC
+  - se admin: toast + navigate
+  - se não admin: erro + signOut
+- `catch`: setError com texto amigável
+- `finally`: `setLoading(false)`
 
-### 1.2 Dados do Perfil Incompletos no Dashboard
+Benefício: remove deadlock e remove dependência de SELECT em `user_roles`.
 
-**Problema**: O `ProfileSection` no Dashboard busca `name` de `user.user_metadata`, mas nao exibe o WhatsApp cadastrado.
+### 2) Corrigir `src/components/auth/RequireRole.tsx` (prevenir travas ao acessar `/admin`)
+Mesmo que o login funcione, ao entrar em `/admin` o guard pode travar por padrão semelhante.
 
-```typescript
-// Dashboard.tsx - linha 31-35
-setEmail(user?.email ?? null);
-setName((user?.user_metadata as any)?.name ?? null);
-// WhatsApp nao e exibido!
-```
+2.1 Remover `onAuthStateChange(checkAuth)` onde `checkAuth` é async.
+- Fazer `onAuthStateChange((event, session) => { setUser(session?.user ?? null); setLoading(false); /* nada async aqui */ })`
 
-**Impacto**: Usuario nao consegue ver/editar seu WhatsApp no perfil.
+2.2 Mover a checagem de role para um `useEffect` separado:
+- Quando `user` mudar:
+  - se role requerido é `admin`, chamar `supabase.rpc('has_role', ...)`
+  - setar `hasRole`
+- Também remover fallback para `profiles.is_admin` (vocês já migraram para RBAC); manter apenas RBAC para consistência e segurança.
 
----
+2.3 (Opcional, mas recomendado) Evitar `console.error` com detalhes sensíveis em produção:
+- Trocar por mensagens mais neutras ou usar logs apenas em dev.
 
-### 1.3 Falta de Link para "Clientes" no Menu Admin
+### 3) Validação rápida pós-correção (checklist)
+3.1 Login admin:
+- Acessar `/admin/login`, entrar com `contato@mkart.com.br`, deve redirecionar para `/admin` rapidamente.
+- Se senha inválida, deve mostrar erro e reabilitar botão (sem travar).
 
-**Problema**: O `AdminLayout.tsx` (linha 39-44) nao inclui um link para gestao de clientes, embora o icone `Users` esteja importado.
+3.2 Acesso direto:
+- Se já estiver logado e acessar `/admin/login`, deve redirecionar automaticamente para `/admin`.
 
-```typescript
-const adminMenuItems = [
-  { title: "Pedidos", url: "/admin", icon: ClipboardList },
-  { title: "Gerenciar Sites", url: "/admin/sites", icon: Settings },
-  { title: "Publicações", url: "/admin/publicacoes", icon: PenTool },
-  { title: "Blog", url: "/admin/blog", icon: Upload },
-  // Falta: { title: "Clientes", url: "/admin/clientes", icon: Users },
-];
-```
+3.3 Usuário não-admin:
+- Login com usuário comum deve:
+  - autenticar,
+  - falhar na checagem de role,
+  - mostrar “Acesso negado…”,
+  - e fazer signOut.
 
----
+3.4 Guard de rota:
+- Acessar `/admin` sem sessão deve redirecionar para `/auth` (ou `/admin/login`, dependendo do fluxo desejado).
+- Acessar `/admin` com usuário não-admin deve ir para `/403`.
 
-### 1.4 Edge Function `get-pii-data` com Verificacao Desatualizada
+## Observações técnicas (importante)
+- A policy atual em `user_roles` (“Admins can view user_roles”) é compatível com essa abordagem, porque a checagem de admin será via `has_role()` e não precisa SELECT na tabela.
+- O principal bug do travamento é o uso de callback async dentro de `onAuthStateChange` somado ao uso de query direta na tabela com RLS restritivo.
 
-**Problema**: A funcao ainda usa `profiles.is_admin` (linha 36-42) ao inves de `has_role()`.
+## Escopo (o que vou mudar)
+- `src/pages/admin/AdminAuth.tsx`: refatorar checagem de admin para RPC + remover callback async + robustez no loading.
+- `src/components/auth/RequireRole.tsx`: mesma refatoração para evitar travas ao entrar no painel.
+- (Sem mudanças de banco necessárias para destravar o login; aproveitamos a função `has_role` já criada.)
 
----
-
-### 1.5 Pagina `ContinuarComprando` Usando `ContactModal` Obsoleto
-
-**Problema**: A pagina ainda importa e usa o `ContactModal` antigo (linha 7), que deveria ter sido substituido pelo sistema de carrinho.
-
-```typescript
-import ContactModal from "@/components/ui/ContactModal";
-```
-
----
-
-### 1.6 Campo `price_cents` vs `price` Inconsistente
-
-**Problema**: Algumas partes do codigo usam `price_cents` (backlinks_public) e outras usam `price` (backlinks), causando confusao.
-
-| Tabela | Campo |
-|--------|-------|
-| `backlinks` | `price` |
-| `backlinks_public` | Copia de `price` |
-| `CartContext` | `price` (em centavos) |
-
----
-
-## 2. Melhorias de UX/UI Sugeridas
-
-### 2.1 Dashboard do Cliente
-
-| Melhoria | Descricao |
-|----------|-----------|
-| Exibir WhatsApp | Mostrar e permitir edicao do WhatsApp no perfil |
-| Feedback visual | Adicionar skeleton loading enquanto carrega pedidos |
-| Filtros de pedidos | Adicionar filtro por status (Todos, Aguardando, Pagos, etc.) |
-| Paginacao | Adicionar paginacao para usuarios com muitos pedidos |
-| Notificacao de status | Badge ou indicador visual quando status muda |
-
-### 2.2 Painel Admin - Pedidos
-
-| Melhoria | Descricao |
-|----------|-----------|
-| Filtros | Filtrar por status, data, metodo de pagamento |
-| Busca | Campo de busca por nome/email do cliente |
-| Exportacao | Botao para exportar pedidos em CSV/Excel |
-| Estatisticas | Cards com resumo (total vendido, pedidos pendentes, etc.) |
-| Edicao inline | Permitir editar ancora/URL diretamente na tabela (itens com mk_will_choose) |
-| Notas internas | Campo para admin adicionar observacoes ao pedido |
-
-### 2.3 Painel Admin - Clientes (Novo)
-
-| Funcionalidade | Descricao |
-|----------------|-----------|
-| Lista de clientes | Nome, email, WhatsApp, data de cadastro |
-| Historico de compras | Ver todos os pedidos do cliente |
-| Botao WhatsApp direto | Contato rapido |
-| Total gasto | Valor total de compras do cliente |
-
-### 2.4 Sistema de Carrinho
-
-| Melhoria | Descricao |
-|----------|-----------|
-| Ancora opcional | Texto ancora deveria ser opcional (muitos SEOs preferem definir depois) |
-| Preview mobile | Melhorar visualizacao em dispositivos moveis |
-| Contador animado | Animacao quando item e adicionado |
-| Confirmacao de remocao | Confirmar antes de remover item |
-
----
-
-## 3. Melhorias de Seguranca
-
-### 3.1 Padronizar RBAC
-
-Todos os locais devem usar a tabela `user_roles` com a funcao `has_role()`:
-
-| Arquivo | Acao |
-|---------|------|
-| `Dashboard.tsx` | Substituir query em `profiles.is_admin` por RPC `has_role` |
-| `get-pii-data/index.ts` | Usar `has_role()` via SQL ou tabela `user_roles` |
-| `AdminLayout.tsx` | Adicionar verificacao de role (atualmente apenas verifica login) |
-
-### 3.2 Validacao de Entrada
-
-| Local | Melhoria |
-|-------|----------|
-| `CartModal.tsx` | Sanitizar URLs antes de salvar |
-| `Auth.tsx` | Validar formato do WhatsApp |
-
----
-
-## 4. Ordem de Implementacao Sugerida
-
-### Fase 1: Correcoes Criticas
-1. Padronizar verificacao de admin para usar `user_roles` em todos os locais
-2. Atualizar edge function `get-pii-data` para usar RBAC correto
-3. Remover uso do `ContactModal` obsoleto em `ContinuarComprando`
-
-### Fase 2: Melhorias no Dashboard do Cliente
-4. Adicionar WhatsApp no ProfileSection
-5. Adicionar filtros na lista de pedidos
-6. Melhorar feedback visual com skeletons
-
-### Fase 3: Melhorias no Painel Admin
-7. Adicionar filtros e busca em AdminPedidos
-8. Adicionar cards de estatisticas
-9. Criar pagina AdminClientes
-
-### Fase 4: Melhorias no Carrinho
-10. Tornar ancora opcional
-11. Adicionar confirmacao de remocao
-12. Melhorar responsividade mobile
-
----
-
-## 5. Arquivos a Modificar
-
-| Arquivo | Alteracoes |
-|---------|------------|
-| `src/pages/Dashboard.tsx` | Usar `user_roles`, adicionar WhatsApp no perfil |
-| `src/components/dashboard/OrdersList.tsx` | Adicionar filtros e paginacao |
-| `supabase/functions/get-pii-data/index.ts` | Usar `has_role()` ao inves de `profiles.is_admin` |
-| `src/layouts/AdminLayout.tsx` | Adicionar menu "Clientes" e verificacao de role |
-| `src/pages/admin/AdminPedidos.tsx` | Adicionar filtros, busca, estatisticas |
-| `src/pages/ContinuarComprando.tsx` | Remover ContactModal, usar sistema de carrinho |
-| `src/components/cart/CartModal.tsx` | Tornar ancora opcional, melhorar mobile |
-
----
-
-## 6. Novos Arquivos a Criar
-
-| Arquivo | Descricao |
-|---------|-----------|
-| `src/pages/admin/AdminClientes.tsx` | Pagina de gestao de clientes |
-| `src/components/admin/OrderFilters.tsx` | Componente de filtros para pedidos |
-| `src/components/admin/OrderStats.tsx` | Cards de estatisticas |
-
+## Critérios de aceite
+- Botão “Entrar no Painel Admin” nunca fica preso em “Verificando…”.
+- Login admin redireciona para `/admin`.
+- Não-admin não consegue entrar no painel e recebe feedback adequado.
+- Nenhum fluxo depende de SELECT em `user_roles` para descobrir role do usuário.
