@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/seo/SEOHead";
@@ -17,76 +17,88 @@ const AdminAuth = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  useEffect(() => {
-    // Check if user is already logged in and redirect to admin panel
-    const checkAdminRole = async (userId: string) => {
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .eq('role', 'admin')
-        .maybeSingle();
+  // Helper: check admin role using RPC (SECURITY DEFINER - bypasses RLS)
+  const checkAdminRole = useCallback(async (userId: string): Promise<boolean> => {
+    try {
+      const { data, error } = await supabase.rpc('has_role', {
+        _user_id: userId,
+        _role: 'admin'
+      });
       
-      return !!roleData;
-    };
+      if (error) {
+        console.error('Error checking admin role:', error.message);
+        return false;
+      }
+      
+      return !!data;
+    } catch (err) {
+      console.error('Unexpected error checking admin role');
+      return false;
+    }
+  }, []);
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
-      if (session?.user) {
-        const isAdmin = await checkAdminRole(session.user.id);
-        if (isAdmin) {
-          navigate('/admin', { replace: true });
-        }
+  // Redirect to admin if user is already logged in and is admin
+  const redirectIfAdmin = useCallback(async (userId: string) => {
+    const isAdmin = await checkAdminRole(userId);
+    if (isAdmin) {
+      navigate('/admin', { replace: true });
+    }
+  }, [checkAdminRole, navigate]);
+
+  useEffect(() => {
+    // Check current session on mount
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) {
+        // Defer async work outside the callback
+        setTimeout(() => redirectIfAdmin(data.session!.user.id), 0);
       }
     });
 
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (data.session?.user) {
-        const isAdmin = await checkAdminRole(data.session.user.id);
-        if (isAdmin) {
-          navigate('/admin', { replace: true });
-        }
+    // Listen for auth state changes - SYNC callback only!
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
+      if (session?.user) {
+        // Defer async work to avoid SDK deadlock
+        setTimeout(() => redirectIfAdmin(session.user.id), 0);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [redirectIfAdmin]);
 
   const handleLogin = async () => {
     setLoading(true);
     setError(null);
     
-    const { data, error: authError } = await supabase.auth.signInWithPassword({ 
-      email, 
-      password 
-    });
-    
-    if (authError) {
-      setLoading(false);
-      setError(authError.message);
-      return;
-    }
-
-    if (data.user) {
-      // Check if user is admin using user_roles table
-      const { data: roleData } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', data.user.id)
-        .eq('role', 'admin')
-        .maybeSingle();
-
-      setLoading(false);
-
-      if (roleData) {
-        toast({
-          title: "Login realizado!",
-          description: "Bem-vindo ao painel administrativo.",
-        });
-        navigate('/admin', { replace: true });
-      } else {
-        setError('Acesso negado. Você não tem permissão de administrador.');
-        await supabase.auth.signOut();
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+      
+      if (authError) {
+        setError(authError.message);
+        return;
       }
+
+      if (data.user) {
+        // Check if user is admin using RPC
+        const isAdmin = await checkAdminRole(data.user.id);
+
+        if (isAdmin) {
+          toast({
+            title: "Login realizado!",
+            description: "Bem-vindo ao painel administrativo.",
+          });
+          navigate('/admin', { replace: true });
+        } else {
+          setError('Acesso negado. Você não tem permissão de administrador.');
+          await supabase.auth.signOut();
+        }
+      }
+    } catch (err) {
+      setError('Erro inesperado ao fazer login. Tente novamente.');
+    } finally {
+      setLoading(false);
     }
   };
 
