@@ -107,7 +107,6 @@ export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { 
       <td className="p-4">
         {item.site_name || item.site_url}
       </td>
-      <td className="p-4 text-primary font-medium">{item.dr ?? '-'}</td>
       <td className="p-4 text-muted-foreground">{item.da ?? '-'}</td>
       <td className="p-4">{item.traffic ? item.traffic.toLocaleString('pt-BR') : '-'}</td>
       <td className="p-4">

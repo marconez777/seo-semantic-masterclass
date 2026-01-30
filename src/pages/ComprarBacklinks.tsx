@@ -405,15 +405,6 @@ export default function ComprarBacklinks() {
                     className="p-4 cursor-pointer select-none"
                     role="button"
                     tabIndex={0}
-                    onClick={() => { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } } }}
-                  >
-                    DR
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
                     onClick={() => { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } }}
                     onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } } }}
                   >
@@ -451,9 +442,9 @@ export default function ComprarBacklinks() {
               </thead>
               <tbody>
                 {loading ? (
-                  <tr><td className="p-6" colSpan={7}>Carregando...</td></tr>
+                  <tr><td className="p-6" colSpan={6}>Carregando...</td></tr>
                 ) : filtered.length === 0 ? (
-                  <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
+                  <tr><td className="p-6" colSpan={6}>Nenhum resultado encontrado.</td></tr>
                 ) : (
                   visible.map((b) => (
                     <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} shouldBlur={b.shouldBlur} />
