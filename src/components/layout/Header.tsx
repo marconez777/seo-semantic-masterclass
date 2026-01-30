@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
-import { ShoppingCart } from "lucide-react";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useLocation, Link } from "react-router-dom";
 import { MobileMenu } from "./MobileMenu";
@@ -18,7 +17,6 @@ const Header = () => {
   
   const isPanelRoute = location.pathname.startsWith("/painel");
   const isLoggedIn = !!userName;
-  const itemsCount = 0;
   
   const openBacklinks = () => {
     if (closeTimer.current) window.clearTimeout(closeTimer.current);
@@ -37,17 +35,14 @@ const Header = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
       
-      // Check role from JWT first, then fallback to database
-      const jwtRole = user.app_metadata?.role || user.user_metadata?.role;
+      // Check is_admin from profiles table
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('is_admin')
+        .eq('user_id', user.id)
+        .single();
       
-      if (jwtRole === 'admin') {
-        setIsAdmin(true);
-      } else {
-        // Fallback: check database
-        const { data } = await supabase.rpc('is_admin', { uid: user.id });
-        setIsAdmin(!!data);
-      }
-      
+      setIsAdmin(profile?.is_admin === true);
       setUserName((user.user_metadata as any)?.name || user.email || null);
     })();
   }, []);
@@ -205,4 +200,3 @@ const Header = () => {
 };
  
 export default Header;
-

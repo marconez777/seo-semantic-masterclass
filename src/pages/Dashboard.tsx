@@ -1,9 +1,8 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
 import { supabase } from "@/integrations/supabase/client";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   SidebarProvider,
@@ -18,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { ClipboardList, FileCheck2, Heart, UserCircle, Shield } from "lucide-react";
+import { Heart, UserCircle, Shield } from "lucide-react";
 
 function ProfileSection() {
   const [email, setEmail] = useState<string | null>(null);
@@ -87,9 +86,9 @@ function FavoritesTable({ userId }: { userId: string }) {
       if (backlinkIds.length) {
         const { data: backs } = await supabase
           .from('backlinks')
-          .select('id, site_name, site_url')
+          .select('id, domain, url')
           .in('id', backlinkIds);
-        (backs ?? []).forEach((b) => { backlinkMap[b.id] = b.site_name || b.site_url; });
+        (backs ?? []).forEach((b) => { backlinkMap[b.id] = b.domain || b.url; });
       }
       if (mounted) setRows((favs ?? []).map((f) => ({...f, site: backlinkMap[f.backlink_id] })));
     })();
@@ -129,7 +128,6 @@ function FavoritesTable({ userId }: { userId: string }) {
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const location = useLocation();
   const [userId, setUserId] = useState<string | null>(null);
   const [tab, setTab] = useState<string>("favoritos");
   const [isAdmin, setIsAdmin] = useState(false);
@@ -151,11 +149,15 @@ export default function Dashboard() {
   useEffect(() => {
     if (!userId) return;
     
-    // Verificar se o usuário tem role de admin usando nova estrutura
+    // Check is_admin from profiles table
     const checkAdminRole = async () => {
       try {
-        const { data } = await supabase.rpc('is_admin', { uid: userId });
-        setIsAdmin(!!data);
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('is_admin')
+          .eq('user_id', userId)
+          .single();
+        setIsAdmin(profile?.is_admin === true);
       } catch (error) {
         console.error('Erro ao verificar role de admin:', error);
         setIsAdmin(false);

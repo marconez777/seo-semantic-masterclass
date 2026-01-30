@@ -12,9 +12,9 @@ interface PostDb {
   id: string;
   title: string;
   slug: string;
-  featured_image_url: string | null;
-  seo_description: string | null;
-  created_at: string;
+  cover_image: string | null;
+  excerpt: string | null;
+  created_at: string | null;
 }
 
 const Blog = () => {
@@ -28,7 +28,7 @@ const Blog = () => {
     try {
       const { data, error } = await supabase
         .from("posts")
-        .select("id,title,slug,featured_image_url,seo_description,created_at")
+        .select("id,title,slug,cover_image,excerpt,created_at")
         .eq("published", true)
         .order("created_at", { ascending: false });
       
@@ -123,7 +123,14 @@ const Blog = () => {
                 {posts.map((post, index) => (
                   <BlogCard
                     key={post.id}
-                    post={post}
+                    post={{
+                      id: post.id,
+                      title: post.title,
+                      slug: post.slug,
+                      featured_image_url: post.cover_image,
+                      seo_description: post.excerpt,
+                      created_at: post.created_at ?? '',
+                    }}
                     variant={index === 0 ? "featured" : "default"}
                   />
                 ))}

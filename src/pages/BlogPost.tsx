@@ -16,13 +16,12 @@ interface DbPost {
   id: string;
   title: string;
   slug: string;
-  content_md: string;
-  featured_image_url: string | null;
-  seo_title: string | null;
-  seo_description: string | null;
-  created_at: string;
-  updated_at: string;
-  category?: string;
+  content: string | null;
+  cover_image: string | null;
+  excerpt: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  category: string | null;
 }
 
 function usePost(slug?: string) {
@@ -36,7 +35,7 @@ function usePost(slug?: string) {
       setLoading(true);
       const { data, error } = await supabase
         .from("posts")
-        .select("id,title,slug,content_md,featured_image_url,seo_title,seo_description,created_at,updated_at")
+        .select("id,title,slug,content,cover_image,excerpt,created_at,updated_at,category")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
@@ -105,11 +104,11 @@ export default function BlogPost() {
   return (
     <>
       <SEOHead
-        title={post.seo_title || post.title}
-        description={post.seo_description || ""}
+        title={post.title}
+        description={post.excerpt || ""}
         canonicalUrl={postUrl}
         keywords="blog seo, marketing digital, backlinks, link building"
-        ogImage={post.featured_image_url || undefined}
+        ogImage={post.cover_image || undefined}
         ogType="article"
       />
 
@@ -117,11 +116,11 @@ export default function BlogPost() {
         type="article"
         data={{
           headline: post.title,
-          description: post.seo_description,
+          description: post.excerpt,
           author: "MK Art SEO",
           datePublished: post.created_at,
           dateModified: post.updated_at,
-          image: post.featured_image_url,
+          image: post.cover_image,
           publisher: "MK Art SEO",
           publisherLogo: "https://mkart.com.br/logo.png"
         }}
@@ -146,10 +145,10 @@ export default function BlogPost() {
             <article className="lg:col-span-2">
               <BlogPostHeader
                 title={post.title}
-                category={post.category}
-                publishDate={post.created_at}
+                category={post.category ?? undefined}
+                publishDate={post.created_at ?? ''}
                 readTime="8"
-                featuredImage={post.featured_image_url}
+                featuredImage={post.cover_image}
               />
 
               {/* Social Share */}
@@ -163,7 +162,7 @@ export default function BlogPost() {
               {/* Content */}
               <div className="prose prose-lg max-w-none dark:prose-invert mt-8">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                  {post.content_md}
+                  {post.content ?? ''}
                 </ReactMarkdown>
               </div>
 

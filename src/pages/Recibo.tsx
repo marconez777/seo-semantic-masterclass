@@ -39,21 +39,21 @@ export default function Recibo() {
       } catch (error) {
         console.error('Erro ao chamar função segura de PII', error);
       }
-      const backlinkIds = Array.from(new Set((it ?? []).map((i) => i.product_id)));
+      const backlinkIds = Array.from(new Set((it ?? []).map((i) => i.backlink_id).filter(Boolean)));
       let m: Record<string, { name: string; url: string }> = {};
       if (backlinkIds.length) {
         const { data: backs } = await supabase
           .from('backlinks')
-          .select('id, site_name, site_url')
+          .select('id, domain, url')
           .in('id', backlinkIds);
-        (backs ?? []).forEach((b) => { m[b.id] = { name: b.site_name, url: b.site_url }; });
+        (backs ?? []).forEach((b) => { m[b.id] = { name: b.domain ?? '', url: b.url }; });
       }
       if (mounted) { setOrder(pedido); setItems(it ?? []); setSiteMap(m); }
     })();
     return () => { mounted = false; };
   }, [orderId]);
 
-  const total = useMemo(() => (items.reduce((acc, i) => acc + i.unit_price_cents * i.qty, 0) / 100), [items]);
+  const total = useMemo(() => (order?.total ?? 0), [order]);
 
   if (!order) return null;
 
@@ -68,8 +68,8 @@ export default function Recibo() {
       <main className="container mx-auto px-4 py-10 space-y-6">
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Recibo do Pedido</h1>
-          <Badge variant={order.status === 'paid' ? 'paid' : 'pending'}>
-            {order.status === 'paid' ? 'Pago' : 'Pendente'}
+          <Badge variant={order.status === 'paid' ? 'default' : 'outline'}>
+            {order.status === 'paid' ? 'Pago' : order.status ?? 'Pendente'}
           </Badge>
         </div>
         <div className="border rounded-md p-4 bg-card">
@@ -86,20 +86,14 @@ export default function Recibo() {
             <thead className="bg-muted/60">
               <tr className="text-left">
                 <th className="p-3 uppercase font-bold tracking-wide">Site</th>
-                <th className="p-3 uppercase font-bold tracking-wide">Âncora</th>
-                <th className="p-3 uppercase font-bold tracking-wide">URL destino</th>
-                <th className="p-3 uppercase font-bold tracking-wide">Qtd</th>
                 <th className="p-3 uppercase font-bold tracking-wide">Preço</th>
               </tr>
             </thead>
             <tbody>
               {items.map((i) => (
                 <tr key={i.id} className="border-t">
-                  <td className="p-3">{siteMap[i.product_id]?.name ?? i.product_id}</td>
-                  <td className="p-3">—</td>
-                  <td className="p-3">—</td>
-                  <td className="p-3">{i.qty}</td>
-                  <td className="p-3">{(i.unit_price_cents/100).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' })}</td>
+                  <td className="p-3">{siteMap[i.backlink_id]?.name || siteMap[i.backlink_id]?.url || i.backlink_id || '—'}</td>
+                  <td className="p-3">{(i.price ?? 0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' })}</td>
                 </tr>
               ))}
             </tbody>
