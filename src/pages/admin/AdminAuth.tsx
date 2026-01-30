@@ -19,35 +19,31 @@ const AdminAuth = () => {
 
   useEffect(() => {
     // Check if user is already logged in and redirect to admin panel
+    const checkAdminRole = async (userId: string) => {
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', userId)
+        .eq('role', 'admin')
+        .maybeSingle();
+      
+      return !!roleData;
+    };
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_, session) => {
       if (session?.user) {
-        // Check if user is admin using is_admin field
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('user_id', session.user.id)
-          .single();
-
-        if (profile?.is_admin === true) {
+        const isAdmin = await checkAdminRole(session.user.id);
+        if (isAdmin) {
           navigate('/admin', { replace: true });
-        } else {
-          setError('Acesso negado. Você não tem permissão de administrador.');
         }
       }
     });
 
     supabase.auth.getSession().then(async ({ data }) => {
       if (data.session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('user_id', data.session.user.id)
-          .single();
-
-        if (profile?.is_admin === true) {
+        const isAdmin = await checkAdminRole(data.session.user.id);
+        if (isAdmin) {
           navigate('/admin', { replace: true });
-        } else {
-          setError('Acesso negado. Você não tem permissão de administrador.');
         }
       }
     });
@@ -71,16 +67,17 @@ const AdminAuth = () => {
     }
 
     if (data.user) {
-      // Check if user is admin using is_admin field
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('is_admin')
+      // Check if user is admin using user_roles table
+      const { data: roleData } = await supabase
+        .from('user_roles')
+        .select('role')
         .eq('user_id', data.user.id)
-        .single();
+        .eq('role', 'admin')
+        .maybeSingle();
 
       setLoading(false);
 
-      if (profile?.is_admin === true) {
+      if (roleData) {
         toast({
           title: "Login realizado!",
           description: "Bem-vindo ao painel administrativo.",
