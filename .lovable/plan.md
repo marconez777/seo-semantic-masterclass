@@ -1,182 +1,383 @@
 
+# PRD - Marketplace de Backlinks v2.0
 
-# Plano: Campo WhatsApp Obrigatorio no Cadastro
+## 1. Visao Geral
 
-## Resumo
-
-Adicionar campo de WhatsApp obrigatorio no cadastro para que o admin possa entrar em contato com o cliente e enviar o QR code do PIX.
+Transformar o catalogo atual de compra via WhatsApp em um e-commerce completo com carrinho de compras, checkout com multiplas opcoes de pagamento (PIX manual e Stripe), painel do cliente para acompanhamento de pedidos e painel administrativo robusto e isolado.
 
 ---
 
-## Alteracoes Necessarias
+## 2. Situacao Atual
 
-### 1. Banco de Dados - Adicionar coluna `whatsapp` em `profiles`
+### Fluxo de Compra Existente
+- Usuario navega no catalogo de backlinks (`/comprar-backlinks`)
+- Clica em "Comprar" no site desejado
+- Abre modal (`ContactModal`) para preencher ancora e URL
+- Redireciona para WhatsApp com mensagem pre-formatada
+- Processo de pagamento e acompanhamento e manual via WhatsApp
 
-Adicionar nova coluna na tabela `profiles`:
+### Painel do Usuario Atual
+- Apenas exibe favoritos e perfil basico
+- Nao mostra pedidos ou historico de compras
+- Nao tem acompanhamento de status
+
+### Painel Admin Atual
+- Gerenciamento basico de pedidos (`AdminPedidos`)
+- Importacao e gestao de backlinks (`AdminBacklinksManager`, `AdminBacklinksImport`)
+- Nao tem gestao de clientes dedicada
+- Verificacao de admin via `profiles.is_admin` (inseguro)
+
+---
+
+## 3. Requisitos Funcionais
+
+### 3.1 Sistema de Carrinho de Compras
+
+**Objetivo**: Permitir compra de multiplos backlinks em uma unica transacao
+
+| Funcionalidade | Descricao |
+|----------------|-----------|
+| Adicionar ao carrinho | Botao "Comprar" adiciona item ao carrinho e abre modal |
+| Modal do carrinho | Lista de sites com campos para ancora e URL de destino |
+| Opcao "MK escolhe" | Checkbox para delegar escolha de ancora/URL ao admin |
+| Persistencia | Carrinho salvo em localStorage |
+| Resumo | Exibe precos individuais e total |
+| Remocao | Permite remover itens do carrinho |
+
+### 3.2 Checkout e Pagamentos
+
+**Opcoes de Pagamento**:
+
+| Metodo | Descricao |
+|--------|-----------|
+| PIX via WhatsApp | Cliente finaliza pedido, admin envia QR code manualmente |
+| Stripe (Cartao) | Pagamento automatico via Stripe Checkout |
+
+**Fluxo PIX Manual**:
+```text
+1. Cliente finaliza pedido no sistema
+2. Pedido criado com status "aguardando_pagamento"
+3. Admin ve pedido no painel com WhatsApp do cliente
+4. Admin gera QR code PIX e envia via WhatsApp
+5. Apos confirmacao, admin marca como "pago" no sistema
+```
+
+### 3.3 Painel do Cliente (Dashboard)
+
+**Novas Funcionalidades**:
+
+| Aba | Funcionalidade |
+|-----|----------------|
+| Meus Pedidos | Lista de pedidos com status e detalhes |
+| Favoritos | Sites favoritos (existente) |
+| Perfil | Dados cadastrais (existente) |
+
+**Status de Pedidos**:
+- Aguardando Pagamento
+- Pago
+- Em Producao
+- Entregue
+- Cancelado
+
+### 3.4 Painel Administrativo
+
+**Modulos Necessarios**:
+
+| Modulo | Funcionalidades |
+|--------|-----------------|
+| Gestao de Vendas | Ver pedidos, mudar status, marcar pago, ver ancora/URL |
+| Gestao de Clientes | Listar usuarios, ver historico, contato WhatsApp |
+| Gestao de Sites | CRUD completo, importacao, edicao de metricas |
+| Blog | Gestao de posts (existente) |
+
+**Seguranca Admin**:
+- Criar tabela `user_roles` separada (nao usar `profiles.is_admin`)
+- Funcao `has_role` com SECURITY DEFINER
+- Componente `RequireAdminRole` isolado
+
+---
+
+## 4. Alteracoes no Banco de Dados
+
+### 4.1 Nova Tabela: `user_roles`
+
+```text
++-------------------+
+|    user_roles     |
++-------------------+
+| id        UUID PK |
+| user_id   UUID FK |
+| role      ENUM    |
+| created_at TIMESTAMP |
++-------------------+
+
+Roles: 'admin', 'user'
+```
+
+### 4.2 Alteracoes em `order_items_new`
+
+Adicionar campos para dados do servico:
 
 | Campo | Tipo | Descricao |
 |-------|------|-----------|
-| whatsapp | TEXT | Numero de WhatsApp do cliente (obrigatorio via app) |
+| anchor_text | TEXT | Texto ancora do link |
+| target_url | TEXT | URL de destino |
+| item_status | TEXT | Status individual do item |
+| mk_will_choose | BOOLEAN | Se true, admin define ancora/URL |
 
-### 2. Frontend - Formulario de Cadastro (Auth.tsx)
+### 4.3 Alteracoes em `orders_new`
 
-**Alteracoes:**
-- Renomear label de "Telefone" para "WhatsApp" 
-- Adicionar validacao: campo obrigatorio
-- Adicionar mascara/placeholder: (11) 99999-9999
-- Exibir mensagem de erro se nao preenchido
-- Continuar salvando em `user_metadata` E criar/atualizar registro em `profiles`
+Adicionar campos para pagamento:
 
-### 3. Criar Perfil ao Cadastrar
-
-Apos o signup, criar automaticamente o registro na tabela `profiles` com:
-- `user_id` = ID do usuario autenticado
-- `email` = email do usuario
-- `full_name` = nome informado
-- `whatsapp` = numero informado
-
-**Opcoes de implementacao:**
-1. **Trigger no banco** (recomendado): Criar trigger que escuta `auth.users` e cria perfil automaticamente
-2. **No frontend**: Apos signup bem sucedido, fazer insert na tabela `profiles`
-
-### 4. Edge Function - Retornar dados do cliente
-
-Atualizar `get-pii-data/index.ts` para buscar dados reais da tabela `profiles`:
-- Consultar `profiles` pelo `user_id` do pedido
-- Retornar `email`, `full_name` e `whatsapp`
-
-### 5. Painel Admin - Exibir WhatsApp
-
-O `AdminPedidos.tsx` ja esta preparado para exibir `customer_phone` - basta garantir que a edge function retorne o dado corretamente.
+| Campo | Tipo | Descricao |
+|-------|------|-----------|
+| payment_method | TEXT | pix_whatsapp, stripe |
+| payment_status | TEXT | aguardando, pago, falhou |
+| paid_at | TIMESTAMPTZ | Data do pagamento |
+| stripe_session_id | TEXT | ID da sessao Stripe (opcional) |
 
 ---
 
-## Fluxo Completo
+## 5. Componentes Frontend
 
-```text
-1. Usuario acessa /auth e seleciona "Sou novo por aqui"
-2. Preenche: Nome, WhatsApp*, Email, Senha
-3. Se WhatsApp vazio → erro "WhatsApp e obrigatorio"
-4. Ao clicar "Cadastrar":
-   a) Supabase cria usuario em auth.users (com metadata)
-   b) Trigger cria registro em profiles (com whatsapp)
-5. Usuario confirma email e faz login
-6. Ao fazer pedido, admin ve WhatsApp na tela de pedidos
-7. Admin entra em contato via WhatsApp para enviar PIX
-```
+### 5.1 Novos Componentes
 
----
+| Componente | Descricao |
+|------------|-----------|
+| `CartContext.tsx` | Estado global do carrinho |
+| `CartModal.tsx` | Modal central com tabela de itens |
+| `CartIcon.tsx` | Icone no header com contador |
+| `OrdersList.tsx` | Lista de pedidos do cliente |
+| `OrderDetails.tsx` | Detalhes expandidos do pedido |
+| `AdminClientes.tsx` | Pagina de gestao de clientes |
+| `RequireAdminRole.tsx` | Guard de rotas admin (isolado) |
 
-## Arquivos a Modificar
+### 5.2 Arquivos a Modificar
 
 | Arquivo | Alteracao |
 |---------|-----------|
-| Migracao SQL | Adicionar coluna `whatsapp` em `profiles` |
-| Migracao SQL | Criar trigger para auto-criar perfil |
-| `src/pages/Auth.tsx` | Validacao obrigatoria + label WhatsApp |
-| `supabase/functions/get-pii-data/index.ts` | Buscar dados de `profiles` |
+| `Header.tsx` | Adicionar CartIcon |
+| `BacklinkTableRow.tsx` | Integrar com carrinho |
+| `Dashboard.tsx` | Adicionar aba "Meus Pedidos" |
+| `AdminPedidos.tsx` | Exibir campos ancora/URL, botao "Marcar Pago" |
+| `AdminLayout.tsx` | Adicionar menu "Clientes" |
+| `ContactModal.tsx` | Remover (substituido pelo carrinho) |
 
 ---
 
-## Secao Tecnica
+## 6. Integracao Stripe
 
-### Migracao SQL - Coluna WhatsApp
+### Edge Functions Necessarias
+
+| Funcao | Descricao |
+|--------|-----------|
+| `create-checkout-session` | Cria sessao de pagamento Stripe |
+| `stripe-webhook` | Recebe eventos do Stripe e atualiza pedido |
+
+### Fluxo Stripe
+
+```text
+1. Cliente clica "Pagar com Cartao"
+2. Frontend chama create-checkout-session
+3. Redireciona para Stripe Checkout
+4. Apos pagamento, Stripe envia webhook
+5. Webhook atualiza status do pedido para "pago"
+```
+
+---
+
+## 7. Fluxo do Usuario
+
+### 7.1 Compra com PIX
+
+```text
+1. Navega no catalogo
+2. Clica "Comprar" em varios sites
+3. Modal do carrinho abre
+4. Preenche ancora e URL (ou marca "MK escolhe")
+5. Clica "Finalizar Pedido"
+6. Escolhe "PIX via WhatsApp"
+7. Pedido criado (aguardando_pagamento)
+8. Tela de confirmacao: "Entraremos em contato via WhatsApp"
+9. Admin envia PIX
+10. Apos pagar, status muda para "Pago"
+11. Cliente acompanha no Dashboard
+```
+
+### 7.2 Compra com Stripe
+
+```text
+1-5. Mesmo fluxo acima
+6. Escolhe "Pagar com Cartao"
+7. Redireciona para Stripe
+8. Paga com cartao
+9. Retorna para confirmacao
+10. Pedido ja marcado como "Pago"
+```
+
+---
+
+## 8. Ordem de Implementacao
+
+### Fase 1: Seguranca e Banco de Dados
+1. Criar tabela `user_roles` com enum de roles
+2. Criar funcao `has_role` (SECURITY DEFINER)
+3. Migrar admins atuais para nova tabela
+4. Adicionar colunas em `order_items_new` (anchor_text, target_url, mk_will_choose)
+5. Adicionar colunas em `orders_new` (payment_method, payment_status, paid_at)
+
+### Fase 2: Sistema de Carrinho
+6. Criar CartContext com persistencia localStorage
+7. Criar CartModal com tabela e inputs
+8. Criar CartIcon para Header
+9. Atualizar BacklinkTableRow para usar carrinho
+
+### Fase 3: Checkout
+10. Criar fluxo de finalizacao de pedido (PIX manual)
+11. Criar tela de confirmacao
+12. Integrar Stripe (opcional, fase posterior)
+
+### Fase 4: Dashboard do Cliente
+13. Adicionar aba "Meus Pedidos" no Dashboard
+14. Criar componentes OrdersList e OrderDetails
+
+### Fase 5: Painel Admin
+15. Criar RequireAdminRole usando user_roles
+16. Atualizar AdminPedidos com campos de ancora/URL e acoes
+17. Criar AdminClientes
+
+### Fase 6: Stripe (Opcional)
+18. Criar edge function create-checkout-session
+19. Criar edge function stripe-webhook
+20. Integrar no fluxo de checkout
+
+---
+
+## 9. Criterios de Aceite
+
+| Requisito | Criterio |
+|-----------|----------|
+| Carrinho | Usuario adiciona multiplos itens e eles persistem ao recarregar |
+| Validacao | Nao pode finalizar sem ancora/URL (ou "MK escolhe" marcado) |
+| Pedido criado | Aparece como "Aguardando Pagamento" no Dashboard |
+| Admin ve dados | Admin ve ancora, URL e WhatsApp do cliente |
+| Marcar pago | Admin consegue mudar status para "Pago" |
+| Seguranca | Roles verificados via tabela separada, nao profiles.is_admin |
+
+---
+
+## 10. Secao Tecnica
+
+### Interface CartItem
+
+```typescript
+interface CartItem {
+  backlink_id: string;
+  domain: string;
+  url: string;
+  dr: number | null;
+  da: number | null;
+  traffic: number | null;
+  category: string;
+  price: number;
+  anchor_text?: string;
+  target_url?: string;
+}
+
+interface CartContextType {
+  items: CartItem[];
+  mkWillChoose: boolean;
+  setMkWillChoose: (value: boolean) => void;
+  addItem: (backlink: BacklinkData) => void;
+  removeItem: (backlink_id: string) => void;
+  updateItem: (backlink_id: string, data: Partial<CartItem>) => void;
+  clearCart: () => void;
+  isOpen: boolean;
+  openCart: () => void;
+  closeCart: () => void;
+  total: number;
+  itemCount: number;
+  isInCart: (backlink_id: string) => boolean;
+}
+```
+
+### Migracao SQL - User Roles
 
 ```sql
--- Adicionar coluna whatsapp na tabela profiles
-ALTER TABLE public.profiles 
-ADD COLUMN whatsapp TEXT;
+-- Criar enum de roles
+CREATE TYPE public.app_role AS ENUM ('admin', 'user');
 
--- Criar funcao para auto-criar perfil quando usuario e criado
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-SECURITY DEFINER
+-- Criar tabela user_roles
+CREATE TABLE public.user_roles (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE NOT NULL,
+  role app_role NOT NULL DEFAULT 'user',
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE (user_id, role)
+);
+
+-- Habilitar RLS
+ALTER TABLE public.user_roles ENABLE ROW LEVEL SECURITY;
+
+-- Funcao SECURITY DEFINER
+CREATE OR REPLACE FUNCTION public.has_role(_user_id uuid, _role app_role)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
 SET search_path = public
 AS $$
-BEGIN
-  INSERT INTO public.profiles (user_id, email, full_name, whatsapp)
-  VALUES (
-    NEW.id,
-    NEW.email,
-    NEW.raw_user_meta_data->>'name',
-    NEW.raw_user_meta_data->>'phone'
+  SELECT EXISTS (
+    SELECT 1 FROM public.user_roles 
+    WHERE user_id = _user_id AND role = _role
   )
-  ON CONFLICT (user_id) DO UPDATE SET
-    email = EXCLUDED.email,
-    full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
-    whatsapp = COALESCE(EXCLUDED.whatsapp, profiles.whatsapp),
-    updated_at = now();
-  RETURN NEW;
-END;
 $$;
 
--- Criar trigger (apenas se nao existir)
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW
-  EXECUTE FUNCTION public.handle_new_user();
+-- Policy: apenas admins podem ver
+CREATE POLICY "Admins can view user_roles"
+ON public.user_roles FOR SELECT
+USING (public.has_role(auth.uid(), 'admin'));
+
+-- Migrar admins existentes
+INSERT INTO public.user_roles (user_id, role)
+SELECT user_id, 'admin'::app_role
+FROM public.profiles
+WHERE is_admin = true
+ON CONFLICT (user_id, role) DO NOTHING;
 ```
 
-### Validacao no Frontend (Auth.tsx)
+### Migracao SQL - Order Items
 
-```typescript
-const handleSignup = async () => {
-  // Validacao
-  if (!name.trim()) {
-    setError("Nome e obrigatorio");
-    return;
-  }
-  if (!phone.trim()) {
-    setError("WhatsApp e obrigatorio para receber o PIX");
-    return;
-  }
-  if (!email.trim()) {
-    setError("E-mail e obrigatorio");
-    return;
-  }
-  if (password.length < 6) {
-    setError("Senha deve ter no minimo 6 caracteres");
-    return;
-  }
-
-  setLoading(true);
-  setError(null);
-  // ... resto do codigo
-};
+```sql
+ALTER TABLE public.order_items_new
+ADD COLUMN anchor_text TEXT,
+ADD COLUMN target_url TEXT,
+ADD COLUMN item_status TEXT DEFAULT 'pendente',
+ADD COLUMN mk_will_choose BOOLEAN DEFAULT false;
 ```
 
-### Edge Function Atualizada
+### Migracao SQL - Orders
 
-```typescript
-// Buscar dados de profiles para cada order
-const orderUserIds = orders.map(o => o.user_id);
-
-const { data: profiles } = await supabaseClient
-  .from('profiles')
-  .select('user_id, email, full_name, whatsapp')
-  .in('user_id', orderUserIds);
-
-const profileMap = new Map(profiles?.map(p => [p.user_id, p]) ?? []);
-
-const result = orders.map(order => ({
-  order_id: order.id,
-  customer_email: profileMap.get(order.user_id)?.email ?? null,
-  customer_name: profileMap.get(order.user_id)?.full_name ?? null,
-  customer_phone: profileMap.get(order.user_id)?.whatsapp ?? null,
-  customer_cpf: null // Removido do sistema
-}));
-
-return new Response(JSON.stringify({ data: result }), ...);
+```sql
+ALTER TABLE public.orders_new
+ADD COLUMN payment_method TEXT DEFAULT 'pix_whatsapp',
+ADD COLUMN payment_status TEXT DEFAULT 'aguardando',
+ADD COLUMN paid_at TIMESTAMPTZ,
+ADD COLUMN stripe_session_id TEXT;
 ```
 
 ---
 
-## Integracao com Plano Principal
+## 11. Arquivos a Criar
 
-Esta alteracao se integra ao plano do Marketplace v2.0:
-- Garante que todo cliente tenha WhatsApp cadastrado
-- Admin pode entrar em contato para enviar PIX
-- Dados ficam na tabela `profiles` (nao em tabela PII separada - simplificacao)
-
+| Arquivo | Descricao |
+|---------|-----------|
+| `src/contexts/CartContext.tsx` | Estado global do carrinho |
+| `src/components/cart/CartModal.tsx` | Modal do carrinho |
+| `src/components/cart/CartTable.tsx` | Tabela de itens |
+| `src/components/cart/CartIcon.tsx` | Icone no header |
+| `src/components/dashboard/OrdersList.tsx` | Lista de pedidos |
+| `src/components/dashboard/OrderDetails.tsx` | Detalhes do pedido |
+| `src/pages/admin/AdminClientes.tsx` | Gestao de clientes |
+| `src/components/admin/RequireAdminRole.tsx` | Guard isolado |
+| `src/pages/OrderConfirmation.tsx` | Confirmacao de pedido |
+| `supabase/functions/create-checkout-session/index.ts` | Stripe checkout |
+| `supabase/functions/stripe-webhook/index.ts` | Webhook Stripe |
