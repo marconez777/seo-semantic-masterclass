@@ -96,17 +96,39 @@ function parseMoneyToReais(value: any): number | null {
   if (value == null) return null;
   let s = String(value).trim();
   if (!s) return null;
-  // Handle formats like 1.234,56 or 1,234.56 or 1234.56
-  const hasCommaDecimal = /,\d{2}$/.test(s);
+  
+  // Remove currency symbols and spaces
   s = s.replace(/[^0-9,.-]/g, "");
-  if (hasCommaDecimal) {
+  if (!s) return null;
+  
+  // Brazilian format detection:
+  // - "16.000" = 16000 (dot is thousands separator, no decimal)
+  // - "16.000,00" = 16000.00 (dot is thousands, comma is decimal)
+  // - "16,00" = 16.00 (comma is decimal)
+  // - "16000" = 16000 (no separators)
+  
+  const hasComma = s.includes(',');
+  const hasDot = s.includes('.');
+  
+  if (hasComma && hasDot) {
+    // Format: 1.234,56 (Brazilian with both separators)
     s = s.replace(/\./g, "").replace(",", ".");
-  } else {
-    s = s.replace(/,/g, "");
+  } else if (hasComma) {
+    // Format: 1234,56 or 16,00 (comma as decimal)
+    s = s.replace(",", ".");
+  } else if (hasDot) {
+    // Format: 16.000 or 1.234.567 (dots are thousands separators in BR)
+    // Check if it looks like Brazilian thousands format (dot followed by 3 digits)
+    const isBrazilianThousands = /\.\d{3}(?:\.|$)/.test(s) || /\.\d{3}$/.test(s);
+    if (isBrazilianThousands) {
+      s = s.replace(/\./g, ""); // Remove all dots (thousands separators)
+    }
+    // Otherwise keep as-is (could be 16.50 meaning sixteen and a half)
   }
+  
   const num = Number.parseFloat(s);
   if (Number.isNaN(num)) return null;
-  return num; // Return in reais, not cents
+  return num;
 }
 
 function toNumber(val: any): number | null {
