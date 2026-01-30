@@ -38,7 +38,19 @@ const CategoryStructuredData = ({
         const da = backlink.da ?? 0;
         const traffic = backlink.traffic ?? 0;
         const priceInReais = backlink.price_cents / 100;
-        const siteName = backlink.site_name || new URL(backlink.site_url).hostname.replace('www.', '');
+        
+        // Safely extract hostname from URL
+        let siteName = backlink.site_name;
+        if (!siteName && backlink.site_url) {
+          try {
+            const urlStr = backlink.site_url.startsWith('http') 
+              ? backlink.site_url 
+              : `https://${backlink.site_url}`;
+            siteName = new URL(urlStr).hostname.replace('www.', '');
+          } catch {
+            siteName = backlink.site_url?.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0] || 'Site';
+          }
+        }
         
         return {
           "@type": "ListItem",
