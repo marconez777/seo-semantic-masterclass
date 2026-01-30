@@ -109,7 +109,7 @@ export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { 
       </td>
       <td className="p-4 text-primary font-medium">{item.dr ?? '-'}</td>
       <td className="p-4 text-muted-foreground">{item.da ?? '-'}</td>
-      <td className="p-4">{item.traffic?.toLocaleString('pt-BR') ?? '-'}</td>
+      <td className="p-4">{item.traffic ? item.traffic.toLocaleString('pt-BR') : '-'}</td>
       <td className="p-4">
         <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getCategoryBadgeClass(item.category)}`}>
           {item.category}

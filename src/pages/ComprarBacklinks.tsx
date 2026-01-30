@@ -363,7 +363,7 @@ export default function ComprarBacklinks() {
           {categories.length > 0 && (
             <section className="mb-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {categories.slice(0,16).map((cat) => {
+                {categories.filter(c => c !== 'Geral').slice(0,16).map((cat) => {
                   const slug = String(cat)
                     .toLowerCase()
                     .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
