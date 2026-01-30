@@ -9,7 +9,7 @@ interface RequireRoleProps {
 
 export function RequireRole({ role, children }: RequireRoleProps) {
   const [user, setUser] = useState<any>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
+  const [hasRole, setHasRole] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
   const location = useLocation();
 
@@ -24,14 +24,32 @@ export function RequireRole({ role, children }: RequireRoleProps) {
 
         setUser(session.user);
 
-        // Check is_admin from profiles table
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('is_admin')
-          .eq('user_id', session.user.id)
-          .single();
+        if (role === 'admin') {
+          // Check user_roles table for admin role
+          const { data: roleData, error } = await supabase
+            .from('user_roles')
+            .select('role')
+            .eq('user_id', session.user.id)
+            .eq('role', 'admin')
+            .maybeSingle();
 
-        setIsAdmin(profile?.is_admin ?? false);
+          if (error) {
+            console.error('Error checking user role:', error);
+            // Fallback to profiles.is_admin for backwards compatibility
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('is_admin')
+              .eq('user_id', session.user.id)
+              .single();
+            setHasRole(profile?.is_admin ?? false);
+          } else {
+            setHasRole(!!roleData);
+          }
+        } else {
+          // 'user' role - just needs to be authenticated
+          setHasRole(true);
+        }
+        
         setLoading(false);
       } catch (error) {
         console.error('Error checking auth:', error);
@@ -43,7 +61,7 @@ export function RequireRole({ role, children }: RequireRoleProps) {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(checkAuth);
     return () => subscription.unsubscribe();
-  }, []);
+  }, [role]);
 
   if (loading) {
     return (
@@ -57,7 +75,7 @@ export function RequireRole({ role, children }: RequireRoleProps) {
     return <Navigate to="/auth" state={{ from: location.pathname }} replace />;
   }
 
-  if (role === 'admin' && !isAdmin) {
+  if (role === 'admin' && !hasRole) {
     return <Navigate to="/403" replace />;
   }
 

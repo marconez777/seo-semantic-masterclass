@@ -17,7 +17,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Heart, UserCircle, Shield } from "lucide-react";
+import { Heart, UserCircle, Shield, Package } from "lucide-react";
+import { OrdersList } from "@/components/dashboard/OrdersList";
 
 function ProfileSection() {
   const [email, setEmail] = useState<string | null>(null);
@@ -129,7 +130,7 @@ function FavoritesTable({ userId }: { userId: string }) {
 export default function Dashboard() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
-  const [tab, setTab] = useState<string>("favoritos");
+  const [tab, setTab] = useState<string>("pedidos");
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -186,6 +187,12 @@ export default function Dashboard() {
                 <SidebarGroupLabel>Minha Conta</SidebarGroupLabel>
                 <SidebarMenu>
                   <SidebarMenuItem>
+                    <SidebarMenuButton isActive={tab==='pedidos'} onClick={() => setTab('pedidos')}>
+                      <Package className="mr-2" />
+                      <span>Meus Pedidos</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
                     <SidebarMenuButton isActive={tab==='favoritos'} onClick={() => setTab('favoritos')}>
                       <Heart className="mr-2" />
                       <span>Favoritos</span>
@@ -231,9 +238,15 @@ export default function Dashboard() {
 
               <Tabs value={tab} onValueChange={setTab}>
                 <TabsList className="mb-4">
+                  <TabsTrigger value="pedidos">Meus Pedidos</TabsTrigger>
                   <TabsTrigger value="favoritos">Favoritos</TabsTrigger>
                   <TabsTrigger value="perfil">Perfil</TabsTrigger>
                 </TabsList>
+
+                <TabsContent value="pedidos" className="space-y-4">
+                  <h2 className="text-xl font-semibold">Meus Pedidos</h2>
+                  <OrdersList userId={userId} />
+                </TabsContent>
 
                 <TabsContent value="favoritos" className="space-y-4">
                   <h2 className="text-xl font-semibold">Favoritos</h2>

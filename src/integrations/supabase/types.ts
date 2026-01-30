@@ -100,25 +100,37 @@ export type Database = {
       }
       order_items_new: {
         Row: {
+          anchor_text: string | null
           backlink_id: string | null
           created_at: string | null
           id: string
+          item_status: string | null
+          mk_will_choose: boolean | null
           order_id: string
           price: number | null
+          target_url: string | null
         }
         Insert: {
+          anchor_text?: string | null
           backlink_id?: string | null
           created_at?: string | null
           id?: string
+          item_status?: string | null
+          mk_will_choose?: boolean | null
           order_id: string
           price?: number | null
+          target_url?: string | null
         }
         Update: {
+          anchor_text?: string | null
           backlink_id?: string | null
           created_at?: string | null
           id?: string
+          item_status?: string | null
+          mk_will_choose?: boolean | null
           order_id?: string
           price?: number | null
+          target_url?: string | null
         }
         Relationships: [
           {
@@ -149,7 +161,11 @@ export type Database = {
           created_at: string | null
           id: string
           notes: string | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_status: string | null
           status: string | null
+          stripe_session_id: string | null
           total: number | null
           updated_at: string | null
           user_id: string | null
@@ -158,7 +174,11 @@ export type Database = {
           created_at?: string | null
           id?: string
           notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
           status?: string | null
+          stripe_session_id?: string | null
           total?: number | null
           updated_at?: string | null
           user_id?: string | null
@@ -167,7 +187,11 @@ export type Database = {
           created_at?: string | null
           id?: string
           notes?: string | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_status?: string | null
           status?: string | null
+          stripe_session_id?: string | null
           total?: number | null
           updated_at?: string | null
           user_id?: string | null
@@ -258,6 +282,27 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       backlinks_public: {
@@ -301,11 +346,18 @@ export type Database = {
       }
     }
     Functions: {
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
       is_admin: { Args: { _user_id: string }; Returns: boolean }
       promote_to_admin: { Args: { user_email: string }; Returns: undefined }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -432,6 +484,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const

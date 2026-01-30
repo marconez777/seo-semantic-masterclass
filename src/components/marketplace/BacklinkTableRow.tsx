@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
-import { Heart } from "lucide-react";
+import { Heart, ShoppingCart, Check } from "lucide-react";
+import { useCart } from "@/contexts/CartContext";
 
 export type BacklinkItem = {
   id: string;
@@ -41,6 +41,8 @@ const getCategoryBadgeClass = (category: string) => {
 
 export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { item: BacklinkItem; onBuy: (b: BacklinkItem) => void; shouldBlur?: boolean }) {
   const [favId, setFavId] = useState<string | null>(null);
+  const { addItem, isInCart, removeItem } = useCart();
+  const inCart = isInCart(item.id);
 
   useEffect(() => {
     let mounted = true;
@@ -83,6 +85,23 @@ export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { 
     }
   };
 
+  const handleAddToCart = () => {
+    if (inCart) {
+      removeItem(item.id);
+    } else {
+      addItem({
+        backlink_id: item.id,
+        domain: item.site_name || item.site_url || "Site",
+        url: item.site_url || "",
+        dr: item.dr ?? null,
+        da: item.da ?? null,
+        traffic: item.traffic ?? null,
+        category: item.category,
+        price: item.price_cents,
+      });
+    }
+  };
+
   return (
     <tr className={`border-t ${shouldBlur ? 'blur-sm pointer-events-none' : ''}`}>
       <td className="p-4">
@@ -98,7 +117,24 @@ export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { 
       </td>
       <td className="p-4 font-medium">{brl(item.price_cents)}</td>
       <td className="p-4 flex items-center justify-end gap-2">
-        <Button size="sm" onClick={() => onBuy(item)}>Comprar</Button>
+        <Button 
+          size="sm" 
+          onClick={handleAddToCart}
+          variant={inCart ? "secondary" : "default"}
+          className="gap-1"
+        >
+          {inCart ? (
+            <>
+              <Check size={14} />
+              No carrinho
+            </>
+          ) : (
+            <>
+              <ShoppingCart size={14} />
+              Comprar
+            </>
+          )}
+        </Button>
         <button aria-label="Favoritar" className={`p-2 rounded hover:bg-accent ${favId ? 'text-primary' : ''}`} onClick={toggleFavorite}>
           <Heart size={18} fill={favId ? 'currentColor' : 'none'} />
         </button>

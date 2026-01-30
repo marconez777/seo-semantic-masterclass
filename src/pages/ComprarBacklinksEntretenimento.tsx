@@ -66,7 +66,6 @@ export default function ComprarBacklinksEntretenimento() {
       const { data, error } = await supabase
         .from("backlinks_public")
         .select("*")
-        .eq("is_active", true)
         .order("dr", { ascending: false });
       if (mounted) {
         if (error) console.error("Erro ao buscar backlinks", error);
