@@ -1,70 +1,87 @@
 
+Objetivo (o que vai mudar)
+- Corrigir a listagem para que as colunas “SITE” e “VALOR” apareçam corretamente em:
+  - /comprar-backlinks
+  - /comprar-backlinks-[categoria]
+- Garantir que o “VALOR” apareça corretamente (sem NaN / vazio) e que o carrinho continue somando corretamente (preço em reais).
 
-## Remover Coluna DR da Listagem
+Diagnóstico (por que SITE e VALOR estão vazios)
+1) O componente `BacklinkTableRow` mostra:
+   - SITE: `item.site_name || item.site_url`
+   - VALOR: `brl(item.price_cents)` (divide por 100)
+2) Porém o backend (view/tabela `backlinks_public`) está entregando os campos no formato do banco:
+   - `domain` (não `site_name`)
+   - `url` (não `site_url`)
+   - `price` em reais (não `price_cents` em centavos)
+3) Resultado:
+   - `site_name` e `site_url` chegam undefined -> SITE vazio
+   - `price_cents` chega undefined -> VALOR vira vazio/NaN
 
-### Resumo
-Excluir completamente a coluna DR (Domain Rating) da tabela de backlinks, pois essa informação não está sendo importada.
+Solução (abordagem)
+- Criar um “adapter” (mapeamento) no momento em que os dados chegam do backend, convertendo o formato do banco para o formato esperado pela UI.
+- Esse adapter será aplicado nas páginas que carregam `backlinks_public`.
 
----
+Mudanças planejadas (passo a passo)
 
-### Arquivos a Modificar
+1) Criar um helper de adaptação (sem mexer no backend)
+- Em cada página que faz `setBacklinks(data ?? [])`, trocar para algo como:
+  - `const adapted = (data ?? []).map(mapBacklinkPublicToRowItem)`
+  - `setBacklinks(adapted)`
+- Regras do adapter:
+  - `site_name = row.domain ?? null`
+  - `site_url  = row.url ?? null`
+  - `price_cents = toCents(row.price)` onde:
+    - `toCents(price)` = `Math.round(Number(price || 0) * 100)`
+    - se price vier string/numeric, garantimos Number() + fallback 0
+  - manter `id`, `da`, `dr`, `traffic`, `category` como vierem
 
-| Arquivo | Mudança |
-|---------|---------|
-| `src/components/marketplace/BacklinkTableRow.tsx` | Remover a célula `<td>` que exibe DR |
-| `src/pages/ComprarBacklinks.tsx` | Remover cabeçalho `<th>` do DR, atualizar colSpan de 7 para 6 |
-| `src/pages/ComprarBacklinksCategoria.tsx` | Remover cabeçalho `<th>` do DR, atualizar colSpan de 7 para 6 |
+Arquivos afetados:
+- `src/pages/ComprarBacklinks.tsx`
+- `src/pages/ComprarBacklinksCategoria.tsx`
 
----
+2) Corrigir o “preço no carrinho” (evitar somar centavos como se fosse reais)
+Hoje o `CartContext` soma `item.price` diretamente e o Recibo formata `i.price` como BRL direto (sem /100), então o carrinho e pedidos assumem “reais”, não “centavos”.
 
-### Detalhes Técnicos
+O que acontece hoje:
+- `BacklinkTableRow` faz `addItem({ price: item.price_cents })`
+- Se passarmos `price_cents` (centavos) para o carrinho, ele vai somar 5000 como se fosse R$ 5.000,00, quando na verdade seria R$ 50,00 (exemplo).
 
-#### 1. BacklinkTableRow.tsx
+Como vamos ajustar:
+- Manter `BacklinkTableRow` mostrando o valor usando `price_cents` (para não refatorar UI inteira agora).
+- Mas, ao adicionar no carrinho, converter de volta para reais:
+  - `price: Math.round(item.price_cents) / 100`
+  - assim o carrinho continua consistente com o resto do app (Recibo/pedidos).
 
-**Remover linha 110:**
-```typescript
-// REMOVER esta linha:
-<td className="p-4 text-primary font-medium">{item.dr ?? '-'}</td>
-```
+Arquivo afetado:
+- `src/components/marketplace/BacklinkTableRow.tsx`
 
-A tabela fica com: SITE | DA | TRÁFEGO | CATEGORIA | VALOR | (ações)
+3) Ajuste opcional (estabilidade visual do overlay do login)
+Você comentou que o bloqueio voltou, então não é urgente.
+Mesmo assim, para evitar “sumir de novo” dependendo do tamanho da lista, vou alinhar com o padrão do projeto:
+- Garantir que o container da tabela em `/comprar-backlinks` tenha:
+  - `relative` e `min-h-[400px]`
+Isso ajuda o `TableAuthGate` a sempre se posicionar corretamente.
 
-#### 2. ComprarBacklinks.tsx
+Arquivo potencialmente afetado:
+- `src/pages/ComprarBacklinks.tsx` (apenas classe CSS do wrapper)
 
-**Remover cabeçalho DR (linhas 404-412):**
-```typescript
-// REMOVER todo este bloco:
-<th
-  className="p-4 cursor-pointer select-none"
-  role="button"
-  tabIndex={0}
-  onClick={() => { if (sortKey === 'dr') ... }}
-  onKeyDown={(e) => { ... }}
->
-  DR
-</th>
-```
+Como vamos validar (checklist)
+1) Abrir /comprar-backlinks (deslogado)
+- Coluna SITE preenchida (mostra domínio/URL)
+- Coluna VALOR preenchida (formatação R$ correta)
+- Blur + overlay de login continuam funcionando
 
-**Atualizar colSpan (linhas 454, 456):**
-```typescript
-// De:
-<td className="p-6" colSpan={7}>
+2) Abrir /comprar-backlinks-[categoria] (deslogado)
+- SITE e VALOR preenchidos
+- (Se ainda não tiver gate nessa página, podemos padronizar depois; mas seu feedback agora foi só “site e valor”)
 
-// Para:
-<td className="p-6" colSpan={6}>
-```
+3) Clicar em “Comprar” e abrir o carrinho
+- Total do carrinho coerente com o valor exibido na tabela (em reais)
 
-#### 3. ComprarBacklinksCategoria.tsx
+Notas técnicas (para manter compatibilidade com o banco)
+- O banco usa `domain`, `url`, `price` (reais). A UI atual usa `site_name`, `site_url`, `price_cents`. O adapter resolve isso sem precisar alterar a estrutura do banco.
+- O ajuste de “reais x centavos” no carrinho é importante para evitar valores errados no checkout/pedido.
 
-**Remover cabeçalho DR e atualizar colSpan de 7 para 6.**
-
----
-
-### Resultado Final
-
-A tabela terá as seguintes colunas:
-
-| SITE | DA | TRÁFEGO/Mês | CATEGORIA | VALOR | (Ações) |
-|------|----|-----------:|-----------|-------|---------|
-| gazetadopovo.com.br | 92 | 13.888.896 | Notícias | R$ 16.000,00 | [Comprar] |
-
+Escopo (o que NÃO será mexido agora)
+- Não vou alterar o schema do banco nem a view `backlinks_public`.
+- Não vou mexer no sistema de categorias/grid neste passo, porque seu pedido agora é somente “site e valor”.
