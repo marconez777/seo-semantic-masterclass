@@ -1,4 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { CartProvider } from "./contexts/CartContext";
+import { CartModal } from "./components/cart/CartModal";
 import Index from "./pages/Index";
 import Contact from "./pages/Contact";
 import AgenciaBacklinks from "./pages/AgenciaBacklinks";
@@ -45,65 +47,69 @@ import { RequireRole } from "./components/auth/RequireRole";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
 import ScrollToTop from "./components/layout/ScrollToTop";
+
  
 const App = () => (
-  <BrowserRouter>
-    <ScrollToTop />
-    <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/contato" element={<Contact />} />
-        <Route path="/agencia-de-backlinks" element={<AgenciaBacklinks />} />
-        <Route path="/consultoria-seo" element={<ConsultoriaSeo />} />
-        <Route path="/consultoria-seo-saas" element={<ConsultoriaSaas />} />
-        <Route path="/comprar-backlinks" element={<ComprarBacklinks />} />
-        <Route path="/continuar-comprando" element={<ContinuarComprando />} />
-        <Route path="/comprar-backlinks-noticias" element={<ComprarBacklinksNoticias />} />
-        <Route path="/comprar-backlinks-automoveis" element={<ComprarBacklinksAutomoveis />} />
-        <Route path="/comprar-backlinks-financas" element={<ComprarBacklinksFinancas />} />
-        <Route path="/comprar-backlinks-negocios" element={<ComprarBacklinksNegocios />} />
-        <Route path="/comprar-backlinks-educacao" element={<ComprarBacklinksEducacao />} />
-        <Route path="/comprar-backlinks-moda" element={<ComprarBacklinksModa />} />
-        <Route path="/comprar-backlinks-tecnologia" element={<ComprarBacklinksTecnologia />} />
-        <Route path="/comprar-backlinks-turismo" element={<ComprarBacklinksTurismo />} />
-        <Route path="/comprar-backlinks-alimentacao" element={<ComprarBacklinksAlimentacao />} />
-        <Route path="/comprar-backlinks-pets" element={<ComprarBacklinksPets />} />
-        <Route path="/comprar-backlinks-esportes" element={<ComprarBacklinksEsportes />} />
-        <Route path="/comprar-backlinks-entretenimento" element={<ComprarBacklinksEntretenimento />} />
-        <Route path="/comprar-backlinks-marketing" element={<ComprarBacklinksMarketing />} />
-        <Route path="/comprar-backlinks-direito" element={<ComprarBacklinksDireito />} />
-        <Route path="/comprar-backlinks-imoveis" element={<ComprarBacklinksImoveis />} />
-        <Route path="/comprar-backlinks-maternidade" element={<ComprarBacklinksMaternidade />} />
-        <Route path="/comprar-backlinks-saude" element={<ComprarBacklinksSaude />} />
-        <Route path="/comprar-backlinks-categoria/:categoria" element={<ComprarBacklinksCategoria />} />
-        <Route path="/blog" element={<Blog />} />
-        <Route path="/blog/:slug" element={<BlogPost />} />
-        <Route path="/auth" element={<Auth />} />
-        <Route path="/painel" element={<Dashboard />} />
-        <Route path="/403" element={<Forbidden />} />
-        
-        {/* Admin auth route */}
-        <Route path="/admin/login" element={<AdminAuth />} />
-        
-        <Route path="/admin" element={
-          <RequireRole role="admin">
-            <AdminLayout />
-          </RequireRole>
-        }>
-          <Route index element={<AdminPedidos />} />
-          <Route path="sites" element={<AdminSites />} />
-          <Route path="publicacoes" element={<AdminPublicacoes />} />
-          <Route path="blog" element={<AdminBlog />} />
-          <Route path="blog/novo" element={<AdminBlogNew />} />
-        </Route>
-        <Route path="/recibo/:orderId" element={<Recibo />} />
-        
-        
-        {/* Catch-all route for 404 */}
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-    <Toaster />
-    <WhatsAppFAB />
-  </BrowserRouter>
+  <CartProvider>
+    <BrowserRouter>
+      <ScrollToTop />
+      <CartModal />
+      <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/contato" element={<Contact />} />
+          <Route path="/agencia-de-backlinks" element={<AgenciaBacklinks />} />
+          <Route path="/consultoria-seo" element={<ConsultoriaSeo />} />
+          <Route path="/consultoria-seo-saas" element={<ConsultoriaSaas />} />
+          <Route path="/comprar-backlinks" element={<ComprarBacklinks />} />
+          <Route path="/continuar-comprando" element={<ContinuarComprando />} />
+          <Route path="/comprar-backlinks-noticias" element={<ComprarBacklinksNoticias />} />
+          <Route path="/comprar-backlinks-automoveis" element={<ComprarBacklinksAutomoveis />} />
+          <Route path="/comprar-backlinks-financas" element={<ComprarBacklinksFinancas />} />
+          <Route path="/comprar-backlinks-negocios" element={<ComprarBacklinksNegocios />} />
+          <Route path="/comprar-backlinks-educacao" element={<ComprarBacklinksEducacao />} />
+          <Route path="/comprar-backlinks-moda" element={<ComprarBacklinksModa />} />
+          <Route path="/comprar-backlinks-tecnologia" element={<ComprarBacklinksTecnologia />} />
+          <Route path="/comprar-backlinks-turismo" element={<ComprarBacklinksTurismo />} />
+          <Route path="/comprar-backlinks-alimentacao" element={<ComprarBacklinksAlimentacao />} />
+          <Route path="/comprar-backlinks-pets" element={<ComprarBacklinksPets />} />
+          <Route path="/comprar-backlinks-esportes" element={<ComprarBacklinksEsportes />} />
+          <Route path="/comprar-backlinks-entretenimento" element={<ComprarBacklinksEntretenimento />} />
+          <Route path="/comprar-backlinks-marketing" element={<ComprarBacklinksMarketing />} />
+          <Route path="/comprar-backlinks-direito" element={<ComprarBacklinksDireito />} />
+          <Route path="/comprar-backlinks-imoveis" element={<ComprarBacklinksImoveis />} />
+          <Route path="/comprar-backlinks-maternidade" element={<ComprarBacklinksMaternidade />} />
+          <Route path="/comprar-backlinks-saude" element={<ComprarBacklinksSaude />} />
+          <Route path="/comprar-backlinks-categoria/:categoria" element={<ComprarBacklinksCategoria />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:slug" element={<BlogPost />} />
+          <Route path="/auth" element={<Auth />} />
+          <Route path="/painel" element={<Dashboard />} />
+          <Route path="/403" element={<Forbidden />} />
+          
+          {/* Admin auth route */}
+          <Route path="/admin/login" element={<AdminAuth />} />
+          
+          <Route path="/admin" element={
+            <RequireRole role="admin">
+              <AdminLayout />
+            </RequireRole>
+          }>
+            <Route index element={<AdminPedidos />} />
+            <Route path="sites" element={<AdminSites />} />
+            <Route path="publicacoes" element={<AdminPublicacoes />} />
+            <Route path="blog" element={<AdminBlog />} />
+            <Route path="blog/novo" element={<AdminBlogNew />} />
+          </Route>
+          <Route path="/recibo/:orderId" element={<Recibo />} />
+          
+          
+          {/* Catch-all route for 404 */}
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+      <Toaster />
+      <WhatsAppFAB />
+    </BrowserRouter>
+  </CartProvider>
 );
  
 export default App;

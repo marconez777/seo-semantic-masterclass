@@ -4,20 +4,34 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { ChevronDown, ChevronUp, ExternalLink, MessageCircle } from "lucide-react";
 
 interface Pedido {
   id: string;
   user_id: string;
   status: string;
-  total_cents: number;
+  total: number;
   created_at: string;
   paid_at?: string;
-  publish_due_at?: string;
-  cancelled_at?: string;
   payment_method?: string;
+  payment_status?: string;
+  items: OrderItem[];
+}
+
+interface OrderItem {
+  id: string;
+  backlink_id: string;
+  price: number;
+  anchor_text: string | null;
+  target_url: string | null;
+  item_status: string;
+  mk_will_choose: boolean;
+  backlink?: {
+    domain: string;
+    url: string;
+  };
 }
 
 interface PedidoPII {
@@ -28,110 +42,189 @@ interface PedidoPII {
   customer_phone: string | null;
 }
 
+const statusOptions = [
+  { value: "aguardando_pagamento", label: "Aguardando Pagamento" },
+  { value: "pago", label: "Pago" },
+  { value: "em_producao", label: "Em Produção" },
+  { value: "entregue", label: "Entregue" },
+  { value: "cancelado", label: "Cancelado" },
+];
+
+const itemStatusOptions = [
+  { value: "pendente", label: "Pendente" },
+  { value: "em_producao", label: "Em Produção" },
+  { value: "publicado", label: "Publicado" },
+  { value: "entregue", label: "Entregue" },
+];
+
+function brl(v: number) {
+  return (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+const getStatusBadgeClass = (status: string) => {
+  const statusColors: Record<string, string> = {
+    aguardando_pagamento: "bg-yellow-100 text-yellow-800 border-yellow-200",
+    pago: "bg-green-100 text-green-800 border-green-200",
+    em_producao: "bg-blue-100 text-blue-800 border-blue-200",
+    entregue: "bg-emerald-100 text-emerald-800 border-emerald-200",
+    cancelado: "bg-red-100 text-red-800 border-red-200",
+    pendente: "bg-gray-100 text-gray-800 border-gray-200",
+    publicado: "bg-purple-100 text-purple-800 border-purple-200",
+  };
+  return statusColors[status] || "bg-gray-100 text-gray-800 border-gray-200";
+};
+
+const getStatusLabel = (status: string) => {
+  const labels: Record<string, string> = {
+    aguardando_pagamento: "Aguardando Pagamento",
+    pago: "Pago",
+    em_producao: "Em Produção",
+    entregue: "Entregue",
+    cancelado: "Cancelado",
+    pendente: "Pendente",
+    publicado: "Publicado",
+  };
+  return labels[status] || status;
+};
+
 export default function AdminPedidos() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [loading, setLoading] = useState(false);
   const [piiByOrder, setPiiByOrder] = useState<Record<string, PedidoPII>>({});
-  const [receiptAmount, setReceiptAmount] = useState("");
-  const [receiptNote, setReceiptNote] = useState("");
-  const [selectedOrderId, setSelectedOrderId] = useState<string>("");
-  const [showReceiptDialog, setShowReceiptDialog] = useState(false);
+  const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null);
+  const [newStatus, setNewStatus] = useState("");
   const { toast } = useToast();
 
   const loadData = async () => {
     setLoading(true);
-    // Pedidos (todos)
-        const { data: pedidosData, error: pedidosErr } = await supabase
-      .from('orders_new')
-      .select('*')
-      .order('created_at', { ascending: false });
-    if (pedidosErr) console.error('Erro ao carregar pedidos', pedidosErr);
-    const pedidos = pedidosData ?? [];
-    setPedidos(pedidos as any);
+    
+    // Fetch orders
+    const { data: pedidosData, error: pedidosErr } = await supabase
+      .from("orders_new")
+      .select("*")
+      .order("created_at", { ascending: false });
+    
+    if (pedidosErr) {
+      console.error("Erro ao carregar pedidos", pedidosErr);
+      setLoading(false);
+      return;
+    }
 
-    const orderIds = pedidos.map((p: any) => p.id);
+    const orderIds = (pedidosData || []).map((p) => p.id);
 
-    // Load PII snapshot for each order (admin only) - using secure edge function
+    // Fetch order items
+    const { data: itemsData } = await supabase
+      .from("order_items_new")
+      .select("*")
+      .in("order_id", orderIds);
+
+    // Fetch backlink details
+    const backlinkIds = (itemsData || [])
+      .map((item) => item.backlink_id)
+      .filter(Boolean) as string[];
+
+    let backlinkMap: Record<string, { domain: string; url: string }> = {};
+    if (backlinkIds.length > 0) {
+      const { data: backlinksData } = await supabase
+        .from("backlinks")
+        .select("id, domain, url")
+        .in("id", backlinkIds);
+
+      (backlinksData || []).forEach((b) => {
+        backlinkMap[b.id] = { domain: b.domain || "", url: b.url };
+      });
+    }
+
+    // Combine orders with items
+    const ordersWithItems: Pedido[] = (pedidosData || []).map((order) => ({
+      id: order.id,
+      user_id: order.user_id || "",
+      status: order.status || "pendente",
+      total: order.total || 0,
+      created_at: order.created_at || "",
+      paid_at: order.paid_at,
+      payment_method: order.payment_method,
+      payment_status: order.payment_status,
+      items: (itemsData || [])
+        .filter((item) => item.order_id === order.id)
+        .map((item) => ({
+          id: item.id,
+          backlink_id: item.backlink_id || "",
+          price: item.price || 0,
+          anchor_text: item.anchor_text,
+          target_url: item.target_url,
+          item_status: item.item_status || "pendente",
+          mk_will_choose: item.mk_will_choose || false,
+          backlink: item.backlink_id ? backlinkMap[item.backlink_id] : undefined,
+        })),
+    }));
+
+    setPedidos(ordersWithItems);
+
+    // Load PII data
     let piiMap: Record<string, PedidoPII> = {};
     if (orderIds.length) {
       try {
-        const { data: piiResponse, error: piiErr } = await supabase.functions.invoke('get-pii-data', {
-          body: { order_ids: orderIds }
+        const { data: piiResponse, error: piiErr } = await supabase.functions.invoke("get-pii-data", {
+          body: { order_ids: orderIds },
         });
-        
-        if (piiErr) {
-          console.error('Erro ao carregar dados PII via edge function', piiErr);
-        } else if (piiResponse?.data) {
+
+        if (!piiErr && piiResponse?.data) {
           piiResponse.data.forEach((record: any) => {
             piiMap[record.order_id] = record as PedidoPII;
           });
         }
       } catch (error) {
-        console.error('Erro ao chamar função segura de PII', error);
+        console.error("Erro ao carregar PII", error);
       }
     }
     setPiiByOrder(piiMap);
     setLoading(false);
   };
 
-  const handleApprovePayment = async (orderId: string) => {
-    const { error } = await supabase
-      .from('orders_new')
-      .update({ status: 'paid' })
-      .eq('id', orderId);
-    
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    const updateData: any = { status };
+    if (status === "pago") {
+      updateData.paid_at = new Date().toISOString();
+      updateData.payment_status = "pago";
+    }
+
+    const { error } = await supabase.from("orders_new").update(updateData).eq("id", orderId);
+
     if (error) {
-      console.error('Erro ao aprovar pagamento', error);
-      toast({ title: "Erro ao aprovar pagamento", description: error.message });
+      toast({ title: "Erro ao atualizar status", description: error.message });
     } else {
-      toast({ title: "Pagamento aprovado com sucesso" });
+      toast({ title: "Status atualizado com sucesso" });
+      loadData();
+    }
+    setStatusDialogOpen(false);
+    setSelectedOrder(null);
+  };
+
+  const updateItemStatus = async (itemId: string, status: string) => {
+    const { error } = await supabase
+      .from("order_items_new")
+      .update({ item_status: status })
+      .eq("id", itemId);
+
+    if (error) {
+      toast({ title: "Erro ao atualizar item", description: error.message });
+    } else {
+      toast({ title: "Item atualizado" });
       loadData();
     }
   };
 
-  const handleCancelOrder = async (orderId: string) => {
-    const { error } = await supabase
-      .from('orders_new')
-      .update({ status: 'cancelled' })
-      .eq('id', orderId);
-    
-    if (error) {
-      console.error('Erro ao cancelar pedido', error);
-      toast({ title: "Erro ao cancelar pedido", description: error.message });
-    } else {
-      toast({ title: "Pedido cancelado com sucesso" });
-      loadData();
-    }
-  };
-
-  const handleAddReceipt = async () => {
-    const amount = parseFloat(receiptAmount);
-    if (!amount || amount <= 0) {
-      toast({ title: "Valor inválido", description: "Digite um valor válido" });
+  const openWhatsApp = (phone: string | null, orderInfo: string) => {
+    if (!phone) {
+      toast({ title: "WhatsApp não disponível" });
       return;
     }
-
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      toast({ title: "Usuário não autenticado", description: "Faça login novamente" });
-      return;
-    }
-
-    // Since order_receipts table is legacy, we'll just show a message
-    toast({ title: "Funcionalidade desabilitada", description: "Sistema de recibos foi descontinuado" });
-    setShowReceiptDialog(false);
-    setReceiptAmount("");
-    setReceiptNote("");
-    setSelectedOrderId("");
-  };
-
-  const getStatusBadgeVariant = (status: string) => {
-    switch (status) {
-      case 'paid': return 'default';
-      case 'pending': return 'secondary';
-      case 'cancelled': return 'destructive';
-      default: return 'outline';
-    }
+    const cleanPhone = phone.replace(/\D/g, "");
+    const message = `Olá! Estamos entrando em contato sobre seu pedido: ${orderInfo}`;
+    window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, "_blank");
   };
 
   useEffect(() => {
@@ -148,133 +241,239 @@ export default function AdminPedidos() {
       />
 
       <div className="space-y-6">
-        <h2 className="text-2xl font-bold">Pedidos</h2>
-        
-        <div className="border rounded-md overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead className="bg-accent/40">
-              <tr className="text-left">
-                <th className="p-3">Pedido</th>
-                <th className="p-3">Cliente</th>
-                <th className="p-3">Contato</th>
-                <th className="p-3">Criado</th>
-                <th className="p-3">Total</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Pago em</th>
-                <th className="p-3">Prazo Pub.</th>
-                <th className="p-3">Ações</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr><td className="p-4" colSpan={9}>Carregando…</td></tr>
-              ) : pedidos.length === 0 ? (
-                <tr><td className="p-4" colSpan={9}>Nenhum pedido.</td></tr>
-              ) : (
-                pedidos.map((p) => (
-                  <tr key={p.id} className="border-t align-top">
-                    <td className="p-3">
-                      <div className="font-mono text-xs break-all max-w-32">{p.id}</div>
-                    </td>
-                    <td className="p-3">
-                      {(() => { const pii = piiByOrder[p.id]; return (
-                        <>
-                          <div className="font-medium">{pii?.customer_name ?? '—'}</div>
-                          <div className="text-muted-foreground text-xs">CPF: {pii?.customer_cpf ?? '—'}</div>
-                        </>
-                      ); })()}
-                    </td>
-                    <td className="p-3 text-xs">
-                      {(() => { const pii = piiByOrder[p.id]; return (
-                        <>
-                          <div>{pii?.customer_email ?? '—'}</div>
-                          <div>{pii?.customer_phone ?? '—'}</div>
-                        </>
-                      ); })()}
-                    </td>
-                    <td className="p-3 text-xs">{new Date(p.created_at).toLocaleString('pt-BR')}</td>
-                    <td className="p-3">{(p.total_cents/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})}</td>
-                    <td className="p-3">
-                      <Badge variant={getStatusBadgeVariant(p.status)}>{p.status}</Badge>
-                    </td>
-                    <td className="p-3 text-xs">
-                      {p.paid_at ? new Date(p.paid_at).toLocaleString('pt-BR') : '—'}
-                    </td>
-                    <td className="p-3 text-xs">
-                      {p.publish_due_at ? new Date(p.publish_due_at).toLocaleString('pt-BR') : '—'}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex flex-col gap-1">
-                        {p.status === 'pending' && (
-                          <>
-                            <Button 
-                              size="sm" 
-                              onClick={() => handleApprovePayment(p.id)}
-                              className="text-xs h-7"
-                            >
-                              Aprovar
-                            </Button>
-                            <Button 
-                              size="sm" 
-                              variant="destructive" 
-                              onClick={() => handleCancelOrder(p.id)}
-                              className="text-xs h-7"
-                            >
-                              Cancelar
-                            </Button>
-                          </>
-                        )}
-                        {p.status === 'paid' && (
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={() => {
-                              setSelectedOrderId(p.id);
-                              setShowReceiptDialog(true);
-                            }}
-                            className="text-xs h-7"
+        <div className="flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Pedidos</h2>
+          <Button onClick={loadData} variant="outline" size="sm">
+            Atualizar
+          </Button>
+        </div>
+
+        <div className="space-y-4">
+          {loading ? (
+            <div className="border rounded-md p-8 text-center text-muted-foreground">
+              Carregando pedidos...
+            </div>
+          ) : pedidos.length === 0 ? (
+            <div className="border rounded-md p-8 text-center text-muted-foreground">
+              Nenhum pedido encontrado.
+            </div>
+          ) : (
+            pedidos.map((pedido) => {
+              const pii = piiByOrder[pedido.id];
+              const isExpanded = expandedOrder === pedido.id;
+
+              return (
+                <div key={pedido.id} className="border rounded-lg bg-card overflow-hidden">
+                  {/* Order Header */}
+                  <div
+                    className="p-4 cursor-pointer hover:bg-muted/50 transition-colors"
+                    onClick={() => setExpandedOrder(isExpanded ? null : pedido.id)}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-3">
+                          <span className="font-mono text-sm">
+                            #{pedido.id.slice(0, 8).toUpperCase()}
+                          </span>
+                          <span
+                            className={`px-2 py-0.5 rounded-full text-xs font-medium border ${getStatusBadgeClass(pedido.status)}`}
                           >
-                            + Recibo
+                            {getStatusLabel(pedido.status)}
+                          </span>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(pedido.created_at).toLocaleString("pt-BR")}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-4">
+                        <div className="text-right">
+                          <div className="font-semibold text-lg">{brl(pedido.total)}</div>
+                          <div className="text-xs text-muted-foreground">
+                            {pedido.items.length} {pedido.items.length === 1 ? "item" : "itens"}
+                          </div>
+                        </div>
+                        {isExpanded ? (
+                          <ChevronUp className="h-5 w-5 text-muted-foreground" />
+                        ) : (
+                          <ChevronDown className="h-5 w-5 text-muted-foreground" />
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Customer Info Summary */}
+                    <div className="mt-3 flex items-center gap-6 text-sm">
+                      <div>
+                        <span className="text-muted-foreground">Cliente: </span>
+                        <span className="font-medium">{pii?.customer_name || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">Email: </span>
+                        <span>{pii?.customer_email || "—"}</span>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground">WhatsApp: </span>
+                        <span>{pii?.customer_phone || "—"}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Expanded Details */}
+                  {isExpanded && (
+                    <div className="border-t p-4 bg-muted/20 space-y-4">
+                      {/* Actions */}
+                      <div className="flex items-center gap-3">
+                        <Button
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrder(pedido);
+                            setNewStatus(pedido.status);
+                            setStatusDialogOpen(true);
+                          }}
+                        >
+                          Alterar Status
+                        </Button>
+                        {pedido.status === "aguardando_pagamento" && (
+                          <Button
+                            size="sm"
+                            variant="default"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              updateOrderStatus(pedido.id, "pago");
+                            }}
+                          >
+                            Marcar como Pago
+                          </Button>
+                        )}
+                        {pii?.customer_phone && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openWhatsApp(pii.customer_phone, `#${pedido.id.slice(0, 8)} - ${brl(pedido.total)}`);
+                            }}
+                          >
+                            <MessageCircle className="h-4 w-4 mr-1" />
+                            WhatsApp
                           </Button>
                         )}
                       </div>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+
+                      {/* Items Table */}
+                      <div>
+                        <h4 className="font-medium mb-2">Itens do Pedido</h4>
+                        <div className="overflow-x-auto border rounded-md">
+                          <table className="w-full text-sm">
+                            <thead className="bg-muted/60">
+                              <tr className="text-left">
+                                <th className="p-2 font-medium">Site</th>
+                                <th className="p-2 font-medium">Âncora</th>
+                                <th className="p-2 font-medium">URL Destino</th>
+                                <th className="p-2 font-medium">MK Escolhe</th>
+                                <th className="p-2 font-medium">Status</th>
+                                <th className="p-2 font-medium text-right">Preço</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {pedido.items.map((item) => (
+                                <tr key={item.id} className="border-t">
+                                  <td className="p-2">
+                                    {item.backlink?.domain || item.backlink?.url || "—"}
+                                  </td>
+                                  <td className="p-2">
+                                    {item.mk_will_choose ? (
+                                      <span className="italic text-muted-foreground">A definir</span>
+                                    ) : (
+                                      item.anchor_text || "—"
+                                    )}
+                                  </td>
+                                  <td className="p-2">
+                                    {item.mk_will_choose ? (
+                                      <span className="italic text-muted-foreground">A definir</span>
+                                    ) : item.target_url ? (
+                                      <a
+                                        href={item.target_url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-primary hover:underline flex items-center gap-1"
+                                        onClick={(e) => e.stopPropagation()}
+                                      >
+                                        {item.target_url.slice(0, 30)}...
+                                        <ExternalLink className="h-3 w-3" />
+                                      </a>
+                                    ) : (
+                                      "—"
+                                    )}
+                                  </td>
+                                  <td className="p-2">
+                                    {item.mk_will_choose ? (
+                                      <Badge variant="secondary">Sim</Badge>
+                                    ) : (
+                                      <span className="text-muted-foreground">Não</span>
+                                    )}
+                                  </td>
+                                  <td className="p-2">
+                                    <Select
+                                      value={item.item_status}
+                                      onValueChange={(value) => updateItemStatus(item.id, value)}
+                                    >
+                                      <SelectTrigger className="h-7 w-32 text-xs">
+                                        <SelectValue />
+                                      </SelectTrigger>
+                                      <SelectContent>
+                                        {itemStatusOptions.map((opt) => (
+                                          <SelectItem key={opt.value} value={opt.value}>
+                                            {opt.label}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
+                                  </td>
+                                  <td className="p-2 text-right font-medium">{brl(item.price)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })
+          )}
         </div>
       </div>
 
-      {/* Dialog para adicionar recibo */}
-      <Dialog open={showReceiptDialog} onOpenChange={setShowReceiptDialog}>
+      {/* Status Change Dialog */}
+      <Dialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Adicionar Recibo</DialogTitle>
+            <DialogTitle>Alterar Status do Pedido</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Valor (R$)</label>
-              <Input
-                type="number"
-                step="0.01"
-                value={receiptAmount}
-                onChange={(e) => setReceiptAmount(e.target.value)}
-                placeholder="Ex: 150.00"
-              />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Observação (opcional)</label>
-              <Textarea
-                value={receiptNote}
-                onChange={(e) => setReceiptNote(e.target.value)}
-                placeholder="Observações sobre o pagamento..."
-              />
-            </div>
+            <Select value={newStatus} onValueChange={setNewStatus}>
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione o status" />
+              </SelectTrigger>
+              <SelectContent>
+                {statusOptions.map((opt) => (
+                  <SelectItem key={opt.value} value={opt.value}>
+                    {opt.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
             <div className="flex gap-2">
-              <Button onClick={handleAddReceipt}>Adicionar Recibo</Button>
-              <Button variant="outline" onClick={() => setShowReceiptDialog(false)}>
+              <Button
+                onClick={() => selectedOrder && updateOrderStatus(selectedOrder.id, newStatus)}
+                disabled={!newStatus}
+              >
+                Salvar
+              </Button>
+              <Button variant="outline" onClick={() => setStatusDialogOpen(false)}>
                 Cancelar
               </Button>
             </div>

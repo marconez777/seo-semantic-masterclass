@@ -5,6 +5,7 @@ import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useLocation, Link } from "react-router-dom";
 import { MobileMenu } from "./MobileMenu";
+import { CartIcon } from "@/components/cart/CartIcon";
 
 
 const Header = () => {
@@ -159,6 +160,7 @@ const Header = () => {
         </div>
 
         <div className="hidden md:flex items-center gap-3">
+          <CartIcon />
           {isPanelRoute ? (
             <>
               <Link to="/contato" aria-label="Contato" className="text-foreground hover:text-primary transition-colors">
