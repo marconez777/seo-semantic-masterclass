@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 function slugify(s: string) {
   return s
@@ -29,9 +30,7 @@ export default function AdminBlogPublisher() {
 
   const [userId, setUserId] = useState<string | null>(null);
 
-  const contentRef = useRef<HTMLTextAreaElement | null>(null);
   const hiddenFeaturedInput = useRef<HTMLInputElement | null>(null);
-  const hiddenInlineImageInput = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUserId(data.user?.id ?? null));
@@ -42,30 +41,6 @@ export default function AdminBlogPublisher() {
   useEffect(() => {
     if (!slug) setSlug(autoSlug);
   }, [autoSlug]);
-
-  const insertAroundSelection = (prefix: string, suffix = "") => {
-    const ta = contentRef.current;
-    if (!ta) return;
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
-    const before = content.slice(0, start);
-    const selected = content.slice(start, end);
-    const after = content.slice(end);
-    const next = before + prefix + selected + suffix + after;
-    setContent(next);
-    // restore caret roughly after inserted text
-    requestAnimationFrame(() => {
-      const pos = start + prefix.length + selected.length + suffix.length;
-      ta.setSelectionRange(pos, pos);
-      ta.focus();
-    });
-  };
-
-  const makeHeading = (level: 1 | 2 | 3) => {
-    insertAroundSelection("\n" + "#".repeat(level) + " ", "\n");
-  };
-  const makeList = () => insertAroundSelection("\n- ");
-  const makeOrdered = () => insertAroundSelection("\n1. ");
 
   async function uploadToBucket(file: File): Promise<string> {
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -85,27 +60,12 @@ export default function AdminBlogPublisher() {
       const url = await uploadToBucket(file);
       setFeaturedUrl(url);
       toast({ title: "Imagem enviada", description: "Imagem em destaque atualizada." });
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast({ title: "Falha no upload", description: err.message || "Tente novamente." });
+      const message = err instanceof Error ? err.message : "Tente novamente.";
+      toast({ title: "Falha no upload", description: message });
     } finally {
       if (hiddenFeaturedInput.current) hiddenFeaturedInput.current.value = "";
-    }
-  };
-
-  const handleInlineImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    try {
-      const url = await uploadToBucket(file);
-      const alt = file.name.replace(/\.[^.]+$/, "");
-      insertAroundSelection(`![${alt}](${url})`);
-      toast({ title: "Imagem inserida", description: "Imagem adicionada ao conteúdo." });
-    } catch (err: any) {
-      console.error(err);
-      toast({ title: "Falha no upload", description: err.message || "Tente novamente." });
-    } finally {
-      if (hiddenInlineImageInput.current) hiddenInlineImageInput.current.value = "";
     }
   };
 
@@ -142,9 +102,10 @@ export default function AdminBlogPublisher() {
       toast({ title: "Post publicado", description: "Seu post foi salvo com sucesso." });
       resetForm();
       setOpen(false);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error(err);
-      toast({ title: "Erro ao salvar", description: err.message || "Tente novamente." });
+      const message = err instanceof Error ? err.message : "Tente novamente.";
+      toast({ title: "Erro ao salvar", description: message });
     } finally {
       setSaving(false);
     }
@@ -158,7 +119,7 @@ export default function AdminBlogPublisher() {
           <DialogTrigger asChild>
             <Button>Adicionar novo post</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-3xl">
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Novo Post</DialogTitle>
               <DialogDescription>Preencha as informações e publique no blog.</DialogDescription>
@@ -172,17 +133,12 @@ export default function AdminBlogPublisher() {
 
               <div className="grid gap-2">
                 <label className="text-sm font-medium">Texto do Post</label>
-                <div className="flex flex-wrap items-center gap-2">
-                  <Button type="button" variant="secondary" size="sm" onClick={() => makeHeading(1)}>H1</Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={() => makeHeading(2)}>H2</Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={() => makeHeading(3)}>H3</Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={makeList}>Lista</Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={makeOrdered}>Lista num.</Button>
-                  <input ref={hiddenInlineImageInput} type="file" accept="image/*" className="hidden" onChange={handleInlineImage} />
-                  <Button type="button" variant="secondary" size="sm" onClick={() => hiddenInlineImageInput.current?.click()}>Inserir imagem</Button>
-                </div>
-                <Textarea ref={contentRef} value={content} onChange={(e) => setContent(e.target.value)} rows={12} placeholder="# Título\n\nSeu conteúdo em markdown…" />
-                <p className="text-xs text-muted-foreground">Suporta Markdown simples: títulos, listas e imagens.</p>
+                <RichTextEditor
+                  value={content}
+                  onChange={setContent}
+                  placeholder="Comece a escrever seu post..."
+                  minHeight="300px"
+                />
               </div>
 
               <div className="grid gap-2">

@@ -6,7 +6,6 @@ import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import BacklinkMarketplace from "@/components/marketplace/BacklinkMarketplace";
 import FAQSection from "@/components/seo/FAQSection";
 import { usePageSEOContent } from "@/hooks/usePageSEOContent";
-import ReactMarkdown from "react-markdown";
 
 const defaultFaqs = [
   {
@@ -64,9 +63,10 @@ export default function ComprarBacklinks() {
           seoContent={
             <div className="mt-12 space-y-8">
               {mainContent ? (
-                <section className="prose prose-lg max-w-none dark:prose-invert">
-                  <ReactMarkdown>{mainContent}</ReactMarkdown>
-                </section>
+                <section 
+                  className="prose prose-lg max-w-none dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: mainContent }}
+                />
               ) : (
                 <section className="prose prose-lg max-w-none">
                   <h2 className="text-2xl font-bold mb-4">Por que comprar backlinks de qualidade?</h2>
