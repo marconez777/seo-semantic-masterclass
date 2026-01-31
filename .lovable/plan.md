@@ -1,218 +1,336 @@
 
-# Plano: Corrigir Grid de Categorias e Migrar Filtro para DA
+# Refatoracao: Sistema Dinamico de Listagem de Backlinks
 
-## Resumo das Alteracoes
+## Resumo Executivo
 
-Duas correcoes principais serao implementadas:
-
-1. **Grid de categorias completo e padronizado**: O quadro de categorias em todas as paginas sera atualizado para mostrar as 17 categorias oficiais do menu, mais um botao "Todas Categorias" que leva a `/comprar-backlinks`.
-
-2. **Migracao do filtro DR para DA**: A barra lateral de filtros passara a filtrar por DA (Domain Authority) em vez de DR (Domain Rating).
+Vamos transformar as 17 paginas de categoria individuais em um sistema dinamico unificado. Isso vai eliminar a duplicacao de codigo e tornar modificacoes futuras muito mais simples.
 
 ---
 
-## Parte 1: Grid de Categorias Completo
+## Problema Atual
 
-### Problema Atual
-- As paginas de categoria geram a lista de categorias dinamicamente a partir dos dados do banco
-- Isso faz com que algumas categorias fiquem faltando se nao houver backlinks naquela categoria
-- Nao ha consistencia com o menu do Header
+### Duplicacao Massiva de Codigo
+- Existem **17 arquivos** de categoria separados (ComprarBacklinksImoveis.tsx, ComprarBacklinksNoticias.tsx, etc.)
+- Cada arquivo tem aproximadamente **370 linhas**
+- Total: ~6.300 linhas de codigo duplicado
+- Para fazer qualquer alteracao (ex: mudar DR para DA), e necessario editar todos os 17 arquivos
 
-### Solucao
-Criar uma lista fixa das 17 categorias oficiais (mesmas do menu) e usar essa lista em todas as paginas de categoria.
-
-### Lista Oficial de Categorias (17 itens)
-1. Noticias
-2. Negocios
-3. Saude
-4. Educacao
-5. Tecnologia
-6. Financas
-7. Imoveis
-8. Moda
-9. Turismo
-10. Alimentacao
-11. Pets
-12. Automotivo
-13. Esportes
-14. Entretenimento
-15. Marketing
-16. Direito
-17. Maternidade
-
-### Mudanca no Codigo
-Em cada pagina de categoria, o grid de categorias sera substituido por uma lista fixa com:
-- Primeiro item: "Todas Categorias" apontando para `/comprar-backlinks`
-- Seguido das 17 categorias oficiais com seus icones
+### Consequencias
+- Modificacoes sao lentas e propensas a erros
+- Risco de inconsistencia entre paginas
+- Dificil manter todas as paginas sincronizadas
+- Aumento desnecessario do bundle size
 
 ---
 
-## Parte 2: Migracao do Filtro de DR para DA
+## Solucao Proposta
 
-### Problema Atual
-- O componente `BacklinkFilters.tsx` exibe "DR" e usa `drRange`/`setDrRange`
-- As paginas de categoria filtram por `b.dr` na logica de filtragem
-- A URL usa `?dr=` como parametro
+Criar uma arquitetura de 3 camadas:
 
-### Solucao
-- Renomear props e state de `drRange` para `daRange`
-- Alterar labels de "DR" para "DA"
-- Alterar a logica de filtragem para usar `b.da`
-- Alterar parametro URL de `?dr=` para `?da=`
+```text
++----------------------------------+
+|     Paginas de Categoria         |
+|  (apenas SEO e conteudo unico)   |
++----------------------------------+
+              |
+              v
++----------------------------------+
+|    BacklinkMarketplace           |
+|    (componente principal)        |
++----------------------------------+
+              |
+              v
++----------------------------------+
+|    Componentes Reutilizaveis     |
+|  CategoryGrid | BacklinkFilters  |
+|  BacklinkTable | Pagination      |
++----------------------------------+
+```
 
 ---
 
-## Arquivos a Serem Modificados
+## Componentes a Criar/Modificar
 
-### Componente de Filtros
-| Arquivo | Alteracoes |
-|---------|-----------|
-| `src/components/marketplace/BacklinkFilters.tsx` | Renomear props drRange->daRange, label "DR"->"DA" |
+### 1. Novo Componente Principal: BacklinkMarketplace
 
-### Pagina Principal
-| Arquivo | Alteracoes |
-|---------|-----------|
-| `src/pages/ComprarBacklinks.tsx` | State drRange->daRange, filtro b.da, URL ?da= |
+Arquivo: `src/components/marketplace/BacklinkMarketplace.tsx`
 
-### Paginas de Categoria (17 arquivos)
-Cada arquivo recebera as seguintes alteracoes:
-- Grid de categorias com lista fixa das 17 categorias oficiais + "Todas Categorias"
-- State: `drRange` -> `daRange`
-- Filtro: `b.dr` -> `b.da`
-- URL: `?dr=` -> `?da=`
+Este componente centraliza toda a logica de:
+- Fetch de dados do banco
+- Filtragem por categoria
+- Filtragem por DA, trafego, preco
+- Ordenacao
+- Paginacao
+- Auth gate
 
-Lista de arquivos:
-1. ComprarBacklinksAlimentacao.tsx
-2. ComprarBacklinksAutomoveis.tsx
-3. ComprarBacklinksDireito.tsx
-4. ComprarBacklinksEducacao.tsx
-5. ComprarBacklinksEntretenimento.tsx
-6. ComprarBacklinksEsportes.tsx
-7. ComprarBacklinksFinancas.tsx
-8. ComprarBacklinksImoveis.tsx
-9. ComprarBacklinksMarketing.tsx
-10. ComprarBacklinksMaternidade.tsx
-11. ComprarBacklinksModa.tsx
-12. ComprarBacklinksNegocios.tsx
-13. ComprarBacklinksNoticias.tsx
-14. ComprarBacklinksPets.tsx
-15. ComprarBacklinksSaude.tsx
-16. ComprarBacklinksTecnologia.tsx
-17. ComprarBacklinksTurismo.tsx
+```text
+interface BacklinkMarketplaceProps {
+  category?: string;        // Filtrar por categoria (opcional)
+  showCategoryGrid?: boolean; // Mostrar grid de categorias
+}
+```
+
+### 2. Novo Componente: BacklinkTable
+
+Arquivo: `src/components/marketplace/BacklinkTable.tsx`
+
+Encapsula a tabela com:
+- Cabecalho clicavel para ordenacao
+- Corpo com BacklinkTableRow
+- Loading state
+- Empty state
+
+### 3. Novo Hook: useBacklinkFilters
+
+Arquivo: `src/hooks/useBacklinkFilters.ts`
+
+Centraliza a logica de:
+- Estado dos filtros (daRange, trafficRange, maxPrice)
+- Sincronizacao com URL params
+- Funcao parseRange
+
+### 4. Novo Hook: useBacklinksQuery
+
+Arquivo: `src/hooks/useBacklinksQuery.ts`
+
+Gerencia:
+- Fetch de dados do Supabase
+- Cache com React Query
+- Filtragem por categoria no servidor
+
+---
+
+## Nova Estrutura das Paginas de Categoria
+
+Cada pagina de categoria ficara MUITO mais simples, com apenas 3 responsabilidades:
+
+1. **SEO Head** - Titulo, descricao, meta tags unicas
+2. **Structured Data** - Schema.org especifico
+3. **Conteudo SEO** - Texto unico por categoria
+
+### Exemplo: ComprarBacklinksImoveis.tsx (ANTES: 377 linhas)
+
+```text
+// DEPOIS: ~60 linhas
+export default function ComprarBacklinksImoveis() {
+  return (
+    <>
+      <SEOHead
+        title="Comprar Backlinks de Imoveis..."
+        description="..."
+      />
+      <CategoryStructuredData ... />
+      <Header />
+      <main>
+        <BacklinkMarketplace 
+          category="Imoveis"
+          showCategoryGrid={true}
+        >
+          {/* Conteudo SEO unico */}
+          <CategorySEOContent 
+            title="Backlinks para Imoveis"
+            description="..."
+            content={<ImoveisContent />}
+          />
+        </BacklinkMarketplace>
+      </main>
+      <Footer />
+    </>
+  );
+}
+```
+
+---
+
+## Estrutura de Arquivos Final
+
+```text
+src/
+  components/
+    marketplace/
+      BacklinkMarketplace.tsx    (NOVO - componente principal)
+      BacklinkTable.tsx          (NOVO - tabela com ordenacao)
+      BacklinkTableRow.tsx       (existente - manter)
+      BacklinkFilters.tsx        (existente - manter)
+      CategoryGrid.tsx           (existente - manter)
+  hooks/
+    useBacklinkFilters.ts        (NOVO - logica de filtros)
+    useBacklinksQuery.ts         (NOVO - fetch com React Query)
+  pages/
+    ComprarBacklinks.tsx         (SIMPLIFICADO)
+    ComprarBacklinksImoveis.tsx  (SIMPLIFICADO - ~60 linhas)
+    ... (outras 16 categorias)   (SIMPLIFICADAS)
+```
+
+---
+
+## Beneficios
+
+### 1. Manutencao Simplificada
+- Para alterar filtros: editar 1 arquivo (BacklinkFilters.tsx)
+- Para alterar tabela: editar 1 arquivo (BacklinkTable.tsx)
+- Para alterar logica: editar 1 arquivo (BacklinkMarketplace.tsx)
+
+### 2. Consistencia Garantida
+- Todas as paginas usam os mesmos componentes
+- Impossivel ter paginas com comportamentos diferentes
+
+### 3. Performance Melhorada
+- React Query faz cache automatico dos dados
+- Possibilidade de filtrar no servidor (reduz dados transferidos)
+- Bundle menor (menos codigo duplicado)
+
+### 4. Escalabilidade
+- Adicionar nova categoria: criar arquivo de ~60 linhas
+- Adicionar novo filtro: alterar 1 componente
+
+---
+
+## Plano de Implementacao
+
+### Fase 1: Criar Infraestrutura (hooks e componentes base)
+1. Criar `useBacklinkFilters.ts`
+2. Criar `useBacklinksQuery.ts`
+3. Criar `BacklinkTable.tsx`
+4. Criar `BacklinkMarketplace.tsx`
+
+### Fase 2: Migrar Pagina Principal
+5. Refatorar `ComprarBacklinks.tsx` para usar BacklinkMarketplace
+
+### Fase 3: Migrar Paginas de Categoria
+6. Refatorar as 17 paginas de categoria (uma por vez)
+7. Testar cada migracao
+
+### Fase 4: Limpeza
+8. Remover codigo duplicado
+9. Testar todas as paginas
 
 ---
 
 ## Detalhes Tecnicos
 
-### Constante de Categorias Oficiais
-Sera criada uma constante reutilizavel:
+### useBacklinkFilters.ts
 
 ```text
-const OFFICIAL_CATEGORIES = [
-  "Noticias",
-  "Negocios",
-  "Saude",
-  "Educacao",
-  "Tecnologia",
-  "Financas",
-  "Imoveis",
-  "Moda",
-  "Turismo",
-  "Alimentacao",
-  "Pets",
-  "Automotivo",
-  "Esportes",
-  "Entretenimento",
-  "Marketing",
-  "Direito",
-  "Maternidade",
-];
-```
-
-### Estrutura do Grid de Categorias
-```text
-<section className="mb-6">
-  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-    {/* Primeiro: link "Todas Categorias" */}
-    <a href="/comprar-backlinks">
-      <Folder icon />
-      "Ver Todas" / "Categorias"
-    </a>
-    
-    {/* Depois: 17 categorias oficiais */}
-    {OFFICIAL_CATEGORIES.map((cat) => (
-      <a href={`/comprar-backlinks-${slug(cat)}`}>
-        <CategoryIcon />
-        "Backlinks de" / {cat}
-      </a>
-    ))}
-  </div>
-</section>
-```
-
-### Mudanca no BacklinkFilters.tsx
-```text
-// Interface - ANTES
-interface BacklinkFiltersProps {
-  drRange: string;
-  setDrRange: (v: string) => void;
-  ...
-}
-
-// Interface - DEPOIS  
-interface BacklinkFiltersProps {
-  daRange: string;
-  setDaRange: (v: string) => void;
-  ...
-}
-
-// Label - ANTES
-<h3>DR</h3>
-
-// Label - DEPOIS
-<h3>DA</h3>
-```
-
-### Mudanca na Logica de Filtragem
-```text
-// ANTES
-const drParsed = parseRange(drRange);
-if (drParsed) {
-  if (b.dr < min || b.dr > max) return false;
-}
-
-// DEPOIS
-const daParsed = parseRange(daRange);
-if (daParsed) {
-  if (b.da < min || b.da > max) return false;
+export function useBacklinkFilters() {
+  const [daRange, setDaRange] = useState('todos');
+  const [trafficRange, setTrafficRange] = useState('todos');
+  const [maxPrice, setMaxPrice] = useState<number | ''>('');
+  
+  // Sync with URL
+  useEffect(() => { ... });
+  
+  // Parse range helper
+  const parseRange = (value: string) => { ... };
+  
+  return {
+    daRange, setDaRange,
+    trafficRange, setTrafficRange,
+    maxPrice, setMaxPrice,
+    parseRange
+  };
 }
 ```
 
-### Mudanca na URL
-```text
-// ANTES
-params.set("dr", drRange);
-const dr = params.get("dr");
+### useBacklinksQuery.ts
 
-// DEPOIS
-params.set("da", daRange);
-const da = params.get("da");
+```text
+export function useBacklinksQuery(category?: string) {
+  return useQuery({
+    queryKey: ['backlinks', category],
+    queryFn: async () => {
+      let query = supabase
+        .from('backlinks_public')
+        .select('*');
+      
+      if (category) {
+        query = query.ilike('category', category);
+      }
+      
+      const { data } = await query.order('da', { ascending: false });
+      return adaptBacklinks(data);
+    }
+  });
+}
 ```
+
+### BacklinkMarketplace.tsx
+
+```text
+interface Props {
+  category?: string;
+  showCategoryGrid?: boolean;
+  seoContent?: React.ReactNode;
+}
+
+export function BacklinkMarketplace({ 
+  category, 
+  showCategoryGrid = true,
+  seoContent 
+}: Props) {
+  const { data: backlinks, isLoading } = useBacklinksQuery(category);
+  const filters = useBacklinkFilters();
+  const isMobile = useIsMobile();
+  const { isAuthenticated } = useAuth();
+  
+  const filtered = useMemo(() => {
+    return applyFilters(backlinks, filters);
+  }, [backlinks, filters]);
+  
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
+      <BacklinkFiltersSidebar 
+        isMobile={isMobile}
+        {...filters}
+      />
+      
+      <section className="md:col-span-10">
+        {showCategoryGrid && <CategoryGrid currentCategory={category} />}
+        
+        <BacklinkTable 
+          data={filtered}
+          isLoading={isLoading}
+          isAuthenticated={isAuthenticated}
+        />
+        
+        {seoContent}
+      </section>
+    </div>
+  );
+}
+```
+
+---
+
+## Comparacao de Esforco Futuro
+
+| Tarefa | Antes | Depois |
+|--------|-------|--------|
+| Mudar DR para DA | 17 arquivos | 1 arquivo |
+| Adicionar novo filtro | 17 arquivos | 1 arquivo |
+| Corrigir bug na tabela | 17 arquivos | 1 arquivo |
+| Adicionar nova categoria | Criar 370 linhas | Criar 60 linhas |
+| Alterar grid de categorias | 17 arquivos | 1 arquivo |
+
+---
+
+## Consideracoes de SEO
+
+As paginas de categoria mantem:
+- URLs unicas por categoria (/comprar-backlinks-imoveis)
+- Meta tags unicas (title, description)
+- Structured Data unico (CategoryStructuredData)
+- Conteudo textual unico para SEO
+- Arquivos HTML pre-renderizados em /public/pages/
+
+Isso garante que o SEO nao sera afetado pela refatoracao.
 
 ---
 
 ## Resultado Esperado
 
-Apos a implementacao:
-
-1. **Grid de categorias**: Todas as paginas de categoria mostrarao:
-   - Primeiro item: "Todas Categorias" com icone de pasta
-   - 17 categorias oficiais (mesmas do menu dropdown)
-   - Consistencia visual entre todas as paginas
-
-2. **Filtro por DA**: 
-   - Label "DA" na barra lateral (desktop e mobile)
-   - Filtragem usando o campo `da` do banco de dados
-   - URL com parametro `?da=` para persistencia
-
-3. **Consistencia**: As mesmas categorias do menu aparecerao no grid de cada pagina de categoria.
+1. **Codigo mais limpo**: 17 arquivos de ~60 linhas em vez de ~370 linhas
+2. **Manutencao 17x mais rapida**: alterar 1 arquivo em vez de 17
+3. **Performance similar ou melhor**: cache com React Query
+4. **SEO preservado**: meta tags e conteudo unico por pagina
+5. **Consistencia garantida**: impossivel ter comportamentos diferentes entre paginas
