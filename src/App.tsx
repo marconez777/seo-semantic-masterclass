@@ -39,6 +39,7 @@ import AdminSites from "./pages/admin/AdminSites";
 import AdminPublicacoes from "./pages/admin/AdminPublicacoes";
 import AdminBlog from "./pages/admin/AdminBlog";
 import AdminConteudoSEO from "./pages/admin/AdminConteudoSEO";
+import AdminContatos from "./pages/admin/AdminContatos";
 import AdminAuth from "./pages/admin/AdminAuth";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
@@ -106,6 +107,7 @@ const App = () => (
             <Route path="blog" element={<AdminBlog />} />
             <Route path="blog/novo" element={<AdminBlogNew />} />
             <Route path="conteudo-seo" element={<AdminConteudoSEO />} />
+            <Route path="contatos" element={<AdminContatos />} />
           </Route>
           <Route path="/recibo/:orderId" element={<Recibo />} />
           
