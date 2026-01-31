@@ -5,8 +5,10 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import BacklinkMarketplace from "@/components/marketplace/BacklinkMarketplace";
 import FAQSection from "@/components/seo/FAQSection";
+import { usePageSEOContent } from "@/hooks/usePageSEOContent";
+import ReactMarkdown from "react-markdown";
 
-const faqs = [
+const defaultFaqs = [
   {
     question: "O que são backlinks e por que são importantes?",
     answer: "Backlinks são links de outros sites que apontam para o seu. Eles são um dos principais fatores de ranqueamento do Google, pois indicam que seu site é confiável e relevante."
@@ -30,19 +32,30 @@ const faqs = [
 ];
 
 export default function ComprarBacklinks() {
+  const { data: seoData } = usePageSEOContent("comprar-backlinks");
+
+  // Use dynamic data or fallback
+  const metaTitle = seoData?.meta_title || "Comprar Backlinks de em Grandes Portais | MK";
+  const metaDescription = seoData?.meta_description || "Comprar Backlinks de qualidade no Nicho que você escolher. Apareça no Topo do Google e nas Respostas das IAs.";
+  const metaKeywords = seoData?.meta_keywords || "comprar backlinks, link building, DR, DA, tráfego, preço";
+  const canonicalUrl = seoData?.canonical_url || "https://mkart.com.br/comprar-backlinks";
+  const h1Title = seoData?.h1_title || "Comprar Backlinks em Grandes Portais";
+  const mainContent = seoData?.main_content;
+  const faqs = seoData?.faqs?.length ? seoData.faqs : defaultFaqs;
+
   return (
     <>
       <SEOHead
-        title="Comprar Backlinks de em Grandes Portais | MK"
-        description="Comprar Backlinks de qualidade no Nicho que você escolher. Apareça no Topo do Google e nas Respostas das IAs."
-        canonicalUrl="https://mkart.com.br/comprar-backlinks"
-        keywords="comprar backlinks, link building, DR, DA, tráfego, preço"
+        title={metaTitle}
+        description={metaDescription}
+        canonicalUrl={canonicalUrl}
+        keywords={metaKeywords}
       />
       <CategoryStructuredData
         categoryName="Comprar Backlinks"
-        categoryUrl="https://mkart.com.br/comprar-backlinks"
+        categoryUrl={canonicalUrl}
         backlinks={[]}
-        description="Compre backlinks de qualidade em grandes portais brasileiros. Links com alta autoridade para melhorar seu posicionamento no Google."
+        description={metaDescription}
       />
       <Header />
       <main className="container mx-auto px-4 py-28">
@@ -50,14 +63,20 @@ export default function ComprarBacklinks() {
           showCategoryGrid={true}
           seoContent={
             <div className="mt-12 space-y-8">
-              <section className="prose prose-lg max-w-none">
-                <h2 className="text-2xl font-bold mb-4">Por que comprar backlinks de qualidade?</h2>
-                <p className="text-muted-foreground">
-                  Os backlinks são um dos principais fatores de ranqueamento do Google. Quando sites de alta autoridade 
-                  linkam para o seu, você ganha credibilidade e melhora sua posição nos resultados de busca. 
-                  Nossa plataforma oferece backlinks em portais verificados com métricas reais.
-                </p>
-              </section>
+              {mainContent ? (
+                <section className="prose prose-lg max-w-none dark:prose-invert">
+                  <ReactMarkdown>{mainContent}</ReactMarkdown>
+                </section>
+              ) : (
+                <section className="prose prose-lg max-w-none">
+                  <h2 className="text-2xl font-bold mb-4">Por que comprar backlinks de qualidade?</h2>
+                  <p className="text-muted-foreground">
+                    Os backlinks são um dos principais fatores de ranqueamento do Google. Quando sites de alta autoridade 
+                    linkam para o seu, você ganha credibilidade e melhora sua posição nos resultados de busca. 
+                    Nossa plataforma oferece backlinks em portais verificados com métricas reais.
+                  </p>
+                </section>
+              )}
               <FAQSection 
                 faqs={faqs}
                 title="Perguntas Frequentes sobre Backlinks"
@@ -72,7 +91,7 @@ export default function ComprarBacklinks() {
               { name: 'Comprar Backlinks', url: '/comprar-backlinks' },
             ]}
           />
-          <h1 className="text-4xl font-bold mb-6">Comprar Backlinks em Grandes Portais</h1>
+          <h1 className="text-4xl font-bold mb-6">{h1Title}</h1>
         </BacklinkMarketplace>
       </main>
       <Footer />

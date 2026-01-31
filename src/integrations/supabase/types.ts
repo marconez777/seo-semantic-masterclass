@@ -198,6 +198,54 @@ export type Database = {
         }
         Relationships: []
       }
+      page_seo_content: {
+        Row: {
+          canonical_url: string | null
+          created_at: string | null
+          faqs: Json | null
+          h1_title: string | null
+          h2_subtitle: string | null
+          id: string
+          intro_text: string | null
+          main_content: string | null
+          meta_description: string | null
+          meta_keywords: string | null
+          meta_title: string | null
+          page_slug: string
+          updated_at: string | null
+        }
+        Insert: {
+          canonical_url?: string | null
+          created_at?: string | null
+          faqs?: Json | null
+          h1_title?: string | null
+          h2_subtitle?: string | null
+          id?: string
+          intro_text?: string | null
+          main_content?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
+          page_slug: string
+          updated_at?: string | null
+        }
+        Update: {
+          canonical_url?: string | null
+          created_at?: string | null
+          faqs?: Json | null
+          h1_title?: string | null
+          h2_subtitle?: string | null
+          id?: string
+          intro_text?: string | null
+          main_content?: string | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
+          page_slug?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       posts: {
         Row: {
           category: string | null

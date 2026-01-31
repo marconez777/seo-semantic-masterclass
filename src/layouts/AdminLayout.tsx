@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { ClipboardList, Upload, Settings, PenTool, Users } from "lucide-react";
+import { ClipboardList, Upload, Settings, PenTool, Users, FileText } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 export default function AdminLayout() {
@@ -42,6 +42,7 @@ export default function AdminLayout() {
     { title: "Gerenciar Sites", url: "/admin/sites", icon: Settings },
     { title: "Publicações", url: "/admin/publicacoes", icon: PenTool },
     { title: "Blog", url: "/admin/blog", icon: Upload },
+    { title: "Conteúdo SEO", url: "/admin/conteudo-seo", icon: FileText },
   ];
 
   return (
