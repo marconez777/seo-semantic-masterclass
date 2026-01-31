@@ -7,7 +7,6 @@ import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import BacklinkMarketplace from "@/components/marketplace/BacklinkMarketplace";
 import FAQSection from "@/components/seo/FAQSection";
 import { usePageSEOContent } from "@/hooks/usePageSEOContent";
-import ReactMarkdown from "react-markdown";
 
 interface CategoryPageProps {
   // Database identifiers
@@ -81,9 +80,10 @@ export default function DynamicCategoryPage({
             <div className="mt-12 space-y-8">
               {/* Dynamic content from database */}
               {mainContent ? (
-                <section className="prose prose-lg max-w-none dark:prose-invert">
-                  <ReactMarkdown>{mainContent}</ReactMarkdown>
-                </section>
+                <section 
+                  className="prose prose-lg max-w-none dark:prose-invert"
+                  dangerouslySetInnerHTML={{ __html: mainContent }}
+                />
               ) : (
                 /* Fallback static content */
                 fallback.seoContent

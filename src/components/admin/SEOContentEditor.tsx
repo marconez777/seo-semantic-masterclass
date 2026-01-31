@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Trash2, GripVertical, Bold, Italic, Link, List, ListOrdered, Heading2, Heading3 } from "lucide-react";
+import { Plus, Trash2, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { 
   type PageSEOContent, 
@@ -15,7 +15,7 @@ import {
   useSavePageSEOContent,
   usePageSEOContent
 } from "@/hooks/usePageSEOContent";
-import ReactMarkdown from "react-markdown";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 interface SEOContentEditorProps {
   editingContent?: PageSEOContent | null;
@@ -25,7 +25,6 @@ interface SEOContentEditorProps {
 
 export default function SEOContentEditor({ editingContent, onClose, onSaved }: SEOContentEditorProps) {
   const { toast } = useToast();
-  const contentRef = useRef<HTMLTextAreaElement | null>(null);
   const saveMutation = useSavePageSEOContent();
 
   // Form state
@@ -56,33 +55,6 @@ export default function SEOContentEditor({ editingContent, onClose, onSaved }: S
       setCanonicalUrl(existingContent.canonical_url || "");
     }
   }, [existingContent, editingContent]);
-
-  const insertAroundSelection = (prefix: string, suffix = "") => {
-    const ta = contentRef.current;
-    if (!ta) return;
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
-    const before = mainContent.slice(0, start);
-    const selected = mainContent.slice(start, end);
-    const after = mainContent.slice(end);
-    const next = before + prefix + selected + suffix + after;
-    setMainContent(next);
-    requestAnimationFrame(() => {
-      const pos = start + prefix.length + selected.length + suffix.length;
-      ta.setSelectionRange(pos, pos);
-      ta.focus();
-    });
-  };
-
-  const makeHeading = (level: 2 | 3) => insertAroundSelection("\n" + "#".repeat(level) + " ", "\n");
-  const makeList = () => insertAroundSelection("\n- ");
-  const makeOrdered = () => insertAroundSelection("\n1. ");
-  const makeBold = () => insertAroundSelection("**", "**");
-  const makeItalic = () => insertAroundSelection("*", "*");
-  const makeLink = () => {
-    const url = prompt("URL do link:");
-    if (url) insertAroundSelection("[", `](${url})`);
-  };
 
   const addFaq = () => setFaqs([...faqs, { question: "", answer: "" }]);
   const removeFaq = (index: number) => setFaqs(faqs.filter((_, i) => i !== index));
@@ -241,41 +213,13 @@ export default function SEOContentEditor({ editingContent, onClose, onSaved }: S
               </div>
 
               <div className="space-y-2">
-                <Label>Conteúdo Principal (Markdown)</Label>
-                <div className="flex flex-wrap items-center gap-1 mb-2">
-                  <Button type="button" variant="secondary" size="sm" onClick={() => makeHeading(2)}>
-                    <Heading2 className="h-4 w-4" />
-                  </Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={() => makeHeading(3)}>
-                    <Heading3 className="h-4 w-4" />
-                  </Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={makeBold}>
-                    <Bold className="h-4 w-4" />
-                  </Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={makeItalic}>
-                    <Italic className="h-4 w-4" />
-                  </Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={makeList}>
-                    <List className="h-4 w-4" />
-                  </Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={makeOrdered}>
-                    <ListOrdered className="h-4 w-4" />
-                  </Button>
-                  <Button type="button" variant="secondary" size="sm" onClick={makeLink}>
-                    <Link className="h-4 w-4" />
-                  </Button>
-                </div>
-                <Textarea 
-                  ref={contentRef}
-                  value={mainContent} 
-                  onChange={(e) => setMainContent(e.target.value)} 
-                  placeholder="## Título&#10;&#10;Seu conteúdo em markdown..."
-                  rows={15}
-                  className="font-mono text-sm"
+                <Label>Conteúdo Principal</Label>
+                <RichTextEditor
+                  value={mainContent}
+                  onChange={setMainContent}
+                  placeholder="Comece a escrever seu conteúdo SEO..."
+                  minHeight="350px"
                 />
-                <p className="text-xs text-muted-foreground">
-                  Suporta Markdown: títulos (##), listas (- item), **negrito**, *itálico*, [links](url)
-                </p>
               </div>
             </CardContent>
           </Card>
@@ -356,9 +300,10 @@ export default function SEOContentEditor({ editingContent, onClose, onSaved }: S
                 {introText && <p className="text-muted-foreground">{introText}</p>}
                 
                 {mainContent && (
-                  <div className="prose prose-sm max-w-none dark:prose-invert">
-                    <ReactMarkdown>{mainContent}</ReactMarkdown>
-                  </div>
+                  <div 
+                    className="prose prose-sm max-w-none dark:prose-invert"
+                    dangerouslySetInnerHTML={{ __html: mainContent }}
+                  />
                 )}
               </div>
 
