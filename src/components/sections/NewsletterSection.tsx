@@ -1,8 +1,8 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const NewsletterSection = () => {
   const { toast } = useToast();
@@ -23,6 +23,20 @@ const NewsletterSection = () => {
     setIsSubmitting(true);
 
     try {
+      // Save lead to database
+      const { error: dbError } = await supabase
+        .from("contact_submissions")
+        .insert({
+          name: "Lead Newsletter",
+          email: email,
+          message: "Solicitou lista de 30 sites para Guest Post DR 20-90"
+        });
+
+      if (dbError) {
+        console.error("Error saving lead:", dbError);
+      }
+
+      // Send email with list
       const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-guest-post-list`, {
         method: 'POST',
         headers: {
