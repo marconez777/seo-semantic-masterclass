@@ -36,11 +36,21 @@ const Contact = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.functions.invoke('send-contact-email', {
+      // Save to database
+      const { error: dbError } = await supabase
+        .from('contact_submissions')
+        .insert({
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          message: formData.message.trim()
+        });
+
+      if (dbError) throw dbError;
+
+      // Also send email notification
+      await supabase.functions.invoke('send-contact-email', {
         body: formData
       });
-
-      if (error) throw error;
 
       toast({
         title: "Mensagem enviada!",
@@ -49,7 +59,7 @@ const Contact = () => {
 
       setFormData({ name: "", email: "", message: "" });
     } catch (error) {
-      console.error('Error sending email:', error);
+      console.error('Error submitting contact form:', error);
       toast({
         title: "Erro ao enviar mensagem",
         description: "Tente novamente ou entre em contato diretamente."
