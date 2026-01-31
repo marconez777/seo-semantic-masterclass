@@ -42,11 +42,12 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
   };
 
   const handleHeadingChange = (value: string) => {
+    // Prevent losing focus - apply command immediately
     if (value === "paragraph") {
       editor.chain().focus().setParagraph().run();
     } else {
       const level = parseInt(value.replace("h", "")) as 1 | 2 | 3 | 4;
-      editor.chain().focus().toggleHeading({ level }).run();
+      editor.chain().focus().setHeading({ level }).run();
     }
   };
 
