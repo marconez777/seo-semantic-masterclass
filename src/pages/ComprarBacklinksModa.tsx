@@ -1,586 +1,68 @@
-import { useEffect, useMemo, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import { supabase } from "@/integrations/supabase/client";
-import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import StructuredData from "@/components/seo/StructuredData";
 import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
-import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
-import { getCategoryIcon } from "@/lib/category-icons";
-import { Folder } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import TableAuthGate from "@/components/auth/TableAuthGate";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { BacklinkFiltersSidebar } from "@/components/marketplace/BacklinkFilters";
-
-// Helper to format BRL
-const brl = (v: number) =>
-  (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
-
-// Ícones por categoria (mesmo mapeamento do dropdown do Header)
-
-const normalize = (s: string) =>
-  s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+import BacklinkMarketplace from "@/components/marketplace/BacklinkMarketplace";
 
 export default function ComprarBacklinksModa() {
-  const [backlinks, setBacklinks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { isAuthenticated, loading: authLoading } = useAuth();
-  const isMobile = useIsMobile();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-
-  // Filters
-  const [daRange, setDaRange] = useState<string>("todos");
-  const [trafficRange, setTrafficRange] = useState<string>("todos");
-  const [maxPrice, setMaxPrice] = useState<number | "">("");
-
-  // Sorting
-  const [sortKey, setSortKey] = useState<
-    | "site_name"
-    | "dr"
-    | "da"
-    | "traffic"
-    | "category"
-    | "price_cents"
-    | null
-  >(null);
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("desc");
-
-  // Modal state
-  const [open, setOpen] = useState(false);
-  const [selected, setSelected] = useState<
-    { id: string; name: string; price_cents: number } | null
-  >(null);
-
-  // Paginação
-  const [page, setPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState<number>(20);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      const { data, error } = await supabase
-        .from("backlinks_public")
-        .select("*")
-        .order("dr", { ascending: false });
-      if (mounted) {
-        if (error) console.error("Erro ao buscar backlinks", error);
-        setBacklinks(data ?? []);
-        setLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  const categories = useMemo(() => {
-    const set = new Set<string>();
-    (backlinks ?? []).forEach((b) => {
-      if (b.category) set.add(String(b.category));
-    });
-    return Array.from(set).sort();
-  }, [backlinks]);
-
-  // Helpers
-  const parseRange = (value: string): [number, number] | null => {
-    if (!value || value === "todos") return null;
-    if (value === "gt-100000") return [100001, Number.POSITIVE_INFINITY];
-    const [minStr, maxStr] = value.split("-");
-    const min = Number(minStr.replace(/\./g, ""));
-    const max = Number(maxStr.replace(/\./g, ""));
-    if (Number.isNaN(min) || Number.isNaN(max)) return null;
-    return [min, max];
-  };
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const da = params.get("da");
-    const traffic = params.get("traffic");
-    if (da) setDaRange(da);
-    if (traffic) setTrafficRange(traffic);
-  }, []);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    if (daRange && daRange !== "todos") params.set("da", daRange);
-    else params.delete("da");
-    if (trafficRange && trafficRange !== "todos")
-      params.set("traffic", trafficRange);
-    else params.delete("traffic");
-    const query = params.toString();
-    const url = `${window.location.pathname}${query ? `?${query}` : ""}`;
-    window.history.replaceState({}, "", url);
-  }, [daRange, trafficRange]);
-
-  useEffect(() => {
-    setPage(1);
-  }, [daRange, trafficRange, maxPrice, sortKey, sortDir, itemsPerPage]);
-
-  const filtered = useMemo(() => {
-    const daParsed = parseRange(daRange);
-    const trafficParsed = parseRange(trafficRange);
-
-    return (backlinks ?? []).filter((b) => {
-      // Restrito a Moda
-      const cat = normalize(String(b.category ?? ""));
-      if (!(cat === "moda")) return false;
-
-      if (daParsed) {
-        const [min, max] = daParsed;
-        if (typeof b.da !== "number") return false;
-        if (b.da < min || b.da > max) return false;
-      }
-      if (trafficParsed) {
-        const [minT, maxT] = trafficParsed;
-        if (typeof b.traffic !== "number") return false;
-        if (b.traffic < minT || b.traffic > maxT) return false;
-      }
-      if (
-        maxPrice !== "" &&
-        typeof b.price_cents === "number" &&
-        b.price_cents > Number(maxPrice)
-      )
-        return false;
-      return true;
-    });
-  }, [backlinks, daRange, trafficRange, maxPrice]);
-
-  const sorted = useMemo(() => {
-    const arr = [...filtered];
-    if (!sortKey) return arr;
-    arr.sort((a, b) => {
-      const av =
-        sortKey === "site_name"
-          ? (a.site_name ?? a.site_url ?? "").toString().toLowerCase()
-          : (a as any)[sortKey!];
-      const bv =
-        sortKey === "site_name"
-          ? (b.site_name ?? b.site_url ?? "").toString().toLowerCase()
-          : (b as any)[sortKey!];
-      if (av == null && bv == null) return 0;
-      if (av == null) return 1;
-      if (bv == null) return -1;
-      if (typeof av === "number" && typeof bv === "number") {
-        return sortDir === "desc"
-          ? (bv as number) - (av as number)
-          : (av as number) - (bv as number);
-      }
-      const as = String(av);
-      const bs = String(bv);
-      return sortDir === "desc" ? bs.localeCompare(as) : as.localeCompare(bs);
-    });
-    return arr;
-  }, [filtered, sortKey, sortDir]);
-
-  const pageCount = Math.max(1, Math.ceil(sorted.length / itemsPerPage));
-  const currentPage = Math.min(page, pageCount);
-  const visible = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    const items = sorted.slice(start, start + itemsPerPage);
-    
-    if (isAuthenticated) {
-      return items;
-    }
-    
-    // For non-authenticated users: show first 4 complete + 3 with blur
-    return items.slice(0, 7).map((item, index) => ({
-      ...item,
-      shouldBlur: index >= 4
-    }));
-  }, [sorted, currentPage, itemsPerPage, isAuthenticated]);
-
-  const onBuy = (b: any) => {
-    setSelected({
-      id: b.id,
-      name: b.site_name ?? b.site_url ?? "Backlink",
-      price_cents: b.price_cents,
-    });
-    setOpen(true);
-  };
-
   return (
     <>
       <SEOHead
-        title="Comprar Backlinks de Qualidade Nicho de Moda | MK"
-        description="Loja de backlinks de qualidade em Blogs de Moda. Melhores backlinks para aparecer no Topo do Google e nas IAs."
+        title="Comprar Backlinks Brasileiros de Moda | MK"
+        description="Comprar Backlinks de qualidade no Nicho de Moda. Apareça no Topo do Google e nas Respostas das IAs."
         canonicalUrl="https://mkart.com.br/comprar-backlinks-moda"
-        keywords="backlinks de moda, comprar backlinks moda, backlinks de qualidade"
+        keywords="comprar backlinks moda, backlinks fashion, backlinks roupas, DR, DA, tráfego"
       />
       <StructuredData
         type="breadcrumb"
         data={{
           items: [
-            { name: "Início", url: `${window.location.origin}/` },
-            {
-              name: "Comprar Backlinks de Moda",
-              url: `${window.location.origin}/comprar-backlinks-moda`,
-            },
+            { name: "Início", url: "https://mkart.com.br/" },
+            { name: "Comprar Backlinks", url: "https://mkart.com.br/comprar-backlinks" },
+            { name: "Backlinks de Moda", url: "https://mkart.com.br/comprar-backlinks-moda" },
           ],
         }}
       />
       <CategoryStructuredData
         categoryName="Backlinks de Moda"
         categoryUrl="https://mkart.com.br/comprar-backlinks-moda"
-        backlinks={filtered}
-        description="Compre backlinks de qualidade em blogs e portais de moda. Links com alta autoridade para melhorar seu SEO."
+        backlinks={[]}
+        description="Compre backlinks de qualidade em portais de moda. Links com alta autoridade para e-commerces e blogs de moda."
       />
       <Header />
       <main className="container mx-auto px-4 py-28">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
-          <BacklinkFiltersSidebar
-            isMobile={isMobile}
-            mobileMenuOpen={mobileMenuOpen}
-            setMobileMenuOpen={setMobileMenuOpen}
-            daRange={daRange}
-            setDaRange={setDaRange}
-            trafficRange={trafficRange}
-            setTrafficRange={setTrafficRange}
-            maxPrice={maxPrice}
-            setMaxPrice={setMaxPrice}
-          />
-
-          {/* Main list */}
-          <section className={isMobile ? "col-span-1" : "md:col-span-10"}>
-            <Breadcrumbs
-              className="mb-3"
+        <BacklinkMarketplace
+          category="Moda"
+          showCategoryGrid={true}
+          currentCategorySlug="moda"
+          seoContent={
+            <section className="mt-10 space-y-4">
+              <h2 className="text-2xl font-semibold">Por que Comprar Backlinks para Moda?</h2>
+              <p className="text-muted-foreground">
+                O mercado de moda é visual e competitivo. Backlinks de qualidade em portais de moda são essenciais para e-commerces e blogs de tendências.
+              </p>
+              <p className="text-muted-foreground">
+                Nossos backlinks são provenientes de sites especializados em moda, beleza e lifestyle, garantindo relevância temática para sua estratégia de SEO.
+              </p>
+            </section>
+          }
+        >
+          <Breadcrumbs
+            className="mb-3"
             items={[
-              { name: "Início", url: "/" },
-              { name: "Backlinks de Moda", url: "/comprar-backlinks-moda" },
+              { name: 'Início', url: '/' },
+              { name: 'Comprar Backlinks', url: '/comprar-backlinks' },
+              { name: 'Moda', url: '/comprar-backlinks-moda' },
             ]}
           />
-          <h1 className="text-4xl font-bold mb-6">
-            Comprar Backlinks de Qualidade para Moda
-          </h1>
-
-          {categories.length > 0 && (
-            <section className="mb-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                {categories.slice(0, 16).map((cat) => {
-                  const slug = String(cat)
-                    .toLowerCase()
-                    .normalize("NFD")
-                    .replace(/[\u0300-\u036f]/g, "")
-                    .replace(/\s+/g, "-");
-                  const IconComp = getCategoryIcon(String(cat));
-                  return (
-                    <a
-                      key={cat}
-                      href={`/comprar-backlinks-${slug}`}
-                      className="group flex items-center gap-3 rounded-md p-2 hover:bg-muted transition-colors"
-                    >
-                      <span className="inline-flex size-9 items-center justify-center rounded-md bg-primary/10 text-primary shadow-sm">
-                        <IconComp className="size-4" aria-hidden="true" />
-                      </span>
-                      <span className="flex flex-col">
-                        <span className="text-[11px] uppercase tracking-wide text-muted-foreground leading-none">
-                          Backlinks de
-                        </span>
-                        <span className="text-sm font-semibold leading-none mt-1">
-                          {String(cat)}
-                        </span>
-                      </span>
-                    </a>
-                  );
-                })}
-              </div>
-            </section>
-          )}
-
-          <div className="relative overflow-x-auto border rounded-xl bg-card shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="bg-accent/40">
-                <tr className="text-left">
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "site_name")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("site_name");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "site_name")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("site_name");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    SITE
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "dr")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("dr");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "dr")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("dr");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    DR
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "da")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("da");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "da")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("da");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    DA
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "traffic")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("traffic");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "traffic")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("traffic");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    TRÁFEGO/Mês
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "category")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("category");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "category")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("category");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    CATEGORIA
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => {
-                      if (sortKey === "price_cents")
-                        setSortDir(sortDir === "asc" ? "desc" : "asc");
-                      else {
-                        setSortKey("price_cents");
-                        setSortDir("desc");
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        if (sortKey === "price_cents")
-                          setSortDir(sortDir === "asc" ? "desc" : "asc");
-                        else {
-                          setSortKey("price_cents");
-                          setSortDir("desc");
-                        }
-                      }
-                    }}
-                  >
-                    VALOR
-                  </th>
-                  <th className="p-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr>
-                    <td className="p-6" colSpan={7}>
-                      Carregando...
-                    </td>
-                  </tr>
-                ) : filtered.length === 0 ? (
-                  <tr>
-                    <td className="p-6" colSpan={7}>
-                      Nenhum resultado encontrado.
-                    </td>
-                  </tr>
-                ) : (
-                  visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} shouldBlur={b.shouldBlur} />
-                  ))
-                )}
-              </tbody>
-            </table>
-            {!isAuthenticated && !authLoading && <TableAuthGate />}
-          </div>
-
-          <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <label className="text-sm">Itens por página:</label>
-              <select
-                className="bg-card text-foreground border rounded-md px-2 py-1"
-                value={itemsPerPage}
-                onChange={(e) => {
-                  setItemsPerPage(Number(e.target.value));
-                  setPage(1);
-                }}
-              >
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={150}>150</option>
-              </select>
-            </div>
-            <div className="flex items-center gap-2 md:ml-auto">
-              <button
-                className="px-3 py-1 border rounded-md disabled:opacity-50"
-                disabled={currentPage <= 1}
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-              >
-                Anterior
-              </button>
-              <span className="text-sm">
-                Página {currentPage} de {pageCount}
-              </span>
-              <button
-                className="px-3 py-1 border rounded-md disabled:opacity-50"
-                disabled={currentPage >= pageCount}
-                onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
-              >
-                Próxima
-              </button>
-            </div>
-          </div>
-
-          {/* Conteúdo SEO */}
-          <section className="mt-10 space-y-6">
-            <h2 className="text-2xl font-semibold">Potencialize Seu Negócio de Moda no Digital</h2>
-            <p className="text-muted-foreground">
-              No mundo digital competitivo atual, ter um site bem-classificado nos mecanismos de busca é crucial para atrair visitantes e transformar cliques em clientes. Para o nicho de moda, onde tendências mudam rapidamente e as opções de lojas online se multiplicam, destacar-se é essencial.
-            </p>
-            <p className="text-muted-foreground">
-              Aqui entra a importância de comprar backlinks brasileiros de alta qualidade, uma estratégia poderosa e eficaz para impulsionar a presença online das lojas de roupas e acessórios.
-            </p>
-
-            <h2 className="text-2xl font-semibold">O que são Backlinks e Por que São Essenciais na Moda?</h2>
-            <p className="text-muted-foreground">
-              Backlinks são links de outros sites que apontam para o seu. Eles funcionam como votos de confiança, indicando ao Google e outros motores de busca que seu site é relevante e confiável.
-            </p>
-            <p className="text-muted-foreground">
-              No nicho de moda, isso é especialmente importante devido à necessidade de se destacar em um mercado saturado. A compra de backlink torna-se uma estratégia prática para aumentar a autoridade do seu site de forma eficaz e rápida.
-            </p>
-
-            <h2 className="text-2xl font-semibold">Benefícios de Comprar Backlinks Brasileiros para o Setor de Moda</h2>
-            <p className="text-muted-foreground">
-              1- Visibilidade Aumentada: Comprar backlinks brasileiros ajuda a posicionar sua loja de moda nos principais resultados dos mecanismos de busca, especialmente quando você opta por links de sites relevantes e bem classificados.
-            </p>
-            <p className="text-muted-foreground">
-              2- Tráfego Qualificado: Links de qualidade garantem que o tráfego que chega ao seu site seja composto por usuários genuinamente interessados em moda, aumentando as chances de conversões.
-            </p>
-            <p className="text-muted-foreground">
-              3- Marca Fortalecida: Ter backlinks de sites reconhecidos no setor de moda ajuda a aumentar a credibilidade e confiança em sua marca, essencial para fidelizar clientes.
-            </p>
-
-            <h2 className="text-2xl font-semibold">Onde Comprar Backlinks e Garantir Qualidade?</h2>
-            <p className="text-muted-foreground">
-              Para garantir o retorno sobre o investimento na compra de backlinks, é fundamental saber onde comprar backlinks de qualidade. A escolha certa de provedores que compreendam o nicho de moda e tenham uma rede de sites relevantes é crucial. Evitar penalizações dos motores de busca também é importante, por isso opte sempre por agências ou plataformas reconhecidas no mercado.
-            </p>
-
-            <h2 className="text-2xl font-semibold">Estratégias para a Compra de Backlink no Segmento de Moda</h2>
-            <p className="text-muted-foreground">
-              Seleção de Sites Relevantes: Focando em sites que partilham o mesmo público-alvo, sua eficácia no SEO será muito maior.
-            </p>
-            <p className="text-muted-foreground">
-              Diversificação de Links: Não se limite apenas a blogs ou sites de moda. Considere parcerias com influenciadores e portais de tendências para uma abordagem diversificada.
-            </p>
-            <p className="text-muted-foreground">
-              Atenção ao Conteúdo: A compra de backlink para SEO deve integrar-se naturalmente ao conteúdo, garantindo que a experiência do usuário ao seguir esses links seja relevante e informativa.
-            </p>
-
-            <h2 className="text-2xl font-semibold">Por que Investir em Matérias com Backlink no Universo da Moda?</h2>
-            <p className="text-muted-foreground">
-              Investir em comprar matéria em site com backlink oferece a vantagem adicional de promover sua loja de moda através de conteúdo editorial. Este tipo de link building não só melhora o SEO do seu site, mas também apresenta sua marca a novos públicos de forma orgânica e engajante.
-            </p>
-            <p className="text-muted-foreground">
-              Ao considerar onde comprar backlinks, priorize plataformas que ofereçam a criação de conteúdo como parte do pacote. Isso não só otimiza suas chances de aparecer em listas e recomendações de moda, como também aumenta a autoridade de seu site aos olhos dos consumidores.
-            </p>
-
-            <h2 className="text-2xl font-semibold">Potencializando sua Loja de Moda com SEO de Backlinks</h2>
-            <p className="text-muted-foreground">
-              No final das contas, comprar backlinks brasileiros eficazes faz parte de uma estratégia mais ampla de SEO que pode colocar sua loja de moda à frente da competição. Ao priorizar backlinks de qualidade e conteúdo relevante, você está investindo no crescimento sustentável e na relevância a longo prazo de sua marca no setor de moda.
-            </p>
-            <p className="text-muted-foreground">
-              Não perca mais tempo!
-            </p>
-            <p className="text-muted-foreground">
-              Potencialize sua presença online no mercado de moda e veja suas vendas crescerem.
-            </p>
-            <p className="text-muted-foreground">
-              Descubra como nossos serviços podem ajudar sua loja a alcançar novas alturas. Entre em contato conosco agora e dê o próximo passo rumo ao sucesso digital no universo da moda!
-            </p>
-          </section>
-        </section>
-        </div>
+          <h1 className="text-4xl font-bold mb-6">Backlinks para Moda</h1>
+          <h2 className="text-2xl font-semibold mb-6">Compre Backlinks de Qualidade para o nicho de Moda</h2>
+          <p className="text-muted-foreground mb-8">Destaque sua loja de moda ou blog de tendências no topo do Google.</p>
+        </BacklinkMarketplace>
       </main>
       <Footer />
-
-      {selected && (
-        <ContactModal open={open} onOpenChange={setOpen} />
-      )}
     </>
   );
 }
