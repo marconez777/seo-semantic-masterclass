@@ -17,8 +17,8 @@ import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-function brl(v: number) {
-  return (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+function brlFromReais(v: number) {
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 export function CartModal() {
@@ -264,7 +264,7 @@ export function CartModal() {
                         )}
                       </div>
                     </td>
-                    <td className="p-3 text-right font-medium">{brl(item.price)}</td>
+                    <td className="p-3 text-right font-medium">{brlFromReais(item.price)}</td>
                     <td className="p-3">
                       <Button
                         variant="ghost"
@@ -304,7 +304,7 @@ export function CartModal() {
         <div className="border-t pt-4 space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-lg font-semibold">Total:</span>
-            <span className="text-2xl font-bold text-primary">{brl(total)}</span>
+            <span className="text-2xl font-bold text-primary">{brlFromReais(total)}</span>
           </div>
 
           <DialogFooter className="flex gap-2 sm:gap-0">
