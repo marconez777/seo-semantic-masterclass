@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { CartProvider } from "./contexts/CartContext";
 import { CartModal } from "./components/cart/CartModal";
 import Index from "./pages/Index";
@@ -49,8 +50,10 @@ import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
 import ScrollToTop from "./components/layout/ScrollToTop";
 
+const queryClient = new QueryClient();
  
 const App = () => (
+  <QueryClientProvider client={queryClient}>
   <CartProvider>
     <BrowserRouter>
       <ScrollToTop />
@@ -112,6 +115,7 @@ const App = () => (
       <WhatsAppFAB />
     </BrowserRouter>
   </CartProvider>
+  </QueryClientProvider>
 );
  
 export default App;
