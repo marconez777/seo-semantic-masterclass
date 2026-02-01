@@ -151,10 +151,10 @@ const Auth = () => {
             {mode === "login" ? "Entrar" : mode === "signup" ? "Cadastrar" : "Recuperar Senha"}
           </h1>
 
-          {mode !== "forgot-password" && (
+        {mode !== "forgot-password" && (
             <div className="flex gap-2 mb-6">
-              <Button variant={mode === "login" ? "default" : "outline"} onClick={() => setMode("login")}>Já tenho conta</Button>
-              <Button variant={mode === "signup" ? "default" : "outline"} onClick={() => setMode("signup")}>Sou novo por aqui</Button>
+              <Button variant={mode === "login" ? "default" : "outline"} onClick={() => { setMode("login"); setSuccess(null); setError(null); }}>Já tenho conta</Button>
+              <Button variant={mode === "signup" ? "default" : "outline"} onClick={() => { setMode("signup"); setSuccess(null); setError(null); }}>Sou novo por aqui</Button>
             </div>
           )}
 
