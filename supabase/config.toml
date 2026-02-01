@@ -1,1 +1,25 @@
 project_id = "nxitvhrfloibpwrkskzx"
+
+[functions.get-pii-data]
+verify_jwt = false
+
+[functions.send-contact-email]
+verify_jwt = false
+
+[functions.send-guest-post-list]
+verify_jwt = false
+
+[functions.send-reset-password-email]
+verify_jwt = false
+
+[functions.send-activation-email]
+verify_jwt = false
+
+[functions.seo-health-check]
+verify_jwt = false
+
+[functions.send-payment-email]
+verify_jwt = false
+
+[functions.send-order-status-email]
+verify_jwt = false
