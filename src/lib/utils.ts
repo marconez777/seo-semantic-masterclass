@@ -5,6 +5,15 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+// Formata valor em Reais (já em reais, não centavos)
+export function formatBRL(value: number) {
+  return value.toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  })
+}
+
+// DEPRECATED: Use formatBRL instead - mantido para compatibilidade
 export function formatCurrency(cents: number) {
   return (cents / 100).toLocaleString('pt-BR', {
     style: 'currency',
