@@ -160,14 +160,15 @@ export default function BlogPost() {
               />
 
               {/* Content - supports both HTML and Markdown */}
-              <div 
-                className="prose prose-lg max-w-none dark:prose-invert mt-8"
-                dangerouslySetInnerHTML={{ 
-                  __html: post.content?.startsWith('<') 
-                    ? post.content 
-                    : `<div>${post.content ?? ''}</div>` 
-                }}
-              />
+              <div className="prose prose-lg max-w-none dark:prose-invert mt-8">
+                {post.content?.startsWith('<') ? (
+                  <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                ) : (
+                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                    {post.content ?? ''}
+                  </ReactMarkdown>
+                )}
+              </div>
 
               {/* Bottom Social Share */}
               <div className="mt-8">

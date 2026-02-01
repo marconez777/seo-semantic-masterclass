@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import { type Editor } from "@tiptap/react";
 
 function slugify(s: string) {
   return s
@@ -31,7 +33,7 @@ export default function AdminBlogNew() {
   const [featuredUrl, setFeaturedUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const contentRef = useRef<HTMLTextAreaElement | null>(null);
+  const currentEditorRef = useRef<Editor | null>(null);
   const hiddenFeaturedInput = useRef<HTMLInputElement | null>(null);
   const hiddenInlineImageInput = useRef<HTMLInputElement | null>(null);
 
@@ -68,26 +70,6 @@ export default function AdminBlogNew() {
     if (!slug) setSlug(autoSlug);
   }, [autoSlug]);
 
-  const insertAroundSelection = (prefix: string, suffix = "") => {
-    const ta = contentRef.current;
-    if (!ta) return;
-    const start = ta.selectionStart ?? 0;
-    const end = ta.selectionEnd ?? 0;
-    const before = content.slice(0, start);
-    const selected = content.slice(start, end);
-    const after = content.slice(end);
-    const next = before + prefix + selected + suffix + after;
-    setContent(next);
-    requestAnimationFrame(() => {
-      const pos = start + prefix.length + selected.length + suffix.length;
-      ta.setSelectionRange(pos, pos);
-      ta.focus();
-    });
-  };
-
-  const makeHeading = (level: 1 | 2 | 3) => insertAroundSelection("\n" + "#".repeat(level) + " ", "\n");
-  const makeList = () => insertAroundSelection("\n- ");
-  const makeOrdered = () => insertAroundSelection("\n1. ");
 
   async function uploadToBucket(file: File): Promise<string> {
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
@@ -115,11 +97,11 @@ export default function AdminBlogNew() {
 
   const handleInlineImage = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file) return;
+    if (!file || !currentEditorRef.current) return;
     try {
       const url = await uploadToBucket(file);
       const alt = file.name.replace(/\.[^.]+$/, "");
-      insertAroundSelection(`![${alt}](${url})`);
+      currentEditorRef.current.chain().focus().setImage({ src: url, alt }).run();
       toast({ title: "Imagem inserida", description: "Imagem adicionada ao conteúdo." });
     } catch (err: any) {
       console.error(err);
@@ -205,17 +187,23 @@ export default function AdminBlogNew() {
 
           <div className="grid gap-2">
             <label className="text-sm font-medium">Texto do Post</label>
-            <div className="flex flex-wrap items-center gap-2">
-              <Button type="button" variant="secondary" size="sm" onClick={() => makeHeading(1)}>H1</Button>
-              <Button type="button" variant="secondary" size="sm" onClick={() => makeHeading(2)}>H2</Button>
-              <Button type="button" variant="secondary" size="sm" onClick={() => makeHeading(3)}>H3</Button>
-              <Button type="button" variant="secondary" size="sm" onClick={makeList}>Lista</Button>
-              <Button type="button" variant="secondary" size="sm" onClick={makeOrdered}>Lista num.</Button>
-              <input ref={hiddenInlineImageInput} type="file" accept="image/*" className="hidden" onChange={handleInlineImage} />
-              <Button type="button" variant="secondary" size="sm" onClick={() => hiddenInlineImageInput.current?.click()}>Inserir imagem</Button>
-            </div>
-            <Textarea ref={contentRef} value={content} onChange={(e) => setContent(e.target.value)} rows={14} placeholder="# Título\n\nSeu conteúdo em markdown…" />
-            <p className="text-xs text-muted-foreground">Suporta Markdown simples: títulos, listas e imagens.</p>
+            <input
+              ref={hiddenInlineImageInput}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleInlineImage}
+            />
+            <RichTextEditor
+              value={content}
+              onChange={setContent}
+              placeholder="Comece a escrever seu post..."
+              minHeight="400px"
+              onImageUpload={(editor) => {
+                currentEditorRef.current = editor;
+                hiddenInlineImageInput.current?.click();
+              }}
+            />
           </div>
 
           <div className="grid gap-2">
