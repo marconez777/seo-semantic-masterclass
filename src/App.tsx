@@ -106,11 +106,11 @@ const App = () => (
             <Route path="publicacoes" element={<AdminPublicacoes />} />
             <Route path="blog" element={<AdminBlog />} />
             <Route path="blog/novo" element={<AdminBlogNew />} />
+            <Route path="blog/editar/:id" element={<AdminBlogNew />} />
             <Route path="conteudo-seo" element={<AdminConteudoSEO />} />
             <Route path="contatos" element={<AdminContatos />} />
           </Route>
           <Route path="/recibo/:orderId" element={<Recibo />} />
-          
           
           {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} />
