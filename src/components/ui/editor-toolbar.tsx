@@ -23,14 +23,16 @@ import {
   AlignRight,
   Undo,
   Redo,
+  Image as ImageIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface EditorToolbarProps {
   editor: Editor | null;
+  onImageUpload?: (editor: Editor) => void;
 }
 
-export function EditorToolbar({ editor }: EditorToolbarProps) {
+export function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
   if (!editor) return null;
 
   const getCurrentHeading = () => {
@@ -172,6 +174,15 @@ export function EditorToolbar({ editor }: EditorToolbarProps) {
       >
         <Unlink className="h-4 w-4" />
       </ToolbarButton>
+
+      {onImageUpload && (
+        <ToolbarButton
+          onClick={() => editor && onImageUpload(editor)}
+          title="Inserir imagem"
+        >
+          <ImageIcon className="h-4 w-4" />
+        </ToolbarButton>
+      )}
 
       <div className="w-px h-6 bg-border mx-1" />
 

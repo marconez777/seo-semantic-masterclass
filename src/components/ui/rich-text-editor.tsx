@@ -1,7 +1,8 @@
-import { useEditor, EditorContent } from "@tiptap/react";
+import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Underline from "@tiptap/extension-underline";
 import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
 import { EditorToolbar } from "./editor-toolbar";
@@ -14,6 +15,7 @@ interface RichTextEditorProps {
   placeholder?: string;
   className?: string;
   minHeight?: string;
+  onImageUpload?: (editor: Editor) => void;
 }
 
 // Simple markdown to HTML converter for legacy content
@@ -74,7 +76,8 @@ export function RichTextEditor({
   onChange, 
   placeholder = "Comece a escrever...",
   className,
-  minHeight = "300px"
+  minHeight = "300px",
+  onImageUpload
 }: RichTextEditorProps) {
   const editor = useEditor({
     extensions: [
@@ -84,6 +87,11 @@ export function RichTextEditor({
         },
       }),
       Underline,
+      Image.configure({
+        HTMLAttributes: {
+          class: "max-w-full h-auto rounded-lg my-4",
+        },
+      }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
@@ -129,7 +137,7 @@ export function RichTextEditor({
 
   return (
     <div className={cn("border rounded-md overflow-hidden", className)}>
-      <EditorToolbar editor={editor} />
+      <EditorToolbar editor={editor} onImageUpload={onImageUpload} />
       <div 
         className="p-4 bg-background"
         style={{ minHeight }}
