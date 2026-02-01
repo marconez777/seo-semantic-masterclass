@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
@@ -21,6 +21,7 @@ function slugify(s: string) {
 
 export default function AdminBlogNew() {
   const navigate = useNavigate();
+  const { id } = useParams();
   const { toast } = useToast();
 
   const [userId, setUserId] = useState<string | null>(null);
@@ -32,6 +33,7 @@ export default function AdminBlogNew() {
   const [slug, setSlug] = useState("");
   const [featuredUrl, setFeaturedUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(!!id);
 
   const currentEditorRef = useRef<Editor | null>(null);
   const hiddenFeaturedInput = useRef<HTMLInputElement | null>(null);
@@ -63,6 +65,30 @@ export default function AdminBlogNew() {
       setIsAdmin(profile?.is_admin ?? false);
     })();
   }, [userId]);
+
+  useEffect(() => {
+    if (!id) return;
+    (async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('posts')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        toast({ title: "Erro ao carregar post", description: error.message });
+        navigate('/admin/blog');
+      } else if (data) {
+        setTitle(data.title);
+        setContent(data.content || "");
+        setSeoDesc(data.excerpt || "");
+        setSlug(data.slug);
+        setFeaturedUrl(data.cover_image);
+      }
+      setLoading(false);
+    })();
+  }, [id, navigate, toast]);
 
   // Auto slug from title if user hasn't edited slug manually
   const autoSlug = useMemo(() => slugify(title), [title]);
@@ -130,7 +156,7 @@ export default function AdminBlogNew() {
     }
     setSaving(true);
     try {
-      const { error } = await supabase.from('posts').insert({
+      const postData = {
         user_id: userId,
         title: title.trim(),
         content: content,
@@ -138,12 +164,32 @@ export default function AdminBlogNew() {
         excerpt: seoDesc || undefined,
         slug: slugify(slug),
         published: true,
-        published_at: new Date().toISOString(),
-      });
+      };
+
+      let error;
+      if (id) {
+        const { error: updateError } = await supabase
+          .from('posts')
+          .update(postData)
+          .eq('id', id);
+        error = updateError;
+      } else {
+        const { error: insertError } = await supabase
+          .from('posts')
+          .insert({
+            ...postData,
+            published_at: new Date().toISOString(),
+          });
+        error = insertError;
+      }
+
       if (error) throw error;
-      toast({ title: "Post publicado", description: "Seu post foi salvo com sucesso." });
+      toast({
+        title: id ? "Post atualizado" : "Post publicado",
+        description: id ? "Seu post foi atualizado com sucesso." : "Seu post foi salvo com sucesso."
+      });
       resetForm();
-      navigate('/blog');
+      navigate('/admin/blog');
     } catch (err: any) {
       console.error(err);
       toast({ title: "Erro ao salvar", description: err.message || "Tente novamente." });
@@ -152,23 +198,25 @@ export default function AdminBlogNew() {
     }
   };
 
-  if (!userId || isAdmin === null) return null;
+  if (!userId || isAdmin === null || (id && loading)) return null;
 
   return (
     <>
       <SEOHead
-        title="Novo Post do Blog | MK Art SEO"
-        description="Crie e publique um novo artigo no blog."
-        canonicalUrl={`${window.location.origin}/admin/blog/novo`}
+        title={id ? "Editar Post | MK Art SEO" : "Novo Post do Blog | MK Art SEO"}
+        description={id ? "Edite um artigo existente no blog." : "Crie e publique um novo artigo no blog."}
+        canonicalUrl={`${window.location.origin}/admin/blog/${id ? `editar/${id}` : 'novo'}`}
         noindex
       />
 
       <main className="container mx-auto px-4 py-10 space-y-8">
         <header className="flex items-center justify-between">
-          <h1 className="text-3xl font-semibold">Novo Post do Blog</h1>
+          <h1 className="text-3xl font-semibold">{id ? "Editar Post" : "Novo Post do Blog"}</h1>
           <div className="flex items-center gap-2">
-            <Button variant="outline" onClick={() => navigate('/admin')}>Voltar</Button>
-            <Button onClick={savePost} disabled={saving || !isAdmin}>Publicar</Button>
+            <Button variant="outline" onClick={() => navigate('/admin/blog')}>Voltar</Button>
+            <Button onClick={savePost} disabled={saving || !isAdmin}>
+              {id ? "Salvar Alterações" : "Publicar"}
+            </Button>
           </div>
         </header>
 
