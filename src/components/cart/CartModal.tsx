@@ -137,13 +137,35 @@ export function CartModal() {
         throw new Error(itemsError.message);
       }
 
+      // Send payment email with PIX info
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("user_id", session.user.id)
+          .single();
+
+        await supabase.functions.invoke("send-payment-email", {
+          body: {
+            email: profile?.email || session.user.email,
+            name: profile?.full_name || "Cliente",
+            order_id: order.id,
+            total: total,
+            items_count: items.length,
+          },
+        });
+      } catch (emailError) {
+        console.error("Erro ao enviar e-mail de pagamento:", emailError);
+        // Don't fail the order if email fails
+      }
+
       // Success
       clearCart();
       closeCart();
       
       toast({
         title: "Pedido criado com sucesso!",
-        description: "Entraremos em contato via WhatsApp para enviar o PIX.",
+        description: "Enviamos os dados do PIX para seu e-mail.",
       });
 
       navigate("/continuar-comprando", { 

@@ -225,6 +225,30 @@ export default function AdminPedidos() {
       toast({ title: "Erro ao atualizar status", description: error.message });
     } else {
       toast({ title: "Status atualizado com sucesso" });
+      
+      // Send email notification for status changes
+      const pii = piiByOrder[orderId];
+      const order = pedidos.find(p => p.id === orderId);
+      
+      if (pii?.customer_email && order) {
+        try {
+          if (status === "em_producao" || status === "entregue") {
+            await supabase.functions.invoke("send-order-status-email", {
+              body: {
+                email: pii.customer_email,
+                name: pii.customer_name || "Cliente",
+                order_id: orderId,
+                status: status,
+                items_count: order.items.length,
+              },
+            });
+            toast({ title: "E-mail de atualização enviado" });
+          }
+        } catch (emailError) {
+          console.error("Erro ao enviar e-mail:", emailError);
+        }
+      }
+      
       loadData();
     }
     setStatusDialogOpen(false);
