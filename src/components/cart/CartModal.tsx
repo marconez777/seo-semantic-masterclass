@@ -26,6 +26,8 @@ export function CartModal() {
     items,
     mkWillChoose,
     setMkWillChoose,
+    customerSite,
+    setCustomerSite,
     removeItem,
     updateItem,
     clearCart,
@@ -37,9 +39,24 @@ export function CartModal() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+  const [customerSiteError, setCustomerSiteError] = useState<string | null>(null);
 
   const validateItems = (): boolean => {
-    if (mkWillChoose) return true;
+    if (mkWillChoose) {
+      // Validate customer site when MK will choose
+      if (!customerSite.trim()) {
+        setCustomerSiteError("Informe o site para o qual deseja os backlinks");
+        return false;
+      }
+      try {
+        new URL(customerSite.startsWith('http') ? customerSite : `https://${customerSite}`);
+        setCustomerSiteError(null);
+        return true;
+      } catch {
+        setCustomerSiteError("URL inválida");
+        return false;
+      }
+    }
 
     const errors: Record<string, string> = {};
     items.forEach((item) => {
@@ -62,8 +79,10 @@ export function CartModal() {
   const handleCheckout = async () => {
     if (!validateItems()) {
       toast({
-        title: "Campos obrigatórios",
-        description: "Preencha a URL de destino para todos os sites ou marque 'Deixar a MK Art escolher'",
+        title: "Campo obrigatório",
+        description: mkWillChoose 
+          ? "Informe o site para o qual deseja os backlinks" 
+          : "Preencha a URL de destino para todos os sites ou marque 'Deixar a MK Art escolher'",
       });
       return;
     }
@@ -99,13 +118,13 @@ export function CartModal() {
         throw new Error(orderError?.message || "Erro ao criar pedido");
       }
 
-      // Create order items
+      // Create order items - use customerSite for all items when mkWillChoose is true
       const orderItems = items.map((item) => ({
         order_id: order.id,
         backlink_id: item.backlink_id,
         price: item.price,
         anchor_text: mkWillChoose ? null : item.anchor_text || null,
-        target_url: mkWillChoose ? null : item.target_url,
+        target_url: mkWillChoose ? customerSite : item.target_url,
         item_status: "pendente",
         mk_will_choose: mkWillChoose,
       }));
@@ -281,23 +300,55 @@ export function CartModal() {
             </table>
           </div>
 
-          <div className="mt-4 flex items-start space-x-3 p-4 bg-muted/40 rounded-lg">
-            <Checkbox
-              id="mk-will-choose"
-              checked={mkWillChoose}
-              onCheckedChange={(checked) => setMkWillChoose(checked === true)}
-            />
-            <div className="space-y-1">
-              <Label
-                htmlFor="mk-will-choose"
-                className="text-sm font-medium cursor-pointer"
-              >
-                Deixar a MK Art escolher o texto âncora e URL
-              </Label>
-              <p className="text-xs text-muted-foreground">
-                Nossa equipe irá escolher as melhores opções de âncora e URL para otimizar seus backlinks.
-              </p>
+          <div className="mt-4 space-y-4 p-4 bg-muted/40 rounded-lg">
+            <div className="flex items-start space-x-3">
+              <Checkbox
+                id="mk-will-choose"
+                checked={mkWillChoose}
+                onCheckedChange={(checked) => {
+                  setMkWillChoose(checked === true);
+                  setCustomerSiteError(null);
+                }}
+              />
+              <div className="space-y-1 flex-1">
+                <Label
+                  htmlFor="mk-will-choose"
+                  className="text-sm font-medium cursor-pointer"
+                >
+                  Deixar a MK Art escolher o texto âncora e URL
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Nossa equipe irá escolher as melhores opções de âncora e URL para otimizar seus backlinks.
+                </p>
+              </div>
             </div>
+            
+            {mkWillChoose && (
+              <div className="pl-7 space-y-2">
+                <Label htmlFor="customer-site" className="text-sm font-medium">
+                  Qual é o seu site? *
+                </Label>
+                <Input
+                  id="customer-site"
+                  placeholder="https://seusite.com.br"
+                  value={customerSite}
+                  onChange={(e) => {
+                    setCustomerSite(e.target.value);
+                    if (customerSiteError) setCustomerSiteError(null);
+                  }}
+                  className={customerSiteError ? "border-destructive" : ""}
+                />
+                {customerSiteError && (
+                  <p className="text-xs text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {customerSiteError}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Informe o site que receberá os backlinks. Usaremos este site para definir as melhores âncoras e URLs.
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
