@@ -17,6 +17,8 @@ interface CartContextType {
   items: CartItem[];
   mkWillChoose: boolean;
   setMkWillChoose: (value: boolean) => void;
+  customerSite: string;
+  setCustomerSite: (value: string) => void;
   addItem: (backlink: Omit<CartItem, "anchor_text" | "target_url">) => void;
   removeItem: (backlink_id: string) => void;
   updateItem: (backlink_id: string, data: Partial<CartItem>) => void;
@@ -33,10 +35,12 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 
 const CART_STORAGE_KEY = "mkart_cart";
 const MK_WILL_CHOOSE_KEY = "mkart_mk_will_choose";
+const CUSTOMER_SITE_KEY = "mkart_customer_site";
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [mkWillChoose, setMkWillChooseState] = useState(false);
+  const [customerSite, setCustomerSiteState] = useState("");
   const [isOpen, setIsOpen] = useState(false);
 
   // Load cart from localStorage on mount
@@ -52,6 +56,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
       const storedMkChoice = localStorage.getItem(MK_WILL_CHOOSE_KEY);
       if (storedMkChoice === "true") {
         setMkWillChooseState(true);
+      }
+      const storedCustomerSite = localStorage.getItem(CUSTOMER_SITE_KEY);
+      if (storedCustomerSite) {
+        setCustomerSiteState(storedCustomerSite);
       }
     } catch (e) {
       console.error("Error loading cart from localStorage:", e);
@@ -71,10 +79,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       localStorage.setItem(MK_WILL_CHOOSE_KEY, mkWillChoose ? "true" : "false");
+      localStorage.setItem(CUSTOMER_SITE_KEY, customerSite);
     } catch (e) {
       console.error("Error saving mkWillChoose to localStorage:", e);
     }
-  }, [mkWillChoose]);
+  }, [mkWillChoose, customerSite]);
 
   const addItem = (backlink: Omit<CartItem, "anchor_text" | "target_url">) => {
     setItems((prev) => {
@@ -108,6 +117,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const clearCart = () => {
     setItems([]);
     setMkWillChooseState(false);
+    setCustomerSiteState("");
   };
 
   const openCart = () => setIsOpen(true);
@@ -123,12 +133,18 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setMkWillChooseState(value);
   };
 
+  const setCustomerSite = (value: string) => {
+    setCustomerSiteState(value);
+  };
+
   return (
     <CartContext.Provider
       value={{
         items,
         mkWillChoose,
         setMkWillChoose,
+        customerSite,
+        setCustomerSite,
         addItem,
         removeItem,
         updateItem,
