@@ -29,6 +29,7 @@ export default function AdminBlogNew() {
 
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
+  const [seoTitle, setSeoTitle] = useState("");
   const [seoDesc, setSeoDesc] = useState("");
   const [slug, setSlug] = useState("");
   const [featuredUrl, setFeaturedUrl] = useState<string | null>(null);
@@ -82,6 +83,7 @@ export default function AdminBlogNew() {
       } else if (data) {
         setTitle(data.title);
         setContent(data.content || "");
+        setSeoTitle(data.seo_title || "");
         setSeoDesc(data.excerpt || "");
         setSlug(data.slug);
         setFeaturedUrl(data.cover_image);
@@ -100,8 +102,16 @@ export default function AdminBlogNew() {
   async function uploadToBucket(file: File): Promise<string> {
     const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
     const path = `posts/${new Date().getFullYear()}/${(new Date().getMonth()+1).toString().padStart(2,'0')}/${crypto.randomUUID()}.${ext}`;
+
     const { error } = await supabase.storage.from('blog').upload(path, file, { upsert: false, contentType: file.type });
-    if (error) throw error;
+
+    if (error) {
+      if (error.message.includes("Bucket not found")) {
+        throw new Error("O bucket 'blog' não foi encontrado no seu Supabase Storage. Por favor, crie um bucket público chamado 'blog'.");
+      }
+      throw error;
+    }
+
     const { data } = supabase.storage.from('blog').getPublicUrl(path);
     return data.publicUrl;
   }
@@ -140,6 +150,7 @@ export default function AdminBlogNew() {
   const resetForm = () => {
     setTitle("");
     setContent("");
+    setSeoTitle("");
     setSeoDesc("");
     setSlug("");
     setFeaturedUrl(null);
@@ -161,6 +172,7 @@ export default function AdminBlogNew() {
         title: title.trim(),
         content: content,
         cover_image: featuredUrl,
+        seo_title: seoTitle.trim() || undefined,
         excerpt: seoDesc || undefined,
         slug: slugify(slug),
         published: true,
@@ -229,12 +241,58 @@ export default function AdminBlogNew() {
 
         <section className="grid grid-cols-1 gap-6">
           <div className="grid gap-2">
-            <label className="text-sm font-medium">Título do Post</label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Digite o título" />
+            <label className="text-sm font-medium">Título do Post (Exibição no Site)</label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Digite o título que aparecerá no post" />
+          </div>
+
+          {/* Seção SEO */}
+          <div className="rounded-lg border bg-card p-6 space-y-4">
+            <h3 className="text-lg font-medium border-b pb-2">Configurações de SEO</h3>
+
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Título SEO (Aba do Navegador)</label>
+              <Input
+                value={seoTitle}
+                onChange={(e) => setSeoTitle(e.target.value)}
+                placeholder={title || "Digite o título para SEO"}
+              />
+              <p className="text-xs text-muted-foreground">Se vazio, usará o Título do Post.</p>
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">Descrição SEO (Meta Description)</label>
+              <Textarea
+                value={seoDesc}
+                onChange={(e) => setSeoDesc(e.target.value)}
+                rows={3}
+                placeholder="Resumo do post para buscadores (Google)"
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">URL SEO (Slug)</label>
+              <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={autoSlug || "minha-url-seo"} />
+              <p className="text-xs text-muted-foreground">URL final: {window.location.origin}/blog/{slugify(slug || autoSlug)}</p>
+            </div>
           </div>
 
           <div className="grid gap-2">
-            <label className="text-sm font-medium">Texto do Post</label>
+            <label className="text-sm font-medium">Imagem em destaque do Post</label>
+            <div className="flex items-center gap-2">
+              <input ref={hiddenFeaturedInput} type="file" accept="image/*" onChange={handleFeaturedUpload} />
+            </div>
+            {featuredUrl && (
+              <img src={featuredUrl} alt="Imagem em destaque do post" className="max-h-48 rounded-md border object-contain" />
+            )}
+            {!featuredUrl && (
+              <div className="h-32 w-full bg-muted flex items-center justify-center rounded-md border border-dashed">
+                <p className="text-sm text-muted-foreground">Nenhuma imagem selecionada</p>
+              </div>
+            )}
+          </div>
+
+          <div className="grid gap-2">
+            <label className="text-sm font-medium">Conteúdo do Post</label>
             <input
               ref={hiddenInlineImageInput}
               type="file"
@@ -252,26 +310,6 @@ export default function AdminBlogNew() {
                 hiddenInlineImageInput.current?.click();
               }}
             />
-          </div>
-
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">Imagem em destaque do Post</label>
-            <div className="flex items-center gap-2">
-              <input ref={hiddenFeaturedInput} type="file" accept="image/*" onChange={handleFeaturedUpload} />
-            </div>
-            {featuredUrl && (
-              <img src={featuredUrl} alt="Imagem em destaque do post" className="max-h-48 rounded-md border object-contain" />
-            )}
-          </div>
-
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">Descrição SEO (Excerpt)</label>
-            <Textarea value={seoDesc} onChange={(e) => setSeoDesc(e.target.value)} rows={3} placeholder="Até ~160 caracteres" />
-          </div>
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">URL SEO (Slug)</label>
-            <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={autoSlug || "minha-url-seo"} />
-            <p className="text-xs text-muted-foreground">URL final: {window.location.origin}/blog/{slugify(slug || autoSlug)}</p>
           </div>
         </section>
       </main>

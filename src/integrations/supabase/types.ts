@@ -289,6 +289,7 @@ export type Database = {
           id: string
           published: boolean | null
           published_at: string | null
+          seo_title: string | null
           slug: string
           tags: string[] | null
           title: string
@@ -304,6 +305,7 @@ export type Database = {
           id?: string
           published?: boolean | null
           published_at?: string | null
+          seo_title?: string | null
           slug: string
           tags?: string[] | null
           title: string
@@ -319,6 +321,7 @@ export type Database = {
           id?: string
           published?: boolean | null
           published_at?: string | null
+          seo_title?: string | null
           slug?: string
           tags?: string[] | null
           title?: string
