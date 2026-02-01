@@ -21,7 +21,7 @@ function markdownToHtml(markdown: string): string {
   if (!markdown) return "";
   
   // Check if it's already HTML
-  if (markdown.includes("<p>") || markdown.includes("<h") || markdown.includes("<ul>")) {
+  if (markdown.includes("<p>") || markdown.includes("<h") || markdown.includes("<ul>") || markdown.includes("<ol") || markdown.includes("<li>") || markdown.includes("<blockquote")) {
     return markdown;
   }
   
@@ -104,13 +104,14 @@ export function RichTextEditor({
     editorProps: {
       attributes: {
         class: cn(
-          "prose prose-sm max-w-none dark:prose-invert focus:outline-none",
+          "prose prose-sm sm:prose-base max-w-none dark:prose-invert focus:outline-none min-h-[inherit]",
           "prose-headings:font-semibold prose-headings:text-foreground",
           "prose-p:text-foreground prose-p:leading-relaxed",
           "prose-a:text-primary prose-a:underline",
           "prose-strong:text-foreground prose-strong:font-semibold",
           "prose-ul:list-disc prose-ol:list-decimal",
-          "prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic"
+          "prose-blockquote:border-l-4 prose-blockquote:border-primary prose-blockquote:pl-4 prose-blockquote:italic",
+          "font-sans"
         ),
       },
     },
