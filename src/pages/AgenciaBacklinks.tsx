@@ -50,7 +50,15 @@ const AgenciaBacklinks = () => {
         .order('dr', { ascending: false });
       if (mounted) {
         if (error) console.error('Erro ao buscar backlinks', error);
-        setBacklinks(data ?? []);
+        // Transform data to include price_cents for BacklinkTableRow compatibility
+        const transformed = (data ?? []).map((row) => ({
+          ...row,
+          id: row.id,
+          site_name: row.domain ?? null,
+          site_url: row.url ?? null,
+          price_cents: Math.round(Number(row.price || 0) * 100),
+        }));
+        setBacklinks(transformed);
         setLoading(false);
       }
     })();

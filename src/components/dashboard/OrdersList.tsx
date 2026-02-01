@@ -31,7 +31,7 @@ interface OrderItem {
 }
 
 function brl(v: number) {
-  return (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 const statusLabels: Record<string, { label: string; color: string }> = {

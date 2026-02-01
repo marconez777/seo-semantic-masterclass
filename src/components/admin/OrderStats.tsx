@@ -10,7 +10,7 @@ interface OrderStatsProps {
 }
 
 function brl(v: number) {
-  return (v / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
 export function OrderStats({ pedidos }: OrderStatsProps) {
