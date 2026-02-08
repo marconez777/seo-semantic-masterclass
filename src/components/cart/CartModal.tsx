@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Trash2, ShoppingBag, AlertCircle } from "lucide-react";
+import { Trash2, ShoppingBag, AlertCircle, Loader2 } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
@@ -389,7 +389,14 @@ export function CartModal() {
               disabled={isSubmitting}
               className="gap-2"
             >
-              {isSubmitting ? "Processando..." : "Finalizar Pedido (PIX)"}
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Carregando...
+                </>
+              ) : (
+                "Finalizar Pedido (PIX)"
+              )}
             </Button>
           </DialogFooter>
         </div>
