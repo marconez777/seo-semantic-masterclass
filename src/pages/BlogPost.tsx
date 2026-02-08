@@ -15,7 +15,6 @@ import { supabase } from "@/integrations/supabase/client";
 interface DbPost {
   id: string;
   title: string;
-  seo_title: string | null;
   slug: string;
   content: string | null;
   cover_image: string | null;
@@ -36,7 +35,7 @@ function usePost(slug?: string) {
       setLoading(true);
       const { data, error } = await supabase
         .from("posts")
-        .select("id,title,seo_title,slug,content,cover_image,excerpt,created_at,updated_at,category")
+        .select("id,title,slug,content,cover_image,excerpt,created_at,updated_at,category")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
@@ -105,7 +104,7 @@ export default function BlogPost() {
   return (
     <>
       <SEOHead
-        title={post.seo_title || post.title}
+        title={post.title}
         description={post.excerpt || ""}
         canonicalUrl={postUrl}
         keywords="blog seo, marketing digital, backlinks, link building"
@@ -116,7 +115,7 @@ export default function BlogPost() {
       <StructuredData
         type="article"
         data={{
-          headline: post.seo_title || post.title,
+          headline: post.title,
           description: post.excerpt,
           author: "MK Art SEO",
           datePublished: post.created_at,

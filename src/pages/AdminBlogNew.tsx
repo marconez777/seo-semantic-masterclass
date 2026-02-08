@@ -83,7 +83,7 @@ export default function AdminBlogNew() {
       } else if (data) {
         setTitle(data.title);
         setContent(data.content || "");
-        setSeoTitle(data.seo_title || "");
+        setSeoTitle(data.title || "");
         setSeoDesc(data.excerpt || "");
         setSlug(data.slug);
         setFeaturedUrl(data.cover_image);
@@ -172,7 +172,6 @@ export default function AdminBlogNew() {
         title: title.trim(),
         content: content,
         cover_image: featuredUrl,
-        seo_title: seoTitle.trim() || undefined,
         excerpt: seoDesc || undefined,
         slug: slugify(slug),
         published: true,
