@@ -3,9 +3,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ChevronDown, ChevronUp, Package, ExternalLink } from "lucide-react";
+import { ChevronDown, ChevronUp, Package, ExternalLink, CreditCard } from "lucide-react";
 import { OrderFilters } from "./OrderFilters";
-
+import { PaymentModal } from "./PaymentModal";
 interface Order {
   id: string;
   total: number;
@@ -57,6 +57,7 @@ export function OrdersList({ userId }: { userId: string }) {
   const [loading, setLoading] = useState(true);
   const [expandedOrder, setExpandedOrder] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("todos");
+  const [paymentModal, setPaymentModal] = useState<{ open: boolean; orderId: string; total: number } | null>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -152,6 +153,11 @@ export function OrdersList({ userId }: { userId: string }) {
     return orders.filter((o) => o.status === statusFilter);
   }, [orders, statusFilter]);
 
+  // Check if order is pending payment
+  const isPendingPayment = (status: string) => {
+    return status === "aguardando_pagamento" || status === "pendente";
+  };
+
   if (loading) {
     return (
       <div className="space-y-4">
@@ -235,6 +241,18 @@ export function OrdersList({ userId }: { userId: string }) {
                   <p className="font-semibold text-primary">{brl(order.total)}</p>
                 </div>
                 {getStatusBadge(order.status)}
+                {isPendingPayment(order.status) && (
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setPaymentModal({ open: true, orderId: order.id, total: order.total });
+                    }}
+                  >
+                    <CreditCard className="h-4 w-4 mr-1" />
+                    Pagar
+                  </Button>
+                )}
                 {expandedOrder === order.id ? (
                   <ChevronUp className="h-5 w-5 text-muted-foreground" />
                 ) : (
@@ -298,7 +316,7 @@ export function OrdersList({ userId }: { userId: string }) {
                   </table>
                 </div>
 
-                <div className="mt-4 pt-4 border-t flex items-center justify-between">
+                <div className="mt-4 pt-4 border-t flex items-center justify-between flex-wrap gap-3">
                   <div className="text-sm text-muted-foreground">
                     <span>Método: </span>
                     <span className="font-medium">
@@ -307,14 +325,37 @@ export function OrdersList({ userId }: { userId: string }) {
                         : "Cartão de Crédito"}
                     </span>
                   </div>
-                  <div className="font-semibold text-lg">
-                    Total: {brl(order.total)}
+                  <div className="flex items-center gap-3">
+                    {isPendingPayment(order.status) && (
+                      <Button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setPaymentModal({ open: true, orderId: order.id, total: order.total });
+                        }}
+                      >
+                        <CreditCard className="h-4 w-4 mr-2" />
+                        Realizar Pagamento
+                      </Button>
+                    )}
+                    <div className="font-semibold text-lg">
+                      Total: {brl(order.total)}
+                    </div>
                   </div>
                 </div>
               </div>
             )}
           </div>
         ))
+      )}
+
+      {/* Payment Modal */}
+      {paymentModal && (
+        <PaymentModal
+          open={paymentModal.open}
+          onOpenChange={(open) => setPaymentModal(open ? paymentModal : null)}
+          orderId={paymentModal.orderId}
+          total={paymentModal.total}
+        />
       )}
     </div>
   );

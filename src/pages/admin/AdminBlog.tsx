@@ -50,9 +50,7 @@ export default function AdminBlog() {
 
     if (error) {
       toast({
-        title: "Erro ao buscar posts",
-        description: error.message,
-        variant: "destructive",
+        title: "Erro ao buscar posts: " + error.message,
       });
     } else {
       setPosts(data || []);
@@ -67,9 +65,7 @@ export default function AdminBlog() {
 
     if (error) {
       toast({
-        title: "Erro ao excluir post",
-        description: error.message,
-        variant: "destructive",
+        title: "Erro ao excluir post: " + error.message,
       });
     } else {
       toast({
