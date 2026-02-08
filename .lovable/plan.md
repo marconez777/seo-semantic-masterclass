@@ -1,105 +1,88 @@
 
-# Plano: Editor de Texto Rico (WYSIWYG) para SEO e Blog
+# Plano: Corrigir E-mails Transacionais - Problema Identificado
 
-## Problema Atual
-Os editores atuais de conteudo SEO e Blog usam textarea com Markdown puro, exigindo que o usuario escreva sintaxe como `##` para titulos e `**` para negrito. Isso e confuso e nao mostra visualmente o resultado.
+## Diagnóstico Detalhado
 
-## Solucao Proposta
-Substituir o editor Markdown por um editor WYSIWYG usando **Tiptap**, a biblioteca mais moderna e flexivel para React. O usuario vera o texto formatado em tempo real e podera selecionar texto e aplicar estilos com botoes ou atalhos de teclado.
+Após investigação aprofundada, identifiquei que o problema **NÃO é que o domínio não está verificado**, mas sim que **a API Key do Resend armazenada no projeto pertence a uma conta diferente** da conta onde o domínio `mkart.com.br` foi verificado.
 
-## Funcionalidades do Novo Editor
+### Evidências:
 
-### Barra de Ferramentas Visual
-- **Titulos**: Dropdown para H1, H2, H3, H4
-- **Formatacao**: Negrito, Italico, Sublinhado, Tachado
-- **Listas**: Lista com marcadores, Lista numerada
-- **Blocos**: Citacao, Codigo
-- **Links**: Inserir/remover links
-- **Alinhamento**: Esquerda, Centro, Direita
-- **Desfazer/Refazer**: Historico de edicoes
+1. O domínio está verificado (como mostra seu print) - há 6 dias
+2. O erro persiste para TODAS as funções que usam `mkart.com.br`:
+   - `send-payment-email`
+   - `send-order-status-email`
+   - `send-activation-email`
+   - `send-reset-password-email`
+   - `send-guest-post-list`
+3. A função `send-contact-email` usa `onboarding@resend.dev` (domínio de teste) e provavelmente funcionaria
 
-### Experiencia do Usuario
-- Ver o texto formatado enquanto digita (WYSIWYG)
-- Selecionar texto e clicar em um botao para aplicar estilo
-- Atalhos de teclado (Ctrl+B para negrito, etc)
-- Placeholder visual quando vazio
-- Exporta HTML limpo para armazenamento
+### Causa Raiz Provável:
 
-## Arquitetura Tecnica
+A `RESEND_API_KEY` configurada nas Edge Functions foi gerada em uma **conta Resend diferente** daquela onde o domínio `mkart.com.br` foi verificado.
 
-```text
-+-------------------+     +------------------+     +----------------+
-| RichTextEditor    | --> | Tiptap Core      | --> | HTML Output    |
-| (Componente)      |     | + Extensions     |     | (Armazenado)   |
-+-------------------+     +------------------+     +----------------+
-         |
-         v
-+-------------------+
-| EditorToolbar     |
-| (Barra de botoes) |
-+-------------------+
-```
+Isso pode acontecer quando:
+- Você tem mais de uma conta no Resend
+- A API Key foi criada antes de verificar o domínio e houve troca de conta
+- Alguém da equipe configurou a API Key de outra conta
 
-## Detalhes Tecnicos
+---
 
-### Novas Dependencias
-- `@tiptap/react` - Binding React para Tiptap
-- `@tiptap/starter-kit` - Extensoes basicas (headings, lists, bold, italic)
-- `@tiptap/extension-link` - Suporte a links
-- `@tiptap/extension-underline` - Sublinhado
-- `@tiptap/extension-placeholder` - Texto placeholder
-- `@tiptap/extension-text-align` - Alinhamento de texto
+## Solução
 
-### Novos Componentes
+### Passo 1: Verificar a Conta Correta no Resend
 
-**1. `src/components/ui/rich-text-editor.tsx`**
-Componente reutilizavel que encapsula o editor Tiptap com:
-- Hook `useEditor` com extensoes configuradas
-- Barra de ferramentas responsiva
-- Estilos Tailwind para area de edicao
-- Props para valor inicial e callback onChange
+1. Acesse https://resend.com/domains
+2. Confirme que você está logado na conta onde o domínio `mkart.com.br` está verificado (a mesma do print)
+3. Na mesma conta, vá para https://resend.com/api-keys
 
-**2. `src/components/ui/editor-toolbar.tsx`**
-Barra de ferramentas com:
-- Toggle buttons para formatacao (negrito, italico, etc)
-- Dropdown para selecao de titulos
-- Botoes para listas e alinhamento
-- Modal para inserir links
+### Passo 2: Gerar Nova API Key na Conta Correta
 
-### Arquivos a Modificar
+1. Clique em "Create API Key"
+2. Nomeie como "MK Art Production" 
+3. Escolha "Full Access" ou "Sending Access"
+4. Copie a nova API Key (começa com `re_`)
 
-**1. `src/components/admin/SEOContentEditor.tsx`**
-- Remover textarea e toolbar Markdown
-- Importar e usar `RichTextEditor`
-- Converter conteudo existente (Markdown para HTML na leitura)
-- Salvar como HTML
+### Passo 3: Atualizar a API Key no Lovable
 
-**2. `src/components/admin/AdminBlogPublisher.tsx`**
-- Mesma modificacao do SEOContentEditor
-- Substituir textarea por `RichTextEditor`
+Você precisará atualizar o secret `RESEND_API_KEY` com a nova chave gerada. Eu farei isso através do painel após você fornecer a nova chave.
 
-### Conversao de Dados
-- **Leitura**: Se existir conteudo Markdown antigo, converter para HTML
-- **Escrita**: Sempre salvar como HTML limpo
-- **Preview**: Renderizar HTML diretamente (sem ReactMarkdown)
+---
 
-## Beneficios
+## Implementação Técnica
 
-1. **Experiencia visual**: Usuario ve exatamente como ficara o texto
-2. **Facilidade**: Sem necessidade de conhecer Markdown
-3. **Produtividade**: Atalhos de teclado e selecao de texto
-4. **Consistencia**: Mesmo editor para SEO e Blog
-5. **Flexibilidade**: Mais opcoes de formatacao (alinhamento, sublinhado)
+Após você confirmar a nova API Key, precisarei:
 
-## Resumo de Arquivos
+1. **Atualizar o secret `RESEND_API_KEY`** com o valor correto
+2. **Fazer deploy das edge functions** para que usem a nova chave
 
-| Acao | Arquivo |
-|------|---------|
-| Criar | `src/components/ui/rich-text-editor.tsx` |
-| Criar | `src/components/ui/editor-toolbar.tsx` |
-| Editar | `src/components/admin/SEOContentEditor.tsx` |
-| Editar | `src/components/admin/AdminBlogPublisher.tsx` |
-| Instalar | Dependencias Tiptap via npm |
+### Arquivos Afetados (não precisam de alteração de código)
 
-## Migracao de Conteudo Existente
-O conteudo Markdown existente sera convertido automaticamente para HTML na primeira edicao usando uma funcao de parse simples. O Tiptap suporta importacao de conteudo Markdown atraves de extensao opcional.
+As funções já estão corretas, só precisam da API Key certa:
+
+- `supabase/functions/send-payment-email/index.ts`
+- `supabase/functions/send-order-status-email/index.ts`
+- `supabase/functions/send-activation-email/index.ts`
+- `supabase/functions/send-reset-password-email/index.ts`
+- `supabase/functions/send-guest-post-list/index.ts`
+
+---
+
+## Como Verificar se a API Key é da Conta Correta
+
+Na página https://resend.com/api-keys você deve ver a lista de API Keys. Compare:
+
+1. O nome da conta no canto superior direito da página
+2. Vá para https://resend.com/domains e veja se o domínio `mkart.com.br` aparece como verificado **na mesma conta**
+
+Se você tiver múltiplas contas Resend, verifique cada uma até encontrar onde está a API Key atual e onde está o domínio verificado.
+
+---
+
+## Próximos Passos
+
+Por favor, confirme:
+
+1. Você conseguiu acessar a conta Resend onde o domínio está verificado?
+2. Você conseguiu gerar uma nova API Key nessa conta?
+
+Com a nova API Key em mãos, poderei atualizar o sistema e os e-mails funcionarão corretamente.
