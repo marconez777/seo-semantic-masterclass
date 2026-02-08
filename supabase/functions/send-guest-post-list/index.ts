@@ -34,7 +34,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const emailResponse = await resend.emails.send({
-      from: "MK Art SEO <noreply@mkart.com.br>",
+      from: "MK Art SEO <contato@mkart.com.br>",
       to: [email],
       subject: "🎉 Sua Lista de 30 Sites para Guest Post DR 20-90 está aqui!",
       html,

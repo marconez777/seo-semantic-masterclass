@@ -40,7 +40,7 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     const emailResponse = await resend.emails.send({
-      from: "MK Art SEO <noreply@mkart.com.br>",
+      from: "MK Art SEO <contato@mkart.com.br>",
       to: [email],
       subject: `PIX para pagamento - Pedido #${order_id.slice(0, 8).toUpperCase()}`,
       html,
