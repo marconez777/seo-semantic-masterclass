@@ -48,7 +48,7 @@ const handler = async (req: Request): Promise<Response> => {
     const subject = `${statusSubjects[status]} - Pedido #${shortOrderId}`;
 
     const emailResponse = await resend.emails.send({
-      from: "MK Art SEO <noreply@mkart.com.br>",
+      from: "MK Art SEO <contato@mkart.com.br>",
       to: [email],
       subject,
       html,

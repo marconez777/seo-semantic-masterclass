@@ -26,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send email to company
     const companyEmailResponse = await resend.emails.send({
-      from: "Contato MK Art <onboarding@resend.dev>",
+      from: "Contato MK Art <contato@mkart.com.br>",
       to: ["contato@mkart.com.br"],
       subject: `Nova mensagem de contato - ${name}`,
       html: `
@@ -40,7 +40,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email to user
     const userEmailResponse = await resend.emails.send({
-      from: "MK Art Agência <onboarding@resend.dev>",
+      from: "MK Art Agência <contato@mkart.com.br>",
       to: [email],
       subject: "Recebemos sua mensagem!",
       html: `
