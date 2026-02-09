@@ -89,7 +89,7 @@ export default function AdminLayout() {
                         end={item.url === '/admin'}
                         className={({ isActive }) =>
                           isActive
-                            ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                            ? "bg-sidebar-accent text-sidebar-foreground font-medium"
                             : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                         }
                       >
