@@ -86,7 +86,7 @@ const Blog = () => {
         {/* Hero Section */}
         <header className="container mx-auto px-4 py-8 text-center">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight mb-4">
-            Blog de SEO e Marketing Digital
+            Blog dos Backlinks
           </h1>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
             Aprenda com guias práticos, novidades e estratégias para crescer com SEO e aumentar o tráfego do seu site.
