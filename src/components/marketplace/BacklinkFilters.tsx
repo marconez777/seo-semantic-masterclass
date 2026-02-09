@@ -119,7 +119,7 @@ function FilterContent({
             <li key={v}>
               <button
                 className={`block text-left w-full py-0.5 ${
-                  maxPrice === v ? "font-semibold" : ""
+                  maxPrice === v ? "font-semibold text-primary" : ""
                 }`}
                 onClick={() => {
                   setMaxPrice(v);
