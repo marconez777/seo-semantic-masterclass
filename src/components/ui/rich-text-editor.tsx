@@ -5,6 +5,7 @@ import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
 import Placeholder from "@tiptap/extension-placeholder";
 import TextAlign from "@tiptap/extension-text-align";
+import Youtube from "@tiptap/extension-youtube";
 import { EditorToolbar } from "./editor-toolbar";
 import { useEffect } from "react";
 import { cn } from "@/lib/utils";
@@ -103,6 +104,13 @@ export function RichTextEditor({
       }),
       TextAlign.configure({
         types: ["heading", "paragraph"],
+      }),
+      Youtube.configure({
+        HTMLAttributes: {
+          class: "w-full aspect-video rounded-lg my-4",
+        },
+        inline: false,
+        allowFullscreen: true,
       }),
     ],
     content: markdownToHtml(value),

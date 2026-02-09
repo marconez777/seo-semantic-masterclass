@@ -24,6 +24,7 @@ import {
   Undo,
   Redo,
   Image as ImageIcon,
+  Video,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -65,6 +66,22 @@ export function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
     }
     
     editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+  };
+
+  const insertYoutube = () => {
+    const url = window.prompt("Cole a URL ou link embed do YouTube:");
+    if (!url) return;
+    
+    // Extract video ID from various YouTube URL formats
+    let videoUrl = url.trim();
+    
+    // If user pasted an iframe, extract the src
+    const iframeMatch = videoUrl.match(/src="([^"]+)"/);
+    if (iframeMatch) {
+      videoUrl = iframeMatch[1];
+    }
+    
+    editor.commands.setYoutubeVideo({ src: videoUrl });
   };
 
   return (
@@ -183,6 +200,13 @@ export function EditorToolbar({ editor, onImageUpload }: EditorToolbarProps) {
           <ImageIcon className="h-4 w-4" />
         </ToolbarButton>
       )}
+
+      <ToolbarButton
+        onClick={insertYoutube}
+        title="Inserir vídeo do YouTube"
+      >
+        <Video className="h-4 w-4" />
+      </ToolbarButton>
 
       <div className="w-px h-6 bg-border mx-1" />
 
