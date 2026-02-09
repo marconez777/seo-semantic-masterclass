@@ -90,7 +90,7 @@ export default function AdminLayout() {
                         className={({ isActive }) =>
                           isActive
                             ? "bg-sidebar-accent text-sidebar-primary font-medium"
-                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                         }
                       >
                         <item.icon className="mr-2 h-4 w-4" />
@@ -107,7 +107,7 @@ export default function AdminLayout() {
               <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild>
-                    <a href="/" className="text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
+                    <a href="/" className="text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
                       <Globe className="mr-2 h-4 w-4" />
                       <span>Ir para o site</span>
                     </a>
