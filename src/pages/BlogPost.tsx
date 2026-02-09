@@ -128,7 +128,7 @@ export default function BlogPost() {
       />
 
       <Header />
-      <main className="pt-20 min-h-screen">
+      <main className="pt-20 min-h-screen overflow-x-hidden">
         {/* Breadcrumbs */}
         <div className="container mx-auto px-4 py-4">
           <Breadcrumbs

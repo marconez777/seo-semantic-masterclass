@@ -49,7 +49,7 @@ const BlogPostHeader = ({
       </h1>
 
       {/* Author and Meta Info */}
-      <div className="flex items-center space-x-6 mb-8 text-muted-foreground">
+      <div className="flex flex-wrap items-center gap-4 mb-8 text-muted-foreground">
         <div className="flex items-center space-x-2">
           <Avatar className="h-8 w-8">
             <AvatarImage src="/placeholder-avatar.jpg" />

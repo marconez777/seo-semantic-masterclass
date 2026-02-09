@@ -28,31 +28,34 @@ const SocialShare = ({ url, title, views, comments }: SocialShareProps) => {
   return (
     <Card className="bg-gradient-to-r from-muted/50 to-muted/30 border-border/50">
       <CardContent className="p-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
               onClick={handleFacebookShare}
-              className="bg-[#1877f2] hover:bg-[#1877f2]/90 text-white px-4 py-2 rounded-md text-sm font-medium"
+              size="sm"
+              className="bg-[#1877f2] hover:bg-[#1877f2]/90 text-white text-xs"
             >
               📘 Facebook
             </Button>
             
             <Button
               onClick={handleTwitterShare}
-              className="bg-[#1da1f2] hover:bg-[#1da1f2]/90 text-white px-4 py-2 rounded-md text-sm font-medium"
+              size="sm"
+              className="bg-[#1da1f2] hover:bg-[#1da1f2]/90 text-white text-xs"
             >
               🐦 Twitter
             </Button>
             
             <Button
               onClick={handlePinterestShare}
-              className="bg-[#bd081c] hover:bg-[#bd081c]/90 text-white px-4 py-2 rounded-md text-sm font-medium"
+              size="sm"
+              className="bg-[#bd081c] hover:bg-[#bd081c]/90 text-white text-xs"
             >
               📌 Pinterest
             </Button>
           </div>
 
-          <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+          <div className="flex items-center gap-3 text-sm text-muted-foreground">
             {comments !== undefined && (
               <span className="inline-flex items-center gap-1">
                 <MessageCircle className="h-4 w-4" />
