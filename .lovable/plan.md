@@ -1,56 +1,113 @@
 
 
-# Corrigir E-mails Transacionais: Logo, Build Error e Aviso de Seguranca
+# Reestruturação do Design - Painel do Usuário e Admin
 
-## Problemas Identificados
+## Visão Geral
 
-1. **Erro de build**: `send-activation-email/index.ts` importa `@react-email/components@0.0.31` (versao inexistente). Deve ser `@0.0.22` como nas demais funcoes.
+Redesign completo dos painéis (usuário e admin) inspirado no layout de referência NexLink, com sidebar escura, header fixo com perfil do usuário, e area de conteudo limpa e moderna.
 
-2. **Logo errado**: Todos os templates de e-mail referenciam `https://mkart.com.br/LOGOMK.png` que exibe um logo preto. Precisa ser substituido pelo logo colorido (azul/roxo) que voce enviou.
+## Mudanças Principais
 
-3. **Aviso "Nao e possivel verificar se este email veio do remetente"**: Esse aviso e exibido pelo provedor de e-mail (Gmail, Outlook, etc.) quando o dominio nao tem registros **SPF** e **DMARC** configurados no DNS. Isso nao e resolvido no codigo -- precisa ser configurado no painel DNS do dominio `mkart.com.br`.
+### 1. Sidebar Escura com Ícones
 
-## Alteracoes no Codigo
+Ambos os painéis terão uma sidebar com fundo escuro (usando as variáveis CSS `--sidebar-*` já definidas no design system), logo no topo, navegação com ícones e labels, e visual mais moderno.
 
-### 1. Corrigir build error
-- **Arquivo**: `supabase/functions/send-activation-email/index.ts`
-- Alterar `@react-email/components@0.0.31` para `@0.0.22`
+### 2. Header Superior Fixo
 
-### 2. Atualizar logo em todos os templates
-O logo colorido sera copiado para `public/images/mkart-logo.png` e a URL nos templates sera atualizada para `https://mkart.com.br/images/mkart-logo.png`.
+Substituir o header atual de cada painel por um header fixo no topo (dentro do layout do painel, nao o Header global do site) contendo:
+- Botão de toggle da sidebar (esquerda)
+- Breadcrumb ou titulo da seção atual
+- Perfil do usuário com dropdown (direita) usando o componente `UserProfileDropdown` já existente
+- Botão de sair integrado no dropdown
 
-Arquivos afetados (4 templates):
-- `supabase/functions/send-payment-email/_templates/payment-email.tsx`
-- `supabase/functions/send-order-status-email/_templates/order-status-email.tsx`
-- `supabase/functions/send-activation-email/_templates/activation-email.tsx`
-- `supabase/functions/send-reset-password-email/_templates/reset-password-email.tsx`
+### 3. Área de Conteúdo Limpa
 
-### 3. Aviso de seguranca do e-mail (acao sua no DNS)
+- Remover headers duplicados dentro das páginas
+- Fundo levemente diferenciado (`bg-muted/30`) para a area de conteudo
+- Cards com sombras suaves e bordas arredondadas
 
-Para resolver o aviso "Nao e possivel verificar se este email veio do remetente", voce precisa adicionar estes registros DNS no painel do seu dominio `mkart.com.br`:
+---
 
-**SPF** (registro TXT no dominio raiz):
+## Detalhes Técnicos
+
+### Arquivos a Modificar
+
+**`src/layouts/AdminLayout.tsx`** - Reestruturação completa:
+- Sidebar escura com logo MK Art no topo, itens de menu com ícones coloridos
+- Separador visual entre grupos de menu
+- Header fixo no topo com `SidebarTrigger`, titulo "Admin", e `UserProfileDropdown`
+- Remover o header interno atual (logo + h1 + botão Sair)
+- Usar `SidebarInset` com header embutido
+
+**`src/pages/Dashboard.tsx`** - Reestruturação completa do painel do usuário:
+- Mesma abordagem da sidebar escura com logo, itens (Pedidos, Favoritos, Perfil, Admin)
+- Header fixo no topo com nome do usuário, avatar e dropdown
+- Remover Tabs duplicadas (a navegação será feita pela sidebar)
+- Manter o conteúdo das seções (OrdersList, FavoritesTable, ProfileSection) renderizados condicionalmente pelo estado `tab`
+
+**`src/components/ui/user-profile-dropdown.tsx`** - Pequeno ajuste:
+- Adicionar link "Ir para o site" no dropdown
+- Garantir que o `onSignOut` funciona corretamente em ambos os painéis
+
+### Estilo Visual (baseado na referência)
+
+- Sidebar: fundo `hsl(var(--sidebar-background))` (preto/escuro), texto claro
+- Item ativo: destaque com fundo `hsl(var(--sidebar-accent))` e texto `hsl(var(--sidebar-primary))`  
+- Header: fundo `bg-card/95` com `backdrop-blur`, borda inferior sutil
+- Conteúdo: fundo `bg-muted/20` para contraste com os cards brancos
+- Cards de stats (admin): manter o design atual com leve refinamento nas sombras
+
+### Estrutura do Layout (Admin)
+
 ```text
-Tipo: TXT
-Nome: @
-Valor: v=spf1 include:amazonses.com ~all
++------------------+-------------------------------------------+
+|                  |  [=] Admin           [Avatar] Nome  v      |
+|   [Logo]         |--------------------------------------------|
+|   MK Art         |                                            |
+|                  |   Conteudo da pagina (Outlet)               |
+|   MENU           |                                            |
+|   > Pedidos      |                                            |
+|   > Clientes     |                                            |
+|   > Sites        |                                            |
+|   > Publicações  |                                            |
+|   > Blog         |                                            |
+|   > SEO          |                                            |
+|   > Contatos     |                                            |
+|   > Leads        |                                            |
+|                  |                                            |
++------------------+-------------------------------------------+
 ```
-(O Resend usa Amazon SES. Verifique no painel do Resend se ha instrucoes especificas de SPF.)
 
-**DMARC** (registro TXT):
+### Estrutura do Layout (Usuário)
+
 ```text
-Tipo: TXT
-Nome: _dmarc
-Valor: v=DMARC1; p=none; rua=mailto:contato@mkart.com.br
++------------------+-------------------------------------------+
+|                  |  [=] Meu Painel      [Avatar] Nome  v      |
+|   [Logo]         |--------------------------------------------|
+|   MK Art         |                                            |
+|                  |   Conteudo (Pedidos/Favoritos/Perfil)       |
+|   MINHA CONTA    |                                            |
+|   > Pedidos      |                                            |
+|   > Favoritos    |                                            |
+|   > Perfil       |                                            |
+|                  |                                            |
+|   -----------    |                                            |
+|   > Admin (*)    |                                            |
+|   > Loja         |                                            |
+|                  |                                            |
++------------------+-------------------------------------------+
 ```
 
-O Resend tambem pode ter sugerido registros DKIM -- verifique em https://resend.com/domains se ha algum registro pendente.
+### Responsividade
 
-## Resumo
+- Em mobile, a sidebar continuará colapsando como `offcanvas` (Sheet)
+- O header ficará fixo no topo com o trigger da sidebar visível
+- O conteúdo ocupará toda a largura
 
-| Item | Tipo | Acao |
-|------|------|------|
-| Build error (versao 0.0.31) | Codigo | Corrigir import |
-| Logo preto nos e-mails | Codigo | Trocar URL da imagem |
-| Aviso de seguranca | DNS | Adicionar SPF + DMARC |
+### O que NÃO muda
+
+- Rotas do `App.tsx` permanecem iguais
+- Componentes de conteúdo (OrdersList, ProfileSection, FavoritesTable, AdminPedidos, etc.) permanecem iguais
+- Header global do site (Header.tsx) não é afetado
+- Lógica de autenticação e RBAC permanecem iguais
 
