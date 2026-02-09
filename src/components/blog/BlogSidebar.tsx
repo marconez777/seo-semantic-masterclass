@@ -28,14 +28,14 @@ const BlogSidebar = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim()) return;
+    if (!name.trim() || !email.trim() || !whatsapp.trim() || !website.trim()) return;
     setSubmitting(true);
     try {
       const { error } = await supabase.from("backlink_leads" as any).insert({
         name: name.trim(),
         email: email.trim(),
-        whatsapp: whatsapp.trim() || null,
-        website: website.trim() || null,
+        whatsapp: whatsapp.trim(),
+        website: website.trim(),
       } as any);
       if (error) throw error;
       setSubmitted(true);
@@ -84,16 +84,18 @@ const BlogSidebar = () => {
               />
               <Input
                 type="text"
-                placeholder="WhatsApp (opcional)"
+                placeholder="WhatsApp"
                 value={whatsapp}
                 onChange={(e) => setWhatsapp(e.target.value)}
+                required
                 className="bg-background/50 backdrop-blur-sm"
               />
               <Input
                 type="url"
-                placeholder="URL do seu site (opcional)"
+                placeholder="URL do seu site"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
+                required
                 className="bg-background/50 backdrop-blur-sm"
               />
               <Button
