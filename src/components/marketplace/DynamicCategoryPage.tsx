@@ -7,6 +7,7 @@ import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import BacklinkMarketplace from "@/components/marketplace/BacklinkMarketplace";
 import FAQSection from "@/components/seo/FAQSection";
 import { usePageSEOContent } from "@/hooks/usePageSEOContent";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 interface CategoryPageProps {
   // Database identifiers
@@ -82,7 +83,7 @@ export default function DynamicCategoryPage({
               {mainContent ? (
                 <section 
                   className="prose prose-lg max-w-none dark:prose-invert"
-                  dangerouslySetInnerHTML={{ __html: mainContent }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(mainContent) }}
                 />
               ) : (
                 /* Fallback static content */

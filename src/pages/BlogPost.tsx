@@ -11,6 +11,7 @@ import BlogPostHeader from "@/components/blog/BlogPostHeader";
 import SocialShare from "@/components/blog/SocialShare";
 import BlogSidebar from "@/components/blog/BlogSidebar";
 import { supabase } from "@/integrations/supabase/client";
+import { sanitizeHtml } from "@/lib/sanitize";
 
 interface DbPost {
   id: string;
@@ -162,7 +163,7 @@ export default function BlogPost() {
               {/* Content - supports both HTML and Markdown */}
               <div className="prose prose-lg max-w-none dark:prose-invert mt-8">
                 {post.content?.startsWith('<') ? (
-                  <div dangerouslySetInnerHTML={{ __html: post.content }} />
+                  <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(post.content) }} />
                 ) : (
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {post.content ?? ''}

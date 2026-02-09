@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeHtml } from "@/lib/sanitize";
 import { 
   type PageSEOContent, 
   type FAQ,
@@ -302,7 +303,7 @@ export default function SEOContentEditor({ editingContent, onClose, onSaved }: S
                 {mainContent && (
                   <div 
                     className="prose prose-sm max-w-none dark:prose-invert"
-                    dangerouslySetInnerHTML={{ __html: mainContent }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeHtml(mainContent) }}
                   />
                 )}
               </div>
