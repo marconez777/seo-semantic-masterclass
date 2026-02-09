@@ -167,15 +167,24 @@ export default function AdminLeads() {
                     <TableCell>{lead.whatsapp || "—"}</TableCell>
                     <TableCell>
                       {lead.website ? (
-                        <a
-                          href={lead.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center gap-1 text-primary hover:underline"
-                        >
-                          {new URL(lead.website).hostname}
-                          <ExternalLink className="h-3 w-3" />
-                        </a>
+                        (() => {
+                          try {
+                            const url = new URL(lead.website.startsWith('http') ? lead.website : `https://${lead.website}`);
+                            return (
+                              <a
+                                href={url.href}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-primary hover:underline"
+                              >
+                                {url.hostname}
+                                <ExternalLink className="h-3 w-3" />
+                              </a>
+                            );
+                          } catch {
+                            return <span>{lead.website}</span>;
+                          }
+                        })()
                       ) : (
                         "—"
                       )}
