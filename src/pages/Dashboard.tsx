@@ -120,7 +120,7 @@ export default function Dashboard() {
                     <SidebarMenuButton
                       isActive={tab === 'pedidos'}
                       onClick={() => setTab('pedidos')}
-                      className={tab === 'pedidos' ? "bg-sidebar-accent text-sidebar-primary font-medium" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"}
+                      className={tab === 'pedidos' ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}
                     >
                       <Package className="mr-2 h-4 w-4" />
                       <span>Meus Pedidos</span>
@@ -130,7 +130,7 @@ export default function Dashboard() {
                     <SidebarMenuButton
                       isActive={tab === 'favoritos'}
                       onClick={() => setTab('favoritos')}
-                      className={tab === 'favoritos' ? "bg-sidebar-accent text-sidebar-primary font-medium" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"}
+                      className={tab === 'favoritos' ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}
                     >
                       <Heart className="mr-2 h-4 w-4" />
                       <span>Favoritos</span>
@@ -140,7 +140,7 @@ export default function Dashboard() {
                     <SidebarMenuButton
                       isActive={tab === 'perfil'}
                       onClick={() => setTab('perfil')}
-                      className={tab === 'perfil' ? "bg-sidebar-accent text-sidebar-primary font-medium" : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50"}
+                      className={tab === 'perfil' ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}
                     >
                       <UserCircle className="mr-2 h-4 w-4" />
                       <span>Perfil</span>
@@ -155,7 +155,7 @@ export default function Dashboard() {
                   {isAdmin && (
                     <SidebarMenuItem>
                       <SidebarMenuButton asChild>
-                        <a href="/admin" className="text-sidebar-foreground/70 hover:bg-sidebar-accent/50">
+                        <a href="/admin" className="text-sidebar-foreground hover:bg-sidebar-accent/50">
                           <Shield className="mr-2 h-4 w-4" />
                           <span>Admin</span>
                         </a>
@@ -164,7 +164,7 @@ export default function Dashboard() {
                   )}
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <a href="/comprar-backlinks" className="text-sidebar-foreground/70 hover:bg-sidebar-accent/50">
+                      <a href="/comprar-backlinks" className="text-sidebar-foreground hover:bg-sidebar-accent/50">
                         <ShoppingBag className="mr-2 h-4 w-4" />
                         <span>Loja de Backlinks</span>
                       </a>
@@ -172,7 +172,7 @@ export default function Dashboard() {
                   </SidebarMenuItem>
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
-                      <a href="/" className="text-sidebar-foreground/70 hover:bg-sidebar-accent/50">
+                      <a href="/" className="text-sidebar-foreground hover:bg-sidebar-accent/50">
                         <Globe className="mr-2 h-4 w-4" />
                         <span>Ir para o site</span>
                       </a>
