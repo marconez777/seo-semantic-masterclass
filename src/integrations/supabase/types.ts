@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      backlink_leads: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          notes: string | null
+          status: string
+          website: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          notes?: string | null
+          status?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          status?: string
+          website?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       backlinks: {
         Row: {
           category: string | null
