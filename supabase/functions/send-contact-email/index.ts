@@ -24,17 +24,23 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message }: ContactEmailRequest = await req.json();
 
+    // Sanitize inputs to prevent HTML injection in emails
+    const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const safeName = esc(name || '');
+    const safeEmail = esc(email || '');
+    const safeMessage = esc(message || '').replace(/\n/g, '<br>');
+
     // Send email to company
     const companyEmailResponse = await resend.emails.send({
       from: "Contato MK Art <contato@mkart.com.br>",
       to: ["contato@mkart.com.br"],
-      subject: `Nova mensagem de contato - ${name}`,
+      subject: `Nova mensagem de contato - ${safeName}`,
       html: `
         <h2>Nova mensagem de contato</h2>
-        <p><strong>Nome:</strong> ${name}</p>
-        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Nome:</strong> ${safeName}</p>
+        <p><strong>Email:</strong> ${safeEmail}</p>
         <p><strong>Mensagem:</strong></p>
-        <p>${message.replace(/\n/g, '<br>')}</p>
+        <p>${safeMessage}</p>
       `,
     });
 
@@ -44,10 +50,10 @@ const handler = async (req: Request): Promise<Response> => {
       to: [email],
       subject: "Recebemos sua mensagem!",
       html: `
-        <h1>Obrigado pelo contato, ${name}!</h1>
+        <h1>Obrigado pelo contato, ${safeName}!</h1>
         <p>Recebemos sua mensagem e retornaremos o mais breve possível.</p>
         <p>Sua mensagem:</p>
-        <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${message.replace(/\n/g, '<br>')}</p>
+        <p style="background: #f5f5f5; padding: 15px; border-radius: 5px;">${safeMessage}</p>
         <p>Atenciosamente,<br>Equipe MK Art</p>
         <hr>
         <p style="font-size: 12px; color: #666;">
@@ -71,7 +77,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-contact-email function:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Failed to send email" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },
