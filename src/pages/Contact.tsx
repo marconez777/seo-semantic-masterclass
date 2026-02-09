@@ -33,17 +33,31 @@ const Contact = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    const name = formData.name.trim();
+    const email = formData.email.trim();
+    const message = formData.message.trim();
+
+    if (name.length < 2 || name.length > 100) {
+      toast({ title: "Nome inválido", description: "O nome deve ter entre 2 e 100 caracteres." });
+      return;
+    }
+    if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email)) {
+      toast({ title: "Email inválido", description: "Por favor, insira um email válido." });
+      return;
+    }
+    if (message.length < 5 || message.length > 5000) {
+      toast({ title: "Mensagem inválida", description: "A mensagem deve ter entre 5 e 5000 caracteres." });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       // Save to database
       const { error: dbError } = await supabase
         .from('contact_submissions')
-        .insert({
-          name: formData.name.trim(),
-          email: formData.email.trim(),
-          message: formData.message.trim()
-        });
+        .insert({ name, email, message });
 
       if (dbError) throw dbError;
 

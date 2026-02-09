@@ -24,6 +24,17 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const { name, email, message }: ContactEmailRequest = await req.json();
 
+    // Validate inputs
+    if (!name || typeof name !== 'string' || name.trim().length < 2 || name.trim().length > 100) {
+      return new Response(JSON.stringify({ error: "Invalid name" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+    if (!email || typeof email !== 'string' || !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email.trim())) {
+      return new Response(JSON.stringify({ error: "Invalid email" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+    if (!message || typeof message !== 'string' || message.trim().length < 5 || message.trim().length > 5000) {
+      return new Response(JSON.stringify({ error: "Invalid message" }), { status: 400, headers: { "Content-Type": "application/json", ...corsHeaders } });
+    }
+
     // Sanitize inputs to prevent HTML injection in emails
     const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     const safeName = esc(name || '');
