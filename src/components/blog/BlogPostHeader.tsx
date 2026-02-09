@@ -85,11 +85,11 @@ const BlogPostHeader = ({
           <OptimizedImage
             src={featuredImage}
             alt={`Imagem do post: ${title}`}
-            className="w-full h-64 md:h-80 lg:h-96 object-cover"
+            className="w-full h-auto max-h-[500px] object-cover"
             sizes="100vw"
           />
         ) : (
-          <div className={`w-full h-64 md:h-80 lg:h-96 bg-gradient-to-br ${gradientClass} flex items-center justify-center`}>
+          <div className={`w-full h-52 md:h-80 lg:h-96 bg-gradient-to-br ${gradientClass} flex items-center justify-center`}>
             <div className="text-white text-8xl">
               📝
             </div>
