@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 
 interface PopularPost {
   title: string;
@@ -15,42 +17,94 @@ interface PopularPost {
 const popularPosts: PopularPost[] = [];
 
 const BlogSidebar = () => {
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [whatsapp, setWhatsapp] = useState("");
+  const [website, setWebsite] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
   const [activeTab, setActiveTab] = useState<"popular" | "trending">("popular");
+  const { toast } = useToast();
 
-  const handleSubscribe = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle newsletter subscription
-    console.log("Newsletter subscription:", email);
+    if (!name.trim() || !email.trim()) return;
+    setSubmitting(true);
+    try {
+      const { error } = await supabase.from("backlink_leads" as any).insert({
+        name: name.trim(),
+        email: email.trim(),
+        whatsapp: whatsapp.trim() || null,
+        website: website.trim() || null,
+      } as any);
+      if (error) throw error;
+      setSubmitted(true);
+      toast({ title: "Cadastro realizado!", description: "Em breve você receberá seus 3 backlinks grátis." });
+    } catch (err: any) {
+      toast({ title: "Erro ao cadastrar", description: err.message || "Tente novamente." });
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
     <aside className="space-y-6">
-      {/* Newsletter Section */}
+      {/* Free Backlinks CTA */}
       <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl font-bold">Assinar Newsletter</CardTitle>
+          <CardTitle className="text-xl font-bold">3 Backlinks Grátis</CardTitle>
           <p className="text-sm text-muted-foreground">
-            Receba os últimos posts e artigos em seu email
+            Cadastre-se e receba 3 backlinks DR 20 a 30 totalmente grátis.
           </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubscribe} className="space-y-3">
-            <Input
-              type="email"
-              placeholder="Digite seu email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="bg-background/50 backdrop-blur-sm"
-            />
-            <Button 
-              type="submit" 
-              className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90"
-            >
-              Assinar ✉️
-            </Button>
-          </form>
+          {submitted ? (
+            <div className="text-center py-4">
+              <div className="text-3xl mb-2">🎉</div>
+              <p className="text-sm font-medium text-foreground">Cadastro realizado com sucesso!</p>
+              <p className="text-xs text-muted-foreground mt-1">Em breve entraremos em contato.</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-3">
+              <Input
+                type="text"
+                placeholder="Seu nome"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                className="bg-background/50 backdrop-blur-sm"
+              />
+              <Input
+                type="email"
+                placeholder="Seu e-mail"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="bg-background/50 backdrop-blur-sm"
+              />
+              <Input
+                type="text"
+                placeholder="WhatsApp (opcional)"
+                value={whatsapp}
+                onChange={(e) => setWhatsapp(e.target.value)}
+                className="bg-background/50 backdrop-blur-sm"
+              />
+              <Input
+                type="url"
+                placeholder="URL do seu site (opcional)"
+                value={website}
+                onChange={(e) => setWebsite(e.target.value)}
+                className="bg-background/50 backdrop-blur-sm"
+              />
+              <Button
+                type="submit"
+                disabled={submitting}
+                className="w-full bg-gradient-to-r from-primary to-secondary hover:opacity-90"
+              >
+                {submitting ? "Enviando..." : "3 Backlinks Grátis 🎁"}
+              </Button>
+            </form>
+          )}
         </CardContent>
       </Card>
 
