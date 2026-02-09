@@ -8,6 +8,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
 import { type Editor } from "@tiptap/react";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon, Clock } from "lucide-react";
+import { format } from "date-fns";
+import { ptBR } from "date-fns/locale";
+import { cn } from "@/lib/utils";
+import { Label } from "@/components/ui/label";
 
 function slugify(s: string) {
   return s
@@ -35,6 +42,9 @@ export default function AdminBlogNew() {
   const [featuredUrl, setFeaturedUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(!!id);
+  const [publishMode, setPublishMode] = useState<"now" | "schedule">("now");
+  const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined);
+  const [scheduledTime, setScheduledTime] = useState("09:00");
 
   const currentEditorRef = useRef<Editor | null>(null);
   const hiddenFeaturedInput = useRef<HTMLInputElement | null>(null);
@@ -87,6 +97,21 @@ export default function AdminBlogNew() {
         setSeoDesc(data.excerpt || "");
         setSlug(data.slug);
         setFeaturedUrl(data.cover_image);
+
+        // Detect scheduled post
+        if (!data.published && data.published_at) {
+          const pubDate = new Date(data.published_at);
+          if (pubDate > new Date()) {
+            setPublishMode("schedule");
+            // Convert UTC to Brasília time for display
+            const brasiliaStr = pubDate.toLocaleString("en-US", { timeZone: "America/Sao_Paulo" });
+            const brasiliaDate = new Date(brasiliaStr);
+            setScheduledDate(brasiliaDate);
+            setScheduledTime(
+              `${brasiliaDate.getHours().toString().padStart(2, "0")}:${brasiliaDate.getMinutes().toString().padStart(2, "0")}`
+            );
+          }
+        }
       }
       setLoading(false);
     })();
@@ -156,7 +181,7 @@ export default function AdminBlogNew() {
     setFeaturedUrl(null);
   };
 
-  const savePost = async () => {
+  const savePost = async (asDraft = false) => {
     if (!userId) {
       toast({ title: "Sessão inválida", description: "Faça login novamente." });
       return;
@@ -165,8 +190,35 @@ export default function AdminBlogNew() {
       toast({ title: "Campos obrigatórios", description: "Preencha Título, Texto e URL SEO." });
       return;
     }
+
+    if (publishMode === "schedule" && !asDraft) {
+      if (!scheduledDate) {
+        toast({ title: "Data obrigatória", description: "Selecione a data de agendamento." });
+        return;
+      }
+      const [h, m] = scheduledTime.split(":").map(Number);
+      // Build date in Brasília timezone and convert to UTC
+      const brasiliaDateStr = `${scheduledDate.getFullYear()}-${(scheduledDate.getMonth() + 1).toString().padStart(2, "0")}-${scheduledDate.getDate().toString().padStart(2, "0")}T${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00`;
+      // America/Sao_Paulo is UTC-3 (no DST since 2019)
+      const utcDate = new Date(brasiliaDateStr + "-03:00");
+      if (utcDate <= new Date()) {
+        toast({ title: "Data inválida", description: "A data de agendamento deve ser no futuro." });
+        return;
+      }
+    }
+
     setSaving(true);
     try {
+      let published = true;
+      let published_at: string | undefined = new Date().toISOString();
+
+      if (publishMode === "schedule" && !asDraft) {
+        published = false;
+        const [h, m] = scheduledTime.split(":").map(Number);
+        const brasiliaDateStr = `${scheduledDate!.getFullYear()}-${(scheduledDate!.getMonth() + 1).toString().padStart(2, "0")}-${scheduledDate!.getDate().toString().padStart(2, "0")}T${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:00-03:00`;
+        published_at = new Date(brasiliaDateStr).toISOString();
+      }
+
       const postData = {
         user_id: userId,
         title: title.trim(),
@@ -174,7 +226,8 @@ export default function AdminBlogNew() {
         cover_image: featuredUrl,
         excerpt: seoDesc || undefined,
         slug: slugify(slug),
-        published: true,
+        published,
+        published_at,
       };
 
       let error;
@@ -187,17 +240,20 @@ export default function AdminBlogNew() {
       } else {
         const { error: insertError } = await supabase
           .from('posts')
-          .insert({
-            ...postData,
-            published_at: new Date().toISOString(),
-          });
+          .insert(postData);
         error = insertError;
       }
 
       if (error) throw error;
+
+      const msg = publishMode === "schedule" && !asDraft
+        ? "Post agendado"
+        : id ? "Post atualizado" : "Post publicado";
       toast({
-        title: id ? "Post atualizado" : "Post publicado",
-        description: id ? "Seu post foi atualizado com sucesso." : "Seu post foi salvo com sucesso."
+        title: msg,
+        description: publishMode === "schedule" && !asDraft
+          ? `O post será publicado automaticamente na data agendada.`
+          : id ? "Seu post foi atualizado com sucesso." : "Seu post foi salvo com sucesso."
       });
       resetForm();
       navigate('/admin/blog');
@@ -225,8 +281,8 @@ export default function AdminBlogNew() {
           <h1 className="text-3xl font-semibold">{id ? "Editar Post" : "Novo Post do Blog"}</h1>
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={() => navigate('/admin/blog')}>Voltar</Button>
-            <Button onClick={savePost} disabled={saving || !isAdmin}>
-              {id ? "Salvar Alterações" : "Publicar"}
+            <Button onClick={() => savePost()} disabled={saving || !isAdmin}>
+              {publishMode === "schedule" ? "Agendar" : id ? "Salvar Alterações" : "Publicar"}
             </Button>
           </div>
         </header>
@@ -273,6 +329,73 @@ export default function AdminBlogNew() {
               <Input value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={autoSlug || "minha-url-seo"} />
               <p className="text-xs text-muted-foreground">URL final: {window.location.origin}/blog/{slugify(slug || autoSlug)}</p>
             </div>
+          </div>
+
+          {/* Agendamento */}
+          <div className="rounded-lg border bg-card p-6 space-y-4">
+            <h3 className="text-lg font-medium border-b pb-2">Publicação</h3>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant={publishMode === "now" ? "default" : "outline"}
+                onClick={() => setPublishMode("now")}
+              >
+                Publicar Agora
+              </Button>
+              <Button
+                type="button"
+                variant={publishMode === "schedule" ? "default" : "outline"}
+                onClick={() => setPublishMode("schedule")}
+              >
+                Agendar
+              </Button>
+            </div>
+
+            {publishMode === "schedule" && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div className="space-y-2">
+                  <Label>Data (Horário de Brasília)</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !scheduledDate && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {scheduledDate
+                          ? format(scheduledDate, "dd/MM/yyyy", { locale: ptBR })
+                          : "Selecione a data"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={scheduledDate}
+                        onSelect={setScheduledDate}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label>Hora (Brasília)</Label>
+                  <div className="flex items-center gap-2">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="time"
+                      value={scheduledTime}
+                      onChange={(e) => setScheduledTime(e.target.value)}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="grid gap-2">

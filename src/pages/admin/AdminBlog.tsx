@@ -123,7 +123,10 @@ export default function AdminBlog() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {posts.map((post) => (
+                {posts.map((post) => {
+                  const isScheduled = !post.published && post.published_at && new Date(post.published_at) > new Date();
+                  const isDraft = !post.published && !isScheduled;
+                  return (
                   <TableRow key={post.id}>
                     <TableCell className="font-medium">{post.title}</TableCell>
                     <TableCell>
@@ -131,13 +134,17 @@ export default function AdminBlog() {
                         <Badge variant="default" className="bg-green-500">
                           Publicado
                         </Badge>
+                      ) : isScheduled ? (
+                        <Badge variant="default" className="bg-blue-500">
+                          Agendado {new Date(post.published_at!).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        </Badge>
                       ) : (
                         <Badge variant="secondary">Rascunho</Badge>
                       )}
                     </TableCell>
                     <TableCell>
                       {post.published_at
-                        ? new Date(post.published_at).toLocaleDateString("pt-BR")
+                        ? new Date(post.published_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })
                         : "—"}
                     </TableCell>
                     <TableCell className="text-right">
@@ -160,7 +167,8 @@ export default function AdminBlog() {
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
