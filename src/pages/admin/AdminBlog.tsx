@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, Trash2, Image, Tag } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -32,6 +32,10 @@ interface Post {
   published: boolean;
   published_at: string | null;
   created_at: string | null;
+  category: string | null;
+  excerpt: string | null;
+  cover_image: string | null;
+  tags: string[] | null;
 }
 
 export default function AdminBlog() {
@@ -45,7 +49,7 @@ export default function AdminBlog() {
     setLoading(true);
     const { data, error } = await supabase
       .from("posts")
-      .select("id, title, slug, published, published_at, created_at")
+      .select("id, title, slug, published, published_at, created_at, category, excerpt, cover_image, tags")
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -116,7 +120,9 @@ export default function AdminBlog() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead className="w-16"></TableHead>
                   <TableHead>Título</TableHead>
+                  <TableHead>Categoria</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Data de Publicação</TableHead>
                   <TableHead className="text-right">Ações</TableHead>
@@ -125,17 +131,52 @@ export default function AdminBlog() {
               <TableBody>
                 {posts.map((post) => {
                   const isScheduled = !post.published && post.published_at && new Date(post.published_at) > new Date();
-                  const isDraft = !post.published && !isScheduled;
                   return (
                   <TableRow key={post.id}>
-                    <TableCell className="font-medium">{post.title}</TableCell>
+                    <TableCell>
+                      {post.cover_image ? (
+                        <img src={post.cover_image} alt="" className="h-10 w-14 rounded object-cover" />
+                      ) : (
+                        <div className="h-10 w-14 rounded bg-muted flex items-center justify-center">
+                          <Image className="h-4 w-4 text-muted-foreground" />
+                        </div>
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      <div className="space-y-1">
+                        <p className="font-medium leading-snug">{post.title}</p>
+                        {post.excerpt && (
+                          <p className="text-xs text-muted-foreground line-clamp-1">{post.excerpt}</p>
+                        )}
+                        {post.tags && post.tags.length > 0 && (
+                          <div className="flex items-center gap-1 flex-wrap">
+                            <Tag className="h-3 w-3 text-muted-foreground" />
+                            {post.tags.slice(0, 3).map((tag) => (
+                              <Badge key={tag} variant="outline" className="text-[10px] px-1.5 py-0">
+                                {tag}
+                              </Badge>
+                            ))}
+                            {post.tags.length > 3 && (
+                              <span className="text-[10px] text-muted-foreground">+{post.tags.length - 3}</span>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      {post.category ? (
+                        <Badge variant="outline">{post.category}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-sm">—</span>
+                      )}
+                    </TableCell>
                     <TableCell>
                       {post.published ? (
-                        <Badge variant="default" className="bg-green-500">
+                        <Badge className="bg-emerald-500/15 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/15">
                           Publicado
                         </Badge>
                       ) : isScheduled ? (
-                        <Badge variant="default" className="bg-blue-500">
+                        <Badge className="bg-sky-500/15 text-sky-600 border-sky-500/20 hover:bg-sky-500/15">
                           Agendado {new Date(post.published_at!).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </Badge>
                       ) : (
