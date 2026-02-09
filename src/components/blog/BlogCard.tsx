@@ -102,55 +102,57 @@ const BlogCard = ({ post, variant = "default" }: BlogCardProps) => {
   return (
     <article>
       <Card className="overflow-hidden group">
-        <div className="relative">
-          <a href={`/blog/${post.slug}`} aria-label={post.title}>
-            {post.featured_image_url ? (
-              <OptimizedImage
-                src={post.featured_image_url}
-                alt={`Imagem do post: ${post.title}`}
-                className="h-48 w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                sizes="(max-width: 1024px) 100vw, 33vw"
-              />
-            ) : (
-              <div className={`h-48 w-full bg-gradient-to-br ${gradientClass} flex items-center justify-center group-hover:scale-105 transition-transform duration-300`}>
-                <div className="text-white text-4xl">
-                  📝
+        <div className="grid grid-cols-1 sm:grid-cols-[minmax(200px,_2fr)_3fr] gap-0">
+          <div className="relative">
+            <a href={`/blog/${post.slug}`} aria-label={post.title}>
+              {post.featured_image_url ? (
+                <OptimizedImage
+                  src={post.featured_image_url}
+                  alt={`Imagem do post: ${post.title}`}
+                  className="h-48 sm:h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  sizes="(max-width: 640px) 100vw, 40vw"
+                />
+              ) : (
+                <div className={`h-48 sm:h-full w-full bg-gradient-to-br ${gradientClass} flex items-center justify-center group-hover:scale-105 transition-transform duration-300`}>
+                  <div className="text-white text-4xl">
+                    📝
+                  </div>
                 </div>
-              </div>
-            )}
-          </a>
-          
-          {post.category && (
-            <Badge className="absolute top-3 left-3 bg-background/90 text-foreground border-border/50 backdrop-blur-sm">
-              {post.category}
-            </Badge>
-          )}
-        </div>
-        
-        <CardContent className="p-4">
-          <a href={`/blog/${post.slug}`} aria-label={post.title}>
-            <h3 className="text-lg font-semibold leading-snug hover:text-primary transition-colors mb-2 line-clamp-2">
-              {post.title}
-            </h3>
-          </a>
-          
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-            {post.seo_description || ""}
-          </p>
-          
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-1">
-              <Calendar className="h-4 w-4" />
-              {new Date(post.created_at).toLocaleDateString("pt-BR")}
-            </span>
-            {post.views && (
-              <span className="inline-flex items-center gap-1">
-                <Eye className="h-4 w-4" />
-                {post.views}
-              </span>
+              )}
+            </a>
+
+            {post.category && (
+              <Badge className="absolute top-3 left-3 bg-background/90 text-foreground border-border/50 backdrop-blur-sm">
+                {post.category}
+              </Badge>
             )}
           </div>
-        </CardContent>
+
+          <CardContent className="p-5 flex flex-col justify-center">
+            <a href={`/blog/${post.slug}`} aria-label={post.title}>
+              <h3 className="text-xl font-bold leading-snug hover:text-primary transition-colors mb-2 line-clamp-2">
+                {post.title}
+              </h3>
+            </a>
+
+            <p className="text-sm text-muted-foreground mb-4 line-clamp-3">
+              {post.seo_description || ""}
+            </p>
+
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                {new Date(post.created_at).toLocaleDateString("pt-BR")}
+              </span>
+              {post.views && (
+                <span className="inline-flex items-center gap-1">
+                  <Eye className="h-4 w-4" />
+                  {post.views}
+                </span>
+              )}
+            </div>
+          </CardContent>
+        </div>
       </Card>
     </article>
   );
