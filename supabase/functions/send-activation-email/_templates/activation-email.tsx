@@ -25,7 +25,7 @@ export const ActivationEmail = ({ name, activation_url }: ActivationEmailProps) 
       <Container style={container}>
         <Section style={logoSection}>
           <Img
-            src="https://mkart.com.br/LOGOMK.png"
+            src="https://mkart.com.br/images/mkart-logo.png"
             width="120"
             height="40"
             alt="MK Art SEO"

@@ -32,7 +32,7 @@ export const PaymentEmail = ({ name, order_id, total, items_count }: PaymentEmai
         <Container style={container}>
           <Section style={logoSection}>
             <Img
-              src="https://mkart.com.br/LOGOMK.png"
+              src="https://mkart.com.br/images/mkart-logo.png"
               width="120"
               height="40"
               alt="MK Art SEO"
