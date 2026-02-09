@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Bell, Search, LogOut, Settings, User } from "lucide-react"
+import { Bell, Search, LogOut, Settings, User, Globe } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -70,6 +70,12 @@ export function UserProfileDropdown({
 </DropdownMenuLabel>
 <DropdownMenuSeparator />
 <DropdownMenuGroup>
+  <DropdownMenuItem asChild>
+    <a href="/">
+      <Globe className="mr-2 h-4 w-4" />
+      <span>Ir para o site</span>
+    </a>
+  </DropdownMenuItem>
   <DropdownMenuItem>
     <Settings className="mr-2 h-4 w-4" />
     <span>Configurações</span>

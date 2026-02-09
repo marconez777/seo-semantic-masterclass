@@ -11,14 +11,20 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarHeader,
+  SidebarSeparator,
+  SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Button } from "@/components/ui/button";
-import { ClipboardList, Upload, Settings, PenTool, Users, FileText, MessageSquare, Gift } from "lucide-react";
+import { ClipboardList, Upload, Settings, PenTool, Users, FileText, MessageSquare, Gift, Globe } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
+import { Separator } from "@/components/ui/separator";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const [userId, setUserId] = useState<string | null>(null);
+  const [userName, setUserName] = useState("Admin");
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -33,6 +39,14 @@ export default function AdminLayout() {
     });
     return () => subscription.unsubscribe();
   }, [navigate]);
+
+  useEffect(() => {
+    if (!userId) return;
+    supabase.from('profiles').select('full_name, avatar_url').eq('user_id', userId).maybeSingle().then(({ data }) => {
+      if (data?.full_name) setUserName(data.full_name);
+      if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+    });
+  }, [userId]);
 
   if (!userId) return null;
 
@@ -51,18 +65,32 @@ export default function AdminLayout() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <Sidebar className="w-60" collapsible="offcanvas">
+          <SidebarHeader className="p-4">
+            <a href="/" className="flex items-center gap-2">
+              <img
+                src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png"
+                alt="Logo MK Art SEO"
+                className="h-8 w-auto"
+                loading="lazy"
+              />
+              <span className="text-sm font-semibold text-sidebar-foreground">MK Art SEO</span>
+            </a>
+          </SidebarHeader>
+          <SidebarSeparator />
           <SidebarContent>
             <SidebarGroup>
-              <SidebarGroupLabel>Painel Administrativo</SidebarGroupLabel>
+              <SidebarGroupLabel>Menu</SidebarGroupLabel>
               <SidebarMenu>
                 {adminMenuItems.map((item) => (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton asChild>
-                      <NavLink 
-                        to={item.url} 
+                      <NavLink
+                        to={item.url}
                         end={item.url === '/admin'}
-                        className={({ isActive }) => 
-                          isActive ? "bg-muted text-primary font-medium" : "hover:bg-muted/50"
+                        className={({ isActive }) =>
+                          isActive
+                            ? "bg-sidebar-accent text-sidebar-primary font-medium"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
                         }
                       >
                         <item.icon className="mr-2 h-4 w-4" />
@@ -73,23 +101,40 @@ export default function AdminLayout() {
                 ))}
               </SidebarMenu>
             </SidebarGroup>
+            <SidebarSeparator />
+            <SidebarGroup>
+              <SidebarGroupLabel>Links</SidebarGroupLabel>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild>
+                    <a href="/" className="text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground">
+                      <Globe className="mr-2 h-4 w-4" />
+                      <span>Ir para o site</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroup>
           </SidebarContent>
         </Sidebar>
 
         <SidebarInset>
-          <main className="container mx-auto px-4 py-10 space-y-8">
-            <div className="flex items-center justify-between border-b pb-6">
-              <div className="flex items-center gap-3">
-                <a href="/" aria-label="Ir para a página inicial">
-                  <img src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png" alt="Logo MK Art SEO" className="h-8 w-auto" loading="lazy" />
-                </a>
-                <h1 className="text-3xl font-semibold">Admin</h1>
-              </div>
-              <Button variant="outline" onClick={() => supabase.auth.signOut()}>
-                Sair
-              </Button>
+          <header className="sticky top-0 z-30 flex h-14 items-center justify-between border-b bg-card/95 backdrop-blur px-4">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <Separator orientation="vertical" className="h-5" />
+              <h1 className="text-lg font-semibold">Admin</h1>
             </div>
-            
+            <UserProfileDropdown
+              name={userName}
+              role="Administrador"
+              avatarUrl={avatarUrl}
+              onSignOut={() => supabase.auth.signOut()}
+              showActions={false}
+            />
+          </header>
+
+          <main className="p-6 bg-muted/20 min-h-[calc(100vh-3.5rem)]">
             <Outlet />
           </main>
         </SidebarInset>
