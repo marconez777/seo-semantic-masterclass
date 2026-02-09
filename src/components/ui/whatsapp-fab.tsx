@@ -1,6 +1,15 @@
 import { FAB } from "@/components/ui/fab"
+import { useLocation } from "react-router-dom"
+import { cn } from "@/lib/utils"
 
 export function WhatsAppFAB() {
+  const { pathname } = useLocation()
+
+  // Hide on admin pages
+  if (pathname.startsWith("/admin")) return null
+
+  const isDashboard = pathname.startsWith("/painel")
+
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent("Olá! Gostaria de saber mais sobre os serviços de SEO e backlinks.")
     const whatsappUrl = `https://wa.me/5511989151997?text=${message}`
@@ -10,7 +19,10 @@ export function WhatsAppFAB() {
   return (
     <FAB 
       onClick={handleWhatsAppClick}
-      className="bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-full z-[9999]"
+      className={cn(
+        "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-full z-[9999]",
+        isDashboard && "right-auto left-6"
+      )}
       aria-label="Falar no WhatsApp"
     >
       <div className="flex items-center gap-3 px-3 py-8">
