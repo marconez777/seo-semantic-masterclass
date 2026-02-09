@@ -56,7 +56,7 @@ const BlogSidebar = () => {
       {/* Free Backlinks CTA */}
       <Card className="bg-gradient-to-br from-primary/10 to-secondary/10 border-primary/20">
         <CardHeader className="text-center">
-          <CardTitle className="text-xl font-bold">                Grátis: 3 Backlinks DR 30 a 40     </CardTitle>
+          <CardTitle className="text-xl font-bold">                Grátis: 3 Backlinks DR 30      </CardTitle>
           <p className="text-sm text-muted-foreground">
             Cadastre-se e receba 3 backlinks DR 20 a 30 totalmente grátis.
           </p>
