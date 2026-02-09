@@ -91,7 +91,7 @@ const BlogSidebar = () => {
                 className="bg-background/50 backdrop-blur-sm"
               />
               <Input
-                type="url"
+                type="text"
                 placeholder="URL do seu site"
                 value={website}
                 onChange={(e) => setWebsite(e.target.value)}
