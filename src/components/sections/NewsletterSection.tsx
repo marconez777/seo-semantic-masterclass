@@ -12,10 +12,10 @@ const NewsletterSection = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email) {
+    if (!email || !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email.trim())) {
       toast({
-        title: "E-mail obrigatório",
-        description: "Por favor, digite seu e-mail."
+        title: "E-mail inválido",
+        description: "Por favor, digite um e-mail válido."
       });
       return;
     }

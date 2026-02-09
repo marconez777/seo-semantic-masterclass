@@ -26,16 +26,29 @@ const BlogSidebar = () => {
   } = useToast();
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !email.trim() || !whatsapp.trim() || !website.trim()) return;
+    const trimName = name.trim();
+    const trimEmail = email.trim();
+    const trimWhatsapp = whatsapp.trim();
+    const trimWebsite = website.trim();
+    if (!trimName || !trimEmail || !trimWhatsapp || !trimWebsite) return;
+    if (trimName.length < 2 || trimName.length > 100) {
+      toast({ title: "Nome inválido", description: "O nome deve ter entre 2 e 100 caracteres." }); return;
+    }
+    if (!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(trimEmail)) {
+      toast({ title: "Email inválido", description: "Insira um email válido." }); return;
+    }
+    if (trimWebsite.length < 5 || trimWebsite.length > 500) {
+      toast({ title: "URL inválida", description: "A URL deve ter entre 5 e 500 caracteres." }); return;
+    }
     setSubmitting(true);
     try {
       const {
         error
       } = await supabase.from("backlink_leads" as any).insert({
-        name: name.trim(),
-        email: email.trim(),
-        whatsapp: whatsapp.trim(),
-        website: website.trim()
+        name: trimName,
+        email: trimEmail,
+        whatsapp: trimWhatsapp,
+        website: trimWebsite
       } as any);
       if (error) throw error;
       setSubmitted(true);
