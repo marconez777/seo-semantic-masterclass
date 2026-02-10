@@ -38,8 +38,8 @@ Allow: /
 User-agent: LinkedInBot
 Allow: /
 
-# Sitemap
-Sitemap: https://mkart.com.br/sitemap.xml
+# Sitemap dinamico (Edge Function)
+Sitemap: https://nxitvhrfloibpwrkskzx.supabase.co/functions/v1/generate-sitemap
 
 # Crawl-delay (opcional)
 Crawl-delay: 1

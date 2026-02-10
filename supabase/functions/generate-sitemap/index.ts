@@ -10,6 +10,7 @@ const staticPages = [
   { loc: '/consultoria-seo', changefreq: 'monthly', priority: '0.7' },
   { loc: '/consultoria-seo-saas', changefreq: 'monthly', priority: '0.7' },
   { loc: '/contato', changefreq: 'monthly', priority: '0.6' },
+  { loc: '/comprar-backlinks-entretenimento', changefreq: 'weekly', priority: '0.8' },
   { loc: '/comprar-backlinks-tecnologia', changefreq: 'weekly', priority: '0.8' },
   { loc: '/comprar-backlinks-financas', changefreq: 'weekly', priority: '0.8' },
   { loc: '/comprar-backlinks-saude', changefreq: 'weekly', priority: '0.8' },
