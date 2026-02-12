@@ -232,18 +232,16 @@ export default function AdminPedidos() {
       
       if (pii?.customer_email && order) {
         try {
-          if (status === "em_producao" || status === "entregue") {
-            await supabase.functions.invoke("send-order-status-email", {
-              body: {
-                email: pii.customer_email,
-                name: pii.customer_name || "Cliente",
-                order_id: orderId,
-                status: status,
-                items_count: order.items.length,
-              },
-            });
-            toast({ title: "E-mail de atualização enviado" });
-          }
+          await supabase.functions.invoke("send-order-status-email", {
+            body: {
+              email: pii.customer_email,
+              name: pii.customer_name || "Cliente",
+              order_id: orderId,
+              status: status,
+              items_count: order.items.length,
+            },
+          });
+          toast({ title: "E-mail de atualização enviado ao cliente" });
         } catch (emailError) {
           console.error("Erro ao enviar e-mail:", emailError);
         }

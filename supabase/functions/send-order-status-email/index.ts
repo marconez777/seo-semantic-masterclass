@@ -16,13 +16,16 @@ interface OrderStatusEmailRequest {
   email: string;
   name: string;
   order_id: string;
-  status: 'em_producao' | 'entregue';
+  status: 'aguardando_pagamento' | 'pago' | 'em_producao' | 'entregue' | 'cancelado';
   items_count: number;
 }
 
-const statusSubjects = {
+const statusSubjects: Record<string, string> = {
+  aguardando_pagamento: 'Pagamento pendente',
+  pago: 'Pagamento confirmado!',
   em_producao: 'Seu pedido está em produção!',
   entregue: 'Pedido entregue com sucesso!',
+  cancelado: 'Pedido cancelado',
 };
 
 const handler = async (req: Request): Promise<Response> => {
