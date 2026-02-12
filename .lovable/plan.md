@@ -1,57 +1,68 @@
 
+## Emails Transacionais para o Admin
 
-## Corrigir Sitemap para incluir posts do blog automaticamente
+Criar um sistema de notificacoes por email para o admin (contato@mkart.com.br) sempre que ocorrer:
+- Novo pedido criado
+- Novo cliente cadastrado
+- Novo lead (contato ou backlink lead)
 
-### Problema identificado
-O domínio `mkart.com.br/sitemap.xml` está servindo o arquivo estático `public/sitemap.xml`, que foi criado manualmente em dezembro de 2025 e nao inclui nenhum post do blog. A Edge Function `generate-sitemap` ja existe e busca os posts dinamicamente do banco, mas nao esta sendo utilizada.
+### Como funciona
 
-### Solucao
+Uma unica Edge Function `notify-admin` recebera o tipo de evento e os dados relevantes, e enviara um email formatado para contato@mkart.com.br.
 
-**1. Atualizar o arquivo `public/sitemap.xml` para ser gerado dinamicamente**
+Os disparos serao feitos diretamente no codigo frontend, nos pontos onde cada evento ja acontece:
 
-Como o site e uma SPA hospedada estaticamente, a forma mais confiavel e substituir o conteudo do `public/sitemap.xml` por um redirect ou, melhor ainda, atualizar o proprio arquivo estatico com todos os dados atuais e configurar o `robots.txt` para apontar para a Edge Function.
-
-A melhor abordagem e dupla:
-
-**Opcao A - Apontar o robots.txt para a Edge Function:**
-- Atualizar `public/robots.txt` para incluir: `Sitemap: https://nxitvhrfloibpwrkskzx.supabase.co/functions/v1/generate-sitemap`
-- Isso faz o Google e outros bots usarem o sitemap dinamico
-
-**Opcao B - Atualizar o sitemap estatico como fallback:**
-- Reescrever `public/sitemap.xml` com todas as URLs atuais incluindo os 8 posts publicados
-- Adicionar as paginas SEO dinamicas
-
-**2. Corrigir URLs inconsistentes no sitemap estatico**
-
-O sitemap estatico atual tem URLs diferentes das rotas reais:
-- `agencia-backlinks` vs rota real `agencia-de-backlinks`
-- `consultoria-saas` vs rota real `consultoria-seo-saas`
-- `contact` vs rota real `contato`
-
-**3. Garantir que a Edge Function funcione corretamente**
-
-A Edge Function `generate-sitemap` ja esta implementada e busca posts e paginas SEO do banco. Apenas precisa de um pequeno ajuste nas URLs estaticas para manter consistencia.
+1. **Novo pedido** - Apos criar o pedido no `CartModal.tsx` (linha ~160, junto com o envio do email de pagamento)
+2. **Novo cliente** - Apos o signup bem-sucedido no `Auth.tsx`
+3. **Novo lead de contato** - Apos salvar no banco no `Contact.tsx` (ja dispara `send-contact-email`, que ja notifica o admin - este caso ja esta coberto)
+4. **Novo lead de backlink** - Apos salvar no `BlogSidebar.tsx`
 
 ### Detalhes tecnicos
 
-#### Arquivo 1: `public/robots.txt`
-- Adicionar a linha `Sitemap:` apontando para a Edge Function dinamica
-- Isso garante que buscadores sempre vejam o sitemap atualizado
+#### 1. Nova Edge Function: `supabase/functions/notify-admin/index.ts`
 
-#### Arquivo 2: `public/sitemap.xml`
-- Reescrever com todas as URLs corretas (paginas estaticas + 8 posts do blog)
-- Servir como fallback caso a Edge Function esteja indisponivel
+- Recebe um JSON com `{ type, data }` onde type pode ser: `new_order`, `new_customer`, `new_lead`
+- Usa Resend para enviar email para contato@mkart.com.br
+- Gera HTML simples com os dados do evento
+- Sem autenticacao obrigatoria (verify_jwt = false) pois o signup acontece antes do usuario estar autenticado
+- Validacao do payload para evitar abuso
 
-#### Arquivo 3: `supabase/functions/generate-sitemap/index.ts`
-- Corrigir URLs estaticas inconsistentes (`/agencia-de-backlinks`, `/consultoria-seo-saas`, `/contato`)
-- Manter a logica de busca dinamica de posts e paginas SEO
+Conteudo dos emails:
 
-#### Arquivo 4: `public/robots.txt`
-- Atualizar referencia do Sitemap para a Edge Function
+**Novo Pedido:**
+- Assunto: "Novo Pedido #XXXXXXXX - R$ XXX,XX"
+- Corpo: ID do pedido, valor total, quantidade de itens, data
 
-### Resultado esperado
-- Buscadores (Google, Bing) usarao o sitemap dinamico da Edge Function
-- Cada novo post publicado aparecera automaticamente no sitemap
-- Paginas SEO gerenciadas pelo admin tambem serao incluidas automaticamente
-- O arquivo estatico servira como backup com os dados mais recentes
+**Novo Cliente:**
+- Assunto: "Novo Cliente Cadastrado - Nome"
+- Corpo: Nome, email, WhatsApp, data do cadastro
 
+**Novo Lead:**
+- Assunto: "Novo Lead - Nome"
+- Corpo: Nome, email, site, origem (contato/backlink)
+
+#### 2. Atualizar `supabase/config.toml`
+
+Adicionar configuracao para a nova funcao:
+```
+[functions.notify-admin]
+verify_jwt = false
+```
+
+#### 3. Atualizar `src/components/cart/CartModal.tsx`
+
+Apos a criacao do pedido (linha ~160), invocar `notify-admin` com type `new_order` e os dados do pedido. Usar try/catch para nao afetar o fluxo principal.
+
+#### 4. Atualizar `src/pages/Auth.tsx`
+
+Apos o signup bem-sucedido, invocar `notify-admin` com type `new_customer` e os dados do usuario (nome, email, telefone).
+
+#### 5. Atualizar `src/components/blog/BlogSidebar.tsx`
+
+Apos inserir o lead de backlink no banco, invocar `notify-admin` com type `new_lead`.
+
+### Observacoes
+
+- O formulario de contato (`Contact.tsx`) ja envia email para contato@mkart.com.br via `send-contact-email`, entao nao precisa de notificacao duplicada.
+- Todas as chamadas ao `notify-admin` serao feitas em blocos try/catch separados para garantir que falhas no envio de email nao afetem o fluxo principal do usuario.
+- A RESEND_API_KEY ja esta configurada nos secrets do projeto.
