@@ -92,6 +92,18 @@ const Auth = () => {
         title: "Cadastro realizado!",
         description: "Verifique seu e-mail para ativar sua conta.",
       });
+
+      // Notify admin about new customer
+      try {
+        await supabase.functions.invoke("notify-admin", {
+          body: {
+            type: "new_customer",
+            data: { name: name.trim(), email: email.trim(), phone: phone.trim() },
+          },
+        });
+      } catch (notifyErr) {
+        console.error("Erro ao notificar admin:", notifyErr);
+      }
     }
   };
 

@@ -159,6 +159,30 @@ export function CartModal() {
         // Don't fail the order if email fails
       }
 
+      // Notify admin about new order
+      try {
+        const { data: profile } = await supabase
+          .from("profiles")
+          .select("full_name, email")
+          .eq("user_id", session.user.id)
+          .single();
+
+        await supabase.functions.invoke("notify-admin", {
+          body: {
+            type: "new_order",
+            data: {
+              order_id: order.id,
+              total,
+              items_count: items.length,
+              customer_name: profile?.full_name || "N/A",
+              customer_email: profile?.email || session.user.email,
+            },
+          },
+        });
+      } catch (notifyErr) {
+        console.error("Erro ao notificar admin:", notifyErr);
+      }
+
       // Success
       clearCart();
       closeCart();
