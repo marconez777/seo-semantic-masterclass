@@ -56,6 +56,18 @@ const BlogSidebar = () => {
         title: "Cadastro realizado!",
         description: "Em breve você receberá seus 3 backlinks grátis."
       });
+
+      // Notify admin about new lead
+      try {
+        await supabase.functions.invoke("notify-admin", {
+          body: {
+            type: "new_lead",
+            data: { name: trimName, email: trimEmail, whatsapp: trimWhatsapp, website: trimWebsite, source: "backlink" },
+          },
+        });
+      } catch (notifyErr) {
+        console.error("Erro ao notificar admin:", notifyErr);
+      }
     } catch (err: any) {
       toast({
         title: "Erro ao cadastrar",
