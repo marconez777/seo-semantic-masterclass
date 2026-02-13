@@ -1,5 +1,10 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
+}
+
 const BASE_URL = 'https://mkart.com.br'
 
 const staticPages = [
@@ -39,7 +44,11 @@ function escapeXml(s: string) {
   return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
 }
 
-Deno.serve(async () => {
+Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
   try {
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
@@ -109,12 +118,13 @@ Deno.serve(async () => {
 
     return new Response(xml, {
       headers: {
+        ...corsHeaders,
         'Content-Type': 'application/xml',
         'Cache-Control': 'public, max-age=3600',
       },
     })
   } catch (error) {
     console.error('Sitemap generation error:', error)
-    return new Response('Error generating sitemap', { status: 500 })
+    return new Response('Error generating sitemap', { status: 500, headers: corsHeaders })
   }
 })
