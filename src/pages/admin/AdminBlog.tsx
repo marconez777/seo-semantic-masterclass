@@ -132,7 +132,14 @@ export default function AdminBlog() {
 
       <div className="space-y-6">
         <div className="flex items-center justify-between">
-          <h2 className="text-2xl font-bold">Blog</h2>
+          <div className="flex items-center gap-3">
+            <h2 className="text-2xl font-bold">Blog</h2>
+            {!loading && (
+              <Badge variant="secondary" className="text-sm">
+                {posts.length} {posts.length === 1 ? 'post' : 'posts'}
+              </Badge>
+            )}
+          </div>
           <div className="flex gap-2">
             <Button
               variant="outline"
