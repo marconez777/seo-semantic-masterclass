@@ -1,39 +1,39 @@
 
 
-## Botao "Atualizar Sitemap" no Admin Blog
+## Corrigir erro CORS no Sitemap
 
 ### Problema
-O arquivo `public/sitemap.xml` e estatico e nao se atualiza quando novos posts sao publicados. A edge function `generate-sitemap` ja gera o sitemap completo dinamicamente, mas o arquivo estatico tem prioridade.
+A edge function `generate-sitemap` nao tem headers CORS. Quando o botao "Atualizar Sitemap" no painel admin tenta chamar a funcao a partir do dominio `mkart.com.br`, o navegador bloqueia a requisicao por politica de seguranca (CORS).
 
 ### Solucao
 
-**1. Redirecionar `/sitemap.xml` para a edge function dinamica**
+**1. Adicionar headers CORS na edge function `generate-sitemap`**
 
-Adicionar uma regra no `public/_redirects` para que `/sitemap.xml` seja servido pela edge function (que ja inclui todos os posts automaticamente):
+Arquivo: `supabase/functions/generate-sitemap/index.ts`
 
-```text
-/sitemap.xml  https://nxitvhrfloibpwrkskzx.supabase.co/functions/v1/generate-sitemap  200
+- Adicionar constante `corsHeaders` com `Access-Control-Allow-Origin: *` e os headers necessarios
+- Adicionar handler para requisicoes `OPTIONS` (preflight)
+- Incluir os headers CORS em todas as respostas (sucesso e erro)
+- Manter o `Content-Type: application/xml` para o sitemap funcionar normalmente para buscadores
+
+### Detalhes tecnicos
+
+```typescript
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
 ```
 
-Remover o arquivo estatico `public/sitemap.xml` para evitar conflitos.
-
-**2. Botao no painel Admin Blog**
-
-Adicionar um botao "Atualizar Sitemap" na pagina `AdminBlog.tsx` que:
-- Chama a edge function `generate-sitemap`
-- Compara os posts publicados no banco com os que estao no sitemap retornado
-- Exibe um toast confirmando quantos posts estao indexados (ex: "Sitemap atualizado com 11 posts")
-- Se houver posts faltando, exibe quais foram adicionados
+O handler `Deno.serve` passara a receber o parametro `req` para verificar se e uma requisicao `OPTIONS`. Se for, retorna `200` com os headers CORS. Caso contrario, processa normalmente e inclui os headers CORS na resposta XML.
 
 ### Arquivos alterados
 
-- `src/pages/admin/AdminBlog.tsx` -- adicionar botao com icone de refresh ao lado do botao "Novo post"
-- `public/_redirects` -- adicionar regra de proxy para `/sitemap.xml`
-- `public/sitemap.xml` -- deletar arquivo estatico
+- `supabase/functions/generate-sitemap/index.ts` -- adicionar CORS headers
 
 ### Resultado
 
-- O sitemap em `/sitemap.xml` sempre refletira os posts publicados no banco, sem necessidade de atualizar codigo
-- O botao no admin serve como confirmacao visual de que o sitemap esta sincronizado
-- Cada vez que um post for publicado, o sitemap ja estara atualizado automaticamente na proxima visita do Google
+- O botao "Atualizar Sitemap" no admin funcionara sem erros
+- O sitemap continuara acessivel normalmente por buscadores em `/sitemap.xml`
+- Nenhuma mudanca no frontend necessaria
 
