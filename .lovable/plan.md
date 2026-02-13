@@ -1,68 +1,112 @@
 
-## Emails Transacionais para o Admin
 
-Criar um sistema de notificacoes por email para o admin (contato@mkart.com.br) sempre que ocorrer:
-- Novo pedido criado
-- Novo cliente cadastrado
-- Novo lead (contato ou backlink lead)
+## Integracao Serp Bot - Rastreio de Palavras-Chave
 
-### Como funciona
+### Resumo
 
-Uma unica Edge Function `notify-admin` recebera o tipo de evento e os dados relevantes, e enviara um email formatado para contato@mkart.com.br.
+Adicionar uma nova aba "Rastreio de Palavras" no painel do usuario, onde ele pode criar projetos para rastrear posicoes de palavras-chave no Google usando a API do Serp Bot.
 
-Os disparos serao feitos diretamente no codigo frontend, nos pontos onde cada evento ja acontece:
+### Regras de negocio
 
-1. **Novo pedido** - Apos criar o pedido no `CartModal.tsx` (linha ~160, junto com o envio do email de pagamento)
-2. **Novo cliente** - Apos o signup bem-sucedido no `Auth.tsx`
-3. **Novo lead de contato** - Apos salvar no banco no `Contact.tsx` (ja dispara `send-contact-email`, que ja notifica o admin - este caso ja esta coberto)
-4. **Novo lead de backlink** - Apos salvar no `BlogSidebar.tsx`
+- Cada usuario pode criar **1 projeto gratis**
+- Projetos adicionais requerem pagamento (planos futuros)
+- Cada projeto suporta ate **60 palavras-chave**
+- O usuario define: nome do projeto, dominio do site, regiao Google (ex: www.google.com.br), dispositivo (desktop/mobile)
+- As verificacoes de posicao sao feitas sob demanda via API do Serp Bot
+
+### Arquitetura
+
+A API do Serp Bot eh read-only e usa uma unica API key compartilhada. Por seguranca, todas as chamadas serao feitas via uma Edge Function (para nao expor a API key no frontend).
+
+```text
+Usuario (Frontend)
+    |
+    v
+Edge Function (serpbot-proxy)
+    |
+    v
+API Serp Bot (rank_check, get_serps)
+```
+
+Os projetos e palavras-chave ficam no nosso banco de dados (nao no Serp Bot), e usamos a API apenas para consultar posicoes.
 
 ### Detalhes tecnicos
 
-#### 1. Nova Edge Function: `supabase/functions/notify-admin/index.ts`
+#### 1. Novas tabelas no banco de dados
 
-- Recebe um JSON com `{ type, data }` onde type pode ser: `new_order`, `new_customer`, `new_lead`
-- Usa Resend para enviar email para contato@mkart.com.br
-- Gera HTML simples com os dados do evento
-- Sem autenticacao obrigatoria (verify_jwt = false) pois o signup acontece antes do usuario estar autenticado
-- Validacao do payload para evitar abuso
+**Tabela `keyword_projects`**
+- `id` (uuid, PK)
+- `user_id` (uuid, NOT NULL) - referencia ao usuario
+- `name` (text, NOT NULL) - nome do projeto
+- `domain` (text, NOT NULL) - dominio a rastrear (sem http/www)
+- `region` (text, default 'www.google.com.br') - regiao Google
+- `device` (text, default 'desktop') - desktop/mobile/tablet
+- `created_at` (timestamptz)
+- `updated_at` (timestamptz)
 
-Conteudo dos emails:
+RLS: usuario so ve/edita/deleta seus proprios projetos. Admin ve tudo.
 
-**Novo Pedido:**
-- Assunto: "Novo Pedido #XXXXXXXX - R$ XXX,XX"
-- Corpo: ID do pedido, valor total, quantidade de itens, data
+**Tabela `tracked_keywords`**
+- `id` (uuid, PK)
+- `project_id` (uuid, FK -> keyword_projects.id ON DELETE CASCADE)
+- `keyword` (text, NOT NULL)
+- `current_position` (integer, nullable) - ultima posicao encontrada
+- `previous_position` (integer, nullable) - posicao anterior
+- `best_position` (integer, nullable) - melhor posicao historica
+- `last_checked_at` (timestamptz, nullable)
+- `created_at` (timestamptz)
 
-**Novo Cliente:**
-- Assunto: "Novo Cliente Cadastrado - Nome"
-- Corpo: Nome, email, WhatsApp, data do cadastro
+RLS: acesso via join com keyword_projects (usuario so ve keywords dos seus projetos).
 
-**Novo Lead:**
-- Assunto: "Novo Lead - Nome"
-- Corpo: Nome, email, site, origem (contato/backlink)
+**Tabela `keyword_history`**
+- `id` (uuid, PK)
+- `keyword_id` (uuid, FK -> tracked_keywords.id ON DELETE CASCADE)
+- `position` (integer, nullable) - posicao naquele check
+- `checked_at` (timestamptz, default now())
 
-#### 2. Atualizar `supabase/config.toml`
+RLS: acesso via join com tracked_keywords -> keyword_projects.
 
-Adicionar configuracao para a nova funcao:
-```
-[functions.notify-admin]
-verify_jwt = false
-```
+#### 2. Nova Edge Function: `serpbot-proxy`
 
-#### 3. Atualizar `src/components/cart/CartModal.tsx`
+- Armazena a API key do Serp Bot como secret
+- Acoes suportadas:
+  - `rank_check`: recebe keyword, domain, region, device e retorna a posicao
+  - `check_project`: recebe project_id, busca todas as keywords do projeto e faz rank_check para cada uma, salvando os resultados no banco
+  - `credit`: retorna o saldo de creditos da API
+- verify_jwt = true (apenas usuarios autenticados)
+- Validacao: verifica se o projeto pertence ao usuario autenticado
 
-Apos a criacao do pedido (linha ~160), invocar `notify-admin` com type `new_order` e os dados do pedido. Usar try/catch para nao afetar o fluxo principal.
+#### 3. Novos componentes frontend
 
-#### 4. Atualizar `src/pages/Auth.tsx`
+**`src/components/dashboard/KeywordTracker.tsx`** - Componente principal da aba
+- Lista os projetos do usuario
+- Botao "Novo Projeto" (desabilitado se ja tem 1 projeto gratis)
+- Para cada projeto: lista de keywords com posicao atual, variacao, melhor posicao
+- Botao "Verificar Posicoes" para rodar o check via edge function
+- Indicadores visuais: seta verde (subiu), vermelha (desceu), cinza (sem mudanca)
 
-Apos o signup bem-sucedido, invocar `notify-admin` com type `new_customer` e os dados do usuario (nome, email, telefone).
+**`src/components/dashboard/NewProjectModal.tsx`** - Modal para criar projeto
+- Campos: nome, dominio, regiao (select com opcoes Google), dispositivo
+- Validacao: max 1 projeto gratis
 
-#### 5. Atualizar `src/components/blog/BlogSidebar.tsx`
+**`src/components/dashboard/AddKeywordForm.tsx`** - Formulario para adicionar keywords
+- Input de texto (uma keyword por vez ou em lote separadas por virgula)
+- Validacao: max 60 keywords por projeto
+- Contador de keywords usadas
 
-Apos inserir o lead de backlink no banco, invocar `notify-admin` com type `new_lead`.
+#### 4. Alteracoes no Dashboard
 
-### Observacoes
+- Adicionar nova aba "Rastreio de Palavras" no sidebar com icone `Search`
+- Atualizar o `tabLabel` para incluir o novo tab
+- Renderizar `KeywordTracker` quando tab === 'keywords'
 
-- O formulario de contato (`Contact.tsx`) ja envia email para contato@mkart.com.br via `send-contact-email`, entao nao precisa de notificacao duplicada.
-- Todas as chamadas ao `notify-admin` serao feitas em blocos try/catch separados para garantir que falhas no envio de email nao afetem o fluxo principal do usuario.
-- A RESEND_API_KEY ja esta configurada nos secrets do projeto.
+#### 5. Secret da API
+
+- Salvar `SERPBOT_API_KEY` como secret do projeto (valor: `17d1d57c349c1b17cdf20a1d0c178021`)
+
+### O que NAO esta incluido nesta fase
+
+- Sistema de pagamento para planos extras (sera implementado depois)
+- Verificacao automatica/agendada (por enquanto eh manual, sob demanda)
+- Gestao de projetos pelo Serp Bot (usamos apenas a API de consulta)
+
