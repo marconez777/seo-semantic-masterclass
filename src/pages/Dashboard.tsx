@@ -17,12 +17,13 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Heart, UserCircle, Shield, Package, ShoppingBag, Globe } from "lucide-react";
+import { Heart, UserCircle, Shield, Package, ShoppingBag, Globe, Search } from "lucide-react";
 import { OrdersList } from "@/components/dashboard/OrdersList";
 import { ProfileSection } from "@/components/dashboard/ProfileSection";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { Separator } from "@/components/ui/separator";
 import { FavoritesTable } from "@/components/dashboard/FavoritesTable";
+import { KeywordTracker } from "@/components/dashboard/KeywordTracker";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -86,7 +87,7 @@ export default function Dashboard() {
 
   if (!userId) return null;
 
-  const tabLabel = tab === 'pedidos' ? 'Meus Pedidos' : tab === 'favoritos' ? 'Favoritos' : 'Perfil';
+  const tabLabel = tab === 'pedidos' ? 'Meus Pedidos' : tab === 'favoritos' ? 'Favoritos' : tab === 'keywords' ? 'Rastreio de Palavras' : 'Perfil';
 
   return (
     <>
@@ -134,6 +135,16 @@ export default function Dashboard() {
                     >
                       <Heart className="mr-2 h-4 w-4" />
                       <span>Favoritos</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      isActive={tab === 'keywords'}
+                      onClick={() => setTab('keywords')}
+                      className={tab === 'keywords' ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}
+                    >
+                      <Search className="mr-2 h-4 w-4" />
+                      <span>Rastreio de Palavras</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                   <SidebarMenuItem>
@@ -210,6 +221,12 @@ export default function Dashboard() {
                 <div className="space-y-4">
                   <h2 className="text-xl font-semibold">Favoritos</h2>
                   <FavoritesTable userId={userId} />
+                </div>
+              )}
+              {tab === 'keywords' && (
+                <div className="space-y-4">
+                  <h2 className="text-xl font-semibold">Rastreio de Palavras-Chave</h2>
+                  <KeywordTracker userId={userId} />
                 </div>
               )}
               {tab === 'perfil' && (
