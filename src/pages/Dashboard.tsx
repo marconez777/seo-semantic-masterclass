@@ -211,30 +211,10 @@ export default function Dashboard() {
             </header>
 
             <main className="p-6 bg-muted/20 min-h-[calc(100vh-3.5rem)]">
-              {tab === 'pedidos' && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Meus Pedidos</h2>
-                  <OrdersList userId={userId} />
-                </div>
-              )}
-              {tab === 'favoritos' && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Favoritos</h2>
-                  <FavoritesTable userId={userId} />
-                </div>
-              )}
-              {tab === 'keywords' && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Rastreio de Palavras-Chave</h2>
-                  <KeywordTracker userId={userId} />
-                </div>
-              )}
-              {tab === 'perfil' && (
-                <div className="space-y-4">
-                  <h2 className="text-xl font-semibold">Perfil</h2>
-                  <ProfileSection />
-                </div>
-              )}
+              {tab === 'pedidos' && <OrdersList userId={userId} />}
+              {tab === 'favoritos' && <FavoritesTable userId={userId} />}
+              {tab === 'keywords' && <KeywordTracker userId={userId} />}
+              {tab === 'perfil' && <ProfileSection />}
             </main>
           </SidebarInset>
         </div>
