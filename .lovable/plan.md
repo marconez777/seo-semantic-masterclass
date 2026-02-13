@@ -1,39 +1,37 @@
 
 
-## Corrigir erro CORS no Sitemap
+## Atualizar sitemap.xml manualmente com todos os 13 posts
 
-### Problema
-A edge function `generate-sitemap` nao tem headers CORS. Quando o botao "Atualizar Sitemap" no painel admin tenta chamar a funcao a partir do dominio `mkart.com.br`, o navegador bloqueia a requisicao por politica de seguranca (CORS).
+### O que sera feito
 
-### Solucao
+Criar o arquivo `public/sitemap.xml` com todas as URLs atualizadas, incluindo os 13 posts publicados no blog, as paginas estaticas e as paginas de categoria.
 
-**1. Adicionar headers CORS na edge function `generate-sitemap`**
+### Conteudo do sitemap
 
-Arquivo: `supabase/functions/generate-sitemap/index.ts`
+**Paginas estaticas (25 URLs):**
+- Home, comprar-backlinks, blog, agencia-de-backlinks, consultoria-seo, consultoria-seo-saas, contato
+- 18 paginas de categoria (tecnologia, financas, saude, etc.)
 
-- Adicionar constante `corsHeaders` com `Access-Control-Allow-Origin: *` e os headers necessarios
-- Adicionar handler para requisicoes `OPTIONS` (preflight)
-- Incluir os headers CORS em todas as respostas (sucesso e erro)
-- Manter o `Content-Type: application/xml` para o sitemap funcionar normalmente para buscadores
+**Posts do blog (13 URLs):**
+1. o-que-sao-referring-domains-dominios-de-referencia
+2. glossario-de-termos-essenciais-de-seo-off-page
+3. o-que-e-texto-ancora-anchor-text-e-por-que-ele-pesa-tanto-no-seo
+4. o-que-e-link-juice
+5. vale-a-pena-comprar-backlinks
+6. o-que-e-domain-authority-da-da-moz
+7. a-importancia-dos-backlinks-para-o-algoritmo-do-google
+8. diferenca-entre-links-dofollow-e-nofollow
+9. como-funciona-o-pagerank-pr
+10. diferenca-entre-links-internos-e-links-externos
+11. o-que-e-link-building
+12. o-que-sao-backlinks-e-para-que-servem-no-seo-e-no-geo
+13. o-que-e-domain-rating-dr-do-ahrefs
 
-### Detalhes tecnicos
+### Arquivo alterado
 
-```typescript
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
-```
+- `public/sitemap.xml` -- criar arquivo com todas as 38 URLs
 
-O handler `Deno.serve` passara a receber o parametro `req` para verificar se e uma requisicao `OPTIONS`. Se for, retorna `200` com os headers CORS. Caso contrario, processa normalmente e inclui os headers CORS na resposta XML.
+### Importante
 
-### Arquivos alterados
-
-- `supabase/functions/generate-sitemap/index.ts` -- adicionar CORS headers
-
-### Resultado
-
-- O botao "Atualizar Sitemap" no admin funcionara sem erros
-- O sitemap continuara acessivel normalmente por buscadores em `/sitemap.xml`
-- Nenhuma mudanca no frontend necessaria
+Sempre que adicionar novos posts, basta me pedir para atualizar o sitemap novamente. A edge function dinamica continua funcionando normalmente para o `robots.txt` -- este arquivo estatico serve para quem acessa `/sitemap.xml` diretamente e para o Search Console.
 
