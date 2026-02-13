@@ -6,6 +6,7 @@ import StructuredData from "@/components/seo/StructuredData";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BlogCard from "@/components/blog/BlogCard";
 import BlogSidebar from "@/components/blog/BlogSidebar";
+import { PaginationBar } from "@/components/ui/pagination-bar";
 import { supabase } from "@/integrations/supabase/client";
 
 interface PostDb {
@@ -17,10 +18,14 @@ interface PostDb {
   created_at: string | null;
 }
 
+const PAGE_SIZE = 15;
+
 const Blog = () => {
   const [posts, setPosts] = useState<PostDb[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -29,17 +34,22 @@ const Blog = () => {
       setLoading(true);
       setError(null);
       try {
-        const { data, error: queryError } = await supabase
+        const from = (page - 1) * PAGE_SIZE;
+        const to = from + PAGE_SIZE - 1;
+
+        const { data, error: queryError, count } = await supabase
           .from("posts")
-          .select("id,title,slug,cover_image,excerpt,created_at")
+          .select("id,title,slug,cover_image,excerpt,created_at", { count: "exact" })
           .eq("published", true)
           .order("created_at", { ascending: false })
+          .range(from, to)
           .abortSignal(controller.signal);
         
         if (queryError) {
           setError(queryError.message);
         } else {
           setPosts(data || []);
+          setTotal(count ?? 0);
         }
       } catch (err: any) {
         if (err?.name !== 'AbortError') {
@@ -51,7 +61,12 @@ const Blog = () => {
 
     fetchPosts();
     return () => controller.abort();
-  }, []);
+  }, [page]);
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   return (
     <>
@@ -132,10 +147,21 @@ const Blog = () => {
                       seo_description: post.excerpt,
                       created_at: post.created_at ?? '',
                     }}
-                    variant={index === 0 ? "featured" : "default"}
+                    variant={index === 0 && page === 1 ? "featured" : "default"}
                   />
                 ))}
               </div>
+
+              {total > PAGE_SIZE && (
+                <div className="mt-8">
+                  <PaginationBar
+                    page={page}
+                    pageSize={PAGE_SIZE}
+                    total={total}
+                    onPageChange={handlePageChange}
+                  />
+                </div>
+              )}
             </div>
 
             {/* Sidebar */}

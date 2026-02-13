@@ -6,6 +6,7 @@ import CaseStudySection from "@/components/sections/CaseStudySection";
 import FounderSection from "@/components/sections/FounderSection";
 import FAQSection from "@/components/seo/FAQSection";
 import NewsletterSection from "@/components/sections/NewsletterSection";
+import LatestBlogPosts from "@/components/sections/LatestBlogPosts";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/seo/SEOHead";
@@ -73,6 +74,7 @@ const Index = () => {
           className="py-16 px-4 max-w-4xl mx-auto"
         />
         <NewsletterSection />
+        <LatestBlogPosts />
       </main>
       
       <Footer />
