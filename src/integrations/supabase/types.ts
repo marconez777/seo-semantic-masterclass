@@ -193,6 +193,38 @@ export type Database = {
           },
         ]
       }
+      keyword_monthly_snapshots: {
+        Row: {
+          checked_at: string
+          id: string
+          keyword_id: string
+          month: string
+          position: number | null
+        }
+        Insert: {
+          checked_at?: string
+          id?: string
+          keyword_id: string
+          month: string
+          position?: number | null
+        }
+        Update: {
+          checked_at?: string
+          id?: string
+          keyword_id?: string
+          month?: string
+          position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "keyword_monthly_snapshots_keyword_id_fkey"
+            columns: ["keyword_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_keywords"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       keyword_projects: {
         Row: {
           created_at: string
