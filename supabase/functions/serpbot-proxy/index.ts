@@ -145,7 +145,7 @@ Deno.serve(async (req) => {
           const res = await fetch(url);
           const data = await res.json();
 
-          const position = data?.position ?? null;
+          const position = data?.pos ?? null;
           const previousPosition = kw.current_position;
           const bestPosition =
             position !== null
