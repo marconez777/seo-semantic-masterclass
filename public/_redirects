@@ -1,3 +1,6 @@
+# Sitemap dinâmico via edge function
+/sitemap.xml https://nxitvhrfloibpwrkskzx.supabase.co/functions/v1/generate-sitemap 200
+
 # Redirects para páginas pré-renderizadas
 / /pages/index.html 200
 /comprar-backlinks /pages/comprar-backlinks.html 200

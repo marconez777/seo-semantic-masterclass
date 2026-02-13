@@ -13,7 +13,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Image, Tag } from "lucide-react";
+import { Pencil, Trash2, Image, Tag, RefreshCw } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -44,6 +44,42 @@ export default function AdminBlog() {
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [sitemapLoading, setSitemapLoading] = useState(false);
+
+  const checkSitemap = async () => {
+    setSitemapLoading(true);
+    try {
+      const { data: publishedPosts } = await supabase
+        .from("posts")
+        .select("slug")
+        .eq("published", true);
+
+      const res = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generate-sitemap`
+      );
+      const xml = await res.text();
+
+      const postCount = publishedPosts?.length ?? 0;
+      const missing = (publishedPosts ?? []).filter(
+        (p) => !xml.includes(`/blog/${p.slug}`)
+      );
+
+      if (missing.length > 0) {
+        toast({
+          title: `Sitemap atualizado — ${missing.length} post(s) estavam faltando`,
+          description: missing.map((p) => p.slug).join(", "),
+        });
+      } else {
+        toast({
+          title: `Sitemap OK — ${postCount} posts indexados`,
+        });
+      }
+    } catch {
+      toast({ title: "Erro ao verificar sitemap" });
+    } finally {
+      setSitemapLoading(false);
+    }
+  };
 
   const fetchPosts = async () => {
     setLoading(true);
@@ -97,9 +133,19 @@ export default function AdminBlog() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <h2 className="text-2xl font-bold">Blog</h2>
-          <Button onClick={() => navigate("/admin/blog/novo")}>
-            Novo post do blog
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              onClick={checkSitemap}
+              disabled={sitemapLoading}
+            >
+              <RefreshCw className={`h-4 w-4 mr-2 ${sitemapLoading ? "animate-spin" : ""}`} />
+              Atualizar Sitemap
+            </Button>
+            <Button onClick={() => navigate("/admin/blog/novo")}>
+              Novo post do blog
+            </Button>
+          </div>
         </div>
 
         {loading ? (
