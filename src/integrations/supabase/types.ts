@@ -164,6 +164,68 @@ export type Database = {
           },
         ]
       }
+      keyword_history: {
+        Row: {
+          checked_at: string
+          id: string
+          keyword_id: string
+          position: number | null
+        }
+        Insert: {
+          checked_at?: string
+          id?: string
+          keyword_id: string
+          position?: number | null
+        }
+        Update: {
+          checked_at?: string
+          id?: string
+          keyword_id?: string
+          position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "keyword_history_keyword_id_fkey"
+            columns: ["keyword_id"]
+            isOneToOne: false
+            referencedRelation: "tracked_keywords"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      keyword_projects: {
+        Row: {
+          created_at: string
+          device: string
+          domain: string
+          id: string
+          name: string
+          region: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          device?: string
+          domain: string
+          id?: string
+          name: string
+          region?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          device?: string
+          domain?: string
+          id?: string
+          name?: string
+          region?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       order_items_new: {
         Row: {
           anchor_text: string | null
@@ -395,6 +457,47 @@ export type Database = {
           whatsapp?: string | null
         }
         Relationships: []
+      }
+      tracked_keywords: {
+        Row: {
+          best_position: number | null
+          created_at: string
+          current_position: number | null
+          id: string
+          keyword: string
+          last_checked_at: string | null
+          previous_position: number | null
+          project_id: string
+        }
+        Insert: {
+          best_position?: number | null
+          created_at?: string
+          current_position?: number | null
+          id?: string
+          keyword: string
+          last_checked_at?: string | null
+          previous_position?: number | null
+          project_id: string
+        }
+        Update: {
+          best_position?: number | null
+          created_at?: string
+          current_position?: number | null
+          id?: string
+          keyword?: string
+          last_checked_at?: string | null
+          previous_position?: number | null
+          project_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tracked_keywords_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "keyword_projects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
