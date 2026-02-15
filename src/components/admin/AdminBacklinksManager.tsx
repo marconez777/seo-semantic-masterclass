@@ -28,33 +28,40 @@ export default function AdminBacklinksManager() {
   const [loading, setLoading] = useState(false);
   const [deletingAll, setDeletingAll] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const PAGE_SIZE = 200;
+  const [totalCount, setTotalCount] = useState<number | null>(null);
 
   useEffect(() => {
-    const t = window.setTimeout(() => setDebouncedQ(q.trim()), 300);
+    const t = window.setTimeout(() => { setDebouncedQ(q.trim()); setPage(0); }, 300);
     return () => window.clearTimeout(t);
   }, [q]);
 
-  async function fetchRows(term: string) {
+  async function fetchRows(term: string, pageNum: number) {
     setLoading(true);
     try {
+      const from = pageNum * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
+
       let query = supabase
         .from("backlinks")
-        .select("*")
+        .select("*", { count: "exact" })
         .order("created_at", { ascending: false })
-        .limit(200);
+        .range(from, to);
 
       if (term) {
         query = supabase
           .from("backlinks")
-          .select("*")
+          .select("*", { count: "exact" })
           .or(`domain.ilike.%${term}%,url.ilike.%${term}%`)
           .order("created_at", { ascending: false })
-          .limit(200);
+          .range(from, to);
       }
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
       if (error) throw error;
       setRows((data as Backlink[]) ?? []);
+      setTotalCount(count ?? 0);
     } catch (err) {
       console.error("Erro ao buscar sites", err);
       toast({ title: "Erro ao buscar sites", description: String((err as any)?.message ?? err) });
@@ -64,14 +71,18 @@ export default function AdminBacklinksManager() {
   }
 
   useEffect(() => {
-    fetchRows(debouncedQ);
+    fetchRows(debouncedQ, page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQ]);
+  }, [debouncedQ, page]);
 
+  const totalPages = totalCount != null ? Math.ceil(totalCount / PAGE_SIZE) : 0;
   const countText = useMemo(() => {
     if (loading) return "Carregando…";
-    return `${rows.length} resultado${rows.length === 1 ? "" : "s"}`;
-  }, [rows.length, loading]);
+    if (totalCount != null && totalCount > rows.length) {
+      return `Exibindo ${page * PAGE_SIZE + 1}–${page * PAGE_SIZE + rows.length} de ${totalCount} resultado${totalCount === 1 ? "" : "s"}`;
+    }
+    return `${totalCount ?? rows.length} resultado${(totalCount ?? rows.length) === 1 ? "" : "s"}`;
+  }, [rows.length, loading, totalCount, page]);
 
   async function handleDeleteOne(id: string) {
     const ok = window.confirm("Tem certeza que deseja excluir este site? Esta ação não pode ser desfeita.");
@@ -127,7 +138,7 @@ export default function AdminBacklinksManager() {
             placeholder="Buscar site (domínio ou URL)…"
             className="w-72"
           />
-          <Button variant="secondary" onClick={() => fetchRows(debouncedQ)} disabled={loading}>
+          <Button variant="secondary" onClick={() => fetchRows(debouncedQ, page)} disabled={loading}>
             Buscar
           </Button>
           <Button variant="destructive" onClick={handleDeleteAll} disabled={deletingAll || loading}>
@@ -212,6 +223,30 @@ export default function AdminBacklinksManager() {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-2 pt-2">
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setPage((p) => Math.max(0, p - 1))}
+            disabled={page === 0 || loading}
+          >
+            ← Anterior
+          </Button>
+          <span className="text-sm text-muted-foreground">
+            Página {page + 1} de {totalPages}
+          </span>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+            disabled={page >= totalPages - 1 || loading}
+          >
+            Próxima →
+          </Button>
+        </div>
+      )}
     </section>
   );
 }
