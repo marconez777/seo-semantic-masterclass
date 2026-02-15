@@ -6,6 +6,8 @@ import { supabase } from "@/integrations/supabase/client";
 import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
+import TableAuthGate from "@/components/auth/TableAuthGate";
+import { useAuth } from "@/hooks/useAuth";
 import { getCategoryIcon } from "@/lib/category-icons";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Menu, Folder } from "lucide-react";
@@ -22,6 +24,7 @@ const AgenciaBacklinks = () => {
   const [backlinks, setBacklinks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
+  const { isAuthenticated } = useAuth();
 
   // Filters
   const [drRange, setDrRange] = useState<string>('todos');
@@ -150,8 +153,18 @@ const AgenciaBacklinks = () => {
   const currentPage = Math.min(page, pageCount);
   const visible = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
-    return sorted.slice(start, start + itemsPerPage);
-  }, [sorted, currentPage, itemsPerPage]);
+    const items = sorted.slice(start, start + itemsPerPage);
+
+    if (isAuthenticated) {
+      return items.map(item => ({ ...item, shouldBlur: false }));
+    }
+
+    // Non-authenticated: show first 4 complete + 3 blurred
+    return items.slice(0, 7).map((item, index) => ({
+      ...item,
+      shouldBlur: index >= 4
+    }));
+  }, [sorted, currentPage, itemsPerPage, isAuthenticated]);
 
   const onBuy = (b: any) => {
     setSelected({ id: b.id, name: b.site_name ?? b.site_url ?? 'Backlink', price_cents: b.price_cents });
@@ -458,100 +471,107 @@ const AgenciaBacklinks = () => {
               </div>
             </section>
           )}
-          <div className="relative overflow-x-auto border rounded-xl bg-card shadow-sm">
-            <table className="w-full text-sm">
-              <thead className="bg-accent/40">
-                <tr className="text-left">
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => { if (sortKey === 'site_name') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('site_name'); setSortDir('desc'); } }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'site_name') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('site_name'); setSortDir('desc'); } } }}
-                  >
-                    SITE
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } } }}
-                  >
-                    DR
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } } }}
-                  >
-                    DA
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => { if (sortKey === 'traffic') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('traffic'); setSortDir('desc'); } }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'traffic') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('traffic'); setSortDir('desc'); } } }}
-                  >
-                    TRÁFEGO/Mês
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => { if (sortKey === 'category') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('category'); setSortDir('desc'); } }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'category') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('category'); setSortDir('desc'); } } }}
-                  >
-                    CATEGORIA
-                  </th>
-                  <th
-                    className="p-4 cursor-pointer select-none"
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => { if (sortKey === 'price_cents') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('price_cents'); setSortDir('desc'); } }}
-                    onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'price_cents') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('price_cents'); setSortDir('desc'); } } }}
-                  >
-                    VALOR
-                  </th>
-                  <th className="p-4"></th>
-                </tr>
-              </thead>
-              <tbody>
-                {loading ? (
-                  <tr><td className="p-6" colSpan={7}>Carregando...</td></tr>
-                ) : filtered.length === 0 ? (
-                  <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
-                ) : (
-                  visible.map((b) => (
-                    <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} />
-                  ))
-                )}
-              </tbody>
-            </table>
+          <div className="relative min-h-[400px]">
+            <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
+              <table className="w-full text-sm">
+                <thead className="bg-accent/40">
+                  <tr className="text-left">
+                    <th
+                      className="p-4 cursor-pointer select-none"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => { if (sortKey === 'site_name') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('site_name'); setSortDir('desc'); } }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'site_name') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('site_name'); setSortDir('desc'); } } }}
+                    >
+                      SITE
+                    </th>
+                    <th
+                      className="p-4 cursor-pointer select-none"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } } }}
+                    >
+                      DR
+                    </th>
+                    <th
+                      className="p-4 cursor-pointer select-none"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } } }}
+                    >
+                      DA
+                    </th>
+                    <th
+                      className="p-4 cursor-pointer select-none"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => { if (sortKey === 'traffic') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('traffic'); setSortDir('desc'); } }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'traffic') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('traffic'); setSortDir('desc'); } } }}
+                    >
+                      TRÁFEGO/Mês
+                    </th>
+                    <th
+                      className="p-4 cursor-pointer select-none"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => { if (sortKey === 'category') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('category'); setSortDir('desc'); } }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'category') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('category'); setSortDir('desc'); } } }}
+                    >
+                      CATEGORIA
+                    </th>
+                    <th
+                      className="p-4 cursor-pointer select-none"
+                      role="button"
+                      tabIndex={0}
+                      onClick={() => { if (sortKey === 'price_cents') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('price_cents'); setSortDir('desc'); } }}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'price_cents') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('price_cents'); setSortDir('desc'); } } }}
+                    >
+                      VALOR
+                    </th>
+                    <th className="p-4"></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {loading ? (
+                    <tr><td className="p-6" colSpan={7}>Carregando...</td></tr>
+                  ) : filtered.length === 0 ? (
+                    <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
+                  ) : (
+                    visible.map((b) => (
+                      <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} shouldBlur={b.shouldBlur} isAuthenticated={isAuthenticated} />
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Auth gate overlay for non-authenticated users */}
+            {!isAuthenticated && <TableAuthGate />}
           </div>
 
-          <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <label className="text-sm">Itens por página:</label>
-              <select
-                className="bg-card text-foreground border rounded-md px-2 py-1"
-                value={itemsPerPage}
-                onChange={(e) => { setItemsPerPage(Number(e.target.value)); setPage(1); }}
-              >
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={150}>150</option>
-              </select>
+          {isAuthenticated && (
+            <div className="mt-4 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <label className="text-sm">Itens por página:</label>
+                <select
+                  className="bg-card text-foreground border rounded-md px-2 py-1"
+                  value={itemsPerPage}
+                  onChange={(e) => { setItemsPerPage(Number(e.target.value)); setPage(1); }}
+                >
+                  <option value={20}>20</option>
+                  <option value={50}>50</option>
+                  <option value={150}>150</option>
+                </select>
+              </div>
+              <div className="flex items-center gap-2 md:ml-auto">
+                <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Anterior</button>
+                <span className="text-sm">Página {currentPage} de {pageCount}</span>
+                <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))}>Próxima</button>
+              </div>
             </div>
-            <div className="flex items-center gap-2 md:ml-auto">
-              <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))}>Anterior</button>
-              <span className="text-sm">Página {currentPage} de {pageCount}</span>
-              <button className="px-3 py-1 border rounded-md disabled:opacity-50" disabled={currentPage >= pageCount} onClick={() => setPage((p) => Math.min(pageCount, p + 1))}>Próxima</button>
-            </div>
-          </div>
+          )}
 
           {/* SEO content below the table */}
           <section className="prose prose-neutral dark:prose-invert max-w-none mt-10 text-muted-foreground">
