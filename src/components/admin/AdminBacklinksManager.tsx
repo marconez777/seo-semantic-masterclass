@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { OFFICIAL_CATEGORIES } from "@/lib/categories";
+import { ExternalLink } from "lucide-react";
 
 interface Backlink {
   id: string;
@@ -24,7 +25,6 @@ interface Backlink {
 
 type EditData = {
   domain: string;
-  url: string;
   category: string;
   dr: string;
   da: string;
@@ -104,7 +104,6 @@ export default function AdminBacklinksManager() {
     setEditingId(b.id);
     setEditData({
       domain: b.domain ?? "",
-      url: b.url,
       category: b.category ?? "",
       dr: String(b.dr ?? ""),
       da: String(b.da ?? ""),
@@ -125,7 +124,6 @@ export default function AdminBacklinksManager() {
     try {
       const payload = {
         domain: editData.domain || null,
-        url: editData.url,
         category: editData.category || null,
         dr: editData.dr ? Number(editData.dr) : null,
         da: editData.da ? Number(editData.da) : null,
@@ -245,12 +243,6 @@ export default function AdminBacklinksManager() {
                         value={editData.domain}
                         onChange={(e) => setEditData({ ...editData, domain: e.target.value })}
                         placeholder="Domínio"
-                        className="mb-1 h-8 text-xs"
-                      />
-                      <Input
-                        value={editData.url}
-                        onChange={(e) => setEditData({ ...editData, url: e.target.value })}
-                        placeholder="URL"
                         className="h-8 text-xs"
                       />
                     </td>
@@ -326,15 +318,17 @@ export default function AdminBacklinksManager() {
                 ) : (
                   <tr key={b.id} className="border-t align-top">
                     <td className="p-3">
-                      <div className="font-medium">{b.domain ?? "—"}</div>
-                      <a
-                        href={b.url}
-                        className="text-xs text-primary hover:underline break-all"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        {b.url}
-                      </a>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium">{b.domain ?? "—"}</span>
+                        <a
+                          href={b.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-muted-foreground hover:text-primary"
+                        >
+                          <ExternalLink size={14} />
+                        </a>
+                      </div>
                     </td>
                     <td className="p-3">{b.category ?? "—"}</td>
                     <td className="p-3">{[b.dr ?? "—", b.da ?? "—"].join("/")}</td>
