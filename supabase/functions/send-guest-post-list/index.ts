@@ -15,16 +15,47 @@ interface GuestPostEmailRequest {
   email: string;
 }
 
+// Simple in-memory rate limiter (per IP, 3 requests per minute)
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 3;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = (rateLimitMap.get(ip) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  if (timestamps.length >= RATE_LIMIT_MAX) return true;
+  timestamps.push(now);
+  rateLimitMap.set(ip, timestamps);
+  return false;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   console.log("Guest post list email function called");
 
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // Rate limiting
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (isRateLimited(clientIp)) {
+    return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
   try {
     const { email }: GuestPostEmailRequest = await req.json();
+
+    // Validate email
+    if (!email || typeof email !== 'string' || !/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(email.trim())) {
+      return new Response(JSON.stringify({ error: "Invalid email" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
     console.log("Processing guest post list email for:", email);
 
     const html = await renderAsync(
@@ -52,7 +83,7 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error sending guest post list email:", error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: "Failed to send email" }),
       {
         status: 500,
         headers: { "Content-Type": "application/json", ...corsHeaders },

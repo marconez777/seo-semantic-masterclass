@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@4.0.0";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
@@ -11,6 +12,9 @@ const corsHeaders = {
 const ADMIN_EMAIL = "contato@mkart.com.br";
 
 type EventType = "new_order" | "new_customer" | "new_lead";
+
+// Types that require authentication
+const AUTH_REQUIRED_TYPES: EventType[] = ["new_order", "new_customer"];
 
 interface NotifyRequest {
   type: EventType;
@@ -91,6 +95,32 @@ const handler = async (req: Request): Promise<Response> => {
       });
     }
 
+    // Require JWT authentication for sensitive event types
+    if (AUTH_REQUIRED_TYPES.includes(type)) {
+      const authHeader = req.headers.get("Authorization");
+      if (!authHeader?.startsWith("Bearer ")) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+
+      const supabase = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_ANON_KEY")!,
+        { global: { headers: { Authorization: authHeader } } }
+      );
+
+      const token = authHeader.replace("Bearer ", "");
+      const { data: claimsData, error: claimsError } = await supabase.auth.getClaims(token);
+      if (claimsError || !claimsData?.claims) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+    }
+
     const { subject, html } = buildEmail(type, data || {});
 
     const emailResponse = await resend.emails.send({
@@ -108,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
     });
   } catch (error: any) {
     console.error("Error sending admin notification:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: "Failed to send notification" }), {
       status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
