@@ -133,6 +133,7 @@ export default function BacklinkTable({
                   item={item}
                   onBuy={onBuy}
                   shouldBlur={item.shouldBlur}
+                  isAuthenticated={isAuthenticated}
                 />
               ))}
             </tbody>

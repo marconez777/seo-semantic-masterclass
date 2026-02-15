@@ -39,7 +39,7 @@ const getCategoryBadgeClass = (category: string) => {
   return categoryColors[category] || 'bg-gray-100 text-gray-800 border-gray-200';
 };
 
-export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { item: BacklinkItem; onBuy?: (b: BacklinkItem) => void; shouldBlur?: boolean }) {
+export default function BacklinkTableRow({ item, onBuy, shouldBlur = false, isAuthenticated = true }: { item: BacklinkItem; onBuy?: (b: BacklinkItem) => void; shouldBlur?: boolean; isAuthenticated?: boolean }) {
   const [favId, setFavId] = useState<string | null>(null);
   const { addItem, isInCart, removeItem } = useCart();
   const inCart = isInCart(item.id);
@@ -115,7 +115,7 @@ export default function BacklinkTableRow({ item, onBuy, shouldBlur = false }: { 
           {item.category}
         </span>
       </td>
-      <td className="p-4 font-medium">{brl(item.price_cents)}</td>
+      <td className="p-4 font-medium">{isAuthenticated ? brl(item.price_cents) : 'R$ ***'}</td>
       <td className="p-4 flex items-center justify-end gap-2">
         <Button 
           size="sm" 
