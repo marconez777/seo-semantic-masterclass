@@ -1,29 +1,23 @@
 
 
-## Corrigir ocultacao de precos e sites na pagina /agencia-de-backlinks
+## Simplificar coluna "Site" no admin e remover URL do modal de edicao
 
-### Problema
+### Alteracoes no arquivo `src/components/admin/AdminBacklinksManager.tsx`
 
-A pagina `AgenciaBacklinks.tsx` tem sua propria implementacao de tabela independente. Ela renderiza `BacklinkTableRow` diretamente (linha 529) **sem passar as props `isAuthenticated` e `shouldBlur`**, e tambem nao inclui o overlay `TableAuthGate`. Por isso, todos os precos e sites sao exibidos normalmente mesmo para visitantes nao logados.
+**1. Coluna "Site" - modo visualizacao**
+- Remover o link da URL que aparece abaixo do dominio
+- Adicionar um icone de link (ExternalLink do lucide-react) ao lado do nome do site, clicavel, que abre a URL em nova aba
+- Layout: `dominio.com.br` + icone clicavel ao lado
 
-### Solucao
-
-Aplicar a mesma logica de bloqueio que ja existe nas outras paginas do marketplace:
-
-**Arquivo: `src/pages/AgenciaBacklinks.tsx`**
-
-1. Importar `useAuth` de `@/hooks/useAuth` e `TableAuthGate` de `@/components/auth/TableAuthGate`
-2. Chamar `const { isAuthenticated } = useAuth()` no componente
-3. Na lista `visible`, limitar para 7 itens com blur nos ultimos 3 quando nao autenticado (mesma logica do `BacklinkTable.tsx`)
-4. Passar `isAuthenticated={isAuthenticated}` e `shouldBlur={item.shouldBlur}` para cada `BacklinkTableRow`
-5. Adicionar o componente `TableAuthGate` como overlay sobre a tabela quando `!isAuthenticated`
-6. Ocultar a paginacao quando o usuario nao estiver autenticado
+**2. Coluna "Site" - modo edicao**
+- Remover o campo de edicao da URL (segundo Input)
+- Manter apenas o campo de edicao do dominio
+- Remover `url` do tipo `EditData` e da logica de `handleSave` (ou manter o valor original sem permitir edicao)
 
 ### Detalhes tecnicos
 
-- Importar: `useAuth` e `TableAuthGate`
-- Modificar o calculo de `visible` (linha 151-154): quando `!isAuthenticated`, pegar apenas 7 itens e marcar `shouldBlur: true` nos itens com index >= 4
-- Na renderizacao do `BacklinkTableRow` (linha 529): passar `shouldBlur={b.shouldBlur}` e `isAuthenticated={isAuthenticated}`
-- Envolver a tabela em um `div` com `position: relative` e adicionar `<TableAuthGate />` quando `!isAuthenticated`
-- Esconder controles de paginacao quando `!isAuthenticated`
+- Importar `ExternalLink` de `lucide-react`
+- Na linha de visualizacao: trocar o bloco atual (dominio + link abaixo) por um `div` com `flex items-center gap-1` contendo o texto do dominio e um `<a>` com o icone `ExternalLink` size 14
+- Na linha de edicao: remover o segundo `<Input>` (campo URL)
+- No `handleSave`: nao incluir `url` no payload de update (manter o valor original)
 
