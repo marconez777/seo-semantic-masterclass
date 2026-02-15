@@ -247,7 +247,7 @@ export function CartModal() {
               <thead className="bg-muted/60">
                 <tr className="text-left">
                   <th className="p-3 font-semibold">Site</th>
-                  <th className="p-3 font-semibold">DR</th>
+                  <th className="p-3 font-semibold">DA</th>
                   <th className="p-3 font-semibold hidden sm:table-cell">Âncora (opcional)</th>
                   <th className="p-3 font-semibold hidden sm:table-cell">URL de Destino</th>
                   <th className="p-3 font-semibold text-right">Preço</th>
@@ -293,7 +293,7 @@ export function CartModal() {
                         )}
                       </div>
                     </td>
-                    <td className="p-3 text-primary font-medium">{item.dr ?? "-"}</td>
+                    <td className="p-3 text-primary font-medium">{item.da ?? "-"}</td>
                     <td className="p-3 hidden sm:table-cell">
                       <Input
                         placeholder="Âncora (opcional)"
