@@ -15,10 +15,33 @@ interface ContactEmailRequest {
   message: string;
 }
 
+// Simple in-memory rate limiter (per IP, 3 requests per minute)
+const rateLimitMap = new Map<string, number[]>();
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 3;
+
+function isRateLimited(ip: string): boolean {
+  const now = Date.now();
+  const timestamps = (rateLimitMap.get(ip) || []).filter(t => now - t < RATE_LIMIT_WINDOW_MS);
+  if (timestamps.length >= RATE_LIMIT_MAX) return true;
+  timestamps.push(now);
+  rateLimitMap.set(ip, timestamps);
+  return false;
+}
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Rate limiting
+  const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (isRateLimited(clientIp)) {
+    return new Response(JSON.stringify({ error: "Too many requests. Please try again later." }), {
+      status: 429,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
   }
 
   try {
