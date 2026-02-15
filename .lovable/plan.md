@@ -1,36 +1,29 @@
 
 
-## Melhorias na tabela de Gerenciar Sites (Admin)
+## Corrigir ocultacao de precos e sites na pagina /agencia-de-backlinks
 
-### 1. Unificar colunas "Dominio" e "URL"
+### Problema
 
-As colunas "Dominio" e "URL" mostram dados redundantes (ex: `moveisdecorando.com.br` e `moveisdecorando.com.br`). Serao unificadas em uma unica coluna "Site" que exibe o dominio como texto principal e a URL como link clicavel abaixo.
+A pagina `AgenciaBacklinks.tsx` tem sua propria implementacao de tabela independente. Ela renderiza `BacklinkTableRow` diretamente (linha 529) **sem passar as props `isAuthenticated` e `shouldBlur`**, e tambem nao inclui o overlay `TableAuthGate`. Por isso, todos os precos e sites sao exibidos normalmente mesmo para visitantes nao logados.
 
-### 2. Adicionar edicao inline de cada item
+### Solucao
 
-Cada linha tera um botao "Editar" ao lado do "Excluir". Ao clicar, a linha entra em modo de edicao com campos editaveis para:
-- **Dominio/URL**
-- **Categoria** (select com as categorias existentes)
-- **DR e DA** (inputs numericos)
-- **Trafego** (input numerico)
-- **Preco** (input numerico em reais)
-- **Status** (select: ativo/inativo)
+Aplicar a mesma logica de bloqueio que ja existe nas outras paginas do marketplace:
 
-Botoes "Salvar" e "Cancelar" substituem os de acao durante a edicao.
+**Arquivo: `src/pages/AgenciaBacklinks.tsx`**
 
----
+1. Importar `useAuth` de `@/hooks/useAuth` e `TableAuthGate` de `@/components/auth/TableAuthGate`
+2. Chamar `const { isAuthenticated } = useAuth()` no componente
+3. Na lista `visible`, limitar para 7 itens com blur nos ultimos 3 quando nao autenticado (mesma logica do `BacklinkTable.tsx`)
+4. Passar `isAuthenticated={isAuthenticated}` e `shouldBlur={item.shouldBlur}` para cada `BacklinkTableRow`
+5. Adicionar o componente `TableAuthGate` como overlay sobre a tabela quando `!isAuthenticated`
+6. Ocultar a paginacao quando o usuario nao estiver autenticado
 
 ### Detalhes tecnicos
 
-**Arquivo: `src/components/admin/AdminBacklinksManager.tsx`**
-
-- Reduzir `colSpan` de 8 para 7 (uma coluna a menos)
-- Unificar as colunas "Dominio" e "URL" em uma coluna "Site" que exibe o dominio em negrito e a URL como link abaixo
-- Adicionar estado `editingId` (string | null) e `editData` (Partial de Backlink)
-- Ao clicar "Editar", preencher `editData` com os valores atuais da linha e setar `editingId`
-- Renderizar inputs inline quando `editingId === b.id`
-- Funcao `handleSave` faz `supabase.from("backlinks").update(editData).eq("id", editingId)` e atualiza o estado local
-- Botao "Cancelar" limpa `editingId` e `editData`
-- Usar `<Input>` para campos texto/numerico e `<select>` nativo para categoria e status
-- Importar lista de categorias de `src/lib/categories.ts` para o select de categoria
+- Importar: `useAuth` e `TableAuthGate`
+- Modificar o calculo de `visible` (linha 151-154): quando `!isAuthenticated`, pegar apenas 7 itens e marcar `shouldBlur: true` nos itens com index >= 4
+- Na renderizacao do `BacklinkTableRow` (linha 529): passar `shouldBlur={b.shouldBlur}` e `isAuthenticated={isAuthenticated}`
+- Envolver a tabela em um `div` com `position: relative` e adicionar `<TableAuthGate />` quando `!isAuthenticated`
+- Esconder controles de paginacao quando `!isAuthenticated`
 
