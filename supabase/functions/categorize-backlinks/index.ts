@@ -51,7 +51,8 @@ async function scrapeUrl(url: string, apiKey: string): Promise<string | null> {
 
 async function classifyWithAI(
   sites: Array<{ id: string; domain: string; content: string | null }>,
-  apiKey: string
+  apiKey: string,
+  provider: "openai" | "gemini" = "openai"
 ): Promise<Array<{ id: string; category: string }>> {
   const prompt = sites
     .map(
@@ -67,24 +68,27 @@ Responda em formato JSON array, ex: [{"id":"xxx","category":"Tecnologia"},...]
 Use EXATAMENTE os nomes das categorias listados acima (com acentos).
 Responda APENAS o JSON, sem markdown, sem explicação.`;
 
+  const isGemini = provider === "gemini";
+  const endpoint = isGemini
+    ? "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions"
+    : "https://api.openai.com/v1/chat/completions";
+  const model = isGemini ? "gemini-2.0-flash" : "gpt-4o-mini";
+
   try {
-    const response = await fetch(
-      "https://api.openai.com/v1/chat/completions",
-      {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          model: "gpt-4o-mini",
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: prompt },
-          ],
-        }),
-      }
-    );
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: prompt },
+        ],
+      }),
+    });
 
     if (!response.ok) {
       const errText = await response.text();
@@ -138,12 +142,7 @@ Deno.serve(async (req) => {
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
     const openaiKey = Deno.env.get("OPENAI_API_KEY");
-    if (!openaiKey) {
-      return new Response(
-        JSON.stringify({ error: "OPENAI_API_KEY não configurada" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    const geminiKey = Deno.env.get("GEMINI_API_KEY");
 
     // Verify user is admin
     const supabaseAuth = createClient(supabaseUrl, Deno.env.get("SUPABASE_ANON_KEY")!, {
@@ -173,9 +172,19 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { sites } = await req.json() as {
+    const { sites, provider = "openai" } = await req.json() as {
       sites: Array<{ id: string; url: string; domain: string }>;
+      provider?: "openai" | "gemini";
     };
+
+    // Validate API key for chosen provider
+    const aiKey = provider === "gemini" ? geminiKey : openaiKey;
+    if (!aiKey) {
+      return new Response(
+        JSON.stringify({ error: `${provider === "gemini" ? "GEMINI_API_KEY" : "OPENAI_API_KEY"} não configurada` }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     if (!sites || !Array.isArray(sites) || sites.length === 0) {
       return new Response(
@@ -193,7 +202,7 @@ Deno.serve(async (req) => {
     );
 
     // Step 2: Classify with AI
-    const classifications = await classifyWithAI(scrapedSites, openaiKey);
+    const classifications = await classifyWithAI(scrapedSites, aiKey, provider);
 
     // Step 3: Update database
     const results = [];
