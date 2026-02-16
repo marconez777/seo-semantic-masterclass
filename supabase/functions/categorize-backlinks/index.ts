@@ -69,7 +69,7 @@ Responda APENAS o JSON, sem markdown, sem explicação.`;
 
   try {
     const response = await fetch(
-      "https://ai.gateway.lovable.dev/v1/chat/completions",
+      "https://api.openai.com/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -77,7 +77,7 @@ Responda APENAS o JSON, sem markdown, sem explicação.`;
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "google/gemini-3-flash-preview",
+          model: "gpt-4o-mini",
           messages: [
             { role: "system", content: systemPrompt },
             { role: "user", content: prompt },
@@ -137,17 +137,10 @@ Deno.serve(async (req) => {
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const firecrawlKey = Deno.env.get("FIRECRAWL_API_KEY");
-    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
-
-    if (!firecrawlKey) {
+    const openaiKey = Deno.env.get("OPENAI_API_KEY");
+    if (!openaiKey) {
       return new Response(
-        JSON.stringify({ error: "FIRECRAWL_API_KEY não configurada" }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-    if (!lovableKey) {
-      return new Response(
-        JSON.stringify({ error: "LOVABLE_API_KEY não configurada" }),
+        JSON.stringify({ error: "OPENAI_API_KEY não configurada" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
@@ -200,7 +193,7 @@ Deno.serve(async (req) => {
     );
 
     // Step 2: Classify with AI
-    const classifications = await classifyWithAI(scrapedSites, lovableKey);
+    const classifications = await classifyWithAI(scrapedSites, openaiKey);
 
     // Step 3: Update database
     const results = [];
