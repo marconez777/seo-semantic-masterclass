@@ -5,8 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Play, Pause, RotateCcw, CheckCircle2, XCircle, SkipForward } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
+
+type AIProvider = "openai" | "gemini";
 
 const BATCH_SIZE = 5;
 const DELAY_BETWEEN_BATCHES_MS = 2000;
@@ -28,6 +31,7 @@ type Stats = {
 };
 
 export default function AdminCategorizer() {
+  const [provider, setProvider] = useState<AIProvider>("openai");
   const [isRunning, setIsRunning] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const [isFinished, setIsFinished] = useState(false);
@@ -70,7 +74,7 @@ export default function AdminCategorizer() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${session.access_token}`,
         },
-        body: JSON.stringify({ sites }),
+        body: JSON.stringify({ sites, provider }),
       }
     );
 
@@ -184,7 +188,16 @@ export default function AdminCategorizer() {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Controls */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap items-center">
+          <Select value={provider} onValueChange={(v) => setProvider(v as AIProvider)} disabled={isRunning}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="openai">ChatGPT (gpt-4o-mini)</SelectItem>
+              <SelectItem value="gemini">Gemini (2.0 Flash)</SelectItem>
+            </SelectContent>
+          </Select>
           {!isRunning ? (
             <Button onClick={startCategorization} disabled={isRunning}>
               <Play className="h-4 w-4 mr-1" />
