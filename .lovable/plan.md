@@ -1,45 +1,25 @@
 
 
-## Reorganizar "Gerenciar Sites" com Abas e Filtros
+## Adicionar icones de ordenacao na tabela da loja
 
-### Resumo
-Separar a pagina `/admin/sites` em abas (Tabs) para organizar os recursos, e adicionar filtros na aba de listagem similares aos filtros da loja (categoria, DA, trafego, preco, status).
+### Problema
+Na loja (`BacklinkTable.tsx`), os cabecalhos das colunas sao clicaveis para ordenar, mas nao ha indicacao visual de que isso e possivel. O icone so aparece apos o usuario clicar.
 
-### Estrutura das Abas
+### Solucao
+Trocar os icones `ChevronUp`/`ChevronDown` pelos mesmos icones usados no admin (`ArrowUp`, `ArrowDown`, `ArrowUpDown`), mostrando `ArrowUpDown` em todas as colunas ordenaveis como estado "idle".
 
-| Aba | Conteudo |
-|-----|----------|
-| **Sites** (padrao) | Listagem com filtros + tabela paginada (AdminBacklinksManager) |
-| **Importar** | Componente AdminBacklinksImport |
-| **Categorizar** | Componente AdminCategorizer |
+### Arquivo modificado
 
-### Filtros na aba "Sites"
+**`src/components/marketplace/BacklinkTable.tsx`**
 
-Inspirados nos filtros da loja (`BacklinkFilters.tsx`), adicionados acima da tabela:
+- Substituir imports de `ChevronUp`/`ChevronDown` por `ArrowUp`, `ArrowDown`, `ArrowUpDown`
+- Atualizar o componente `SortIcon` para:
+  - Quando a coluna **nao esta ativa**: mostrar `ArrowUpDown` com opacidade reduzida (`text-muted-foreground/50`)
+  - Quando a coluna **esta ativa em asc**: mostrar `ArrowUp`
+  - Quando a coluna **esta ativa em desc**: mostrar `ArrowDown`
+- Remover a logica que retorna `null` quando a coluna nao esta selecionada
+- Usar `size={14}` e layout `inline-flex items-center gap-1` no `<th>` para consistencia visual com o admin
 
-- **Busca por texto** (dominio/URL) - ja existe, sera mantido
-- **Categoria** - Select com as 17 categorias oficiais + "Todas"
-- **DA** - Select com faixas (Todos, 10-20, 20-30, ... 90-99)
-- **Trafego** - Select com faixas (Todos, 0-100, 100-1k, 1k-10k, 10k-100k, 100k+)
-- **Preco maximo** - Select com faixas predefinidas em BRL
-- **Status** - Select (Todos, Ativo, Inativo)
-
-Todos os filtros serao aplicados na query server-side (Supabase) para manter a performance com muitos registros.
-
-### Detalhes Tecnicos
-
-**Arquivos modificados:**
-
-1. **`src/pages/admin/AdminSites.tsx`**
-   - Importar componente `Tabs` do shadcn
-   - Criar 3 abas: "Sites", "Importar", "Categorizar"
-   - Mover cada componente para sua aba correspondente
-
-2. **`src/components/admin/AdminBacklinksManager.tsx`**
-   - Adicionar estados para os novos filtros (category, daRange, trafficRange, maxPrice, status)
-   - Criar uma barra de filtros com componentes `Select` acima da tabela
-   - Atualizar a funcao `fetchRows` para aplicar os filtros na query Supabase (`.eq()`, `.gte()`, `.lte()`, etc.)
-   - Manter a paginacao e busca por texto existentes
-
-**Nenhuma alteracao no banco de dados e necessaria** - todos os filtros usam colunas ja existentes na tabela `backlinks`.
+### Resultado
+Todas as colunas ordenaveis (Site, DA, Trafego, Categoria, Preco) mostrarao o icone de setas bidirecionais, indicando ao usuario que e possivel clicar para organizar.
 
