@@ -196,13 +196,15 @@ const createHTML = (route) => `<!DOCTYPE html>
       "description": "Especialista em backlinks brasileiros de qualidade para melhorar o posicionamento no Google",
       "contactPoint": {
         "@type": "ContactPoint",
+        "telephone": "+55 11 98915-1997",
         "contactType": "Customer Service",
         "availableLanguage": "Portuguese"
       },
       "sameAs": [
         "https://wa.me/5511989151997",
         "https://www.instagram.com/seosupremo777/",
-        "https://www.youtube.com/@mkartseolinkbuilding614"
+        "https://www.youtube.com/@mkartseolinkbuilding614",
+        "https://facebook.com/mkart.seo"
       ]
     }
     </script>
