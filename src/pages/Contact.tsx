@@ -1,7 +1,6 @@
 import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import StructuredData from "@/components/seo/StructuredData";
 import SEOHead from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,12 +17,6 @@ const Contact = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
-
-  const pageData = {
-    name: "Contato - MK Art Agência de SEO",
-    url: "https://mkart.com.br/contato",
-    description: "Entre em contato com nossa agência de SEO e backlinks. Consultoria especializada para melhorar seu ranking no Google."
-  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -92,7 +85,7 @@ const Contact = () => {
         canonicalUrl="https://mkart.com.br/contato"
         keywords="contato seo, agencia backlinks, consultoria seo"
       />
-      <StructuredData type="website" data={pageData} />
+      
       <Header />
       
       <main className="pt-20 min-h-screen bg-background">

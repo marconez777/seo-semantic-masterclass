@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ContactModal from "@/components/ui/ContactModal";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
+import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import { Circle, BookText, Menu } from "lucide-react";
 import BacklinkTableRow from "@/components/marketplace/BacklinkTableRow";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -122,6 +123,12 @@ export default function ComprarBacklinksCategoria() {
         canonicalUrl={`https://mkart.com.br/comprar-backlinks-${encodeURIComponent(String(categoryLabel).toLowerCase().replace(/\s+/g,'-'))}`}
         keywords={`comprar backlinks, ${categoryLabel}`}
       />
+      <CategoryStructuredData
+        categoryName={`Backlinks de ${categoryLabel}`}
+        categoryUrl={`https://mkart.com.br/comprar-backlinks-${encodeURIComponent(String(categoryLabel).toLowerCase().replace(/\s+/g,'-'))}`}
+        backlinks={[]}
+        description={`Backlinks da categoria ${categoryLabel}. Filtre por DR, tráfego e preço.`}
+      />
       <Header />
       <main className="container mx-auto px-4 py-28">
         <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
@@ -199,9 +206,9 @@ export default function ComprarBacklinksCategoria() {
           <Breadcrumbs
             className="mb-3"
             items={[
-              { name: 'Início', url: '/' },
-              { name: 'Comprar Backlinks', url: '/comprar-backlinks' },
-              { name: categoryLabel, url: `/comprar-backlinks-${encodeURIComponent(String(categoryLabel).toLowerCase().replace(/\s+/g,'-'))}` },
+              { name: 'Início', url: 'https://mkart.com.br/' },
+              { name: 'Comprar Backlinks', url: 'https://mkart.com.br/comprar-backlinks' },
+              { name: categoryLabel, url: `https://mkart.com.br/comprar-backlinks-${encodeURIComponent(String(categoryLabel).toLowerCase().replace(/\s+/g,'-'))}` },
             ]}
           />
           <h1 className="text-4xl font-bold mb-6">Comprar Backlinks de {categoryLabel}</h1>

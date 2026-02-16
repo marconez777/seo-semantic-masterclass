@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { Helmet } from "react-helmet-async";
+import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -171,84 +171,15 @@ const AgenciaBacklinks = () => {
     setOpen(true);
   };
 
-  const yoastSchema = {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebPage",
-        "@id": "https://mkart.com.br/agencia-de-backlinks/",
-        "url": "https://mkart.com.br/agencia-de-backlinks/",
-        "name": "Agência de Backlinks Premium DR ou DA acima de 50 a 90.",
-        "isPartOf": { "@id": "https://mkart.com.br/#website" },
-        "primaryImageOfPage": { "@id": "https://mkart.com.br/agencia-de-backlinks/#primaryimage" },
-        "image": { "@id": "https://mkart.com.br/agencia-de-backlinks/#primaryimage" },
-        "thumbnailUrl": "https://mkart.com.br/wp-content/uploads/2023/11/dr.png",
-        "datePublished": "2023-10-27T23:48:21+00:00",
-        "dateModified": "2025-04-04T17:14:09+00:00",
-        "description": "Agencia de backlinks focada em linkbuilding white hat. Enviamos artigos para os principais sites da internet. Artigos únicos e DoFollow para cada site.",
-        "breadcrumb": { "@id": "https://mkart.com.br/agencia-de-backlinks/#breadcrumb" },
-        "inLanguage": "pt-BR",
-        "potentialAction": [
-          { "@type": "ReadAction", "target": ["https://mkart.com.br/agencia-de-backlinks/"] }
-        ]
-      },
-      {
-        "@type": "ImageObject",
-        "inLanguage": "pt-BR",
-        "@id": "https://mkart.com.br/agencia-de-backlinks/#primaryimage",
-        "url": "https://mkart.com.br/wp-content/uploads/2023/11/dr.png",
-        "contentUrl": "https://mkart.com.br/wp-content/uploads/2023/11/dr.png",
-        "width": 161,
-        "height": 158
-      },
-      {
-        "@type": "BreadcrumbList",
-        "@id": "https://mkart.com.br/agencia-de-backlinks/#breadcrumb",
-        "itemListElement": [
-          { "@type": "ListItem", "position": 1, "name": "Início", "item": "https://mkart.com.br/" },
-          { "@type": "ListItem", "position": 2, "name": "Agência de Backlinks" }
-        ]
-      },
-      {
-        "@type": "WebSite",
-        "@id": "https://mkart.com.br/#website",
-        "url": "https://mkart.com.br/",
-        "name": "MK - Agencia de Tráfego",
-        "description": "",
-        "potentialAction": [
-          {
-            "@type": "SearchAction",
-            "target": { "@type": "EntryPoint", "urlTemplate": "https://mkart.com.br/?s={search_term_string}" },
-            "query-input": { "@type": "PropertyValueSpecification", "valueRequired": true, "valueName": "search_term_string" }
-          }
-        ],
-        "inLanguage": "pt-BR"
-      }
-    ]
-  };
-
   return (
     <>
-      <Helmet>
-        <title>Agência de Backlinks Premium DR ou DA acima de 50 a 90.</title>
-        <meta name="description" content="Agencia de backlinks focada em linkbuilding white hat. Enviamos artigos para os principais sites da internet. Artigos únicos e DoFollow para cada site." />
-        <link rel="canonical" href="https://mkart.com.br/agencia-de-backlinks/" />
-        <meta property="og:locale" content="pt_BR" />
-        <meta property="og:type" content="article" />
-        <meta property="og:title" content="Agência de Backlinks Premium DR ou DA acima de 50 a 90." />
-        <meta property="og:description" content="Agencia de backlinks focada em linkbuilding white hat. Enviamos artigos para os principais sites da internet. Artigos únicos e DoFollow para cada site." />
-        <meta property="og:url" content="https://mkart.com.br/agencia-de-backlinks/" />
-        <meta property="og:site_name" content="MK - Agencia de Tráfego" />
-        <meta property="article:modified_time" content="2025-04-04T17:14:09+00:00" />
-        <meta property="og:image" content="https://mkart.com.br/wp-content/uploads/2023/11/dr.png" />
-        <meta property="og:image:width" content="161" />
-        <meta property="og:image:height" content="158" />
-        <meta property="og:image:type" content="image/png" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:label1" content="Est. tempo de leitura" />
-        <meta name="twitter:data1" content="16 minutos" />
-        <script type="application/ld+json" className="yoast-schema-graph" dangerouslySetInnerHTML={{ __html: JSON.stringify(yoastSchema) }} />
-      </Helmet>
+      <SEOHead
+        title="Agência de Backlinks Premium DR ou DA acima de 50 a 90"
+        description="Agencia de backlinks focada em linkbuilding white hat. Enviamos artigos para os principais sites da internet. Artigos únicos e DoFollow para cada site."
+        canonicalUrl="https://mkart.com.br/agencia-de-backlinks"
+        keywords="agencia backlinks, link building, backlinks premium, DR alto, DA alto"
+        ogType="website"
+      />
 
       <Header />
       <main className="container mx-auto px-4 py-28">

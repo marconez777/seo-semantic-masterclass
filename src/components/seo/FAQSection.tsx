@@ -27,7 +27,7 @@ const FAQSection = ({ title, faqs, className }: FAQSectionProps) => {
   };
 
   return (
-    <section className={cn("space-y-6", className)} itemScope itemType="https://schema.org/FAQPage">
+    <section className={cn("space-y-6", className)}>
       <StructuredData type="faq" data={{ questions: faqs }} />
       
       <h2 className="text-3xl font-bold text-center mb-8">{title}</h2>
@@ -37,16 +37,13 @@ const FAQSection = ({ title, faqs, className }: FAQSectionProps) => {
           <div 
             key={index} 
             className="border border-border rounded-lg overflow-hidden"
-            itemScope 
-            itemProp="mainEntity" 
-            itemType="https://schema.org/Question"
           >
             <button
               className="w-full px-6 py-4 text-left flex justify-between items-center hover:bg-muted/50 transition-colors"
               onClick={() => toggleItem(index)}
               aria-expanded={openItems.includes(index)}
             >
-              <h3 className="font-semibold text-lg" itemProp="name">
+              <h3 className="font-semibold text-lg">
                 {faq.question}
               </h3>
               <ChevronDown 
@@ -62,11 +59,8 @@ const FAQSection = ({ title, faqs, className }: FAQSectionProps) => {
                 "px-6 overflow-hidden transition-all duration-200",
                 openItems.includes(index) ? "pb-4 max-h-96" : "max-h-0"
               )}
-              itemScope 
-              itemProp="acceptedAnswer" 
-              itemType="https://schema.org/Answer"
             >
-              <div className="prose prose-sm max-w-none" itemProp="text">
+              <div className="prose prose-sm max-w-none">
                 {faq.answer}
               </div>
             </div>

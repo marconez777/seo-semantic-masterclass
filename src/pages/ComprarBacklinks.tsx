@@ -88,8 +88,8 @@ export default function ComprarBacklinks() {
           <Breadcrumbs
             className="mb-3"
             items={[
-              { name: 'Início', url: '/' },
-              { name: 'Comprar Backlinks', url: '/comprar-backlinks' },
+              { name: 'Início', url: 'https://mkart.com.br/' },
+              { name: 'Comprar Backlinks', url: 'https://mkart.com.br/comprar-backlinks' },
             ]}
           />
           <h1 className="text-4xl font-bold mb-6">{h1Title}</h1>

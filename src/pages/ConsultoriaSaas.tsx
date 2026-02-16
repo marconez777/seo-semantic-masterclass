@@ -1,6 +1,5 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
-import StructuredData from "@/components/seo/StructuredData";
 import SEOHead from "@/components/seo/SEOHead";
 
 import DeliveryProcessSection from "@/components/sections/DeliveryProcessSection";
@@ -8,14 +7,6 @@ import CaseStudyCard from "@/components/sections/CaseStudyCard";
 import LeadGenerationSection from "@/components/sections/LeadGenerationSection";
 
 const ConsultoriaSaas = () => {
-  console.log("ConsultoriaSaas component rendering");
-  
-  const pageData = {
-    name: "Consultoria de SEO e GEO para SAAS - MK Art",
-    url: "https://mkart.com.br/consultoria-seo-saas",
-    description: "Com centenas de SAAS atendidos, temos um método validado focado em performance e vendas. Solicite uma análise grátis agora!"
-  };
-
   return (
     <>
       <SEOHead
@@ -24,7 +15,6 @@ const ConsultoriaSaas = () => {
         canonicalUrl="https://mkart.com.br/consultoria-seo-saas"
         keywords="consultoria seo saas, seo para saas, marketing digital saas, posicionamento google saas"
       />
-      <StructuredData type="website" data={pageData} />
       <Header />
       
       <main className="pt-20 min-h-screen bg-background">
