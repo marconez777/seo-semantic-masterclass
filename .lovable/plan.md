@@ -1,149 +1,86 @@
 
 
-## Auditoria de SEO Tecnico - Problemas e Melhorias
+## Correcoes de SEO - Telefone Errado e Dados Inconsistentes
 
-### 1. URLs inconsistentes nos Structured Data (CRITICO)
+### Problema Principal: Telefone placeholder em todos os schemas
 
-**Index.tsx** usa `https://seo-semantic-masterclass.lovable.app` como URL da organizacao e do website nos schemas, enquanto o canonical e todas as outras paginas usam `https://mkart.com.br`. Isso confunde os motores de busca sobre qual e o dominio principal.
+O numero `5511999999999` (placeholder) aparece em **19 arquivos** no `sameAs` do Organization schema. O numero correto do WhatsApp e `5511989151997` (conforme usado no FAB, LeadGeneration e PaymentModal).
 
-- `organizationData.url` e `organizationData.logo` apontam para `seo-semantic-masterclass.lovable.app`
-- `websiteData.url` aponta para `seo-semantic-masterclass.lovable.app`
+### Problemas encontrados
 
-**Contact.tsx** tambem usa `seo-semantic-masterclass.lovable.app` no `pageData.url`.
+#### 1. Telefone placeholder `5511999999999` (CRITICO - 19 arquivos)
 
-**ConsultoriaSeo.tsx** usa `seo-semantic-masterclass.lovable.app` no `pageData.url`.
+**Arquivos afetados:**
+- `index.html` (schema Organization no HTML base)
+- `scripts/prerender.js` (gera todas as paginas pre-renderizadas)
+- `supabase/functions/send-payment-email/_templates/payment-email.tsx` (email de pagamento)
+- Todas as 15 paginas em `public/pages/*.html` (geradas pelo prerender)
 
-**Correcao:** Trocar todas as referencias para `https://mkart.com.br`.
+**Correcao:** Trocar `5511999999999` por `5511989151997` em `index.html`, `scripts/prerender.js` e no template de email. As paginas em `public/pages/` serao regeneradas automaticamente pelo prerender.
 
----
+#### 2. Dois numeros de WhatsApp diferentes no codigo (INCONSISTENCIA)
 
-### 2. Paginas sem SEOHead (CRITICO)
+- `5511989151997` - usado no FAB, LeadGeneration, PaymentModal (numero principal)
+- `5511991795436` - usado no ContactModal e PricingSection (numero diferente)
 
-- **ConsultoriaSeo.tsx**: Nao tem componente `SEOHead`, apenas `StructuredData`. Falta title, description e canonical no `<head>`.
-- **Contact.tsx**: Nao tem `SEOHead`, apenas `StructuredData`. Falta title, description e canonical.
+**Correcao:** Confirmar qual e o numero correto e padronizar. Baseado na memoria do projeto, o numero principal e `5511989151997`. Trocar em `ContactModal.tsx` e `PricingSection.tsx`.
 
-**Correcao:** Adicionar `SEOHead` com title, description, canonical e keywords nestas paginas.
+#### 3. Organization schema duplicado e inconsistente
 
----
+O schema Organization aparece em DOIS lugares com dados diferentes:
+- **index.html**: nome "MK Art SEO", logo "LOGOMK.png", tem `contactPoint`, sameAs com WhatsApp
+- **Index.tsx (React)**: nome "MK Art - Agencia de SEO", logo "logo.png", sameAs com Instagram e YouTube, SEM contactPoint
 
-### 3. AggregateRating fabricado no CategoryStructuredData (RISCO)
+Isso gera **dois schemas Organization** na pagina inicial, confundindo o Google.
 
-O `CategoryStructuredData.tsx` gera `aggregateRating` com valores calculados artificialmente (DR+DA/20 como rating, traffic/1000 como reviewCount). Isso viola as diretrizes do Google para dados estruturados - ratings devem ser de avaliacoes reais de usuarios. Pode resultar em penalizacao ou remocao de rich snippets.
+**Correcao:** Unificar no `Index.tsx` com todos os dados corretos (contactPoint, sameAs completo com WhatsApp + Instagram + YouTube, logo correto). Remover ou simplificar o schema do `index.html` para evitar duplicacao.
 
-**Correcao:** Remover o bloco `aggregateRating` do schema.
+#### 4. Schema WebSite tambem duplicado
 
----
+- **index.html**: WebSite com SearchAction apontando para `/comprar-backlinks?q=`
+- **Index.tsx**: WebSite com SearchAction apontando para `/search?q=`
+- Nenhuma dessas URLs de busca existe de verdade no site
 
-### 4. StructuredData.tsx injeta scripts duplicados sem limpeza adequada
+**Correcao:** Remover o SearchAction (o site nao tem funcionalidade de busca global) ou apontar para a URL correta. Manter apenas um schema WebSite.
 
-O componente `StructuredData` usa `useEffect` para adicionar `<script>` ao `<head>`, mas se o componente re-renderizar rapidamente, scripts duplicados podem aparecer. Alem disso, o cleanup depende de `document.head.removeChild` que pode falhar se o DOM mudar.
+#### 5. Logo inconsistente
 
-**Correcao:** Migrar para usar `Helmet` (react-helmet-async) para injetar JSON-LD, garantindo deduplicacao automatica.
+- `index.html` usa `https://mkart.com.br/LOGOMK.png` 
+- `Index.tsx` usa `https://mkart.com.br/logo.png`
+- O arquivo real no projeto e `public/LOGOMK.png`
 
----
+**Correcao:** Padronizar para `https://mkart.com.br/LOGOMK.png` em todos os lugares.
 
-### 5. Breadcrumbs com URLs duplicadas no Schema
+#### 6. Auth.tsx ainda usa `window.location.origin` no canonical
 
-O `DynamicCategoryPage.tsx` gera breadcrumbs DUAS VEZES:
-- Uma via `<StructuredData type="breadcrumb">` com URLs absolutas (`https://mkart.com.br/`)
-- Outra via `<Breadcrumbs>` que internamente tambem chama `<StructuredData type="breadcrumb">` com URLs relativas (`/`)
+A pagina de auth usa `canonicalUrl={window.location.origin}/auth` que em preview aponta para lovable.app. Porem, como a pagina de auth deve ser `noindex`, basta adicionar `noindex={true}`.
 
-Isso injeta dois schemas BreadcrumbList na pagina, com URLs diferentes, confundindo o Google.
+**Correcao:** Adicionar `noindex={true}` ao SEOHead da pagina Auth.
 
-**Correcao:** Remover o `<StructuredData type="breadcrumb">` extra do `DynamicCategoryPage.tsx` e padronizar URLs absolutas nos breadcrumbs.
+#### 7. Paginas admin sem `noindex`
 
----
+Varias paginas admin (AdminSites, AdminClientes, AdminLeads) tem canonical com `window.location.origin` mas nao marcam `noindex`. Paginas administrativas nunca devem ser indexadas.
 
-### 6. BlogPost canonical usa `window.location.origin` (PROBLEMA)
-
-Em `BlogPost.tsx`, o `canonicalUrl` e gerado com `window.location.origin`, que no preview sera `lovable.app` em vez de `mkart.com.br`. O canonical deve ser sempre o dominio de producao.
-
-**Correcao:** Usar `https://mkart.com.br/blog/${post.slug}` como canonical.
-
----
-
-### 7. ComprarBacklinksCategoria canonical usa `window.location.origin`
-
-Mesmo problema do BlogPost - canonical gerado dinamicamente com `window.location.origin`.
-
-**Correcao:** Usar `https://mkart.com.br/comprar-backlinks-...` como canonical.
+**Correcao:** Adicionar `noindex={true}` em todas as paginas admin que ainda nao tem.
 
 ---
-
-### 8. NotFound com canonical `/404`
-
-A pagina 404 define `canonicalUrl="/404"` - uma URL relativa e que nao deveria ser indexada.
-
-**Correcao:** Adicionar `noindex={true}` e remover o canonical da pagina 404.
-
----
-
-### 9. Sitemap com URL incorreta
-
-O sitemap lista `consultoria-seo-saas` mas a rota HTML pre-renderizada e `consultoria-saas.html` e o `_redirects` nao tem entrada para `consultoria-seo-saas`.
-
-**Correcao:** Adicionar redirect para `/consultoria-seo-saas` no `_redirects` e criar o HTML pre-renderizado correspondente, OU corrigir a URL no sitemap.
-
----
-
-### 10. robots.txt expoe URL interna do backend
-
-O Sitemap no robots.txt aponta para `https://nxitvhrfloibpwrkskzx.supabase.co/functions/v1/generate-sitemap` - uma URL interna. O ideal e apontar para `https://mkart.com.br/sitemap.xml`.
-
-**Correcao:** Trocar para `Sitemap: https://mkart.com.br/sitemap.xml`.
-
----
-
-### 11. Textos placeholder em ComprarBacklinksCategoria
-
-O componente generico `ComprarBacklinksCategoria.tsx` tem textos placeholder: "Titulo h1 (Comprar Backlinks da...)" e "Titulo h2 (Como escolher os melhores backlinks...)". Isso prejudica o SEO se a pagina for indexada.
-
-**Correcao:** Substituir por textos reais ou usar o sistema de conteudo SEO dinamico (usePageSEOContent).
-
----
-
-### 12. Textos em ingles no ComprarBacklinksCategoria
-
-A sidebar tem "Filter by Category" e "All" em ingles, sendo o site em portugues.
-
-**Correcao:** Trocar para "Filtrar por Categoria" e "Todos".
-
----
-
-### 13. og:image sem dimensoes adequadas
-
-Na pagina Index, o `ogImage` default e `/og-image.jpg` que provavelmente nao existe. O fallback global no SEOHead e `https://mkart.com.br/og-image.jpg`. Verificar se esse arquivo existe.
-
----
-
-### Resumo de prioridades
-
-| Prioridade | Item | Impacto |
-|-----------|------|---------|
-| Alta | URLs lovable.app nos schemas (item 1) | Confunde indexacao |
-| Alta | Paginas sem SEOHead (item 2) | Sem meta tags |
-| Alta | AggregateRating falso (item 3) | Risco de penalizacao |
-| Alta | Canonical com window.location (itens 6-7) | Canonical errado |
-| Media | Breadcrumbs duplicados (item 5) | Schema duplicado |
-| Media | Sitemap vs redirects inconsistente (item 9) | Pagina nao acessivel |
-| Media | robots.txt com URL interna (item 10) | Expoe infraestrutura |
-| Media | 404 com canonical (item 8) | SEO incorreto |
-| Baixa | StructuredData via useEffect (item 4) | Potencial duplicacao |
-| Baixa | Textos placeholder/ingles (itens 11-12) | UX/SEO menor |
-| Baixa | og:image inexistente (item 13) | Compartilhamento social |
 
 ### Detalhes tecnicos das correcoes
 
 **Arquivos a modificar:**
-- `src/pages/Index.tsx` - corrigir URLs para mkart.com.br
-- `src/pages/Contact.tsx` - adicionar SEOHead, corrigir URL
-- `src/pages/ConsultoriaSeo.tsx` - adicionar SEOHead, corrigir URL
-- `src/pages/BlogPost.tsx` - canonical fixo com mkart.com.br
-- `src/pages/ComprarBacklinksCategoria.tsx` - canonical fixo, traduzir textos, remover placeholders
-- `src/pages/NotFound.tsx` - adicionar noindex, remover canonical
-- `src/components/seo/CategoryStructuredData.tsx` - remover aggregateRating
-- `src/components/marketplace/DynamicCategoryPage.tsx` - remover StructuredData breadcrumb duplicado
-- `public/robots.txt` - corrigir URL do sitemap
-- `public/sitemap.xml` - verificar consistencia com _redirects
-- `public/_redirects` - adicionar entrada para consultoria-seo-saas
 
+| Arquivo | Alteracao |
+|---------|----------|
+| `index.html` | Trocar `5511999999999` por `5511989151997`, corrigir SearchAction, adicionar Instagram/YouTube ao sameAs |
+| `scripts/prerender.js` | Trocar `5511999999999` por `5511989151997` |
+| `supabase/functions/send-payment-email/_templates/payment-email.tsx` | Trocar `5511999999999` por `5511989151997` |
+| `src/pages/Index.tsx` | Adicionar contactPoint, WhatsApp ao sameAs, corrigir logo para LOGOMK.png, remover SearchAction invalido |
+| `src/components/ui/ContactModal.tsx` | Trocar `5511991795436` por `5511989151997` |
+| `src/components/sections/PricingSection.tsx` | Trocar `5511991795436` por `5511989151997` |
+| `src/pages/Auth.tsx` | Adicionar `noindex={true}`, usar canonical fixo |
+| `src/pages/admin/AdminSites.tsx` | Adicionar `noindex={true}` |
+| `src/pages/admin/AdminClientes.tsx` | Adicionar `noindex={true}` |
+| `src/pages/Dashboard.tsx` | Adicionar `noindex={true}`, canonical fixo |
+| `src/pages/Recibo.tsx` | Adicionar `noindex={true}`, canonical fixo |
+
+**Total: 11 arquivos, corrigindo telefone errado, schemas duplicados, logos inconsistentes e paginas privadas sem noindex.**
