@@ -100,7 +100,7 @@ export default function AdminBacklinksTableRow({
         </div>
       </td>
       <td className="p-3">{b.category ?? "—"}</td>
-      <td className="p-3">{[b.dr ?? "—", b.da ?? "—"].join("/")}</td>
+      <td className="p-3">{b.da ?? "—"}</td>
       <td className="p-3">{b.traffic?.toLocaleString("pt-BR") ?? "—"}</td>
       <td className="p-3">
         {b.price != null
