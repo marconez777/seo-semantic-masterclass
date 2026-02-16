@@ -144,7 +144,7 @@ export function ConsultingBlogPosts({ clientId, readOnly }: Props) {
                 <TableCell>
                   {p.url ? (
                     <a href={p.url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1 text-sm">
-                      {new URL(p.url).pathname.slice(0, 40)}
+                      {(() => { try { return new URL(p.url).pathname.slice(0, 40); } catch { return (p.url || "").slice(0, 40); } })()}
                       <ExternalLink className="h-3 w-3" />
                     </a>
                   ) : <span className="text-muted-foreground text-sm">—</span>}
