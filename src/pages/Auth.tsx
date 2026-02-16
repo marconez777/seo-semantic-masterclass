@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import Header from "@/components/layout/Header";
-import { CheckCircle, Mail } from "lucide-react";
+import { CheckCircle, Mail, ArrowLeft } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Auth = () => {
   const [mode, setMode] = useState<"login" | "signup" | "forgot-password">("login");
@@ -159,6 +160,10 @@ const Auth = () => {
       <Header />
       <main className="min-h-screen flex items-center justify-center px-4 py-16">
         <article className="w-full max-w-md border rounded-lg p-6 bg-background shadow">
+          <Link to="/comprar-backlinks" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors mb-4">
+            <ArrowLeft size={16} />
+            Voltar para Comprar Backlinks
+          </Link>
           <h1 className="text-2xl font-semibold mb-4">
             {mode === "login" ? "Entrar" : mode === "signup" ? "Cadastrar" : "Recuperar Senha"}
           </h1>
