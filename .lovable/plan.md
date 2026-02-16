@@ -1,66 +1,30 @@
 
 
-## Categorizador Automatico de Sites - Aplicacao Direta
+## Alterar Categorizador para usar ChatGPT com sua API Key
 
-### Mudanca em relacao ao plano anterior
+### O que muda
 
-Em vez de exigir aprovacao manual para cada sugestao, o sistema vai aplicar a categoria sugerida pela AI diretamente no banco de dados. Voce depois revisa e edita pelo gerenciador de sites existente (`AdminBacklinksManager`).
+Trocar o Lovable AI Gateway (`ai.gateway.lovable.dev`) pela API da OpenAI (`api.openai.com`) na Edge Function `categorize-backlinks`, usando sua propria chave da OpenAI.
 
-### Fluxo de uso
+### Passos
 
-1. Acessa `/admin/sites` e ve o card "Categorizar Sites Automaticamente"
-2. Clica em "Iniciar" - o sistema processa lotes de 5 sites automaticamente
-3. Para cada site: Firecrawl faz scraping, AI sugere categoria, o banco e atualizado imediatamente
-4. Uma barra de progresso mostra quantos foram processados (ex: 45/941)
-5. Um log em tempo real mostra cada site processado: dominio, categoria antiga ("Geral"), nova categoria
-6. O processo continua automaticamente ate acabar (ou voce pode pausar)
-7. Depois, voce usa o gerenciador de sites existente para revisar e editar qualquer categoria que nao ficou boa
+1. **Solicitar sua OpenAI API Key** - Vou pedir para voce colar sua chave da OpenAI, que sera armazenada de forma segura como secret do projeto (nunca fica no codigo).
 
-### Arquitetura tecnica
-
-**1. Edge Function: `categorize-backlinks`**
-- Recebe lista de sites (max 5 por chamada)
-- Para cada URL, chama Firecrawl para extrair conteudo (markdown, titulo, descricao)
-- Envia conteudo para Gemini Flash com as 17 categorias oficiais
-- Se scraping falhar, faz fallback analisando apenas o dominio
-- Atualiza a categoria diretamente no banco (`UPDATE backlinks SET category = ... WHERE id = ...`)
-- Retorna os resultados para o frontend mostrar no log
-
-**2. Componente: `AdminCategorizer.tsx`**
-- Botao "Iniciar Categorizacao Automatica"
-- Barra de progresso com contadores (processados / total / erros)
-- Log scrollavel mostrando cada site processado e sua nova categoria
-- Botao de "Pausar/Retomar" para controle
-- Processa automaticamente lote apos lote sem intervencao
-- Ao terminar, mostra resumo: quantos categorizados, quantos falharam
-
-**3. Prompt da AI**
-```
-Voce e um classificador de sites. Analise o conteudo abaixo e classifique em UMA das categorias:
-Noticias, Negocios, Saude, Educacao, Tecnologia, Financas, Imoveis, Moda, Turismo, Alimentacao, Pets, Automotivo, Esportes, Entretenimento, Marketing, Direito, Maternidade.
-
-Responda APENAS com o nome da categoria, nada mais.
-```
+2. **Alterar a Edge Function `categorize-backlinks`**
+   - Trocar o endpoint de `https://ai.gateway.lovable.dev/v1/chat/completions` para `https://api.openai.com/v1/chat/completions`
+   - Trocar a autenticacao de `LOVABLE_API_KEY` para `OPENAI_API_KEY`
+   - Usar o modelo `gpt-4o-mini` (rapido, barato, ideal para classificacao em lote) - ou `gpt-4o` se preferir mais precisao
+   - O formato da requisicao e resposta e identico (ambos seguem o padrao OpenAI), entao a mudanca e minima
 
 ### Detalhes tecnicos
 
 | Arquivo | Acao |
 |---------|------|
-| `supabase/functions/categorize-backlinks/index.ts` | Criar - Edge Function que faz scraping + AI + update no banco |
-| `supabase/config.toml` | Adicionar config da funcao |
-| `src/components/admin/AdminCategorizer.tsx` | Criar - UI com progresso e log automatico |
-| `src/pages/admin/AdminSites.tsx` | Modificar - Adicionar componente |
+| `supabase/functions/categorize-backlinks/index.ts` | Modificar - trocar endpoint e API key |
 
-### Protecoes
+### Sobre custos
 
-- JWT + verificacao de role admin na Edge Function
-- Lotes de 5 para evitar timeout e rate limiting do Firecrawl
-- Delay de 2 segundos entre lotes para nao sobrecarregar
-- Se um site falhar o scraping, tenta classificar pelo dominio antes de pular
-- Sites que falharem completamente ficam como "Geral" e aparecem no log como erro
-
-### Custos estimados
-
-- Firecrawl: ~941 scrapes
-- Lovable AI (Gemini Flash): ~188 chamadas (5 sites por chamada)
+- Os creditos serao descontados da **sua conta OpenAI** (platform.openai.com)
+- `gpt-4o-mini`: ~$0.15 por 1M tokens input / ~$0.60 por 1M tokens output (muito barato para classificacao)
+- Estimativa para 941 sites: menos de $1 total com gpt-4o-mini
 
