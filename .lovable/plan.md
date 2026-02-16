@@ -1,30 +1,45 @@
 
 
-## Alterar Categorizador para usar ChatGPT com sua API Key
+## Reorganizar "Gerenciar Sites" com Abas e Filtros
 
-### O que muda
+### Resumo
+Separar a pagina `/admin/sites` em abas (Tabs) para organizar os recursos, e adicionar filtros na aba de listagem similares aos filtros da loja (categoria, DA, trafego, preco, status).
 
-Trocar o Lovable AI Gateway (`ai.gateway.lovable.dev`) pela API da OpenAI (`api.openai.com`) na Edge Function `categorize-backlinks`, usando sua propria chave da OpenAI.
+### Estrutura das Abas
 
-### Passos
+| Aba | Conteudo |
+|-----|----------|
+| **Sites** (padrao) | Listagem com filtros + tabela paginada (AdminBacklinksManager) |
+| **Importar** | Componente AdminBacklinksImport |
+| **Categorizar** | Componente AdminCategorizer |
 
-1. **Solicitar sua OpenAI API Key** - Vou pedir para voce colar sua chave da OpenAI, que sera armazenada de forma segura como secret do projeto (nunca fica no codigo).
+### Filtros na aba "Sites"
 
-2. **Alterar a Edge Function `categorize-backlinks`**
-   - Trocar o endpoint de `https://ai.gateway.lovable.dev/v1/chat/completions` para `https://api.openai.com/v1/chat/completions`
-   - Trocar a autenticacao de `LOVABLE_API_KEY` para `OPENAI_API_KEY`
-   - Usar o modelo `gpt-4o-mini` (rapido, barato, ideal para classificacao em lote) - ou `gpt-4o` se preferir mais precisao
-   - O formato da requisicao e resposta e identico (ambos seguem o padrao OpenAI), entao a mudanca e minima
+Inspirados nos filtros da loja (`BacklinkFilters.tsx`), adicionados acima da tabela:
 
-### Detalhes tecnicos
+- **Busca por texto** (dominio/URL) - ja existe, sera mantido
+- **Categoria** - Select com as 17 categorias oficiais + "Todas"
+- **DA** - Select com faixas (Todos, 10-20, 20-30, ... 90-99)
+- **Trafego** - Select com faixas (Todos, 0-100, 100-1k, 1k-10k, 10k-100k, 100k+)
+- **Preco maximo** - Select com faixas predefinidas em BRL
+- **Status** - Select (Todos, Ativo, Inativo)
 
-| Arquivo | Acao |
-|---------|------|
-| `supabase/functions/categorize-backlinks/index.ts` | Modificar - trocar endpoint e API key |
+Todos os filtros serao aplicados na query server-side (Supabase) para manter a performance com muitos registros.
 
-### Sobre custos
+### Detalhes Tecnicos
 
-- Os creditos serao descontados da **sua conta OpenAI** (platform.openai.com)
-- `gpt-4o-mini`: ~$0.15 por 1M tokens input / ~$0.60 por 1M tokens output (muito barato para classificacao)
-- Estimativa para 941 sites: menos de $1 total com gpt-4o-mini
+**Arquivos modificados:**
+
+1. **`src/pages/admin/AdminSites.tsx`**
+   - Importar componente `Tabs` do shadcn
+   - Criar 3 abas: "Sites", "Importar", "Categorizar"
+   - Mover cada componente para sua aba correspondente
+
+2. **`src/components/admin/AdminBacklinksManager.tsx`**
+   - Adicionar estados para os novos filtros (category, daRange, trafficRange, maxPrice, status)
+   - Criar uma barra de filtros com componentes `Select` acima da tabela
+   - Atualizar a funcao `fetchRows` para aplicar os filtros na query Supabase (`.eq()`, `.gte()`, `.lte()`, etc.)
+   - Manter a paginacao e busca por texto existentes
+
+**Nenhuma alteracao no banco de dados e necessaria** - todos os filtros usam colunas ja existentes na tabela `backlinks`.
 
