@@ -10,7 +10,7 @@ const NotFound = () => {
       <SEOHead 
         title="Página não encontrada - 404 | MK Backlinks"
         description="A página que você está procurando não foi encontrada. Volte para a página inicial ou navegue por nossos serviços de backlinks."
-        canonicalUrl="/404"
+        noindex={true}
       />
       
       <div className="min-h-screen flex flex-col">

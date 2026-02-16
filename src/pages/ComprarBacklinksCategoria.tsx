@@ -119,7 +119,7 @@ export default function ComprarBacklinksCategoria() {
       <SEOHead
         title={`Comprar Backlinks - ${categoryLabel} | MK Art SEO`}
         description={`Backlinks da categoria ${categoryLabel}. Filtre por DR, tráfego e preço.`}
-        canonicalUrl={`${window.location.origin}/comprar-backlinks-${encodeURIComponent(String(categoryLabel).toLowerCase().replace(/\s+/g,'-'))}`}
+        canonicalUrl={`https://mkart.com.br/comprar-backlinks-${encodeURIComponent(String(categoryLabel).toLowerCase().replace(/\s+/g,'-'))}`}
         keywords={`comprar backlinks, ${categoryLabel}`}
       />
       <Header />
@@ -129,10 +129,10 @@ export default function ComprarBacklinksCategoria() {
           {!isMobile && (
             <aside className="md:col-span-3 space-y-6">
               <section>
-                <h2 className="text-lg font-semibold mb-3">Filter by Category</h2>
+                <h2 className="text-lg font-semibold mb-3">Filtrar por Categoria</h2>
                 <nav className="space-y-2">
                   <a className="flex items-center gap-2 hover:underline" href="/comprar-backlinks">
-                    <Circle size={16} /> <span>All</span>
+                    <Circle size={16} /> <span>Todos</span>
                   </a>
                   {categories.filter(c => c !== 'Geral').map((cat) => (
                     <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`}>
@@ -176,10 +176,10 @@ export default function ComprarBacklinksCategoria() {
                   </SheetHeader>
                   <div className="mt-6 space-y-6">
                     <section>
-                      <h2 className="text-lg font-semibold mb-3">Filter by Category</h2>
+                      <h2 className="text-lg font-semibold mb-3">Filtrar por Categoria</h2>
                       <nav className="space-y-2">
                         <a className="flex items-center gap-2 hover:underline" href="/comprar-backlinks" onClick={() => setMobileMenuOpen(false)}>
-                          <Circle size={16} /> <span>All</span>
+                          <Circle size={16} /> <span>Todos</span>
                         </a>
                         {categories.filter(c => c !== 'Geral').map((cat) => (
                           <a key={cat} className="flex items-center gap-2 hover:underline" href={`/comprar-backlinks-${encodeURIComponent(String(cat).toLowerCase().replace(/\s+/g,'-'))}`} onClick={() => setMobileMenuOpen(false)}>
@@ -204,7 +204,7 @@ export default function ComprarBacklinksCategoria() {
               { name: categoryLabel, url: `/comprar-backlinks-${encodeURIComponent(String(categoryLabel).toLowerCase().replace(/\s+/g,'-'))}` },
             ]}
           />
-          <h1 className="text-4xl font-bold mb-6">Título h1 (Comprar Backlinks da {categoryLabel})</h1>
+          <h1 className="text-4xl font-bold mb-6">Comprar Backlinks de {categoryLabel}</h1>
           <div className="overflow-x-auto border rounded-xl bg-card shadow-sm">
             <table className="w-full text-sm">
               <thead className="bg-accent/40">
@@ -232,8 +232,8 @@ export default function ComprarBacklinksCategoria() {
           </div>
 
           <section className="mt-10">
-            <h2 className="text-2xl font-semibold mb-2">Título h2 (Como escolher os melhores backlinks para o seu site de Saúde:)</h2>
-            <p className="text-muted-foreground">Texto SEO com 500 palavras e títulos h2, h3 e listagens</p>
+            <h2 className="text-2xl font-semibold mb-2">Como escolher os melhores backlinks de {categoryLabel}</h2>
+            <p className="text-muted-foreground">Ao comprar backlinks na categoria {categoryLabel}, priorize sites com alto Domain Rating (DR), tráfego orgânico consistente e relevância temática. Backlinks de qualidade neste nicho ajudam a aumentar a autoridade do seu site e melhorar o posicionamento nos resultados de busca do Google.</p>
           </section>
         </section>
         </div>

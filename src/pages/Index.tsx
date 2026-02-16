@@ -15,9 +15,9 @@ import StructuredData from "@/components/seo/StructuredData";
 const Index = () => {
   const organizationData = {
     name: "MK Art - Agência de SEO",
-    url: "https://seo-semantic-masterclass.lovable.app",
+    url: "https://mkart.com.br",
     description: "Agência especializada em SEO e Marketing Digital com mais de 9 anos de experiência e 1000+ clientes atendidos.",
-    logo: "https://seo-semantic-masterclass.lovable.app/logo.png",
+    logo: "https://mkart.com.br/logo.png",
     sameAs: [
       "https://www.instagram.com/seosupremo777/",
       "https://www.youtube.com/@mkartseolinkbuilding614"
@@ -26,7 +26,7 @@ const Index = () => {
 
   const websiteData = {
     name: "MK Art - Agência de SEO",
-    url: "https://seo-semantic-masterclass.lovable.app",
+    url: "https://mkart.com.br",
     description: "Tráfego, Leads e Vendas Todos os Meses. Analisamos o seu site e concorrentes e mostramos a melhor estratégia."
   };
 

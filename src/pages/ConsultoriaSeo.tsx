@@ -1,6 +1,7 @@
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import StructuredData from "@/components/seo/StructuredData";
+import SEOHead from "@/components/seo/SEOHead";
 import DeliveryProcessSection from "@/components/sections/DeliveryProcessSection";
 import CaseStudyCard from "@/components/sections/CaseStudyCard";
 import LeadGenerationSection from "@/components/sections/LeadGenerationSection";
@@ -9,10 +10,16 @@ const ConsultoriaSeo = () => {
   console.log("ConsultoriaSeo component rendering");
   const pageData = {
     name: "Consultoria de SEO e Backlinks - MK Art",
-    url: "https://seo-semantic-masterclass.lovable.app/consultoria-de-seo",
+    url: "https://mkart.com.br/consultoria-seo",
     description: "Consultoria especializada em SEO e estratégias de backlinks. Análise completa do seu site e estratégia personalizada."
   };
   return <>
+      <SEOHead
+        title="Consultoria de SEO e Backlinks | MK Art - Agência Especializada"
+        description="Consultoria especializada em SEO e estratégias de backlinks. Análise completa do seu site e estratégia personalizada para rankear no Google."
+        canonicalUrl="https://mkart.com.br/consultoria-seo"
+        keywords="consultoria seo, estrategia backlinks, auditoria seo, consultoria link building"
+      />
       <StructuredData type="website" data={pageData} />
       <Header />
       
