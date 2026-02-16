@@ -1,69 +1,102 @@
 
 
-## Correcoes de SEO - Telefone Errado e Dados Inconsistentes
+## Varredura Final de SEO Tecnico - Problemas Remanescentes
 
-### Problema Principal: Telefone placeholder em todos os schemas
+### 1. SearchAction invalido no StructuredData.tsx (CRITICO)
 
-O numero `5511999999999` (placeholder) aparece em **19 arquivos** no `sameAs` do Organization schema. O numero correto do WhatsApp e `5511989151997` (conforme usado no FAB, LeadGeneration e PaymentModal).
+O componente `StructuredData.tsx` ainda gera automaticamente um `SearchAction` apontando para `{url}/search?q=...` em TODAS as paginas que usam `type="website"`. O site nao tem funcionalidade de busca. Isso afeta:
+- Index.tsx (gera `https://mkart.com.br/search?q=...`)
+- Blog.tsx (gera `https://mkart.com.br/blog/search?q=...`)
+- Contact.tsx (gera `https://mkart.com.br/contato/search?q=...`)
+- ConsultoriaSeo.tsx (gera `https://mkart.com.br/consultoria-seo/search?q=...`)
+- ConsultoriaSaas.tsx (gera `https://mkart.com.br/consultoria-seo-saas/search?q=...`)
 
-### Problemas encontrados
+**Correcao:** Remover o bloco `potentialAction` / `SearchAction` do tipo `website` no `StructuredData.tsx`.
 
-#### 1. Telefone placeholder `5511999999999` (CRITICO - 19 arquivos)
+### 2. publisherLogo errado no BlogPost.tsx (CRITICO)
 
-**Arquivos afetados:**
-- `index.html` (schema Organization no HTML base)
-- `scripts/prerender.js` (gera todas as paginas pre-renderizadas)
-- `supabase/functions/send-payment-email/_templates/payment-email.tsx` (email de pagamento)
-- Todas as 15 paginas em `public/pages/*.html` (geradas pelo prerender)
+O `BlogPost.tsx` na linha 126 usa `publisherLogo: "https://mkart.com.br/logo.png"` - arquivo que nao existe. O correto e `https://mkart.com.br/LOGOMK.png`.
 
-**Correcao:** Trocar `5511999999999` por `5511989151997` em `index.html`, `scripts/prerender.js` e no template de email. As paginas em `public/pages/` serao regeneradas automaticamente pelo prerender.
+**Correcao:** Trocar para `https://mkart.com.br/LOGOMK.png`.
 
-#### 2. Dois numeros de WhatsApp diferentes no codigo (INCONSISTENCIA)
+### 3. AgenciaBacklinks.tsx com schema Yoast legado contendo SearchAction invalido
 
-- `5511989151997` - usado no FAB, LeadGeneration, PaymentModal (numero principal)
-- `5511991795436` - usado no ContactModal e PricingSection (numero diferente)
+O schema Yoast hardcoded (linhas 174-228) inclui:
+- `SearchAction` apontando para `https://mkart.com.br/?s={search_term_string}` (URL WordPress legada que nao existe)
+- `og:type` como `"article"` quando deveria ser `"website"` (nao e um artigo)
+- `og:site_name` como `"MK - Agencia de Trafego"` diferente do padrao `"MK Art SEO"`
+- `og:image` apontando para `https://mkart.com.br/wp-content/uploads/2023/11/dr.png` (URL WordPress que pode nao existir mais)
+- `thumbnailUrl` e `contentUrl` tambem apontam para URLs WordPress
 
-**Correcao:** Confirmar qual e o numero correto e padronizar. Baseado na memoria do projeto, o numero principal e `5511989151997`. Trocar em `ContactModal.tsx` e `PricingSection.tsx`.
+**Correcao:** Migrar para usar `SEOHead` + `StructuredData` padronizados, removendo o schema Yoast legado inteiro.
 
-#### 3. Organization schema duplicado e inconsistente
+### 4. WebSite StructuredData duplicado em subpaginas
 
-O schema Organization aparece em DOIS lugares com dados diferentes:
-- **index.html**: nome "MK Art SEO", logo "LOGOMK.png", tem `contactPoint`, sameAs com WhatsApp
-- **Index.tsx (React)**: nome "MK Art - Agencia de SEO", logo "logo.png", sameAs com Instagram e YouTube, SEM contactPoint
+As paginas Contact, ConsultoriaSeo, ConsultoriaSaas e Blog emitem `StructuredData type="website"` com dados locais, gerando schemas WebSite diferentes em cada pagina. O schema WebSite deve existir apenas na homepage (Index.tsx). Subpaginas devem usar `WebPage`.
 
-Isso gera **dois schemas Organization** na pagina inicial, confundindo o Google.
+**Correcao:** Trocar `type="website"` por `type="webpage"` (novo tipo a criar) ou remover completamente dessas subpaginas. Adicionar suporte a `WebPage` no `StructuredData.tsx`.
 
-**Correcao:** Unificar no `Index.tsx` com todos os dados corretos (contactPoint, sameAs completo com WhatsApp + Instagram + YouTube, logo correto). Remover ou simplificar o schema do `index.html` para evitar duplicacao.
+### 5. Breadcrumbs com URLs relativas vs absolutas (INCONSISTENCIA)
 
-#### 4. Schema WebSite tambem duplicado
+- `DynamicCategoryPage.tsx` breadcrumbItems (linhas 50-54) usa URLs absolutas (`https://mkart.com.br/`)
+- `DynamicCategoryPage.tsx` `<Breadcrumbs>` (linhas 99-105) usa URLs relativas (`/`)
+- Mesmo padrao no `ComprarBacklinks.tsx` e `Blog.tsx` - URLs relativas
 
-- **index.html**: WebSite com SearchAction apontando para `/comprar-backlinks?q=`
-- **Index.tsx**: WebSite com SearchAction apontando para `/search?q=`
-- Nenhuma dessas URLs de busca existe de verdade no site
+O schema de Breadcrumbs gerado pelo componente `Breadcrumbs.tsx` usa as URLs como passadas, gerando schemas com `/` em vez de `https://mkart.com.br/`. O Google prefere URLs absolutas nos schemas.
 
-**Correcao:** Remover o SearchAction (o site nao tem funcionalidade de busca global) ou apontar para a URL correta. Manter apenas um schema WebSite.
+**Correcao:** Padronizar todas as URLs de breadcrumbs para absolutas com `https://mkart.com.br`.
 
-#### 5. Logo inconsistente
+### 6. Footer com ano desatualizado e falta de Facebook no sameAs
 
-- `index.html` usa `https://mkart.com.br/LOGOMK.png` 
-- `Index.tsx` usa `https://mkart.com.br/logo.png`
-- O arquivo real no projeto e `public/LOGOMK.png`
+- Footer mostra `2024` no copyright, deveria ser `2025` ou dinamico
+- Facebook (`https://facebook.com/mkart.seo`) aparece no Footer mas nao esta no `sameAs` do Organization schema no Index.tsx
 
-**Correcao:** Padronizar para `https://mkart.com.br/LOGOMK.png` em todos os lugares.
+**Correcao:** Atualizar ano para dinamico e adicionar Facebook ao sameAs.
 
-#### 6. Auth.tsx ainda usa `window.location.origin` no canonical
+### 7. console.log em producao
 
-A pagina de auth usa `canonicalUrl={window.location.origin}/auth` que em preview aponta para lovable.app. Porem, como a pagina de auth deve ser `noindex`, basta adicionar `noindex={true}`.
+`ConsultoriaSeo.tsx` e `ConsultoriaSaas.tsx` tem `console.log("... component rendering")` que polui o console em producao.
 
-**Correcao:** Adicionar `noindex={true}` ao SEOHead da pagina Auth.
+**Correcao:** Remover os console.log.
 
-#### 7. Paginas admin sem `noindex`
+### 8. FAQSection gera FAQPage schema duplicado com microdata
 
-Varias paginas admin (AdminSites, AdminClientes, AdminLeads) tem canonical com `window.location.origin` mas nao marcam `noindex`. Paginas administrativas nunca devem ser indexadas.
+O `FAQSection.tsx` emite DOIS formatos de dados estruturados simultaneamente:
+- JSON-LD via `StructuredData type="faq"` 
+- Microdata via `itemScope itemType="https://schema.org/FAQPage"` no HTML
 
-**Correcao:** Adicionar `noindex={true}` em todas as paginas admin que ainda nao tem.
+Ter ambos pode confundir o Google. O recomendado e usar apenas JSON-LD.
+
+**Correcao:** Remover os atributos `itemScope`, `itemProp` e `itemType` do HTML do `FAQSection.tsx`.
+
+### 9. Paginas pre-renderizadas (public/pages/) com SearchAction invalido
+
+Todas as 15+ paginas em `public/pages/` contem o SearchAction legado do `prerender.js`. Como o `prerender.js` ja foi corrigido para nao incluir SearchAction, as paginas precisam ser regeneradas.
+
+**Correcao:** Atualizar `scripts/prerender.js` para remover o bloco `potentialAction` do WebSite schema. As paginas em `public/pages/` serao regeneradas.
+
+### 10. ComprarBacklinksCategoria.tsx sem CategoryStructuredData
+
+A pagina generica de categoria (`ComprarBacklinksCategoria.tsx`) nao inclui `CategoryStructuredData`, diferente das paginas especificas (via `DynamicCategoryPage.tsx`). Faltam dados estruturados de produto/lista.
+
+**Correcao:** Adicionar `CategoryStructuredData` ao `ComprarBacklinksCategoria.tsx`.
 
 ---
+
+### Resumo de prioridades
+
+| Prioridade | Item | Impacto |
+|-----------|------|---------|
+| Alta | SearchAction invalido no StructuredData.tsx (item 1) | Schema invalido em 5 paginas |
+| Alta | publisherLogo errado (item 2) | Logo 404 no Article schema |
+| Alta | Schema Yoast legado no AgenciaBacklinks (item 3) | URLs WordPress mortas, dados inconsistentes |
+| Media | WebSite duplicado em subpaginas (item 4) | Schemas redundantes |
+| Media | Breadcrumbs com URLs relativas (item 5) | Schema nao-ideal |
+| Media | FAQSection duplicado JSON-LD + microdata (item 8) | Duplicacao de dados estruturados |
+| Media | Paginas pre-renderizadas desatualizadas (item 9) | SearchAction invalido servido a crawlers |
+| Baixa | Footer ano 2024 + Facebook no sameAs (item 6) | Dados desatualizados |
+| Baixa | console.log em producao (item 7) | Poluicao de console |
+| Baixa | ComprarBacklinksCategoria sem structured data (item 10) | Oportunidade perdida |
 
 ### Detalhes tecnicos das correcoes
 
@@ -71,16 +104,20 @@ Varias paginas admin (AdminSites, AdminClientes, AdminLeads) tem canonical com `
 
 | Arquivo | Alteracao |
 |---------|----------|
-| `index.html` | Trocar `5511999999999` por `5511989151997`, corrigir SearchAction, adicionar Instagram/YouTube ao sameAs |
-| `scripts/prerender.js` | Trocar `5511999999999` por `5511989151997` |
-| `supabase/functions/send-payment-email/_templates/payment-email.tsx` | Trocar `5511999999999` por `5511989151997` |
-| `src/pages/Index.tsx` | Adicionar contactPoint, WhatsApp ao sameAs, corrigir logo para LOGOMK.png, remover SearchAction invalido |
-| `src/components/ui/ContactModal.tsx` | Trocar `5511991795436` por `5511989151997` |
-| `src/components/sections/PricingSection.tsx` | Trocar `5511991795436` por `5511989151997` |
-| `src/pages/Auth.tsx` | Adicionar `noindex={true}`, usar canonical fixo |
-| `src/pages/admin/AdminSites.tsx` | Adicionar `noindex={true}` |
-| `src/pages/admin/AdminClientes.tsx` | Adicionar `noindex={true}` |
-| `src/pages/Dashboard.tsx` | Adicionar `noindex={true}`, canonical fixo |
-| `src/pages/Recibo.tsx` | Adicionar `noindex={true}`, canonical fixo |
+| `src/components/seo/StructuredData.tsx` | Remover `potentialAction`/`SearchAction` do tipo `website` |
+| `src/pages/BlogPost.tsx` | Corrigir `publisherLogo` para `LOGOMK.png` |
+| `src/pages/AgenciaBacklinks.tsx` | Substituir schema Yoast por `SEOHead` + `StructuredData` padrao, corrigir `og:type` para `website` |
+| `src/pages/Contact.tsx` | Remover `StructuredData type="website"` |
+| `src/pages/ConsultoriaSeo.tsx` | Remover `StructuredData type="website"`, remover console.log |
+| `src/pages/ConsultoriaSaas.tsx` | Remover `StructuredData type="website"`, remover console.log |
+| `src/pages/Blog.tsx` | Remover `StructuredData type="website"` |
+| `src/components/seo/FAQSection.tsx` | Remover microdata duplicado (itemScope/itemProp/itemType) |
+| `src/components/layout/Footer.tsx` | Ano dinamico, Facebook no copyright |
+| `src/pages/Index.tsx` | Adicionar Facebook ao sameAs do Organization |
+| `src/pages/ComprarBacklinks.tsx` | Breadcrumbs com URLs absolutas |
+| `src/pages/ComprarBacklinksCategoria.tsx` | Adicionar CategoryStructuredData, breadcrumbs absolutos |
+| `src/components/marketplace/DynamicCategoryPage.tsx` | Padronizar breadcrumbs para URLs absolutas |
+| `scripts/prerender.js` | Remover SearchAction do WebSite schema |
 
-**Total: 11 arquivos, corrigindo telefone errado, schemas duplicados, logos inconsistentes e paginas privadas sem noindex.**
+**Total: 14 arquivos com correcoes de schema, meta dados, dados estruturados e limpeza de codigo.**
+
