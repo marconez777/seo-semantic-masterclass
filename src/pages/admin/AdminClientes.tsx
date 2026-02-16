@@ -155,8 +155,9 @@ export default function AdminClientes() {
       <SEOHead
         title="Admin – Clientes | MK Art SEO"
         description="Gerenciamento de clientes"
-        canonicalUrl={`${window.location.origin}/admin/clientes`}
+        canonicalUrl="https://mkart.com.br/admin/clientes"
         keywords="admin, clientes"
+        noindex={true}
       />
 
       <div className="space-y-6">

@@ -74,7 +74,7 @@ export const PaymentEmail = ({ name, order_id, total, items_count }: PaymentEmai
 
           <Section style={buttonSection}>
             <Link 
-              href="https://wa.me/5511999999999?text=Olá! Acabei de realizar o pagamento do pedido #{shortOrderId}"
+              href={`https://wa.me/5511989151997?text=Olá! Acabei de realizar o pagamento do pedido #${shortOrderId}`}
               style={button}
             >
               Enviar Comprovante via WhatsApp

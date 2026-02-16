@@ -14,18 +14,24 @@ import StructuredData from "@/components/seo/StructuredData";
 
 const Index = () => {
   const organizationData = {
-    name: "MK Art - Agência de SEO",
+    name: "MK Art SEO",
     url: "https://mkart.com.br",
     description: "Agência especializada em SEO e Marketing Digital com mais de 9 anos de experiência e 1000+ clientes atendidos.",
-    logo: "https://mkart.com.br/logo.png",
+    logo: "https://mkart.com.br/LOGOMK.png",
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "Customer Service",
+      availableLanguage: "Portuguese"
+    },
     sameAs: [
+      "https://wa.me/5511989151997",
       "https://www.instagram.com/seosupremo777/",
       "https://www.youtube.com/@mkartseolinkbuilding614"
     ]
   };
 
   const websiteData = {
-    name: "MK Art - Agência de SEO",
+    name: "MK Art SEO",
     url: "https://mkart.com.br",
     description: "Tráfego, Leads e Vendas Todos os Meses. Analisamos o seu site e concorrentes e mostramos a melhor estratégia."
   };

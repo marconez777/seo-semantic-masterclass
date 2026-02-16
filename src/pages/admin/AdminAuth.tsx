@@ -107,8 +107,9 @@ const AdminAuth = () => {
       <SEOHead
         title="Login Admin | MK Art SEO"
         description="Acesso administrativo ao painel de controlo do MK Art SEO"
-        canonicalUrl={`${window.location.origin}/admin/login`}
+        canonicalUrl="https://mkart.com.br/admin/login"
         keywords="admin, login, painel administrativo"
+        noindex={true}
       />
       <main className="min-h-screen flex items-center justify-center px-4 bg-gradient-to-br from-primary/5 to-secondary/5">
         <article className="w-full max-w-md border rounded-lg p-8 bg-background shadow-lg">

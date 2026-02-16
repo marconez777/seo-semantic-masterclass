@@ -9,7 +9,7 @@ export default function Forbidden() {
       <SEOHead
         title="403 - Acesso Negado | MK Art SEO"
         description="Você não tem permissão para acessar esta página."
-        canonicalUrl={`${window.location.origin}/403`}
+        canonicalUrl="https://mkart.com.br/403"
         noindex={true}
       />
 

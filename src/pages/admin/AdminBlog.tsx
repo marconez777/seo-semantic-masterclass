@@ -126,8 +126,9 @@ export default function AdminBlog() {
       <SEOHead
         title="Admin – Blog | MK Art SEO"
         description="Painel admin para gerenciar blog."
-        canonicalUrl={`${window.location.origin}/admin/blog`}
+        canonicalUrl="https://mkart.com.br/admin/blog"
         keywords="admin, blog, posts"
+        noindex={true}
       />
 
       <div className="space-y-6">
