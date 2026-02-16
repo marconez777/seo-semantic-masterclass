@@ -15,12 +15,7 @@ const StructuredData = ({ type, data }: StructuredDataProps) => {
           "@type": "WebSite",
           "name": data.name,
           "url": data.url,
-          "description": data.description,
-          "potentialAction": {
-            "@type": "SearchAction",
-            "target": `${data.url}/search?q={search_term_string}`,
-            "query-input": "required name=search_term_string"
-          }
+          "description": data.description
         };
       case 'organization':
         return {

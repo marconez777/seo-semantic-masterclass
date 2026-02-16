@@ -214,7 +214,6 @@ const createHTML = (route) => `<!DOCTYPE html>
       "@type": "WebSite",
       "name": "MK Art SEO",
       "url": "https://mkart.com.br",
-      "description": "Compre backlinks brasileiros de alta qualidade para seu site",
       "description": "Compre backlinks brasileiros de alta qualidade para seu site"
     }
     </script>

@@ -99,9 +99,9 @@ export default function DynamicCategoryPage({
           <Breadcrumbs
             className="mb-3"
             items={[
-              { name: 'Início', url: '/' },
-              { name: 'Comprar Backlinks', url: '/comprar-backlinks' },
-              { name: categoryName, url: `/${pageSlug}` },
+              { name: 'Início', url: 'https://mkart.com.br/' },
+              { name: 'Comprar Backlinks', url: 'https://mkart.com.br/comprar-backlinks' },
+              { name: categoryName, url: `https://mkart.com.br/${pageSlug}` },
             ]}
           />
           <h1 className="text-4xl font-bold mb-6">{h1Title}</h1>

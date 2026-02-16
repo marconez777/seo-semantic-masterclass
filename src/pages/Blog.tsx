@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/seo/SEOHead";
-import StructuredData from "@/components/seo/StructuredData";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import BlogCard from "@/components/blog/BlogCard";
 import BlogSidebar from "@/components/blog/BlogSidebar";
@@ -78,23 +77,14 @@ const Blog = () => {
         ogType="website"
       />
 
-      <StructuredData
-        type="website"
-        data={{
-          name: "Blog MK Art SEO",
-          url: "https://mkart.com.br/blog",
-          description: "Blog especializado em SEO, backlinks e marketing digital com guias práticos e estratégias."
-        }}
-      />
-
       <Header />
       <main className="pt-20 min-h-screen">
         {/* Breadcrumbs */}
         <div className="container mx-auto px-4 py-4">
           <Breadcrumbs
             items={[
-              { name: "Início", url: "/" },
-              { name: "Blog", url: "/blog" }
+              { name: "Início", url: "https://mkart.com.br/" },
+              { name: "Blog", url: "https://mkart.com.br/blog" }
             ]}
           />
         </div>

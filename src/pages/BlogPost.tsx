@@ -123,7 +123,7 @@ export default function BlogPost() {
           dateModified: post.updated_at,
           image: post.cover_image,
           publisher: "MK Art SEO",
-          publisherLogo: "https://mkart.com.br/logo.png"
+          publisherLogo: "https://mkart.com.br/LOGOMK.png"
         }}
       />
 
@@ -133,9 +133,9 @@ export default function BlogPost() {
         <div className="container mx-auto px-4 py-4">
           <Breadcrumbs
             items={[
-              { name: "Início", url: "/" },
-              { name: "Blog", url: "/blog" },
-              { name: post.title, url: `/blog/${post.slug}` }
+              { name: "Início", url: "https://mkart.com.br/" },
+              { name: "Blog", url: "https://mkart.com.br/blog" },
+              { name: post.title, url: `https://mkart.com.br/blog/${post.slug}` }
             ]}
           />
         </div>

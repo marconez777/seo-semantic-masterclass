@@ -26,7 +26,8 @@ const Index = () => {
     sameAs: [
       "https://wa.me/5511989151997",
       "https://www.instagram.com/seosupremo777/",
-      "https://www.youtube.com/@mkartseolinkbuilding614"
+      "https://www.youtube.com/@mkartseolinkbuilding614",
+      "https://facebook.com/mkart.seo"
     ]
   };
 
