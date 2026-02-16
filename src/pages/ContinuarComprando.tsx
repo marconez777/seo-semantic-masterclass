@@ -337,8 +337,8 @@ export default function ContinuarComprando() {
           <Breadcrumbs
             className="mb-3"
             items={[
-              { name: 'Início', url: '/' },
-              { name: 'Continuar Comprando', url: '/continuar-comprando' },
+              { name: 'Início', url: 'https://mkart.com.br/' },
+              { name: 'Continuar Comprando', url: 'https://mkart.com.br/continuar-comprando' },
             ]}
           />
           <h1 className="text-4xl font-bold mb-6">Continue Comprando</h1>

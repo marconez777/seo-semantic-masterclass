@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import SEOHead from "@/components/seo/SEOHead";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
@@ -141,6 +142,7 @@ export default function AdminContatos() {
 
   return (
     <div className="space-y-6">
+      <SEOHead title="Contatos - Admin" description="Painel administrativo" noindex={true} />
       <div>
         <h2 className="text-2xl font-bold flex items-center gap-2">
           Formulários de Contato

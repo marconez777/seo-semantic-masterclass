@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Pencil, ExternalLink, CheckCircle2, AlertCircle } from "lucide-react";
 import { useAllPageSEOContent, PAGE_SLUGS, type PageSEOContent } from "@/hooks/usePageSEOContent";
 import SEOContentEditor from "@/components/admin/SEOContentEditor";
+import SEOHead from "@/components/seo/SEOHead";
 
 export default function AdminConteudoSEO() {
   const { data: allContent, isLoading, refetch } = useAllPageSEOContent();
@@ -48,6 +49,7 @@ export default function AdminConteudoSEO() {
 
   return (
     <div className="space-y-6">
+      <SEOHead title="Conteúdo SEO - Admin" description="Painel administrativo" noindex={true} />
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Conteúdo SEO</h2>

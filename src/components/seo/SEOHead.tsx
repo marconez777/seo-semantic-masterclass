@@ -15,12 +15,12 @@ const SEOHead = ({
   description, 
   canonicalUrl,
   keywords,
-  ogImage = "/og-image.jpg",
+  ogImage = "https://mkart.com.br/LOGOMK.png",
   ogType = "website",
   noindex = false
 }: SEOHeadProps) => {
   const siteName = "MK Art SEO";
-  const defaultImage = "https://mkart.com.br/og-image.jpg";
+  const defaultImage = "https://mkart.com.br/LOGOMK.png";
 
   return (
     <Helmet prioritizeSeoTags>

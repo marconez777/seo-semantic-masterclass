@@ -91,29 +91,6 @@ const CategoryStructuredData = ({
           }
         };
       })
-    },
-    "breadcrumb": {
-      "@type": "BreadcrumbList",
-      "itemListElement": [
-        {
-          "@type": "ListItem",
-          "position": 1,
-          "name": "Início",
-          "item": "https://mkart.com.br/"
-        },
-        {
-          "@type": "ListItem",
-          "position": 2,
-          "name": "Comprar Backlinks",
-          "item": "https://mkart.com.br/comprar-backlinks"
-        },
-        {
-          "@type": "ListItem",
-          "position": 3,
-          "name": categoryName,
-          "item": categoryUrl
-        }
-      ]
     }
   };
 
