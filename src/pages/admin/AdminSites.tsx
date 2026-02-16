@@ -1,6 +1,7 @@
 import SEOHead from "@/components/seo/SEOHead";
 import AdminBacklinksImport from "@/components/admin/AdminBacklinksImport";
 import AdminBacklinksManager from "@/components/admin/AdminBacklinksManager";
+import AdminCategorizer from "@/components/admin/AdminCategorizer";
 
 export default function AdminSites() {
   return (
@@ -15,6 +16,10 @@ export default function AdminSites() {
 
       <div className="space-y-8">
         <h2 className="text-2xl font-bold">Gerenciar Sites</h2>
+
+        <section className="space-y-4">
+          <AdminCategorizer />
+        </section>
         
         <section className="space-y-4">
           <AdminBacklinksImport />
