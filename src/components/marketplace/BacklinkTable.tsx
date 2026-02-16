@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import BacklinkTableRow, { BacklinkItem } from "./BacklinkTableRow";
 import TableAuthGate from "@/components/auth/TableAuthGate";
 import { sortBacklinks } from "@/hooks/useBacklinksQuery";
-import { ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 
 type SortKey = 'site_name' | 'dr' | 'da' | 'traffic' | 'category' | 'price_cents';
@@ -62,10 +62,10 @@ export default function BacklinkTable({
   };
 
   const SortIcon = ({ columnKey }: { columnKey: SortKey }) => {
-    if (sortKey !== columnKey) return null;
+    if (sortKey !== columnKey) return <ArrowUpDown size={14} className="text-muted-foreground/50" />;
     return sortDir === 'desc' 
-      ? <ChevronDown className="inline-block ml-1 h-4 w-4" />
-      : <ChevronUp className="inline-block ml-1 h-4 w-4" />;
+      ? <ArrowDown size={14} />
+      : <ArrowUp size={14} />;
   };
 
   if (isLoading) {
@@ -97,31 +97,31 @@ export default function BacklinkTable({
                   className="p-4 cursor-pointer select-none hover:bg-accent/60 transition-colors"
                   onClick={() => handleSort('site_name')}
                 >
-                  SITE <SortIcon columnKey="site_name" />
+                  <span className="inline-flex items-center gap-1">SITE <SortIcon columnKey="site_name" /></span>
                 </th>
                 <th
                   className="p-4 cursor-pointer select-none hover:bg-accent/60 transition-colors"
                   onClick={() => handleSort('da')}
                 >
-                  DA <SortIcon columnKey="da" />
+                  <span className="inline-flex items-center gap-1">DA <SortIcon columnKey="da" /></span>
                 </th>
                 <th
                   className="p-4 cursor-pointer select-none hover:bg-accent/60 transition-colors"
                   onClick={() => handleSort('traffic')}
                 >
-                  TRÁFEGO <SortIcon columnKey="traffic" />
+                  <span className="inline-flex items-center gap-1">TRÁFEGO <SortIcon columnKey="traffic" /></span>
                 </th>
                 <th
                   className="p-4 cursor-pointer select-none hover:bg-accent/60 transition-colors"
                   onClick={() => handleSort('category')}
                 >
-                  CATEGORIA <SortIcon columnKey="category" />
+                  <span className="inline-flex items-center gap-1">CATEGORIA <SortIcon columnKey="category" /></span>
                 </th>
                 <th
                   className="p-4 cursor-pointer select-none hover:bg-accent/60 transition-colors"
                   onClick={() => handleSort('price_cents')}
                 >
-                  PREÇO <SortIcon columnKey="price_cents" />
+                  <span className="inline-flex items-center gap-1">PREÇO <SortIcon columnKey="price_cents" /></span>
                 </th>
                 <th className="p-4 text-right">AÇÕES</th>
               </tr>
