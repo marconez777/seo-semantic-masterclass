@@ -95,6 +95,294 @@ export type Database = {
         }
         Relationships: []
       }
+      consulting_backlinks: {
+        Row: {
+          anchor_text: string | null
+          client_id: string
+          created_at: string
+          dr: number | null
+          id: string
+          month: string
+          position: number | null
+          publication_url: string | null
+          site_domain: string
+          status: string
+          target_url: string | null
+        }
+        Insert: {
+          anchor_text?: string | null
+          client_id: string
+          created_at?: string
+          dr?: number | null
+          id?: string
+          month: string
+          position?: number | null
+          publication_url?: string | null
+          site_domain: string
+          status?: string
+          target_url?: string | null
+        }
+        Update: {
+          anchor_text?: string | null
+          client_id?: string
+          created_at?: string
+          dr?: number | null
+          id?: string
+          month?: string
+          position?: number | null
+          publication_url?: string | null
+          site_domain?: string
+          status?: string
+          target_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulting_backlinks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consulting_blog_posts: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          month: string | null
+          published_at: string | null
+          status: string
+          title: string
+          url: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          month?: string | null
+          published_at?: string | null
+          status?: string
+          title: string
+          url?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          month?: string | null
+          published_at?: string | null
+          status?: string
+          title?: string
+          url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulting_blog_posts_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consulting_clients: {
+        Row: {
+          created_at: string
+          domain: string
+          email: string | null
+          id: string
+          name: string
+          status: string
+          updated_at: string
+          user_id: string | null
+          whatsapp: string | null
+        }
+        Insert: {
+          created_at?: string
+          domain: string
+          email?: string | null
+          id?: string
+          name: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Update: {
+          created_at?: string
+          domain?: string
+          email?: string | null
+          id?: string
+          name?: string
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
+      consulting_keywords: {
+        Row: {
+          client_id: string
+          cpc: number | null
+          created_at: string
+          id: string
+          keyword: string
+          position: number | null
+          volume: number | null
+        }
+        Insert: {
+          client_id: string
+          cpc?: number | null
+          created_at?: string
+          id?: string
+          keyword: string
+          position?: number | null
+          volume?: number | null
+        }
+        Update: {
+          client_id?: string
+          cpc?: number | null
+          created_at?: string
+          id?: string
+          keyword?: string
+          position?: number | null
+          volume?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulting_keywords_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consulting_page_keywords: {
+        Row: {
+          created_at: string
+          id: string
+          keyword: string
+          page_id: string
+          repartition: number | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          keyword: string
+          page_id: string
+          repartition?: number | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          keyword?: string
+          page_id?: string
+          repartition?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulting_page_keywords_page_id_fkey"
+            columns: ["page_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_pages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consulting_pages: {
+        Row: {
+          client_id: string
+          created_at: string
+          id: string
+          main_keyword: string | null
+          page_url: string | null
+          position: number | null
+          seo_description: string | null
+          seo_title: string | null
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          id?: string
+          main_keyword?: string | null
+          page_url?: string | null
+          position?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          id?: string
+          main_keyword?: string | null
+          page_url?: string | null
+          position?: number | null
+          seo_description?: string | null
+          seo_title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulting_pages_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      consulting_tasks: {
+        Row: {
+          client_id: string
+          column_key: string
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          position: number | null
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          column_key?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          position?: number | null
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          column_key?: string
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          position?: number | null
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulting_tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       contact_submissions: {
         Row: {
           created_at: string
