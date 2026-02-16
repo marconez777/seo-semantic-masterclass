@@ -7,6 +7,7 @@ import { ArrowLeft, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ConsultingKeywords } from "@/components/consulting/ConsultingKeywords";
 import { ConsultingPages } from "@/components/consulting/ConsultingPages";
+import { ConsultingBacklinks } from "@/components/consulting/ConsultingBacklinks";
 
 export default function AdminConsultoriaClient() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -60,7 +61,7 @@ export default function AdminConsultoriaClient() {
           <ConsultingPages clientId={client.id} readOnly={false} />
         </TabsContent>
         <TabsContent value="backlinks">
-          <div className="py-12 text-center text-muted-foreground">Em breve — Fase 4</div>
+          <ConsultingBacklinks clientId={client.id} readOnly={false} />
         </TabsContent>
         <TabsContent value="blog">
           <div className="py-12 text-center text-muted-foreground">Em breve — Fase 5</div>
