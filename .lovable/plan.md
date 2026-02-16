@@ -1,86 +1,66 @@
 
 
-## Varredura Final #3 - Ultimos Ajustes de SEO Tecnico
+## Categorizador Automatico de Sites - Aplicacao Direta
 
-Apos as 3 rodadas anteriores de correcoes, o projeto esta em otimo estado. Os problemas restantes sao menores, mas ainda vale corrigir:
+### Mudanca em relacao ao plano anterior
 
----
+Em vez de exigir aprovacao manual para cada sugestao, o sistema vai aplicar a categoria sugerida pela AI diretamente no banco de dados. Voce depois revisa e edita pelo gerenciador de sites existente (`AdminBacklinksManager`).
 
-### 1. Organization schema sem `telephone` no `contactPoint` (MEDIO)
+### Fluxo de uso
 
-O `contactPoint` no `Index.tsx` (linhas 21-25) tem `contactType` e `availableLanguage`, mas falta o campo `telephone` que o Google espera para validar o ContactPoint.
+1. Acessa `/admin/sites` e ve o card "Categorizar Sites Automaticamente"
+2. Clica em "Iniciar" - o sistema processa lotes de 5 sites automaticamente
+3. Para cada site: Firecrawl faz scraping, AI sugere categoria, o banco e atualizado imediatamente
+4. Uma barra de progresso mostra quantos foram processados (ex: 45/941)
+5. Um log em tempo real mostra cada site processado: dominio, categoria antiga ("Geral"), nova categoria
+6. O processo continua automaticamente ate acabar (ou voce pode pausar)
+7. Depois, voce usa o gerenciador de sites existente para revisar e editar qualquer categoria que nao ficou boa
 
-O mesmo problema existe no `scripts/prerender.js` (linhas 197-201).
+### Arquitetura tecnica
 
-**Correcao:** Adicionar `"telephone": "+55 11 98915-1997"` ao contactPoint em ambos os arquivos. Tambem adicionar Facebook ao sameAs do prerender.js (ja foi adicionado no Index.tsx mas nao no prerender).
+**1. Edge Function: `categorize-backlinks`**
+- Recebe lista de sites (max 5 por chamada)
+- Para cada URL, chama Firecrawl para extrair conteudo (markdown, titulo, descricao)
+- Envia conteudo para Gemini Flash com as 17 categorias oficiais
+- Se scraping falhar, faz fallback analisando apenas o dominio
+- Atualiza a categoria diretamente no banco (`UPDATE backlinks SET category = ... WHERE id = ...`)
+- Retorna os resultados para o frontend mostrar no log
 
----
+**2. Componente: `AdminCategorizer.tsx`**
+- Botao "Iniciar Categorizacao Automatica"
+- Barra de progresso com contadores (processados / total / erros)
+- Log scrollavel mostrando cada site processado e sua nova categoria
+- Botao de "Pausar/Retomar" para controle
+- Processa automaticamente lote apos lote sem intervencao
+- Ao terminar, mostra resumo: quantos categorizados, quantos falharam
 
-### 2. prerender.js sem Facebook no `sameAs` (BAIXO)
+**3. Prompt da AI**
+```
+Voce e um classificador de sites. Analise o conteudo abaixo e classifique em UMA das categorias:
+Noticias, Negocios, Saude, Educacao, Tecnologia, Financas, Imoveis, Moda, Turismo, Alimentacao, Pets, Automotivo, Esportes, Entretenimento, Marketing, Direito, Maternidade.
 
-O `scripts/prerender.js` linha 202-206 tem sameAs com WhatsApp, Instagram e YouTube, mas falta o Facebook (`https://facebook.com/mkart.seo`) que ja foi adicionado ao `Index.tsx`.
+Responda APENAS com o nome da categoria, nada mais.
+```
 
-**Correcao:** Adicionar Facebook ao sameAs do prerender.js.
+### Detalhes tecnicos
 
----
+| Arquivo | Acao |
+|---------|------|
+| `supabase/functions/categorize-backlinks/index.ts` | Criar - Edge Function que faz scraping + AI + update no banco |
+| `supabase/config.toml` | Adicionar config da funcao |
+| `src/components/admin/AdminCategorizer.tsx` | Criar - UI com progresso e log automatico |
+| `src/pages/admin/AdminSites.tsx` | Modificar - Adicionar componente |
 
-### 3. Blog.tsx com `ogType="website"` (BAIXO)
+### Protecoes
 
-Na linha 77 do `Blog.tsx`, o `ogType` esta como `"website"`. A pagina de listagem do blog poderia usar `"website"` mas o ideal e nao especificar (ja e o default) para manter consistencia. Nao e um problema real, apenas redundancia.
+- JWT + verificacao de role admin na Edge Function
+- Lotes de 5 para evitar timeout e rate limiting do Firecrawl
+- Delay de 2 segundos entre lotes para nao sobrecarregar
+- Se um site falhar o scraping, tenta classificar pelo dominio antes de pular
+- Sites que falharem completamente ficam como "Geral" e aparecem no log como erro
 
-**Nenhuma correcao necessaria** - o default do SEOHead ja e `"website"`.
+### Custos estimados
 
----
-
-### 4. SEOHead emite `viewport` e `theme-color` duplicados com index.html (BAIXO)
-
-O `SEOHead.tsx` linhas 59-60 emite `<meta name="theme-color">` e `<meta name="viewport">` que ja existem no `index.html`. O Helmet deveria gerenciar isso sem duplicacao, mas tags identicas em dois lugares podem gerar entradas duplicadas no DOM.
-
-**Correcao:** Remover as tags `theme-color` e `viewport` do `SEOHead.tsx` (linhas 59-60), ja que sao identicas ao `index.html` e nao mudam por pagina.
-
----
-
-### 5. SEOHead emite `preconnect` duplicado com index.html (BAIXO)
-
-As linhas 63-65 do `SEOHead.tsx` emitem `preconnect` para fonts.googleapis.com e dns-prefetch para mkart.com.br, que ja estao no `index.html`. Duplicar `preconnect` nao causa erros mas e desnecessario.
-
-**Correcao:** Remover as linhas 63-65 do `SEOHead.tsx` (preconnect/dns-prefetch), mantendo apenas as do `index.html`.
-
----
-
-### 6. `Crawl-delay: 1` no robots.txt pode limitar crawl (INFO)
-
-O `Crawl-delay: 1` no robots.txt forca crawlers a esperar 1 segundo entre requests. O Google ignora essa diretiva, mas Bing e outros respeitam. Para um site pequeno isso nao e problema, mas se quiser crawl mais rapido pode remover.
-
-**Nenhuma correcao necessaria** - informativo apenas.
-
----
-
-### 7. Sitemap `lastmod` desatualizado (BAIXO)
-
-O `public/sitemap.xml` tem `lastmod` de `2025-06-01` para paginas estaticas e `2025-05-01` para posts. Como o sitemap e estatico e atualizado manualmente, convem atualizar as datas para `2025-07-01` (ou mais recente) para refletir as correcoes feitas.
-
-**Correcao:** Atualizar datas `lastmod` no sitemap para `2026-02-16` (data atual).
-
----
-
-### Resumo
-
-| Prioridade | Item | Impacto |
-|-----------|------|---------|
-| Media | contactPoint sem telephone (item 1) | Schema incompleto |
-| Baixa | prerender.js sem Facebook no sameAs (item 2) | Inconsistencia |
-| Baixa | SEOHead tags duplicadas com index.html (itens 4-5) | DOM limpo |
-| Baixa | Sitemap lastmod desatualizado (item 7) | Crawl |
-
-### Detalhes tecnicos das correcoes
-
-| Arquivo | Alteracao |
-|---------|----------|
-| `src/pages/Index.tsx` | Adicionar `"telephone": "+55 11 98915-1997"` ao contactPoint |
-| `scripts/prerender.js` | Adicionar `telephone` ao contactPoint + Facebook ao sameAs |
-| `src/components/seo/SEOHead.tsx` | Remover tags duplicadas: `theme-color`, `viewport`, `preconnect`, `dns-prefetch` (linhas 58-65) |
-| `public/sitemap.xml` | Atualizar todas as datas `lastmod` para `2026-02-16` |
-
-**Total: 4 arquivos com ajustes finos de schema, limpeza de meta tags duplicadas e atualizacao de sitemap.**
+- Firecrawl: ~941 scrapes
+- Lovable AI (Gemini Flash): ~188 chamadas (5 sites por chamada)
 
