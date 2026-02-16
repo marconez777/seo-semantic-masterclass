@@ -1,12 +1,14 @@
 import { FAB } from "@/components/ui/fab"
 import { useLocation } from "react-router-dom"
 import { cn } from "@/lib/utils"
+import { useCart } from "@/contexts/CartContext"
 
 export function WhatsAppFAB() {
   const { pathname } = useLocation()
+  const { isOpen: cartOpen } = useCart()
 
-  // Hide on admin pages
-  if (pathname.startsWith("/admin")) return null
+  // Hide on admin pages or when cart modal is open
+  if (pathname.startsWith("/admin") || cartOpen) return null
 
   const isDashboard = pathname.startsWith("/painel")
 
