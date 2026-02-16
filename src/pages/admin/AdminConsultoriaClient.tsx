@@ -6,6 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Globe } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ConsultingKeywords } from "@/components/consulting/ConsultingKeywords";
+import { ConsultingPages } from "@/components/consulting/ConsultingPages";
 
 export default function AdminConsultoriaClient() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -56,7 +57,7 @@ export default function AdminConsultoriaClient() {
           <ConsultingKeywords clientId={client.id} readOnly={false} />
         </TabsContent>
         <TabsContent value="paginas">
-          <div className="py-12 text-center text-muted-foreground">Em breve — Fase 3</div>
+          <ConsultingPages clientId={client.id} readOnly={false} />
         </TabsContent>
         <TabsContent value="backlinks">
           <div className="py-12 text-center text-muted-foreground">Em breve — Fase 4</div>
