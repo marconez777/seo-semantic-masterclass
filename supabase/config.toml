@@ -32,3 +32,6 @@ verify_jwt = false
 
 [functions.serpbot-proxy]
 verify_jwt = false
+
+[functions.categorize-backlinks]
+verify_jwt = false
