@@ -17,13 +17,19 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Heart, UserCircle, Shield, Package, ShoppingBag, Globe, Search } from "lucide-react";
+import { Heart, UserCircle, Shield, Package, ShoppingBag, Globe, Search, BarChart3 } from "lucide-react";
 import { OrdersList } from "@/components/dashboard/OrdersList";
 import { ProfileSection } from "@/components/dashboard/ProfileSection";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { Separator } from "@/components/ui/separator";
 import { FavoritesTable } from "@/components/dashboard/FavoritesTable";
 import { KeywordTracker } from "@/components/dashboard/KeywordTracker";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ConsultingKeywords } from "@/components/consulting/ConsultingKeywords";
+import { ConsultingPages } from "@/components/consulting/ConsultingPages";
+import { ConsultingBacklinks } from "@/components/consulting/ConsultingBacklinks";
+import { ConsultingBlogPosts } from "@/components/consulting/ConsultingBlogPosts";
+import { ConsultingTaskBoard } from "@/components/consulting/ConsultingTaskBoard";
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -32,6 +38,8 @@ export default function Dashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userName, setUserName] = useState("Usuário");
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>();
+  const [consultingClientId, setConsultingClientId] = useState<string | null>(null);
+  const [consultingClientName, setConsultingClientName] = useState<string | null>(null);
 
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
@@ -54,6 +62,14 @@ export default function Dashboard() {
     supabase.from('profiles').select('full_name, avatar_url').eq('user_id', userId).maybeSingle().then(({ data }) => {
       if (data?.full_name) setUserName(data.full_name);
       if (data?.avatar_url) setAvatarUrl(data.avatar_url);
+    });
+
+    // Check if user is a consulting client
+    supabase.from('consulting_clients').select('id, name').eq('user_id', userId).eq('status', 'ativo').maybeSingle().then(({ data }) => {
+      if (data) {
+        setConsultingClientId(data.id);
+        setConsultingClientName(data.name);
+      }
     });
 
     // Check admin role
@@ -87,7 +103,7 @@ export default function Dashboard() {
 
   if (!userId) return null;
 
-  const tabLabel = tab === 'pedidos' ? 'Meus Pedidos' : tab === 'favoritos' ? 'Favoritos' : tab === 'keywords' ? 'Rastreio de Palavras' : 'Perfil';
+  const tabLabel = tab === 'pedidos' ? 'Meus Pedidos' : tab === 'favoritos' ? 'Favoritos' : tab === 'keywords' ? 'Rastreio de Palavras' : tab === 'consultoria' ? 'Consultoria SEO' : 'Perfil';
 
   return (
     <>
@@ -160,6 +176,26 @@ export default function Dashboard() {
                   </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroup>
+              {consultingClientId && (
+                <>
+                  <SidebarSeparator />
+                  <SidebarGroup>
+                    <SidebarGroupLabel>Consultoria SEO</SidebarGroupLabel>
+                    <SidebarMenu>
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          isActive={tab === 'consultoria'}
+                          onClick={() => setTab('consultoria')}
+                          className={tab === 'consultoria' ? "bg-sidebar-accent text-sidebar-foreground font-medium" : "text-sidebar-foreground hover:bg-sidebar-accent/50"}
+                        >
+                          <BarChart3 className="mr-2 h-4 w-4" />
+                          <span>{consultingClientName || "Meu Projeto"}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </SidebarMenu>
+                  </SidebarGroup>
+                </>
+              )}
               <SidebarSeparator />
               <SidebarGroup>
                 <SidebarGroupLabel>Links</SidebarGroupLabel>
@@ -216,6 +252,32 @@ export default function Dashboard() {
               {tab === 'favoritos' && <FavoritesTable userId={userId} />}
               {tab === 'keywords' && <KeywordTracker userId={userId} />}
               {tab === 'perfil' && <ProfileSection />}
+              {tab === 'consultoria' && consultingClientId && (
+                <Tabs defaultValue="palavras">
+                  <TabsList>
+                    <TabsTrigger value="palavras">Palavras</TabsTrigger>
+                    <TabsTrigger value="paginas">Páginas</TabsTrigger>
+                    <TabsTrigger value="backlinks">Backlinks</TabsTrigger>
+                    <TabsTrigger value="blog">Blog</TabsTrigger>
+                    <TabsTrigger value="tarefas">Tarefas</TabsTrigger>
+                  </TabsList>
+                  <TabsContent value="palavras">
+                    <ConsultingKeywords clientId={consultingClientId} readOnly={true} />
+                  </TabsContent>
+                  <TabsContent value="paginas">
+                    <ConsultingPages clientId={consultingClientId} readOnly={true} />
+                  </TabsContent>
+                  <TabsContent value="backlinks">
+                    <ConsultingBacklinks clientId={consultingClientId} readOnly={true} />
+                  </TabsContent>
+                  <TabsContent value="blog">
+                    <ConsultingBlogPosts clientId={consultingClientId} readOnly={true} />
+                  </TabsContent>
+                  <TabsContent value="tarefas">
+                    <ConsultingTaskBoard clientId={consultingClientId} readOnly={true} />
+                  </TabsContent>
+                </Tabs>
+              )}
             </main>
           </SidebarInset>
         </div>
