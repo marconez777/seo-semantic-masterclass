@@ -71,13 +71,6 @@ const CategoryStructuredData = ({
                 "name": "MK Art SEO"
               }
             },
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": Math.min(5, Math.max(1, (dr + da) / 20)).toFixed(1),
-              "reviewCount": Math.max(1, Math.floor(traffic / 1000)),
-              "bestRating": 5,
-              "worstRating": 1
-            },
             "additionalProperty": [
               {
                 "@type": "PropertyValue",

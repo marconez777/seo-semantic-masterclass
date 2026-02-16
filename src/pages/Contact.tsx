@@ -2,6 +2,7 @@ import { useState } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import StructuredData from "@/components/seo/StructuredData";
+import SEOHead from "@/components/seo/SEOHead";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -20,7 +21,7 @@ const Contact = () => {
 
   const pageData = {
     name: "Contato - MK Art Agência de SEO",
-    url: "https://seo-semantic-masterclass.lovable.app/contato",
+    url: "https://mkart.com.br/contato",
     description: "Entre em contato com nossa agência de SEO e backlinks. Consultoria especializada para melhorar seu ranking no Google."
   };
 
@@ -85,6 +86,12 @@ const Contact = () => {
 
   return (
     <>
+      <SEOHead
+        title="Contato - MK Art Agência de SEO e Backlinks"
+        description="Entre em contato com nossa agência de SEO e backlinks. Consultoria especializada para melhorar seu ranking no Google."
+        canonicalUrl="https://mkart.com.br/contato"
+        keywords="contato seo, agencia backlinks, consultoria seo"
+      />
       <StructuredData type="website" data={pageData} />
       <Header />
       

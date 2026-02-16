@@ -61,10 +61,6 @@ export default function DynamicCategoryPage({
         canonicalUrl={canonicalUrl}
         keywords={metaKeywords}
       />
-      <StructuredData
-        type="breadcrumb"
-        data={{ items: breadcrumbItems }}
-      />
       <CategoryStructuredData
         categoryName={`Backlinks de ${categoryName}`}
         categoryUrl={canonicalUrl}

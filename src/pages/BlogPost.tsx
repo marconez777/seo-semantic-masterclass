@@ -100,7 +100,7 @@ export default function BlogPost() {
     );
   }
 
-  const postUrl = `${window.location.origin}/blog/${post.slug}`;
+  const postUrl = `https://mkart.com.br/blog/${post.slug}`;
 
   return (
     <>
