@@ -5,9 +5,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { OFFICIAL_CATEGORIES } from "@/lib/categories";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import AdminBacklinksFilters from "./AdminBacklinksFilters";
 import AdminBacklinksTableRow from "./AdminBacklinksTableRow";
+
+export type SortColumn = "domain" | "category" | "da" | "traffic" | "price" | "status" | null;
+export type SortDir = "asc" | "desc";
 
 export interface Backlink {
   id: string;
@@ -77,6 +80,19 @@ export default function AdminBacklinksManager() {
     status: "todos",
   });
 
+  const [sortCol, setSortCol] = useState<SortColumn>(null);
+  const [sortDir, setSortDir] = useState<SortDir>("asc");
+
+  function toggleSort(col: SortColumn) {
+    if (sortCol === col) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortCol(col);
+      setSortDir("asc");
+    }
+    setPage(0);
+  }
+
   useEffect(() => {
     const t = window.setTimeout(() => { setDebouncedQ(q.trim()); setPage(0); }, 300);
     return () => window.clearTimeout(t);
@@ -94,8 +110,13 @@ export default function AdminBacklinksManager() {
       let query = supabase
         .from("backlinks")
         .select("*", { count: "exact" })
-        .order("created_at", { ascending: false })
         .range(from, to);
+
+      // Apply sorting
+      if (sortCol) {
+        query = query.order(sortCol, { ascending: sortDir === "asc" });
+      }
+      query = query.order("created_at", { ascending: false });
 
       if (term) {
         query = query.or(`domain.ilike.%${term}%,url.ilike.%${term}%`);
@@ -142,7 +163,7 @@ export default function AdminBacklinksManager() {
   useEffect(() => {
     fetchRows(debouncedQ, page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQ, page, filters]);
+  }, [debouncedQ, page, filters, sortCol, sortDir]);
 
   const totalPages = totalCount != null ? Math.ceil(totalCount / PAGE_SIZE) : 0;
   const countText = useMemo(() => {
@@ -267,12 +288,29 @@ export default function AdminBacklinksManager() {
         <table className="w-full text-sm">
           <thead className="bg-accent/40">
             <tr className="text-left">
-              <th className="p-3">Site</th>
-              <th className="p-3">Categoria</th>
-              <th className="p-3">DR/DA</th>
-              <th className="p-3">Tráfego</th>
-              <th className="p-3">Preço</th>
-              <th className="p-3">Status</th>
+              {([
+                { key: "domain", label: "Site" },
+                { key: "category", label: "Categoria" },
+                { key: "da", label: "DA" },
+                { key: "traffic", label: "Tráfego" },
+                { key: "price", label: "Preço" },
+                { key: "status", label: "Status" },
+              ] as { key: SortColumn; label: string }[]).map(({ key, label }) => (
+                <th
+                  key={key}
+                  className="p-3 cursor-pointer select-none hover:bg-accent/60 transition-colors"
+                  onClick={() => toggleSort(key)}
+                >
+                  <span className="inline-flex items-center gap-1">
+                    {label}
+                    {sortCol === key ? (
+                      sortDir === "asc" ? <ArrowUp size={14} /> : <ArrowDown size={14} />
+                    ) : (
+                      <ArrowUpDown size={14} className="text-muted-foreground/50" />
+                    )}
+                  </span>
+                </th>
+              ))}
               <th className="p-3">Ações</th>
             </tr>
           </thead>
