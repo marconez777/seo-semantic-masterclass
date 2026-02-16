@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { ConsultingKeywords } from "@/components/consulting/ConsultingKeywords";
 import { ConsultingPages } from "@/components/consulting/ConsultingPages";
 import { ConsultingBacklinks } from "@/components/consulting/ConsultingBacklinks";
+import { ConsultingBlogPosts } from "@/components/consulting/ConsultingBlogPosts";
 
 export default function AdminConsultoriaClient() {
   const { clientId } = useParams<{ clientId: string }>();
@@ -64,7 +65,7 @@ export default function AdminConsultoriaClient() {
           <ConsultingBacklinks clientId={client.id} readOnly={false} />
         </TabsContent>
         <TabsContent value="blog">
-          <div className="py-12 text-center text-muted-foreground">Em breve — Fase 5</div>
+          <ConsultingBlogPosts clientId={client.id} readOnly={false} />
         </TabsContent>
         <TabsContent value="tarefas">
           <div className="py-12 text-center text-muted-foreground">Em breve — Fase 6</div>
