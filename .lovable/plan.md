@@ -1,13 +1,21 @@
 
 
-## Trocar coluna DR por DA no modal do carrinho
+## Redirecionar botao "Comprar" para login quando usuario nao esta logado
 
-### Alteracao
+### Problema
 
-No arquivo `src/components/cart/CartModal.tsx`, substituir a coluna "DR" por "DA":
+O `handleAddToCart` no `BacklinkTableRow.tsx` adiciona o item ao carrinho sem verificar se o usuario esta autenticado. O componente ja recebe a prop `isAuthenticated`, mas nao a utiliza nessa funcao.
 
-- No cabecalho da tabela: trocar `<th>DR</th>` por `<th>DA</th>`
-- No corpo da tabela: trocar `{item.dr ?? "-"}` por `{item.da ?? "-"}`
+### Solucao
 
-Alteracao em 2 linhas apenas.
+No arquivo `src/components/marketplace/BacklinkTableRow.tsx`:
 
+1. Importar `useNavigate` de `react-router-dom`
+2. No `handleAddToCart`, adicionar uma verificacao no inicio: se `!isAuthenticated`, redirecionar para `/auth` com `state: { from: location.pathname }` e retornar sem adicionar ao carrinho
+3. Mesma logica sera aplicada: usuario deslogado clica em "Comprar" e vai para a tela de login/cadastro
+
+### Detalhes tecnicos
+
+- Importar `useNavigate` e `useLocation` de `react-router-dom`
+- No inicio de `handleAddToCart`: `if (!isAuthenticated) { navigate('/auth', { state: { from: location.pathname } }); return; }`
+- Nenhuma outra alteracao necessaria, pois a prop `isAuthenticated` ja e passada corretamente pelo `BacklinkTable` e pela pagina `AgenciaBacklinks`
