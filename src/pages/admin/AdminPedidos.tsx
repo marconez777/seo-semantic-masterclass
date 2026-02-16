@@ -286,8 +286,9 @@ export default function AdminPedidos() {
       <SEOHead
         title="Admin – Pedidos | MK Art SEO"
         description="Painel admin para gerenciar pedidos."
-        canonicalUrl={`${window.location.origin}/admin`}
+        canonicalUrl="https://mkart.com.br/admin"
         keywords="admin, pedidos"
+        noindex={true}
       />
 
       <div className="space-y-6">

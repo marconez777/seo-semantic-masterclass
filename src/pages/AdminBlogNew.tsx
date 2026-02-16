@@ -272,8 +272,8 @@ export default function AdminBlogNew() {
       <SEOHead
         title={id ? "Editar Post | MK Art SEO" : "Novo Post do Blog | MK Art SEO"}
         description={id ? "Edite um artigo existente no blog." : "Crie e publique um novo artigo no blog."}
-        canonicalUrl={`${window.location.origin}/admin/blog/${id ? `editar/${id}` : 'novo'}`}
-        noindex
+        canonicalUrl={`https://mkart.com.br/admin/blog/${id ? `editar/${id}` : 'novo'}`}
+        noindex={true}
       />
 
       <main className="container mx-auto px-4 py-10 space-y-8">

@@ -154,8 +154,9 @@ const Auth = () => {
       <SEOHead
         title="Entrar ou Cadastrar | MK Art SEO"
         description="Acesse sua conta para comprar backlinks com segurança. Cadastre-se com nome, telefone e CPF."
-        canonicalUrl={`${window.location.origin}/auth`}
+        canonicalUrl="https://mkart.com.br/auth"
         keywords="login, cadastro, autenticação, backlinks"
+        noindex={true}
       />
       <Header />
       <main className="min-h-screen flex items-center justify-center px-4 py-16">

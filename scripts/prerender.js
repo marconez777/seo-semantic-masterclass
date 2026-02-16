@@ -200,7 +200,9 @@ const createHTML = (route) => `<!DOCTYPE html>
         "availableLanguage": "Portuguese"
       },
       "sameAs": [
-        "https://wa.me/5511999999999"
+        "https://wa.me/5511989151997",
+        "https://www.instagram.com/seosupremo777/",
+        "https://www.youtube.com/@mkartseolinkbuilding614"
       ]
     }
     </script>
@@ -213,11 +215,7 @@ const createHTML = (route) => `<!DOCTYPE html>
       "name": "MK Art SEO",
       "url": "https://mkart.com.br",
       "description": "Compre backlinks brasileiros de alta qualidade para seu site",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "@target": "https://mkart.com.br/comprar-backlinks?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
+      "description": "Compre backlinks brasileiros de alta qualidade para seu site"
     }
     </script>
     

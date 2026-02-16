@@ -62,8 +62,9 @@ export default function Recibo() {
       <SEOHead
         title={`Recibo do Pedido ${order.id} | MK Art SEO`}
         description={`Recibo do pedido realizado em ${new Date(order.created_at).toLocaleString('pt-BR')}`}
-        canonicalUrl={`${window.location.origin}/recibo/${order.id}`}
+        canonicalUrl={`https://mkart.com.br/recibo/${order.id}`}
         keywords="recibo, pedido, pagamento"
+        noindex={true}
       />
       <main className="container mx-auto px-4 py-10 space-y-6">
         <div className="flex items-center justify-between">

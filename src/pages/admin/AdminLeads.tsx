@@ -119,7 +119,7 @@ export default function AdminLeads() {
       <SEOHead
         title="Admin – Leads Backlinks Grátis | MK Art SEO"
         description="Gerenciar leads de backlinks grátis."
-        canonicalUrl={`${window.location.origin}/admin/leads`}
+        canonicalUrl="https://mkart.com.br/admin/leads"
         noindex
       />
 

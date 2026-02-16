@@ -94,8 +94,9 @@ export default function Dashboard() {
       <SEOHead
         title="Painel | MK Art SEO"
         description="Veja seus favoritos e perfil."
-        canonicalUrl={`${window.location.origin}/painel`}
+        canonicalUrl="https://mkart.com.br/painel"
         keywords="dashboard, favoritos"
+        noindex={true}
       />
 
       <SidebarProvider>

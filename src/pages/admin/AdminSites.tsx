@@ -8,8 +8,9 @@ export default function AdminSites() {
       <SEOHead
         title="Admin – Gerenciar Sites | MK Art SEO"
         description="Painel admin para gerenciar sites de backlinks."
-        canonicalUrl={`${window.location.origin}/admin/sites`}
+        canonicalUrl="https://mkart.com.br/admin/sites"
         keywords="admin, sites, backlinks"
+        noindex={true}
       />
 
       <div className="space-y-8">
