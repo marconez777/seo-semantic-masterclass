@@ -15,7 +15,7 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ClipboardList, Upload, Settings, PenTool, Users, FileText, MessageSquare, Gift, Globe } from "lucide-react";
+import { ClipboardList, Upload, Settings, PenTool, Users, FileText, MessageSquare, Gift, Globe, Briefcase } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { Separator } from "@/components/ui/separator";
@@ -59,6 +59,7 @@ export default function AdminLayout() {
     { title: "Conteúdo SEO", url: "/admin/conteudo-seo", icon: FileText },
     { title: "Contatos", url: "/admin/contatos", icon: MessageSquare },
     { title: "Leads Backlinks", url: "/admin/leads", icon: Gift },
+    { title: "Consultoria", url: "/admin/consultoria", icon: Briefcase },
   ];
 
   return (

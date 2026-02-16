@@ -42,6 +42,8 @@ import AdminConteudoSEO from "./pages/admin/AdminConteudoSEO";
 import AdminContatos from "./pages/admin/AdminContatos";
 import AdminLeads from "./pages/admin/AdminLeads";
 import AdminAuth from "./pages/admin/AdminAuth";
+import AdminConsultoria from "./pages/admin/AdminConsultoria";
+import AdminConsultoriaClient from "./pages/admin/AdminConsultoriaClient";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -111,6 +113,8 @@ const App = () => (
             <Route path="conteudo-seo" element={<AdminConteudoSEO />} />
             <Route path="contatos" element={<AdminContatos />} />
             <Route path="leads" element={<AdminLeads />} />
+            <Route path="consultoria" element={<AdminConsultoria />} />
+            <Route path="consultoria/:clientId" element={<AdminConsultoriaClient />} />
           </Route>
           <Route path="/recibo/:orderId" element={<Recibo />} />
           
