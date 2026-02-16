@@ -29,9 +29,8 @@ const Breadcrumbs = ({ items, className }: BreadcrumbsProps) => {
                 <a 
                   href={item.url} 
                   className="hover:text-foreground transition-colors"
-                  itemProp="item"
                 >
-                  <span itemProp="name">{item.name}</span>
+                  {item.name}
                 </a>
               )}
             </li>

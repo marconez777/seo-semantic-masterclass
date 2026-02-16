@@ -1,12 +1,13 @@
-import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertTriangle } from "lucide-react";
+import SEOHead from "@/components/seo/SEOHead";
 
 export default function AdminPublicacoes() {
   return (
     <div className="space-y-6">
+      <SEOHead title="Publicações - Admin" description="Painel administrativo" noindex={true} />
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Publicações</h1>
       </div>

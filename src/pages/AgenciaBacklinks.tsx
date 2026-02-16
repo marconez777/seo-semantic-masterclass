@@ -357,8 +357,8 @@ const AgenciaBacklinks = () => {
           <Breadcrumbs
             className="mb-3"
             items={[
-              { name: 'Início', url: '/' },
-              { name: 'Agência de Backlinks', url: '/agencia-de-backlinks' },
+              { name: 'Início', url: 'https://mkart.com.br/' },
+              { name: 'Agência de Backlinks', url: 'https://mkart.com.br/agencia-de-backlinks' },
             ]}
           />
           <h1 className="text-4xl font-bold mb-6">Agencia de Backlinks de Qualidade</h1>
