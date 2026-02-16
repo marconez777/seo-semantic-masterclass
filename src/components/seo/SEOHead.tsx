@@ -56,13 +56,6 @@ const SEOHead = ({
       
       {/* Additional SEO */}
       <meta name="format-detection" content="telephone=no" />
-      <meta name="theme-color" content="#0066ff" />
-      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-      
-      {/* Preload critical resources */}
-      <link rel="preconnect" href="https://fonts.googleapis.com" />
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-      <link rel="dns-prefetch" href="https://mkart.com.br" />
     </Helmet>
   );
 };

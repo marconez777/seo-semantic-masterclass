@@ -20,6 +20,7 @@ const Index = () => {
     logo: "https://mkart.com.br/LOGOMK.png",
     contactPoint: {
       "@type": "ContactPoint",
+      telephone: "+55 11 98915-1997",
       contactType: "Customer Service",
       availableLanguage: "Portuguese"
     },
