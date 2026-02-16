@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { Heart, ShoppingCart, Check } from "lucide-react";
@@ -42,6 +43,8 @@ const getCategoryBadgeClass = (category: string) => {
 export default function BacklinkTableRow({ item, onBuy, shouldBlur = false, isAuthenticated = true }: { item: BacklinkItem; onBuy?: (b: BacklinkItem) => void; shouldBlur?: boolean; isAuthenticated?: boolean }) {
   const [favId, setFavId] = useState<string | null>(null);
   const { addItem, isInCart, removeItem } = useCart();
+  const navigate = useNavigate();
+  const location = useLocation();
   const inCart = isInCart(item.id);
 
   useEffect(() => {
@@ -86,6 +89,10 @@ export default function BacklinkTableRow({ item, onBuy, shouldBlur = false, isAu
   };
 
   const handleAddToCart = () => {
+    if (!isAuthenticated) {
+      navigate('/auth', { state: { from: location.pathname } });
+      return;
+    }
     if (inCart) {
       removeItem(item.id);
     } else {
