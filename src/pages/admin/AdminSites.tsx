@@ -2,6 +2,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import AdminBacklinksImport from "@/components/admin/AdminBacklinksImport";
 import AdminBacklinksManager from "@/components/admin/AdminBacklinksManager";
 import AdminCategorizer from "@/components/admin/AdminCategorizer";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AdminSites() {
   return (
@@ -14,20 +15,26 @@ export default function AdminSites() {
         noindex={true}
       />
 
-      <div className="space-y-8">
-        <h2 className="text-2xl font-bold">Gerenciar Sites</h2>
+      <div className="space-y-6">
+        <Tabs defaultValue="sites">
+          <TabsList>
+            <TabsTrigger value="sites">Sites</TabsTrigger>
+            <TabsTrigger value="importar">Importar</TabsTrigger>
+            <TabsTrigger value="categorizar">Categorizar</TabsTrigger>
+          </TabsList>
 
-        <section className="space-y-4">
-          <AdminCategorizer />
-        </section>
-        
-        <section className="space-y-4">
-          <AdminBacklinksImport />
-        </section>
+          <TabsContent value="sites">
+            <AdminBacklinksManager />
+          </TabsContent>
 
-        <section className="space-y-4">
-          <AdminBacklinksManager />
-        </section>
+          <TabsContent value="importar">
+            <AdminBacklinksImport />
+          </TabsContent>
+
+          <TabsContent value="categorizar">
+            <AdminCategorizer />
+          </TabsContent>
+        </Tabs>
       </div>
     </>
   );

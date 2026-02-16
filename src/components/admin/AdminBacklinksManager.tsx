@@ -6,8 +6,10 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
 import { OFFICIAL_CATEGORIES } from "@/lib/categories";
 import { ExternalLink } from "lucide-react";
+import AdminBacklinksFilters from "./AdminBacklinksFilters";
+import AdminBacklinksTableRow from "./AdminBacklinksTableRow";
 
-interface Backlink {
+export interface Backlink {
   id: string;
   created_at: string | null;
   updated_at: string | null;
@@ -23,7 +25,7 @@ interface Backlink {
   observacoes: string | null;
 }
 
-type EditData = {
+export type EditData = {
   domain: string;
   category: string;
   dr: string;
@@ -32,6 +34,25 @@ type EditData = {
   price: string;
   status: string;
 };
+
+export interface AdminFilters {
+  category: string;
+  daRange: string;
+  trafficRange: string;
+  maxPrice: string;
+  status: string;
+}
+
+function parseRange(value: string): [number, number] | null {
+  if (!value || value === "todos") return null;
+  if (value === "100000+") return [100000, Infinity];
+  const parts = value.split("-");
+  if (parts.length !== 2) return null;
+  const min = Number(parts[0]);
+  const max = Number(parts[1]);
+  if (Number.isNaN(min) || Number.isNaN(max)) return null;
+  return [min, max];
+}
 
 export default function AdminBacklinksManager() {
   const [q, setQ] = useState("");
@@ -48,10 +69,21 @@ export default function AdminBacklinksManager() {
   const [editData, setEditData] = useState<EditData | null>(null);
   const [saving, setSaving] = useState(false);
 
+  const [filters, setFilters] = useState<AdminFilters>({
+    category: "todos",
+    daRange: "todos",
+    trafficRange: "todos",
+    maxPrice: "",
+    status: "todos",
+  });
+
   useEffect(() => {
     const t = window.setTimeout(() => { setDebouncedQ(q.trim()); setPage(0); }, 300);
     return () => window.clearTimeout(t);
   }, [q]);
+
+  // Reset page when filters change
+  useEffect(() => { setPage(0); }, [filters]);
 
   async function fetchRows(term: string, pageNum: number) {
     setLoading(true);
@@ -66,12 +98,33 @@ export default function AdminBacklinksManager() {
         .range(from, to);
 
       if (term) {
-        query = supabase
-          .from("backlinks")
-          .select("*", { count: "exact" })
-          .or(`domain.ilike.%${term}%,url.ilike.%${term}%`)
-          .order("created_at", { ascending: false })
-          .range(from, to);
+        query = query.or(`domain.ilike.%${term}%,url.ilike.%${term}%`);
+      }
+
+      // Apply filters
+      if (filters.category !== "todos") {
+        query = query.eq("category", filters.category);
+      }
+
+      const daRange = parseRange(filters.daRange);
+      if (daRange) {
+        query = query.gte("da", daRange[0]);
+        if (daRange[1] !== Infinity) query = query.lte("da", daRange[1]);
+      }
+
+      const trafficRange = parseRange(filters.trafficRange);
+      if (trafficRange) {
+        query = query.gte("traffic", trafficRange[0]);
+        if (trafficRange[1] !== Infinity) query = query.lte("traffic", trafficRange[1]);
+      }
+
+      if (filters.maxPrice) {
+        const price = Number(filters.maxPrice);
+        if (!Number.isNaN(price)) query = query.lte("price", price);
+      }
+
+      if (filters.status !== "todos") {
+        query = query.eq("status", filters.status);
       }
 
       const { data, error, count } = await query;
@@ -89,7 +142,7 @@ export default function AdminBacklinksManager() {
   useEffect(() => {
     fetchRows(debouncedQ, page);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [debouncedQ, page]);
+  }, [debouncedQ, page, filters]);
 
   const totalPages = totalCount != null ? Math.ceil(totalCount / PAGE_SIZE) : 0;
   const countText = useMemo(() => {
@@ -188,27 +241,25 @@ export default function AdminBacklinksManager() {
     }
   }
 
-  const isEditing = (id: string) => editingId === id;
-
   return (
-    <section className="space-y-4">
+    <section className="space-y-4 mt-4">
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <h2 className="text-xl font-semibold">Gerenciar Sites</h2>
         <div className="flex items-center gap-2 ml-auto">
-          <Input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar site (domínio ou URL)…"
-            className="w-72"
-          />
-          <Button variant="secondary" onClick={() => fetchRows(debouncedQ, page)} disabled={loading}>
-            Buscar
-          </Button>
           <Button variant="destructive" onClick={handleDeleteAll} disabled={deletingAll || loading}>
             {deletingAll ? "Excluindo…" : "Excluir todos os sites"}
           </Button>
         </div>
       </div>
+
+      <AdminBacklinksFilters
+        q={q}
+        setQ={setQ}
+        filters={filters}
+        setFilters={setFilters}
+        onRefresh={() => fetchRows(debouncedQ, page)}
+        loading={loading}
+      />
 
       <div className="text-sm text-muted-foreground">{countText}</div>
 
@@ -235,138 +286,21 @@ export default function AdminBacklinksManager() {
                 <td className="p-4" colSpan={7}>Nenhum site encontrado.</td>
               </tr>
             ) : (
-              rows.map((b) =>
-                isEditing(b.id) && editData ? (
-                  <tr key={b.id} className="border-t align-top bg-muted/30">
-                    <td className="p-2">
-                      <Input
-                        value={editData.domain}
-                        onChange={(e) => setEditData({ ...editData, domain: e.target.value })}
-                        placeholder="Domínio"
-                        className="h-8 text-xs"
-                      />
-                    </td>
-                    <td className="p-2">
-                      <select
-                        value={editData.category}
-                        onChange={(e) => setEditData({ ...editData, category: e.target.value })}
-                        className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs"
-                      >
-                        <option value="">— Sem categoria —</option>
-                        {OFFICIAL_CATEGORIES.map((c) => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
-                      </select>
-                    </td>
-                    <td className="p-2">
-                      <div className="flex gap-1">
-                        <Input
-                          type="number"
-                          value={editData.dr}
-                          onChange={(e) => setEditData({ ...editData, dr: e.target.value })}
-                          placeholder="DR"
-                          className="w-16 h-8 text-xs"
-                        />
-                        <Input
-                          type="number"
-                          value={editData.da}
-                          onChange={(e) => setEditData({ ...editData, da: e.target.value })}
-                          placeholder="DA"
-                          className="w-16 h-8 text-xs"
-                        />
-                      </div>
-                    </td>
-                    <td className="p-2">
-                      <Input
-                        type="number"
-                        value={editData.traffic}
-                        onChange={(e) => setEditData({ ...editData, traffic: e.target.value })}
-                        placeholder="Tráfego"
-                        className="w-24 h-8 text-xs"
-                      />
-                    </td>
-                    <td className="p-2">
-                      <Input
-                        type="number"
-                        value={editData.price}
-                        onChange={(e) => setEditData({ ...editData, price: e.target.value })}
-                        placeholder="Preço (R$)"
-                        className="w-24 h-8 text-xs"
-                      />
-                    </td>
-                    <td className="p-2">
-                      <select
-                        value={editData.status}
-                        onChange={(e) => setEditData({ ...editData, status: e.target.value })}
-                        className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs"
-                      >
-                        <option value="ativo">Ativo</option>
-                        <option value="inativo">Inativo</option>
-                      </select>
-                    </td>
-                    <td className="p-2">
-                      <div className="flex items-center gap-1">
-                        <Button size="sm" onClick={handleSave} disabled={saving} className="h-8 text-xs">
-                          {saving ? "Salvando…" : "Salvar"}
-                        </Button>
-                        <Button size="sm" variant="outline" onClick={cancelEditing} disabled={saving} className="h-8 text-xs">
-                          Cancelar
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  <tr key={b.id} className="border-t align-top">
-                    <td className="p-3">
-                      <div className="flex items-center gap-1">
-                        <span className="font-medium">{b.domain ?? "—"}</span>
-                        <a
-                          href={b.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-muted-foreground hover:text-primary"
-                        >
-                          <ExternalLink size={14} />
-                        </a>
-                      </div>
-                    </td>
-                    <td className="p-3">{b.category ?? "—"}</td>
-                    <td className="p-3">{[b.dr ?? "—", b.da ?? "—"].join("/")}</td>
-                    <td className="p-3">{b.traffic?.toLocaleString("pt-BR") ?? "—"}</td>
-                    <td className="p-3">
-                      {b.price != null
-                        ? b.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-                        : "—"}
-                    </td>
-                    <td className="p-3">
-                      {b.status === "ativo" ? (
-                        <Badge className="bg-green-600 text-white hover:bg-green-600">Ativo</Badge>
-                      ) : (
-                        <Badge variant="outline">{b.status ?? "Inativo"}</Badge>
-                      )}
-                    </td>
-                    <td className="p-3">
-                      <div className="flex items-center gap-2">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => startEditing(b)}
-                        >
-                          Editar
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="destructive"
-                          onClick={() => handleDeleteOne(b.id)}
-                          disabled={deletingId === b.id}
-                        >
-                          {deletingId === b.id ? "Excluindo…" : "Excluir"}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                )
-              )
+              rows.map((b) => (
+                <AdminBacklinksTableRow
+                  key={b.id}
+                  backlink={b}
+                  isEditing={editingId === b.id}
+                  editData={editingId === b.id ? editData : null}
+                  setEditData={setEditData}
+                  saving={saving}
+                  deletingId={deletingId}
+                  onStartEditing={startEditing}
+                  onCancelEditing={cancelEditing}
+                  onSave={handleSave}
+                  onDelete={handleDeleteOne}
+                />
+              ))
             )}
           </tbody>
         </table>
