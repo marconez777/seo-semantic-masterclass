@@ -1,38 +1,61 @@
 
 
-## Separar o Dashboard em 2 Paineis: Loja vs Consultoria
+## Personalizar o E-mail de Ativacao no Padrao dos Outros E-mails Transacionais
 
-### Resumo
-Atualmente o dashboard mostra todas as abas para todos os usuarios, com a consultoria aparecendo como secao extra. A mudanca vai criar dois modos completamente separados:
+### O que sera feito
 
-- **Painel Loja**: Meus Pedidos, Favoritos, Rastreio de Palavras, Perfil
-- **Painel Consultoria**: Palavras, Paginas, Backlinks, Blog, Tarefas, Perfil
+O template de ativacao ja tem a estrutura base (logo, heading, botao, footer), mas falta o padrao visual dos outros e-mails transacionais: secao de status com icone/cor, secao de informacoes com background cinza, e separador `Hr`.
 
-O tipo de painel e determinado automaticamente: se o usuario tem registro ativo em `consulting_clients`, ve o painel de consultoria. Caso contrario, ve o painel da loja.
+### Alteracoes no template
 
-### O que muda para o usuario
+**Arquivo:** `supabase/functions/send-activation-email/_templates/activation-email.tsx`
 
-- **Clientes da loja** continuam vendo exatamente o que veem hoje (pedidos, favoritos, etc.)
-- **Clientes de consultoria** (como marco_next7) veem apenas as abas de consultoria + perfil, sem pedidos/favoritos/keywords
-- A sidebar muda completamente conforme o tipo de usuario
+1. **Adicionar secao de status estilizada** (como no order-status-email): caixa com borda azul, fundo azul claro, icone de boas-vindas, e texto "Conta criada com sucesso"
 
-### Detalhes Tecnicos
+2. **Substituir a lista de bullets solta** por uma secao `infoSection` com fundo `#f8fafc` e border-radius (mesmo padrao do `orderDetails` no payment-email e `infoSection` no order-status)
 
-**Arquivo alterado:** `src/pages/Dashboard.tsx`
+3. **Remover a secao CTA secundaria** ("Pronto para impulsionar seu SEO?" com botao verde) - isso nao existe nos outros templates e destoa do padrao
 
-1. **Logica de deteccao**: Ja existe a query em `consulting_clients`. Adicionar um estado `isConsultingClient` (boolean) e um `loading` para evitar flash de conteudo errado.
+4. **Adicionar import do `Hr`** para separadores visuais, como no payment-email
 
-2. **Sidebar condicional**:
-   - Se `isConsultingClient === true`: mostrar sidebar com abas Palavras, Paginas, Backlinks, Blog, Tarefas, Perfil
-   - Se `isConsultingClient === false`: mostrar sidebar atual (Pedidos, Favoritos, Rastreio, Perfil)
-   - A secao "Links" (Admin, Loja, Site) permanece para ambos
+5. **Padronizar os estilos** para usar exatamente os mesmos valores dos outros templates:
+   - `button` com `padding: '14px 28px'` (os outros usam isso, o activation usa `12px 24px`)
+   - Adicionar estilos `statusSection`, `statusIcon`, `infoSection`, `infoTitle`, `infoText` seguindo o order-status-email
 
-3. **Tab default**: 
-   - Consultoria: `tab` inicia como `"palavras"`
-   - Loja: `tab` inicia como `"pedidos"` (como ja esta)
+6. **Footer**: manter o mesmo padrao dos outros (links MK Art SEO, Contato, e um terceiro relevante)
 
-4. **Conteudo principal**: renderizar os componentes de consultoria diretamente (sem sub-Tabs), cada aba do sidebar mapeia para um componente
+### Estrutura final do e-mail
 
-5. **Label do header**: atualizar o mapeamento `tabLabel` para incluir as novas abas de consultoria
+```text
+[Logo MK Art SEO]
 
-Nenhuma alteracao no banco de dados e necessaria - a deteccao ja funciona pela tabela `consulting_clients`.
+Bem-vindo(a) a MK Art SEO!
+
+Ola {nome},
+Obrigado por se cadastrar...
+
++----------------------------------+
+|          🎉                       |
+|   Conta Criada com Sucesso       |
+|   Clique abaixo para ativar      |
++----------------------------------+
+
+    [ Ativar Minha Conta ]
+
++----------------------------------+
+| Apos ativar, voce tera acesso a: |
+| - Marketplace com centenas...    |
+| - Backlinks de alta autoridade   |
+| - Relatorios de entrega          |
+| - Suporte especializado          |
++----------------------------------+
+
+Se voce nao se cadastrou...
+
+MK Art SEO • Contato • Comprar Backlinks
+```
+
+### Arquivo da Edge Function
+
+O `index.ts` nao precisa de alteracao - apenas o template `.tsx` sera atualizado.
+
