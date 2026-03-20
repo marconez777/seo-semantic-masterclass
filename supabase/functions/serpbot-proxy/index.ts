@@ -8,6 +8,36 @@ const corsHeaders = {
 
 const SERPBOT_API = "https://api.serprobot.com/v1/api.php";
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function extractPosition(data: any): number | null {
+  const pos = data?.pos ?? data?.position ?? null;
+  if (pos === null || pos === undefined || pos === 0 || pos === "0") return null;
+  return typeof pos === "string" ? parseInt(pos, 10) : pos;
+}
+
+async function fetchWithRetry(url: string, keyword: string): Promise<{ position: number | null; rawResponse: any }> {
+  const res = await fetch(url);
+  const data = await res.json();
+  console.log(`[SerpBot] Keyword: "${keyword}" | Response:`, JSON.stringify(data));
+
+  let position = extractPosition(data);
+
+  if (position === null) {
+    console.log(`[SerpBot] Retry for "${keyword}" after 3s...`);
+    await delay(3000);
+    const res2 = await fetch(url);
+    const data2 = await res2.json();
+    console.log(`[SerpBot] Retry response for "${keyword}":`, JSON.stringify(data2));
+    position = extractPosition(data2);
+    return { position, rawResponse: data2 };
+  }
+
+  return { position, rawResponse: data };
+}
+
 function getCurrentMonth(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
