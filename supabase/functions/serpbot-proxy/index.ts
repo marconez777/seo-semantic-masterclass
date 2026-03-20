@@ -18,24 +18,28 @@ function extractPosition(data: any): number | null {
   return typeof pos === "string" ? parseInt(pos, 10) : pos;
 }
 
-async function fetchWithRetry(url: string, keyword: string): Promise<{ position: number | null; rawResponse: any }> {
-  const res = await fetch(url);
-  const data = await res.json();
-  console.log(`[SerpBot] Keyword: "${keyword}" | Response:`, JSON.stringify(data));
+async function fetchWithRetry(url: string, keyword: string, maxRetries = 2): Promise<{ position: number | null; rawResponse: any }> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    const res = await fetch(url);
+    const httpStatus = res.status;
+    const data = await res.json();
+    console.log(`[SerpBot] Attempt ${attempt + 1} | Keyword: "${keyword}" | HTTP: ${httpStatus} | Response:`, JSON.stringify(data));
 
-  let position = extractPosition(data);
+    const position = extractPosition(data);
 
-  if (position === null) {
-    console.log(`[SerpBot] Retry for "${keyword}" after 3s...`);
-    await delay(3000);
-    const res2 = await fetch(url);
-    const data2 = await res2.json();
-    console.log(`[SerpBot] Retry response for "${keyword}":`, JSON.stringify(data2));
-    position = extractPosition(data2);
-    return { position, rawResponse: data2 };
+    if (position !== null) {
+      return { position, rawResponse: data };
+    }
+
+    if (attempt < maxRetries) {
+      const retryDelay = 5000;
+      console.log(`[SerpBot] Retry ${attempt + 1}/${maxRetries} for "${keyword}" after ${retryDelay / 1000}s...`);
+      await delay(retryDelay);
+    } else {
+      return { position: null, rawResponse: data };
+    }
   }
-
-  return { position, rawResponse: data };
+  return { position: null, rawResponse: null };
 }
 
 function getCurrentMonth(): string {
@@ -188,7 +192,7 @@ Deno.serve(async (req) => {
           } catch (e) {
             allResults.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
           }
-          await delay(1500);
+          await delay(3000);
         }
       }
 
@@ -232,7 +236,7 @@ Deno.serve(async (req) => {
           } catch (e) {
             allResults.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
           }
-          await delay(1500);
+          await delay(3000);
         }
       }
 
@@ -350,7 +354,7 @@ Deno.serve(async (req) => {
         } catch (e) {
           results.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
         }
-        await delay(1500);
+        await delay(3000);
       }
 
       return new Response(JSON.stringify({ results }), {
@@ -358,7 +362,97 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Action: check_consulting_client (admin only, batch check consulting keywords)
+    // Action: check_consulting_batch (batch check consulting keywords with offset/limit)
+    if (action === "check_consulting_batch") {
+      const { client_id, offset = 0, batch_size = 10 } = params;
+      if (!client_id) {
+        return new Response(JSON.stringify({ error: "client_id required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const supabaseAdmin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+
+      // Verify user is admin
+      const { data: roleData } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!roleData) {
+        return new Response(JSON.stringify({ error: "Forbidden - admin only" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: client, error: clErr } = await supabaseAdmin
+        .from("consulting_clients")
+        .select("*")
+        .eq("id", client_id)
+        .single();
+
+      if (clErr || !client) {
+        return new Response(JSON.stringify({ error: "Client not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Get total count
+      const { count: total } = await supabaseAdmin
+        .from("consulting_keywords")
+        .select("id", { count: "exact", head: true })
+        .eq("client_id", client_id);
+
+      // Get batch
+      const { data: keywords, error: kwErr } = await supabaseAdmin
+        .from("consulting_keywords")
+        .select("*")
+        .eq("client_id", client_id)
+        .order("id", { ascending: true })
+        .range(offset, offset + batch_size - 1);
+
+      if (kwErr) {
+        return new Response(JSON.stringify({ error: "Failed to fetch keywords" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!keywords || keywords.length === 0) {
+        return new Response(JSON.stringify({ results: [], total: total || 0, offset, has_more: false }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const results = [];
+
+      for (const kw of keywords) {
+        try {
+          const result = await checkConsultingKeyword(apiKey, kw, client.domain, supabaseAdmin);
+          results.push(result);
+        } catch (e) {
+          results.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
+        }
+        await delay(3000);
+      }
+
+      const nextOffset = offset + keywords.length;
+      const hasMore = nextOffset < (total || 0);
+
+      return new Response(JSON.stringify({ results, total: total || 0, offset, has_more: hasMore }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Action: check_consulting_client (kept for backward compat but redirects to batch)
     if (action === "check_consulting_client") {
       const { client_id } = params;
       if (!client_id) {
@@ -368,13 +462,11 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Use service role to bypass RLS for admin action
       const supabaseAdmin = createClient(
         Deno.env.get("SUPABASE_URL")!,
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
       );
 
-      // Verify user is admin
       const { data: roleData } = await supabaseAdmin
         .from("user_roles")
         .select("role")
@@ -429,7 +521,7 @@ Deno.serve(async (req) => {
         } catch (e) {
           results.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
         }
-        await delay(1500);
+        await delay(3000);
       }
 
       return new Response(JSON.stringify({ results }), {

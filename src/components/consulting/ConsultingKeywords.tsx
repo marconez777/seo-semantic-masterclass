@@ -100,37 +100,62 @@ export function ConsultingKeywords({ clientId, readOnly }: Props) {
 
   const lastCheckedAt = keywords.find(k => k.last_checked_at)?.last_checked_at;
 
+  const [checkProgress, setCheckProgress] = useState("");
+
   const handleCheckPositions = async () => {
     setChecking(true);
-    toast({ title: "Verificação iniciada", description: "As posições estão sendo verificadas em segundo plano. Você pode navegar livremente." });
-    
-    // Fire-and-forget: trigger the edge function without blocking
+    toast({ title: "Verificação iniciada", description: "Processando em lotes. Você pode navegar livremente." });
+
     const session = (await supabase.auth.getSession()).data.session;
     const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/serpbot-proxy`;
-    
-    fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${session?.access_token}`,
-        "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-      },
-      body: JSON.stringify({ action: "check_consulting_client", client_id: clientId }),
-      keepalive: true,
-    }).then(async (res) => {
-      const data = await res.json();
-      if (res.ok) {
-        toast({ title: "Posições atualizadas", description: `${data?.results?.length || 0} palavras verificadas.` });
+    const batchSize = 10;
+    let offset = 0;
+    let totalChecked = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${session?.access_token}`,
+            "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+          },
+          body: JSON.stringify({ action: "check_consulting_batch", client_id: clientId, offset, batch_size: batchSize }),
+          keepalive: true,
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          toast({ title: "Erro", description: data?.error || "Falha ao verificar posições" });
+          break;
+        }
+
+        totalChecked += data?.results?.length || 0;
+        hasMore = data?.has_more || false;
+        const total = data?.total || totalChecked;
+        const batchNum = Math.floor(offset / batchSize) + 1;
+        const totalBatches = Math.ceil(total / batchSize);
+        setCheckProgress(`Lote ${batchNum}/${totalBatches} (${totalChecked}/${total})`);
+
+        // Refresh UI after each batch
         fetchKeywords();
         fetchSnapshots();
-      } else {
-        toast({ title: "Erro", description: data?.error || "Falha ao verificar posições" });
+
+        offset += batchSize;
+      } catch {
+        // If fetch fails (e.g. tab switch), stop loop silently
+        break;
       }
-    }).catch(() => {
-      // Request sent successfully in background, even if we can't read the response
-    }).finally(() => {
-      setChecking(false);
-    });
+    }
+
+    toast({ title: "Verificação concluída", description: `${totalChecked} palavras verificadas.` });
+    setChecking(false);
+    setCheckProgress("");
+    fetchKeywords();
+    fetchSnapshots();
   };
 
   const handleAdd = async () => {
@@ -227,7 +252,7 @@ export function ConsultingKeywords({ clientId, readOnly }: Props) {
             <>
               <Button variant="outline" size="sm" onClick={handleCheckPositions} disabled={checking}>
                 <RefreshCw className={`h-4 w-4 mr-1 ${checking ? "animate-spin" : ""}`} />
-                {checking ? "Verificando..." : "Verificar Posições"}
+                {checking ? (checkProgress || "Verificando...") : "Verificar Posições"}
               </Button>
               <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
                 <DialogTrigger asChild>
