@@ -1,67 +1,34 @@
 
 
-## Adicionar Colunas Mensais de Posicao na Aba Palavras (Consultoria)
+## Corrigir Detecção de Posições no Serp Bot
 
-### Resumo
-Transformar a aba "Palavras" da consultoria para incluir colunas dinamicas por mes com posicoes de cada palavra-chave no Google, usando a API do Serp Bot. Sem limitacoes de palavras ou projetos. No primeiro dia de cada mes, um cron job automatico verifica todas as palavras de todos os clientes de consultoria.
+### Problema
+A API do Serp Bot não está retornando posições para keywords que estão claramente na primeira página. Causas identificadas:
 
-### Banco de dados
+1. **Sem delay entre requisições** — todas as keywords são verificadas em rajada, causando rate-limiting ou respostas vazias da API
+2. **Sem logging** — não há como ver o que a API realmente retorna, dificultando o diagnóstico
+3. **Sem retry** — se uma requisição falha ou retorna vazio, a keyword é marcada como "não encontrada" permanentemente
 
-**Nova tabela: `consulting_keyword_snapshots`**
-```text
-id (uuid PK)
-keyword_id (uuid FK -> consulting_keywords.id ON DELETE CASCADE)
-month (date) -- formato YYYY-MM-01
-position (integer nullable)
-checked_at (timestamptz)
-UNIQUE(keyword_id, month)
-```
+### Alterações
 
-RLS:
-- Admin ALL via `has_role()`
-- Clientes SELECT via join `consulting_keywords -> consulting_clients.user_id`
+**Arquivo:** `supabase/functions/serpbot-proxy/index.ts`
 
-**Alteracao na tabela `consulting_keywords`:**
-- Adicionar colunas: `current_position integer`, `previous_position integer`, `best_position integer`, `last_checked_at timestamptz`
+1. **Adicionar delay de 1.5 segundos entre cada requisição** — evita rate-limiting da API do Serp Bot
 
-### Edge Function
+2. **Adicionar logging detalhado** — logar a URL chamada e a resposta completa da API para cada keyword, permitindo diagnosticar o que está acontecendo
 
-**Atualizar `serpbot-proxy/index.ts`** para adicionar nova action: `check_consulting_client`
-- Recebe `client_id`
-- Busca o `consulting_client` (domain) com service role
-- Busca todas as `consulting_keywords` do cliente
-- Para cada keyword, chama a API do Serp Bot com o dominio do cliente
-- Atualiza `current_position`, `previous_position`, `best_position`, `last_checked_at`
-- Insere/upsert em `consulting_keyword_snapshots`
-- Sem limite de palavras
+3. **Adicionar retry automático** — se a API retornar `pos` como `null`/`undefined` ou um erro, tentar novamente após 3 segundos (máximo 1 retry)
 
-**Nova action: `cron_consulting_check`** (chamada pelo cron)
-- Busca todos os `consulting_clients` ativos
-- Para cada um, busca as keywords e verifica posicoes
-- Salva snapshots
+4. **Verificar campo correto da resposta** — a API pode retornar `data.position` em vez de `data.pos` dependendo da versão; logar toda a resposta para confirmar
 
-### Cron Job
+5. **Retornar a resposta raw da API nos resultados** — para que no frontend você possa ver exatamente o que a API retornou para cada keyword
 
-Agendar via `pg_cron` + `pg_net` para executar no dia 1 de cada mes:
-```sql
-cron.schedule('consulting-monthly-check', '0 10 1 * *', ...)
-```
-Chama `serpbot-proxy` com action `cron_consulting_check`.
+### Aplicar a mesma correção para ambas as funções:
+- `checkConsultingKeyword` (consultoria)
+- `checkAndUpdateKeyword` (loja/dashboard)
 
-### Frontend
-
-**Atualizar `ConsultingKeywords.tsx`:**
-- Buscar `consulting_keyword_snapshots` para as keywords do cliente
-- Calcular meses unicos e ordenados
-- Adicionar colunas dinamicas por mes (mesmo padrao do `KeywordTracker`)
-- Cores semanticas: verde (subiu), laranja (desceu), neutro
-- Botao "Verificar Posicoes" (admin only, nao readOnly) que chama `check_consulting_client`
-- Mostrar data da ultima checagem
-- Manter todas as funcionalidades existentes (add, edit, delete, bulk import)
-
-### Arquivos a criar/editar
-1. Migracao SQL: nova tabela + colunas na `consulting_keywords` + RLS
-2. `supabase/functions/serpbot-proxy/index.ts`: novas actions
-3. `src/components/consulting/ConsultingKeywords.tsx`: colunas mensais + botao verificar
-4. Cron job via insert SQL
+### Resultado esperado
+- Keywords na primeira página passarão a ser detectadas corretamente
+- Logs permitirão diagnosticar qualquer keyword que ainda falhe
+- O delay evita que a API ignore requisições por excesso de chamadas
 
