@@ -102,19 +102,35 @@ export function ConsultingKeywords({ clientId, readOnly }: Props) {
 
   const handleCheckPositions = async () => {
     setChecking(true);
-    try {
-      const { data, error } = await supabase.functions.invoke("serpbot-proxy", {
-        body: { action: "check_consulting_client", client_id: clientId },
-      });
-      if (error) throw error;
-      toast({ title: "Posições atualizadas", description: `${data?.results?.length || 0} palavras verificadas.` });
-      fetchKeywords();
-      fetchSnapshots();
-    } catch (e: any) {
-      toast({ title: "Erro", description: e.message || "Falha ao verificar posições" });
-    } finally {
+    toast({ title: "Verificação iniciada", description: "As posições estão sendo verificadas em segundo plano. Você pode navegar livremente." });
+    
+    // Fire-and-forget: trigger the edge function without blocking
+    const session = (await supabase.auth.getSession()).data.session;
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/serpbot-proxy`;
+    
+    fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session?.access_token}`,
+        "apikey": import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({ action: "check_consulting_client", client_id: clientId }),
+      keepalive: true,
+    }).then(async (res) => {
+      const data = await res.json();
+      if (res.ok) {
+        toast({ title: "Posições atualizadas", description: `${data?.results?.length || 0} palavras verificadas.` });
+        fetchKeywords();
+        fetchSnapshots();
+      } else {
+        toast({ title: "Erro", description: data?.error || "Falha ao verificar posições" });
+      }
+    }).catch(() => {
+      // Request sent successfully in background, even if we can't read the response
+    }).finally(() => {
       setChecking(false);
-    }
+    });
   };
 
   const handleAdd = async () => {
