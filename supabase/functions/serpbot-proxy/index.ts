@@ -350,6 +350,7 @@ Deno.serve(async (req) => {
         } catch (e) {
           results.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
         }
+        await delay(1500);
       }
 
       return new Response(JSON.stringify({ results }), {
