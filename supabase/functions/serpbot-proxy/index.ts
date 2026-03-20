@@ -71,6 +71,52 @@ async function checkAndUpdateKeyword(
   return { keyword_id: kw.id, keyword: kw.keyword, position, previous_position: previousPosition };
 }
 
+async function checkConsultingKeyword(
+  apiKey: string,
+  kw: any,
+  domain: string,
+  supabaseAdmin: any
+) {
+  const url = `${SERPBOT_API}?api_key=${apiKey}&action=rank_check&keyword=${encodeURIComponent(kw.keyword)}&target_url=${encodeURIComponent(domain)}&region=www.google.com.br&device=desktop`;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  const position = data?.pos ?? null;
+  const previousPosition = kw.current_position;
+  const bestPosition =
+    position !== null
+      ? kw.best_position !== null
+        ? Math.min(kw.best_position, position)
+        : position
+      : kw.best_position;
+
+  const month = getCurrentMonth();
+
+  await supabaseAdmin
+    .from("consulting_keywords")
+    .update({
+      current_position: position,
+      previous_position: previousPosition,
+      best_position: bestPosition,
+      last_checked_at: new Date().toISOString(),
+    })
+    .eq("id", kw.id);
+
+  if (position !== null) {
+    await supabaseAdmin.from("consulting_keyword_snapshots").upsert(
+      {
+        keyword_id: kw.id,
+        month,
+        position,
+        checked_at: new Date().toISOString(),
+      },
+      { onConflict: "keyword_id,month" }
+    );
+  }
+
+  return { keyword_id: kw.id, keyword: kw.keyword, position, previous_position: previousPosition };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
@@ -80,7 +126,8 @@ Deno.serve(async (req) => {
     const { action, ...params } = await req.json();
     const apiKey = Deno.env.get("SERPBOT_API_KEY")!;
 
-    // Action: cron_monthly_check (no auth required, uses service role)
+    // === CRON ACTIONS (no auth required, uses service role) ===
+
     if (action === "cron_monthly_check") {
       const supabaseAdmin = createClient(
         Deno.env.get("SUPABASE_URL")!,
@@ -123,7 +170,51 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Auth required for other actions
+    if (action === "cron_consulting_check") {
+      const supabaseAdmin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+
+      const { data: clients, error: clErr } = await supabaseAdmin
+        .from("consulting_clients")
+        .select("*")
+        .eq("status", "ativo");
+
+      if (clErr || !clients) {
+        return new Response(JSON.stringify({ error: "Failed to fetch consulting clients" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const allResults = [];
+
+      for (const client of clients) {
+        const { data: keywords } = await supabaseAdmin
+          .from("consulting_keywords")
+          .select("*")
+          .eq("client_id", client.id);
+
+        if (!keywords || keywords.length === 0) continue;
+
+        for (const kw of keywords) {
+          try {
+            const result = await checkConsultingKeyword(apiKey, kw, client.domain, supabaseAdmin);
+            allResults.push(result);
+          } catch (e) {
+            allResults.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
+          }
+        }
+      }
+
+      return new Response(JSON.stringify({ results: allResults }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === AUTH REQUIRED ACTIONS ===
+
     const authHeader = req.headers.get("Authorization");
     if (!authHeader?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -227,6 +318,84 @@ Deno.serve(async (req) => {
       for (const kw of keywords) {
         try {
           const result = await checkAndUpdateKeyword(apiKey, kw, project, supabase);
+          results.push(result);
+        } catch (e) {
+          results.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
+        }
+      }
+
+      return new Response(JSON.stringify({ results }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // Action: check_consulting_client (admin only, batch check consulting keywords)
+    if (action === "check_consulting_client") {
+      const { client_id } = params;
+      if (!client_id) {
+        return new Response(JSON.stringify({ error: "client_id required" }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Use service role to bypass RLS for admin action
+      const supabaseAdmin = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+
+      // Verify user is admin
+      const { data: roleData } = await supabaseAdmin
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userId)
+        .eq("role", "admin")
+        .maybeSingle();
+
+      if (!roleData) {
+        return new Response(JSON.stringify({ error: "Forbidden - admin only" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: client, error: clErr } = await supabaseAdmin
+        .from("consulting_clients")
+        .select("*")
+        .eq("id", client_id)
+        .single();
+
+      if (clErr || !client) {
+        return new Response(JSON.stringify({ error: "Client not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: keywords, error: kwErr } = await supabaseAdmin
+        .from("consulting_keywords")
+        .select("*")
+        .eq("client_id", client_id);
+
+      if (kwErr) {
+        return new Response(JSON.stringify({ error: "Failed to fetch keywords" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      if (!keywords || keywords.length === 0) {
+        return new Response(JSON.stringify({ message: "No keywords to check", results: [] }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const results = [];
+
+      for (const kw of keywords) {
+        try {
+          const result = await checkConsultingKeyword(apiKey, kw, client.domain, supabaseAdmin);
           results.push(result);
         } catch (e) {
           results.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
