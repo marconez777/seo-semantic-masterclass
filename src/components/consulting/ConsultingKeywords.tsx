@@ -252,7 +252,7 @@ export function ConsultingKeywords({ clientId, readOnly }: Props) {
             <>
               <Button variant="outline" size="sm" onClick={handleCheckPositions} disabled={checking}>
                 <RefreshCw className={`h-4 w-4 mr-1 ${checking ? "animate-spin" : ""}`} />
-                {checking ? "Verificando..." : "Verificar Posições"}
+                {checking ? (checkProgress || "Verificando...") : "Verificar Posições"}
               </Button>
               <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
                 <DialogTrigger asChild>
