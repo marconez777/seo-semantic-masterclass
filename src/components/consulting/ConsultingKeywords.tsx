@@ -1,13 +1,14 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2, Upload, X, Check, Pencil } from "lucide-react";
+import { Plus, Trash2, Upload, X, Check, Pencil, RefreshCw } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 
 interface Keyword {
   id: string;
@@ -15,6 +16,16 @@ interface Keyword {
   volume: number;
   cpc: number;
   position: number;
+  current_position: number | null;
+  previous_position: number | null;
+  best_position: number | null;
+  last_checked_at: string | null;
+}
+
+interface Snapshot {
+  keyword_id: string;
+  month: string;
+  position: number | null;
 }
 
 interface Props {
@@ -22,10 +33,26 @@ interface Props {
   readOnly: boolean;
 }
 
+function formatMonthLabel(monthStr: string): string {
+  const d = new Date(monthStr + "T12:00:00");
+  const months = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+  return `${months[d.getMonth()]}/${String(d.getFullYear()).slice(2)}`;
+}
+
+function getPositionColor(position: number | null, prevPosition: number | null): string {
+  if (position === null) return "text-muted-foreground";
+  if (prevPosition === null) return "text-foreground font-medium";
+  if (position < prevPosition) return "text-green-600 font-semibold";
+  if (position > prevPosition) return "text-orange-500 font-semibold";
+  return "text-foreground font-medium";
+}
+
 export function ConsultingKeywords({ clientId, readOnly }: Props) {
   const { toast } = useToast();
   const [keywords, setKeywords] = useState<Keyword[]>([]);
+  const [snapshots, setSnapshots] = useState<Snapshot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [checking, setChecking] = useState(false);
   const [newKeyword, setNewKeyword] = useState("");
   const [newVolume, setNewVolume] = useState("");
   const [newCpc, setNewCpc] = useState("");
@@ -42,11 +69,53 @@ export function ConsultingKeywords({ clientId, readOnly }: Props) {
       .select("*")
       .eq("client_id", clientId)
       .order("position", { ascending: true });
-    setKeywords(data || []);
+    setKeywords((data as any[]) || []);
     setLoading(false);
   };
 
-  useEffect(() => { fetchKeywords(); }, [clientId]);
+  const fetchSnapshots = async () => {
+    const { data: kws } = await supabase
+      .from("consulting_keywords")
+      .select("id")
+      .eq("client_id", clientId);
+    if (!kws || kws.length === 0) { setSnapshots([]); return; }
+    const ids = kws.map(k => k.id);
+    const { data } = await supabase
+      .from("consulting_keyword_snapshots")
+      .select("keyword_id, month, position")
+      .in("keyword_id", ids)
+      .order("month", { ascending: true });
+    setSnapshots((data as any[]) || []);
+  };
+
+  useEffect(() => { fetchKeywords(); fetchSnapshots(); }, [clientId]);
+
+  // Derive unique sorted months
+  const months = [...new Set(snapshots.map(s => s.month))].sort();
+  const snapshotMap: Record<string, Record<string, number | null>> = {};
+  for (const s of snapshots) {
+    if (!snapshotMap[s.keyword_id]) snapshotMap[s.keyword_id] = {};
+    snapshotMap[s.keyword_id][s.month] = s.position;
+  }
+
+  const lastCheckedAt = keywords.find(k => k.last_checked_at)?.last_checked_at;
+
+  const handleCheckPositions = async () => {
+    setChecking(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("serpbot-proxy", {
+        body: { action: "check_consulting_client", client_id: clientId },
+      });
+      if (error) throw error;
+      toast({ title: "Posições atualizadas", description: `${data?.results?.length || 0} palavras verificadas.` });
+      fetchKeywords();
+      fetchSnapshots();
+    } catch (e: any) {
+      toast({ title: "Erro", description: e.message || "Falha ao verificar posições" });
+    } finally {
+      setChecking(false);
+    }
+  };
 
   const handleAdd = async () => {
     if (!newKeyword.trim()) return;
@@ -68,6 +137,7 @@ export function ConsultingKeywords({ clientId, readOnly }: Props) {
   const handleDelete = async (id: string) => {
     await supabase.from("consulting_keywords").delete().eq("id", id);
     fetchKeywords();
+    fetchSnapshots();
   };
 
   const startEdit = (kw: Keyword) => {
@@ -123,111 +193,149 @@ export function ConsultingKeywords({ clientId, readOnly }: Props) {
     }
   };
 
+  const fixedColCount = readOnly ? 4 : 5; // #, keyword, volume, cpc, [actions]
+
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg">Palavras-Chave ({keywords.length})</CardTitle>
-        {!readOnly && (
-          <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm">
-                <Upload className="h-4 w-4 mr-1" /> Importar em Lote
+      <CardHeader className="flex flex-row items-center justify-between gap-2 flex-wrap">
+        <div>
+          <CardTitle className="text-lg">Palavras-Chave ({keywords.length})</CardTitle>
+          {lastCheckedAt && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Última verificação: {new Date(lastCheckedAt).toLocaleDateString("pt-BR")}
+            </p>
+          )}
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {!readOnly && (
+            <>
+              <Button variant="outline" size="sm" onClick={handleCheckPositions} disabled={checking}>
+                <RefreshCw className={`h-4 w-4 mr-1 ${checking ? "animate-spin" : ""}`} />
+                {checking ? "Verificando..." : "Verificar Posições"}
               </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Importar Palavras-Chave em Lote</DialogTitle>
-              </DialogHeader>
-              <p className="text-sm text-muted-foreground">
-                Cole as palavras-chave, uma por linha. Formato: <code>palavra-chave TAB volume TAB cpc</code> ou <code>palavra-chave;volume;cpc</code>.
-                Se só colar a palavra, volume e CPC ficam zerados.
-              </p>
-              <Textarea
-                value={bulkText}
-                onChange={(e) => setBulkText(e.target.value)}
-                placeholder={"consultoria seo\t1200\t3.50\nbacklinks baratos\t800\t2.10"}
-                rows={10}
-              />
-              <Button onClick={handleBulkImport} disabled={bulkLoading || !bulkText.trim()}>
-                {bulkLoading ? "Importando..." : "Importar"}
-              </Button>
-            </DialogContent>
-          </Dialog>
-        )}
+              <Dialog open={bulkOpen} onOpenChange={setBulkOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Upload className="h-4 w-4 mr-1" /> Importar em Lote
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Importar Palavras-Chave em Lote</DialogTitle>
+                  </DialogHeader>
+                  <p className="text-sm text-muted-foreground">
+                    Cole as palavras-chave, uma por linha. Formato: <code>palavra-chave TAB volume TAB cpc</code> ou <code>palavra-chave;volume;cpc</code>.
+                  </p>
+                  <Textarea
+                    value={bulkText}
+                    onChange={(e) => setBulkText(e.target.value)}
+                    placeholder={"consultoria seo\t1200\t3.50\nbacklinks baratos\t800\t2.10"}
+                    rows={10}
+                  />
+                  <Button onClick={handleBulkImport} disabled={bulkLoading || !bulkText.trim()}>
+                    {bulkLoading ? "Importando..." : "Importar"}
+                  </Button>
+                </DialogContent>
+              </Dialog>
+            </>
+          )}
+        </div>
       </CardHeader>
       <CardContent className="p-0">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-12">#</TableHead>
-              <TableHead>Palavra-chave</TableHead>
-              <TableHead className="w-32">Volume</TableHead>
-              <TableHead className="w-32">CPC (BRL)</TableHead>
-              {!readOnly && <TableHead className="w-24" />}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow><TableCell colSpan={readOnly ? 4 : 5} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
-            ) : keywords.length === 0 && readOnly ? (
-              <TableRow><TableCell colSpan={4} className="text-center py-8 text-muted-foreground">Nenhuma palavra-chave cadastrada</TableCell></TableRow>
-            ) : (
-              <>
-                {keywords.map((kw, idx) => (
-                  <TableRow key={kw.id}>
-                    <TableCell className="text-muted-foreground">{idx + 1}</TableCell>
-                    {editingId === kw.id ? (
-                      <>
-                        <TableCell>
-                          <Input value={editValues.keyword} onChange={(e) => setEditValues(v => ({ ...v, keyword: e.target.value }))} className="h-8" onKeyDown={(e) => e.key === "Enter" && saveEdit()} />
-                        </TableCell>
-                        <TableCell>
-                          <Input value={editValues.volume} onChange={(e) => setEditValues(v => ({ ...v, volume: e.target.value }))} className="h-8" type="number" />
-                        </TableCell>
-                        <TableCell>
-                          <Input value={editValues.cpc} onChange={(e) => setEditValues(v => ({ ...v, cpc: e.target.value }))} className="h-8" type="number" step="0.01" />
-                        </TableCell>
-                        <TableCell className="flex gap-1">
-                          <Button size="icon" variant="ghost" onClick={saveEdit}><Check className="h-4 w-4 text-green-600" /></Button>
-                          <Button size="icon" variant="ghost" onClick={cancelEdit}><X className="h-4 w-4" /></Button>
-                        </TableCell>
-                      </>
-                    ) : (
-                      <>
-                        <TableCell className="font-medium">{kw.keyword}</TableCell>
-                        <TableCell>{kw.volume.toLocaleString("pt-BR")}</TableCell>
-                        <TableCell>R$ {Number(kw.cpc).toFixed(2)}</TableCell>
-                        {!readOnly && (
-                          <TableCell className="flex gap-1">
-                            <Button size="icon" variant="ghost" onClick={() => startEdit(kw)}><Pencil className="h-4 w-4" /></Button>
-                            <Button size="icon" variant="ghost" onClick={() => handleDelete(kw.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                          </TableCell>
-                        )}
-                      </>
-                    )}
-                  </TableRow>
+        <ScrollArea className="w-full">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-12 sticky left-0 bg-background z-10">#</TableHead>
+                <TableHead className="min-w-[180px] sticky left-12 bg-background z-10">Palavra-chave</TableHead>
+                <TableHead className="w-24">Volume</TableHead>
+                <TableHead className="w-24">CPC</TableHead>
+                {months.map(m => (
+                  <TableHead key={m} className="w-20 text-center whitespace-nowrap">{formatMonthLabel(m)}</TableHead>
                 ))}
-                {!readOnly && (
-                  <TableRow>
-                    <TableCell className="text-muted-foreground">{keywords.length + 1}</TableCell>
-                    <TableCell>
-                      <Input value={newKeyword} onChange={(e) => setNewKeyword(e.target.value)} placeholder="Nova palavra-chave" className="h-8" onKeyDown={(e) => e.key === "Enter" && handleAdd()} />
-                    </TableCell>
-                    <TableCell>
-                      <Input value={newVolume} onChange={(e) => setNewVolume(e.target.value)} placeholder="0" className="h-8" type="number" />
-                    </TableCell>
-                    <TableCell>
-                      <Input value={newCpc} onChange={(e) => setNewCpc(e.target.value)} placeholder="0.00" className="h-8" type="number" step="0.01" />
-                    </TableCell>
-                    <TableCell>
-                      <Button size="icon" variant="ghost" onClick={handleAdd}><Plus className="h-4 w-4" /></Button>
-                    </TableCell>
-                  </TableRow>
-                )}
-              </>
-            )}
-          </TableBody>
-        </Table>
+                {!readOnly && <TableHead className="w-24" />}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {loading ? (
+                <TableRow><TableCell colSpan={fixedColCount + months.length} className="text-center py-8 text-muted-foreground">Carregando...</TableCell></TableRow>
+              ) : keywords.length === 0 && readOnly ? (
+                <TableRow><TableCell colSpan={fixedColCount + months.length} className="text-center py-8 text-muted-foreground">Nenhuma palavra-chave cadastrada</TableCell></TableRow>
+              ) : (
+                <>
+                  {keywords.map((kw, idx) => (
+                    <TableRow key={kw.id}>
+                      <TableCell className="text-muted-foreground sticky left-0 bg-background z-10">{idx + 1}</TableCell>
+                      {editingId === kw.id ? (
+                        <>
+                          <TableCell className="sticky left-12 bg-background z-10">
+                            <Input value={editValues.keyword} onChange={(e) => setEditValues(v => ({ ...v, keyword: e.target.value }))} className="h-8" onKeyDown={(e) => e.key === "Enter" && saveEdit()} />
+                          </TableCell>
+                          <TableCell>
+                            <Input value={editValues.volume} onChange={(e) => setEditValues(v => ({ ...v, volume: e.target.value }))} className="h-8" type="number" />
+                          </TableCell>
+                          <TableCell>
+                            <Input value={editValues.cpc} onChange={(e) => setEditValues(v => ({ ...v, cpc: e.target.value }))} className="h-8" type="number" step="0.01" />
+                          </TableCell>
+                          {months.map(m => (
+                            <TableCell key={m} className="text-center text-muted-foreground">—</TableCell>
+                          ))}
+                          <TableCell className="flex gap-1">
+                            <Button size="icon" variant="ghost" onClick={saveEdit}><Check className="h-4 w-4 text-green-600" /></Button>
+                            <Button size="icon" variant="ghost" onClick={cancelEdit}><X className="h-4 w-4" /></Button>
+                          </TableCell>
+                        </>
+                      ) : (
+                        <>
+                          <TableCell className="font-medium sticky left-12 bg-background z-10">{kw.keyword}</TableCell>
+                          <TableCell>{kw.volume.toLocaleString("pt-BR")}</TableCell>
+                          <TableCell>R$ {Number(kw.cpc).toFixed(2)}</TableCell>
+                          {months.map((m, mIdx) => {
+                            const pos = snapshotMap[kw.id]?.[m] ?? null;
+                            const prevMonthPos = mIdx > 0 ? (snapshotMap[kw.id]?.[months[mIdx - 1]] ?? null) : null;
+                            const color = getPositionColor(pos, prevMonthPos);
+                            return (
+                              <TableCell key={m} className={`text-center tabular-nums ${color}`}>
+                                {pos !== null ? pos : "—"}
+                              </TableCell>
+                            );
+                          })}
+                          {!readOnly && (
+                            <TableCell className="flex gap-1">
+                              <Button size="icon" variant="ghost" onClick={() => startEdit(kw)}><Pencil className="h-4 w-4" /></Button>
+                              <Button size="icon" variant="ghost" onClick={() => handleDelete(kw.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                            </TableCell>
+                          )}
+                        </>
+                      )}
+                    </TableRow>
+                  ))}
+                  {!readOnly && (
+                    <TableRow>
+                      <TableCell className="text-muted-foreground sticky left-0 bg-background z-10">{keywords.length + 1}</TableCell>
+                      <TableCell className="sticky left-12 bg-background z-10">
+                        <Input value={newKeyword} onChange={(e) => setNewKeyword(e.target.value)} placeholder="Nova palavra-chave" className="h-8" onKeyDown={(e) => e.key === "Enter" && handleAdd()} />
+                      </TableCell>
+                      <TableCell>
+                        <Input value={newVolume} onChange={(e) => setNewVolume(e.target.value)} placeholder="0" className="h-8" type="number" />
+                      </TableCell>
+                      <TableCell>
+                        <Input value={newCpc} onChange={(e) => setNewCpc(e.target.value)} placeholder="0.00" className="h-8" type="number" step="0.01" />
+                      </TableCell>
+                      {months.map(m => (
+                        <TableCell key={m} />
+                      ))}
+                      <TableCell>
+                        <Button size="icon" variant="ghost" onClick={handleAdd}><Plus className="h-4 w-4" /></Button>
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </>
+              )}
+            </TableBody>
+          </Table>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </CardContent>
     </Card>
   );

@@ -222,32 +222,76 @@ export type Database = {
         }
         Relationships: []
       }
+      consulting_keyword_snapshots: {
+        Row: {
+          checked_at: string
+          id: string
+          keyword_id: string
+          month: string
+          position: number | null
+        }
+        Insert: {
+          checked_at?: string
+          id?: string
+          keyword_id: string
+          month: string
+          position?: number | null
+        }
+        Update: {
+          checked_at?: string
+          id?: string
+          keyword_id?: string
+          month?: string
+          position?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "consulting_keyword_snapshots_keyword_id_fkey"
+            columns: ["keyword_id"]
+            isOneToOne: false
+            referencedRelation: "consulting_keywords"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       consulting_keywords: {
         Row: {
+          best_position: number | null
           client_id: string
           cpc: number | null
           created_at: string
+          current_position: number | null
           id: string
           keyword: string
+          last_checked_at: string | null
           position: number | null
+          previous_position: number | null
           volume: number | null
         }
         Insert: {
+          best_position?: number | null
           client_id: string
           cpc?: number | null
           created_at?: string
+          current_position?: number | null
           id?: string
           keyword: string
+          last_checked_at?: string | null
           position?: number | null
+          previous_position?: number | null
           volume?: number | null
         }
         Update: {
+          best_position?: number | null
           client_id?: string
           cpc?: number | null
           created_at?: string
+          current_position?: number | null
           id?: string
           keyword?: string
+          last_checked_at?: string | null
           position?: number | null
+          previous_position?: number | null
           volume?: number | null
         }
         Relationships: [
