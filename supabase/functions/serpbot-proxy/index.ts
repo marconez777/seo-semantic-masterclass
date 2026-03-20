@@ -8,6 +8,36 @@ const corsHeaders = {
 
 const SERPBOT_API = "https://api.serprobot.com/v1/api.php";
 
+function delay(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function extractPosition(data: any): number | null {
+  const pos = data?.pos ?? data?.position ?? null;
+  if (pos === null || pos === undefined || pos === 0 || pos === "0") return null;
+  return typeof pos === "string" ? parseInt(pos, 10) : pos;
+}
+
+async function fetchWithRetry(url: string, keyword: string): Promise<{ position: number | null; rawResponse: any }> {
+  const res = await fetch(url);
+  const data = await res.json();
+  console.log(`[SerpBot] Keyword: "${keyword}" | Response:`, JSON.stringify(data));
+
+  let position = extractPosition(data);
+
+  if (position === null) {
+    console.log(`[SerpBot] Retry for "${keyword}" after 3s...`);
+    await delay(3000);
+    const res2 = await fetch(url);
+    const data2 = await res2.json();
+    console.log(`[SerpBot] Retry response for "${keyword}":`, JSON.stringify(data2));
+    position = extractPosition(data2);
+    return { position, rawResponse: data2 };
+  }
+
+  return { position, rawResponse: data };
+}
+
 function getCurrentMonth(): string {
   const now = new Date();
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
@@ -39,10 +69,8 @@ async function checkAndUpdateKeyword(
   supabaseAdmin: any
 ) {
   const url = `${SERPBOT_API}?api_key=${apiKey}&action=rank_check&keyword=${encodeURIComponent(kw.keyword)}&target_url=${encodeURIComponent(project.domain)}&region=${encodeURIComponent(project.region)}&device=${encodeURIComponent(project.device)}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const { position, rawResponse } = await fetchWithRetry(url, kw.keyword);
 
-  const position = data?.pos ?? null;
   const previousPosition = kw.current_position;
   const bestPosition =
     position !== null
@@ -68,7 +96,7 @@ async function checkAndUpdateKeyword(
 
   await saveMonthlySnapshot(supabaseAdmin, kw.id, position);
 
-  return { keyword_id: kw.id, keyword: kw.keyword, position, previous_position: previousPosition };
+  return { keyword_id: kw.id, keyword: kw.keyword, position, previous_position: previousPosition, raw: rawResponse };
 }
 
 async function checkConsultingKeyword(
@@ -78,10 +106,8 @@ async function checkConsultingKeyword(
   supabaseAdmin: any
 ) {
   const url = `${SERPBOT_API}?api_key=${apiKey}&action=rank_check&keyword=${encodeURIComponent(kw.keyword)}&target_url=${encodeURIComponent(domain)}&region=www.google.com.br&device=desktop`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const { position, rawResponse } = await fetchWithRetry(url, kw.keyword);
 
-  const position = data?.pos ?? null;
   const previousPosition = kw.current_position;
   const bestPosition =
     position !== null
@@ -114,7 +140,7 @@ async function checkConsultingKeyword(
     );
   }
 
-  return { keyword_id: kw.id, keyword: kw.keyword, position, previous_position: previousPosition };
+  return { keyword_id: kw.id, keyword: kw.keyword, position, previous_position: previousPosition, raw: rawResponse };
 }
 
 Deno.serve(async (req) => {
@@ -162,6 +188,7 @@ Deno.serve(async (req) => {
           } catch (e) {
             allResults.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
           }
+          await delay(1500);
         }
       }
 
@@ -205,6 +232,7 @@ Deno.serve(async (req) => {
           } catch (e) {
             allResults.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
           }
+          await delay(1500);
         }
       }
 
@@ -322,6 +350,7 @@ Deno.serve(async (req) => {
         } catch (e) {
           results.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
         }
+        await delay(1500);
       }
 
       return new Response(JSON.stringify({ results }), {
@@ -400,6 +429,7 @@ Deno.serve(async (req) => {
         } catch (e) {
           results.push({ keyword_id: kw.id, keyword: kw.keyword, error: String(e) });
         }
+        await delay(1500);
       }
 
       return new Response(JSON.stringify({ results }), {
