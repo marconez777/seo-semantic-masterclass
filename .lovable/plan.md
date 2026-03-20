@@ -1,61 +1,67 @@
 
 
-## Personalizar o E-mail de Ativacao no Padrao dos Outros E-mails Transacionais
+## Adicionar Colunas Mensais de Posicao na Aba Palavras (Consultoria)
 
-### O que sera feito
+### Resumo
+Transformar a aba "Palavras" da consultoria para incluir colunas dinamicas por mes com posicoes de cada palavra-chave no Google, usando a API do Serp Bot. Sem limitacoes de palavras ou projetos. No primeiro dia de cada mes, um cron job automatico verifica todas as palavras de todos os clientes de consultoria.
 
-O template de ativacao ja tem a estrutura base (logo, heading, botao, footer), mas falta o padrao visual dos outros e-mails transacionais: secao de status com icone/cor, secao de informacoes com background cinza, e separador `Hr`.
+### Banco de dados
 
-### Alteracoes no template
-
-**Arquivo:** `supabase/functions/send-activation-email/_templates/activation-email.tsx`
-
-1. **Adicionar secao de status estilizada** (como no order-status-email): caixa com borda azul, fundo azul claro, icone de boas-vindas, e texto "Conta criada com sucesso"
-
-2. **Substituir a lista de bullets solta** por uma secao `infoSection` com fundo `#f8fafc` e border-radius (mesmo padrao do `orderDetails` no payment-email e `infoSection` no order-status)
-
-3. **Remover a secao CTA secundaria** ("Pronto para impulsionar seu SEO?" com botao verde) - isso nao existe nos outros templates e destoa do padrao
-
-4. **Adicionar import do `Hr`** para separadores visuais, como no payment-email
-
-5. **Padronizar os estilos** para usar exatamente os mesmos valores dos outros templates:
-   - `button` com `padding: '14px 28px'` (os outros usam isso, o activation usa `12px 24px`)
-   - Adicionar estilos `statusSection`, `statusIcon`, `infoSection`, `infoTitle`, `infoText` seguindo o order-status-email
-
-6. **Footer**: manter o mesmo padrao dos outros (links MK Art SEO, Contato, e um terceiro relevante)
-
-### Estrutura final do e-mail
-
+**Nova tabela: `consulting_keyword_snapshots`**
 ```text
-[Logo MK Art SEO]
-
-Bem-vindo(a) a MK Art SEO!
-
-Ola {nome},
-Obrigado por se cadastrar...
-
-+----------------------------------+
-|          🎉                       |
-|   Conta Criada com Sucesso       |
-|   Clique abaixo para ativar      |
-+----------------------------------+
-
-    [ Ativar Minha Conta ]
-
-+----------------------------------+
-| Apos ativar, voce tera acesso a: |
-| - Marketplace com centenas...    |
-| - Backlinks de alta autoridade   |
-| - Relatorios de entrega          |
-| - Suporte especializado          |
-+----------------------------------+
-
-Se voce nao se cadastrou...
-
-MK Art SEO • Contato • Comprar Backlinks
+id (uuid PK)
+keyword_id (uuid FK -> consulting_keywords.id ON DELETE CASCADE)
+month (date) -- formato YYYY-MM-01
+position (integer nullable)
+checked_at (timestamptz)
+UNIQUE(keyword_id, month)
 ```
 
-### Arquivo da Edge Function
+RLS:
+- Admin ALL via `has_role()`
+- Clientes SELECT via join `consulting_keywords -> consulting_clients.user_id`
 
-O `index.ts` nao precisa de alteracao - apenas o template `.tsx` sera atualizado.
+**Alteracao na tabela `consulting_keywords`:**
+- Adicionar colunas: `current_position integer`, `previous_position integer`, `best_position integer`, `last_checked_at timestamptz`
+
+### Edge Function
+
+**Atualizar `serpbot-proxy/index.ts`** para adicionar nova action: `check_consulting_client`
+- Recebe `client_id`
+- Busca o `consulting_client` (domain) com service role
+- Busca todas as `consulting_keywords` do cliente
+- Para cada keyword, chama a API do Serp Bot com o dominio do cliente
+- Atualiza `current_position`, `previous_position`, `best_position`, `last_checked_at`
+- Insere/upsert em `consulting_keyword_snapshots`
+- Sem limite de palavras
+
+**Nova action: `cron_consulting_check`** (chamada pelo cron)
+- Busca todos os `consulting_clients` ativos
+- Para cada um, busca as keywords e verifica posicoes
+- Salva snapshots
+
+### Cron Job
+
+Agendar via `pg_cron` + `pg_net` para executar no dia 1 de cada mes:
+```sql
+cron.schedule('consulting-monthly-check', '0 10 1 * *', ...)
+```
+Chama `serpbot-proxy` com action `cron_consulting_check`.
+
+### Frontend
+
+**Atualizar `ConsultingKeywords.tsx`:**
+- Buscar `consulting_keyword_snapshots` para as keywords do cliente
+- Calcular meses unicos e ordenados
+- Adicionar colunas dinamicas por mes (mesmo padrao do `KeywordTracker`)
+- Cores semanticas: verde (subiu), laranja (desceu), neutro
+- Botao "Verificar Posicoes" (admin only, nao readOnly) que chama `check_consulting_client`
+- Mostrar data da ultima checagem
+- Manter todas as funcionalidades existentes (add, edit, delete, bulk import)
+
+### Arquivos a criar/editar
+1. Migracao SQL: nova tabela + colunas na `consulting_keywords` + RLS
+2. `supabase/functions/serpbot-proxy/index.ts`: novas actions
+3. `src/components/consulting/ConsultingKeywords.tsx`: colunas mensais + botao verificar
+4. Cron job via insert SQL
 
