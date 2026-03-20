@@ -69,10 +69,8 @@ async function checkAndUpdateKeyword(
   supabaseAdmin: any
 ) {
   const url = `${SERPBOT_API}?api_key=${apiKey}&action=rank_check&keyword=${encodeURIComponent(kw.keyword)}&target_url=${encodeURIComponent(project.domain)}&region=${encodeURIComponent(project.region)}&device=${encodeURIComponent(project.device)}`;
-  const res = await fetch(url);
-  const data = await res.json();
+  const { position, rawResponse } = await fetchWithRetry(url, kw.keyword);
 
-  const position = data?.pos ?? null;
   const previousPosition = kw.current_position;
   const bestPosition =
     position !== null
@@ -98,7 +96,7 @@ async function checkAndUpdateKeyword(
 
   await saveMonthlySnapshot(supabaseAdmin, kw.id, position);
 
-  return { keyword_id: kw.id, keyword: kw.keyword, position, previous_position: previousPosition };
+  return { keyword_id: kw.id, keyword: kw.keyword, position, previous_position: previousPosition, raw: rawResponse };
 }
 
 async function checkConsultingKeyword(
