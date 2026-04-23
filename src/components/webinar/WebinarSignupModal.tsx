@@ -52,8 +52,13 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
       return;
     }
     setSubmitting(true);
+    const d = parsed.data;
     const { error } = await supabase.from("webinar_signups").insert([{
-      ...parsed.data,
+      nome: d.nome,
+      email: d.email,
+      whatsapp: d.whatsapp,
+      especialidade: d.especialidade,
+      faturamento: d.faturamento,
       source: "webinar-medico",
     }]);
     setSubmitting(false);
