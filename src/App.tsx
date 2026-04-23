@@ -44,6 +44,7 @@ import AdminLeads from "./pages/admin/AdminLeads";
 import AdminAuth from "./pages/admin/AdminAuth";
 import AdminConsultoria from "./pages/admin/AdminConsultoria";
 import AdminConsultoriaClient from "./pages/admin/AdminConsultoriaClient";
+import AdminWebinar from "./pages/admin/AdminWebinar";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
