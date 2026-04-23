@@ -46,7 +46,7 @@ export default function AdminWebinar() {
     if (!confirm("Excluir esta inscrição?")) return;
     const { error } = await supabase.from("webinar_signups").delete().eq("id", id);
     if (error) {
-      toast({ title: "Erro ao excluir", description: error.message, variant: "destructive" });
+      toast({ title: "Erro ao excluir", description: error.message });
       return;
     }
     setRows((prev) => prev.filter((r) => r.id !== id));
