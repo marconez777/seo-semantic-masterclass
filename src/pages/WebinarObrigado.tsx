@@ -27,16 +27,16 @@ const WebinarObrigado = () => {
             <CheckCircle2 size={64} className="text-emerald-600" strokeWidth={1.5} />
           </div>
 
-          <p className="text-[11px] tracking-[0.2em] uppercase text-webinar-muted mb-4">
+          <p className="text-[20px] tracking-[0.18em] uppercase text-webinar-muted mb-5">
             Inscrição confirmada
           </p>
 
-          <div className="mx-auto mb-7 w-full max-w-sm animate-fade-in">
+          <div className="mx-auto mb-8 w-full max-w-md animate-fade-in">
             <Progress
               value={progress}
-              className="h-2.5 bg-webinar-ink/10 shadow-inner [&>div]:bg-webinar-gold [&>div]:transition-transform [&>div]:duration-1000 [&>div]:ease-out"
+              className="h-5 bg-webinar-ink/10 shadow-inner [&>div]:bg-webinar-gold [&>div]:transition-transform [&>div]:duration-1000 [&>div]:ease-out"
             />
-            <p className="mt-3 text-xs font-medium text-webinar-muted">
+            <p className="mt-4 text-[20px] font-medium text-webinar-muted">
               80% concluído · falta entrar no grupo
             </p>
           </div>
@@ -45,7 +45,7 @@ const WebinarObrigado = () => {
             Falta um passo: entre no grupo do WhatsApp.
           </h1>
 
-        <p className="text-[16px] leading-[1.7] text-webinar-muted mb-10">
+        <p className="text-[20px] leading-[1.7] text-webinar-muted mb-10">
           O <span className="font-medium text-webinar-ink">link da aula</span> e os lembretes serão enviados <span className="font-medium text-webinar-ink">apenas pelo grupo</span>. Sem o grupo, você corre o risco de perder o webinar.
         </p>
 
@@ -59,7 +59,7 @@ const WebinarObrigado = () => {
           Entrar no grupo do WhatsApp
         </a>
 
-        <p className="text-xs text-webinar-muted mt-8">
+        <p className="text-[20px] text-webinar-muted mt-8">
           📅 Quinta-feira · 20h · Ao vivo
         </p>
         </div>
