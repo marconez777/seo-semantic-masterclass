@@ -51,7 +51,7 @@ const WebinarMedico = () => {
         canonicalUrl="https://mkart.com.br/webinar-medico"
       />
 
-      <main className="font-sans">
+      <main className="font-sans text-[20px]">
         <WebinarHero onCTAClick={openModal} videoId={HERO_VIDEO_ID} vagas={VAGAS_RESTANTES} />
         <WebinarCaseIvan videoId={IVAN_VIDEO_ID} />
         <WebinarLearn onCTAClick={openModal} vagas={VAGAS_RESTANTES} />
