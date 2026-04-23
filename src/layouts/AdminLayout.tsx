@@ -60,6 +60,7 @@ export default function AdminLayout() {
     { title: "Contatos", url: "/admin/contatos", icon: MessageSquare },
     { title: "Leads Backlinks", url: "/admin/leads", icon: Gift },
     { title: "Consultoria", url: "/admin/consultoria", icon: Briefcase },
+    { title: "Webinar", url: "/admin/webinar", icon: Video },
   ];
 
   return (
