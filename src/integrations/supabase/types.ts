@@ -884,6 +884,39 @@ export type Database = {
         }
         Relationships: []
       }
+      webinar_signups: {
+        Row: {
+          created_at: string
+          email: string
+          especialidade: string
+          faturamento: string
+          id: string
+          nome: string
+          source: string
+          whatsapp: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          especialidade: string
+          faturamento: string
+          id?: string
+          nome: string
+          source?: string
+          whatsapp: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          especialidade?: string
+          faturamento?: string
+          id?: string
+          nome?: string
+          source?: string
+          whatsapp?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       backlinks_public: {
