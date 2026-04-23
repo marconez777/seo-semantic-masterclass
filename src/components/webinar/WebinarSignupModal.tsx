@@ -52,10 +52,10 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
       return;
     }
     setSubmitting(true);
-    const { error } = await supabase.from("webinar_signups").insert({
+    const { error } = await supabase.from("webinar_signups").insert([{
       ...parsed.data,
       source: "webinar-medico",
-    });
+    }]);
     setSubmitting(false);
     if (error) {
       toast.error("Não foi possível concluir a inscrição. Tente novamente.");
