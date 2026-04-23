@@ -34,7 +34,7 @@ const WebinarObrigado = () => {
           <div className="mx-auto mb-8 w-full max-w-md animate-fade-in">
             <Progress
               value={progress}
-              className="h-5 bg-webinar-ink/10 shadow-inner [&>div]:!bg-[hsl(var(--webinar-accent))] [&>div]:transition-transform [&>div]:duration-1000 [&>div]:ease-out"
+              className="h-5 border border-webinar bg-muted shadow-inner [&>div]:!bg-[hsl(var(--webinar-accent))] [&>div]:transition-transform [&>div]:duration-1000 [&>div]:ease-out"
             />
             <p className="mt-4 text-[20px] font-medium text-webinar-muted">
               80% concluído · falta entrar no grupo
