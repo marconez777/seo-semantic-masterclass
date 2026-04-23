@@ -7,11 +7,11 @@ export const WebinarFinalCTA = ({ onCTAClick }: Props) => (
         Na quinta-feira, 20h, você decide.
       </h2>
 
-      <p className="text-[17px] leading-[1.7] text-webinar-muted-inverse mb-12 max-w-2xl mx-auto">
+      <p className="text-[20px] leading-[1.7] text-webinar-muted-inverse mb-12 max-w-2xl mx-auto">
         Continuar queimando caixa em anúncio pago e dependendo da sua presença física para faturar, ou implementar a mesma arquitetura de aquisição que tirou o Dr. Ivan da dependência de Ads e colocou a clínica dele em 1º lugar no Google e no ChatGPT.
       </p>
 
-      <div className="space-y-2 text-[15px] text-webinar-muted-inverse mb-12">
+      <div className="space-y-2 text-[20px] text-webinar-muted-inverse mb-12">
         <p>📅 Quinta-feira</p>
         <p>⏰ 20h — duração de 90 minutos</p>
         <p>💻 Online, ao vivo, com espaço para perguntas</p>
@@ -20,7 +20,7 @@ export const WebinarFinalCTA = ({ onCTAClick }: Props) => (
       <button onClick={onCTAClick} className="btn-webinar-cta">
         Garantir minha vaga gratuita →
       </button>
-      <p className="mt-4 text-[11px] text-webinar-muted-inverse">
+      <p className="mt-4 text-[20px] text-webinar-muted-inverse">
         Evento gratuito. Vaga limitada. Somente para donos de clínica.
       </p>
     </div>

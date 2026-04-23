@@ -19,10 +19,10 @@ export const WebinarFAQ = () => (
       <Accordion type="single" collapsible className="border-t border-webinar">
         {FAQS.map(({ q, a }, i) => (
           <AccordionItem key={i} value={`item-${i}`} className="border-b border-webinar">
-            <AccordionTrigger className="text-left font-sans font-semibold text-base sm:text-lg py-5 hover:no-underline">
+            <AccordionTrigger className="text-left font-sans font-semibold text-[20px] py-5 hover:no-underline">
               {q}
             </AccordionTrigger>
-            <AccordionContent className="text-[15px] leading-[1.7] text-webinar-muted pb-6">
+            <AccordionContent className="text-[20px] leading-[1.7] text-webinar-muted pb-6">
               {a}
             </AccordionContent>
           </AccordionItem>

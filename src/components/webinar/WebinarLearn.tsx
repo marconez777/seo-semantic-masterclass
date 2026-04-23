@@ -26,14 +26,14 @@ export const WebinarLearn = ({ onCTAClick, vagas }: Props) => (
               <Icon size={22} className="text-webinar-muted" strokeWidth={1.5} />
             </div>
             <h3 className="font-serif-display text-xl sm:text-2xl leading-snug mb-3">{title}</h3>
-            <p className="text-[15px] leading-[1.65] text-webinar-muted">{desc}</p>
+            <p className="text-[20px] leading-[1.65] text-webinar-muted">{desc}</p>
           </article>
         ))}
       </div>
 
       <div className="flex flex-col items-center gap-2 mt-14">
         <button onClick={onCTAClick} className="btn-webinar-cta">Quero garantir minha vaga →</button>
-        <p className="text-[11px] text-webinar-muted">{vagas} vagas</p>
+        <p className="text-[20px] font-semibold text-webinar-muted">{vagas} vagas</p>
       </div>
     </div>
   </section>

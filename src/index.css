@@ -171,7 +171,7 @@
     background-color: hsl(var(--webinar-accent));
     color: hsl(var(--webinar-navy));
     font-weight: 600;
-    font-size: 1.0625rem;
+    font-size: 1.25rem;
     min-height: 56px;
     padding: 0.875rem 1.75rem;
     border-radius: 4px;

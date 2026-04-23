@@ -27,7 +27,7 @@ export const WebinarForWhom = () => (
           <h3 className="font-serif-display text-2xl mb-6">É para você se:</h3>
           <ul className="space-y-4">
             {SIM.map((t) => (
-              <li key={t} className="flex items-start gap-3 text-[15px] leading-[1.6]">
+              <li key={t} className="flex items-start gap-3 text-[20px] leading-[1.6]">
                 <Check size={20} className="mt-0.5 shrink-0 text-emerald-600" strokeWidth={2.5} />
                 <span>{t}</span>
               </li>
@@ -39,7 +39,7 @@ export const WebinarForWhom = () => (
           <h3 className="font-serif-display text-2xl mb-6 text-webinar-muted">NÃO é para você se:</h3>
           <ul className="space-y-4">
             {NAO.map((t) => (
-              <li key={t} className="flex items-start gap-3 text-[15px] leading-[1.6] text-webinar-muted">
+              <li key={t} className="flex items-start gap-3 text-[20px] leading-[1.6] text-webinar-muted">
                 <X size={20} className="mt-0.5 shrink-0" strokeWidth={2.5} />
                 <span>{t}</span>
               </li>
