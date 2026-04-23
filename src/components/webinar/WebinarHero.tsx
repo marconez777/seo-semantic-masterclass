@@ -40,7 +40,7 @@ export const WebinarHero = ({ onCTAClick, videoId, vagas }: Props) => (
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-webinar-accent opacity-75" />
             <span className="relative inline-flex size-3 rounded-full bg-webinar-accent" />
           </span>
-          <span><span className="text-webinar-accent">{vagas}</span> vagas. Gratuito para donos de clínicas.</span>
+           <span><span className="text-webinar-accent">{vagas}</span> vagas</span>
         </p>
       </div>
 
