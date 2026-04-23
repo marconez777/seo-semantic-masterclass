@@ -35,9 +35,8 @@ export const WebinarHero = ({ onCTAClick, videoId, vagas }: Props) => (
         <button onClick={onCTAClick} className="btn-webinar-cta">
           Garantir minha vaga gratuita →
         </button>
-        <p className="relative inline-flex items-center gap-3 rounded-md border-2 border-webinar bg-white px-5 py-3 text-[22px] font-bold text-webinar-ink shadow-lg animate-pulse">
+        <p className="relative inline-flex items-center gap-2 rounded-md border border-webinar bg-white px-4 py-2 text-[20px] font-bold text-webinar-ink shadow-md">
           <span className="relative flex size-3">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-webinar-accent opacity-75" />
             <span className="relative inline-flex size-3 rounded-full bg-webinar-accent" />
           </span>
            <span><span className="text-webinar-accent">{vagas}</span> vagas</span>
