@@ -15,7 +15,7 @@ import {
   SidebarSeparator,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ClipboardList, Upload, Settings, PenTool, Users, FileText, MessageSquare, Gift, Globe, Briefcase } from "lucide-react";
+import { ClipboardList, Upload, Settings, PenTool, Users, FileText, MessageSquare, Gift, Globe, Briefcase, Video } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { UserProfileDropdown } from "@/components/ui/user-profile-dropdown";
 import { Separator } from "@/components/ui/separator";
