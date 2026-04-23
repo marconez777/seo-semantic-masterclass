@@ -31,7 +31,7 @@ export default function AdminWebinar() {
       .select("*")
       .order("created_at", { ascending: false });
     if (error) {
-      toast({ title: "Erro ao carregar", description: error.message, variant: "destructive" });
+      toast({ title: "Erro ao carregar", description: error.message });
     } else {
       setRows((data ?? []) as WebinarSignup[]);
     }
