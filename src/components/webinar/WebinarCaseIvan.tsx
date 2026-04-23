@@ -3,7 +3,7 @@ interface Props { videoId: string; }
 export const WebinarCaseIvan = ({ videoId }: Props) => (
   <section className="bg-webinar-navy text-webinar-ink-inverse">
     <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
-      <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-webinar-muted-inverse mb-6">
+      <p className="text-[20px] tracking-[0.16em] uppercase text-webinar-muted-inverse mb-6">
         Caso de estudo · Psiquiatria
       </p>
       <h2 className="font-serif-display text-3xl sm:text-5xl leading-[1.1] font-medium tracking-tight max-w-3xl mb-12">
@@ -21,7 +21,7 @@ export const WebinarCaseIvan = ({ videoId }: Props) => (
           />
         </div>
 
-        <div className="space-y-5 text-[16px] leading-[1.7] text-webinar-muted-inverse">
+        <div className="space-y-5 text-[20px] leading-[1.7] text-webinar-muted-inverse">
           <p>
             Antes, a clínica do Dr. Ivan dependia de anúncios pagos no Google e Meta. O resultado era previsível: muito volume de WhatsApp, baixa qualificação, recepção sobrecarregada respondendo curioso e pouca conversão em consulta particular.
           </p>
@@ -45,7 +45,7 @@ export const WebinarCaseIvan = ({ videoId }: Props) => (
         ].map(({ n, l }) => (
           <div key={n} className="text-center sm:text-left">
             <div className="font-serif-display text-5xl sm:text-6xl text-webinar-accent leading-none">{n}</div>
-            <div className="mt-2 text-sm text-webinar-muted-inverse">{l}</div>
+            <div className="mt-2 text-[20px] text-webinar-muted-inverse">{l}</div>
           </div>
         ))}
       </div>

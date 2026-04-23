@@ -32,10 +32,10 @@ export const WebinarMoreCases = ({ cases }: Props) => (
               <blockquote className="font-serif-display text-xl sm:text-2xl leading-snug italic mb-5">
                 "{c.quote}"
               </blockquote>
-              <p className="text-sm text-webinar-muted mb-4">
+              <p className="text-[20px] text-webinar-muted mb-4">
                 <span className="text-webinar-ink font-medium">{c.name}</span> · {c.specialty} · {c.city}
               </p>
-              <ul className="text-[13px] text-webinar-muted space-y-1">
+              <ul className="text-[20px] text-webinar-muted space-y-1">
                 {c.metrics.map((m) => <li key={m}>· {m}</li>)}
               </ul>
             </div>
