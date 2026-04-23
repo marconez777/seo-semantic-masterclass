@@ -48,6 +48,8 @@ import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlogNew from "./pages/AdminBlogNew";
+import WebinarMedico from "./pages/WebinarMedico";
+import WebinarObrigado from "./pages/WebinarObrigado";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
 import { RequireRole } from "./components/auth/RequireRole";
@@ -117,6 +119,8 @@ const App = () => (
             <Route path="consultoria/:clientId" element={<AdminConsultoriaClient />} />
           </Route>
           <Route path="/recibo/:orderId" element={<Recibo />} />
+          <Route path="/webinar-medico" element={<WebinarMedico />} />
+          <Route path="/webinar-medico/obrigado" element={<WebinarObrigado />} />
           
           {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} />

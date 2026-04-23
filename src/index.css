@@ -133,3 +133,51 @@
   .size-sm { height: 2.25rem; font-size: 0.875rem; padding-left: 0.75rem; padding-right: 0.75rem; }
   .size-lg { height: 2.75rem; font-size: 1rem; padding-left: 1rem; padding-right: 1rem; }
 }
+
+/* ========= Webinar Médico — design tokens isolados ========= */
+@layer base {
+  :root {
+    --webinar-navy: 215 60% 10%;
+    --webinar-cream: 60 33% 98%;
+    --webinar-ink: 0 0% 10%;
+    --webinar-ink-inverse: 0 0% 96%;
+    --webinar-accent: 35 56% 59%;
+    --webinar-accent-hover: 35 56% 52%;
+    --webinar-muted: 215 15% 45%;
+    --webinar-muted-inverse: 215 20% 70%;
+    --webinar-border: 215 20% 88%;
+    --webinar-border-inverse: 215 30% 22%;
+  }
+}
+
+@layer utilities {
+  .font-serif-display { font-family: 'Fraunces', Georgia, serif; font-feature-settings: "ss01"; }
+  .bg-webinar-navy { background-color: hsl(var(--webinar-navy)); }
+  .bg-webinar-cream { background-color: hsl(var(--webinar-cream)); }
+  .bg-webinar-accent { background-color: hsl(var(--webinar-accent)); }
+  .text-webinar-ink { color: hsl(var(--webinar-ink)); }
+  .text-webinar-ink-inverse { color: hsl(var(--webinar-ink-inverse)); }
+  .text-webinar-accent { color: hsl(var(--webinar-accent)); }
+  .text-webinar-muted { color: hsl(var(--webinar-muted)); }
+  .text-webinar-muted-inverse { color: hsl(var(--webinar-muted-inverse)); }
+  .border-webinar { border-color: hsl(var(--webinar-border)); }
+  .border-webinar-inverse { border-color: hsl(var(--webinar-border-inverse)); }
+
+  .btn-webinar-cta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background-color: hsl(var(--webinar-accent));
+    color: hsl(var(--webinar-navy));
+    font-weight: 600;
+    font-size: 1.0625rem;
+    min-height: 56px;
+    padding: 0.875rem 1.75rem;
+    border-radius: 4px;
+    box-shadow: 0 10px 30px -8px hsl(var(--webinar-accent) / 0.4);
+    transition: background-color 0.2s, transform 0.1s;
+  }
+  .btn-webinar-cta:hover { background-color: hsl(var(--webinar-accent-hover)); }
+  .btn-webinar-cta:active { transform: translateY(1px); }
+}
