@@ -121,7 +121,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
             {submitting ? "Enviando..." : "Confirmar minha inscrição →"}
           </button>
 
-          <p className="text-xs text-webinar-muted text-center leading-relaxed">
+          <p className="text-[20px] text-webinar-muted text-center leading-relaxed">
             Você precisa entrar no grupo do WhatsApp na próxima página para receber o link da aula.
           </p>
         </form>

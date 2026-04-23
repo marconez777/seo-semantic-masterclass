@@ -1,7 +1,7 @@
 export const WebinarHost = () => (
   <section className="bg-webinar-navy text-webinar-ink-inverse">
     <div className="max-w-6xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
-      <p className="text-[11px] sm:text-xs tracking-[0.2em] uppercase text-webinar-muted-inverse mb-6">
+      <p className="text-[20px] tracking-[0.16em] uppercase text-webinar-muted-inverse mb-6">
         Quem conduz
       </p>
 
@@ -15,7 +15,7 @@ export const WebinarHost = () => (
             Marco Guimarães — MK
           </h2>
 
-          <div className="space-y-5 text-[16px] leading-[1.7] text-webinar-muted-inverse max-w-2xl">
+          <div className="space-y-5 text-[20px] leading-[1.7] text-webinar-muted-inverse max-w-2xl">
             <p>
               Especialista em aquisição orgânica para clínicas médicas, com foco em SEO de performance, GEO (otimização para IAs generativas) e integração com agentes de IA para WhatsApp.
             </p>
