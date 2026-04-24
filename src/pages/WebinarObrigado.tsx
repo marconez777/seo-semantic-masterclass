@@ -3,7 +3,7 @@ import SEOHead from "@/components/seo/SEOHead";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, MessageCircle } from "lucide-react";
 
-const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/PLACEHOLDER";
+const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/CHs1yNroEsYL6j6LWPQC2N";
 
 const WebinarObrigado = () => {
   const [progress, setProgress] = useState(0);
