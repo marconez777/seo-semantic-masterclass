@@ -73,14 +73,17 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
     if (step === 1) {
       const r = nomeSchema.safeParse(answers.nome);
       if (!r.success) return toast.error(r.error.issues[0].message);
+      webinarTracker.track("signup_answer", { step: 1, field: "nome", value: answers.nome.trim() });
     }
     if (step === 2) {
       const r = emailSchema.safeParse(answers.email);
       if (!r.success) return toast.error(r.error.issues[0].message);
+      webinarTracker.track("signup_answer", { step: 2, field: "email", value: answers.email.trim() });
     }
     if (step === 3) {
       const r = whatsappSchema.safeParse(answers.whatsapp);
       if (!r.success) return toast.error(r.error.issues[0].message);
+      webinarTracker.track("signup_answer", { step: 3, field: "whatsapp", value: answers.whatsapp.trim() });
     }
     next();
   };
