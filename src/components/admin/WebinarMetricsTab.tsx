@@ -235,6 +235,9 @@ export function WebinarMetricsTab() {
       r.signup_step_reached,
       r.signup_completed ? "sim" : "não",
       r.signup_qualified ? "sim" : "não",
+      r.reached_thank_you ? "sim" : "não",
+      r.thank_you_at ? new Date(r.thank_you_at).toLocaleString("pt-BR") : "",
+      r.whatsapp_group_clicked ? "sim" : "não",
       r.total_time_on_page_seconds, r.scroll_depth_pct,
       r.signup_nome ?? "", r.signup_email ?? "",
     ]);
