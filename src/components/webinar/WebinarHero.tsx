@@ -37,16 +37,24 @@ export const WebinarHero = ({ onCTAClick, videoUrl, posterUrl, vagas }: Props) =
         </p>
       </div>
 
-      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-[20px] text-webinar-muted max-w-4xl mx-auto">
+      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 max-w-5xl mx-auto">
         {[
+          "Somente para psiquiatras",
           "Dentro da Resolução CFM 2.336/2023",
           "Método aplicado em dezenas de clínicas",
           "Ao vivo, com espaço para perguntas",
           "Sem promessa milagrosa",
         ].map((t) => (
-          <li key={t} className="flex items-start gap-2">
-            <Check size={16} className="mt-0.5 shrink-0 text-webinar-accent" />
-            <span>{t}</span>
+          <li
+            key={t}
+            className="flex items-start gap-3 rounded-xl border border-webinar bg-white/70 backdrop-blur-sm px-4 py-3 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <span className="mt-0.5 shrink-0 inline-flex items-center justify-center size-6 rounded-full bg-webinar-accent/15 ring-1 ring-webinar-accent/30">
+              <Check size={14} strokeWidth={3} className="text-webinar-accent" />
+            </span>
+            <span className="text-[15px] sm:text-[16px] leading-snug font-medium text-webinar-ink">
+              {t}
+            </span>
           </li>
         ))}
       </ul>
