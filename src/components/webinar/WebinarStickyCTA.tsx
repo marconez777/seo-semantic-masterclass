@@ -23,7 +23,7 @@ export const WebinarStickyCTA = ({ onCTAClick }: Props) => {
       className="fixed bottom-0 left-0 right-0 z-40 bg-webinar-accent text-webinar-navy font-semibold py-4 px-5 text-center text-[20px] shadow-[0_-10px_30px_-10px_rgba(0,0,0,0.3)] hover:brightness-95 transition"
       style={{ paddingBottom: "calc(1rem + env(safe-area-inset-bottom))" }}
     >
-      QUINTA, 20H · VAGA GRATUITA →
+      DOMINGO, 17/05 · 10H · VAGA GRATUITA →
     </button>
   );
 };
