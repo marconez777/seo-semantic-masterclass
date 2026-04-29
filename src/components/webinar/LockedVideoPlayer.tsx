@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize } from "lucide-react";
+import { webinarTracker } from "@/lib/webinarTracker";
 
 interface Props {
   src: string;
