@@ -119,10 +119,10 @@ export function WebinarMetricsTab() {
 
       // Também tentar amarrar via session_id (caso signup_id ainda não esteja preenchido na sessão)
       const sessionIds = list.map((s) => s.session_id);
-      const { data: signupsBySession } = await supabase
+      const { data: signupsBySession } = await (supabase as any)
         .from("webinar_signups")
-        .select("id, nome, email, session_id" as any)
-        .in("session_id" as any, sessionIds);
+        .select("id, nome, email, session_id")
+        .in("session_id", sessionIds);
       const bySession: Record<string, { id: string; nome: string; email: string }> = {};
       for (const s of (signupsBySession ?? []) as any[]) {
         if (s.session_id) bySession[s.session_id] = { id: s.id, nome: s.nome, email: s.email };
