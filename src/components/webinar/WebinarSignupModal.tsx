@@ -253,6 +253,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
                         disabled={submitting}
                         onClick={() => {
                           update("faturamento", f);
+                          webinarTracker.track("signup_answer", { step: 5, field: "faturamento", value: f });
                           submit(f);
                         }}
                       />
