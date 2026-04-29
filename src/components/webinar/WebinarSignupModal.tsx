@@ -132,6 +132,8 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg bg-webinar-cream text-webinar-ink border-webinar p-0 overflow-hidden">
+        <DialogTitle className="sr-only">Inscrição no Webinar</DialogTitle>
+        <DialogDescription className="sr-only">Formulário de inscrição em etapas</DialogDescription>
         <div className="px-6 sm:px-8 py-8 sm:py-10">
           {done === "unqualified" ? (
             <div className="text-center animate-fade-in">
