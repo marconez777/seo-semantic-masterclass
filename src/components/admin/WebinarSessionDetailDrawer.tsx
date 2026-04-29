@@ -43,6 +43,7 @@ const eventLabel: Record<string, string> = {
   cta_click: "🟡 Clicou CTA",
   signup_open: "📝 Abriu inscrição",
   signup_step: "📝 Avançou step",
+  signup_answer: "✍️ Respondeu",
   signup_submit: "✅ Submeteu inscrição",
   signup_qualified: "🎯 Qualificado",
   signup_unqualified: "🚫 Não qualificado",
