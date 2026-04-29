@@ -47,6 +47,8 @@ const eventLabel: Record<string, string> = {
   signup_qualified: "🎯 Qualificado",
   signup_unqualified: "🚫 Não qualificado",
   signup_error: "❌ Erro inscrição",
+  thank_you_view: "🙏 Página de obrigado",
+  whatsapp_group_click: "💬 Clicou no grupo WhatsApp",
 };
 
 export function WebinarSessionDetailDrawer({
@@ -183,6 +185,8 @@ export function WebinarSessionDetailDrawer({
               <Field label="Step máximo" value={session.signup_step_reached} />
               <Field label="Completou" value={session.signup_completed ? "Sim" : "Não"} />
               <Field label="Qualificado" value={session.signup_qualified ? "Sim" : "Não"} />
+              <Field label="Chegou na pág. obrigado" value={session.reached_thank_you ? (session.thank_you_at ? new Date(session.thank_you_at).toLocaleString("pt-BR") : "Sim") : "Não"} />
+              <Field label="Entrou no WhatsApp" value={session.whatsapp_group_clicked ? "Sim" : "Não"} />
             </div>
           </section>
 

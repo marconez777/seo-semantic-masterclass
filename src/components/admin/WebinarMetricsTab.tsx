@@ -55,6 +55,9 @@ interface SessionRow {
   signup_step_reached: number;
   signup_completed: boolean;
   signup_qualified: boolean;
+  reached_thank_you: boolean;
+  thank_you_at: string | null;
+  whatsapp_group_clicked: boolean;
   total_time_on_page_seconds: number;
   scroll_depth_pct: number;
   // join
@@ -168,6 +171,8 @@ export function WebinarMetricsTab() {
   const modalOpened = rows.filter((r) => r.signup_modal_opened).length;
   const signedUp = rows.filter((r) => r.signup_completed).length;
   const qualified = rows.filter((r) => r.signup_qualified).length;
+  const reachedThankYou = rows.filter((r) => r.reached_thank_you).length;
+  const joinedWhatsApp = rows.filter((r) => r.whatsapp_group_clicked).length;
 
   const avgWatch =
     startedVideo > 0
@@ -213,6 +218,7 @@ export function WebinarMetricsTab() {
       "vídeo_iniciou", "vídeo_assistido_seg", "vídeo_max_seg", "vídeo_completou_pct", "fullscreen", "velocidade_max",
       "cta_total", "cta_hero", "cta_learn", "cta_final", "cta_sticky", "primeiro_cta",
       "abriu_modal", "step_atingido", "completou_inscrição", "qualificado",
+      "chegou_obrigado", "obrigado_em", "clicou_whatsapp",
       "tempo_pagina_seg", "scroll_pct",
       "lead_nome", "lead_email",
     ];
@@ -229,6 +235,9 @@ export function WebinarMetricsTab() {
       r.signup_step_reached,
       r.signup_completed ? "sim" : "não",
       r.signup_qualified ? "sim" : "não",
+      r.reached_thank_you ? "sim" : "não",
+      r.thank_you_at ? new Date(r.thank_you_at).toLocaleString("pt-BR") : "",
+      r.whatsapp_group_clicked ? "sim" : "não",
       r.total_time_on_page_seconds, r.scroll_depth_pct,
       r.signup_nome ?? "", r.signup_email ?? "",
     ]);
@@ -275,6 +284,8 @@ export function WebinarMetricsTab() {
         <MetricCard label="Modais abertos" value={modalOpened.toString()} sub={`${pct(modalOpened, total)}% dos visitantes`} />
         <MetricCard label="Inscrições" value={signedUp.toString()} sub={`Conv: ${pct(signedUp, total)}%`} />
         <MetricCard label="Qualificados" value={qualified.toString()} sub={`${pct(qualified, signedUp)}% das inscrições`} />
+        <MetricCard label="Chegou na pág. obrigado" value={reachedThankYou.toString()} sub={`${pct(reachedThankYou, signedUp)}% dos inscritos`} />
+        <MetricCard label="Entrou no WhatsApp" value={joinedWhatsApp.toString()} sub={`${pct(joinedWhatsApp, reachedThankYou)}% dos que chegaram`} />
       </div>
 
       {/* Funil */}
@@ -289,6 +300,8 @@ export function WebinarMetricsTab() {
           <FunnelStep label="Abriu o modal de inscrição" value={modalOpened} base={total} />
           <FunnelStep label="Completou inscrição" value={signedUp} base={total} />
           <FunnelStep label="Qualificado (psiquiatra + faturamento)" value={qualified} base={total} />
+          <FunnelStep label="Chegou na página de obrigado" value={reachedThankYou} base={total} />
+          <FunnelStep label="Clicou para entrar no WhatsApp" value={joinedWhatsApp} base={total} />
         </CardContent>
       </Card>
 
@@ -414,17 +427,27 @@ export function WebinarMetricsTab() {
                       ) : <span className="text-muted-foreground">—</span>}
                     </TableCell>
                     <TableCell>
-                      {r.signup_completed ? (
-                        r.signup_qualified ? (
-                          <Badge className="bg-emerald-600">Qualificado</Badge>
+                      <div className="flex flex-col gap-0.5">
+                        {r.signup_completed ? (
+                          r.signup_qualified ? (
+                            <Badge className="bg-emerald-600 w-fit">Qualificado</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="w-fit">Inscrito</Badge>
+                          )
+                        ) : r.signup_modal_opened ? (
+                          <Badge variant="outline" className="w-fit">Modal · step {r.signup_step_reached}</Badge>
                         ) : (
-                          <Badge variant="secondary">Inscrito</Badge>
-                        )
-                      ) : r.signup_modal_opened ? (
-                        <Badge variant="outline">Modal · step {r.signup_step_reached}</Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                        <div className="flex gap-1">
+                          {r.reached_thank_you && (
+                            <Badge variant="outline" className="h-4 text-[10px] px-1 border-emerald-500 text-emerald-700">obrigado</Badge>
+                          )}
+                          {r.whatsapp_group_clicked && (
+                            <Badge variant="outline" className="h-4 text-[10px] px-1 border-emerald-500 text-emerald-700">WA</Badge>
+                          )}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell className="text-xs">
                       {r.signup_nome ? (

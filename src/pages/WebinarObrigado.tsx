@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import SEOHead from "@/components/seo/SEOHead";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, MessageCircle } from "lucide-react";
+import { webinarTracker } from "@/lib/webinarTracker";
 
 const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/CHs1yNroEsYL6j6LWPQC2N";
 
@@ -10,8 +11,19 @@ const WebinarObrigado = () => {
 
   useEffect(() => {
     const timer = window.setTimeout(() => setProgress(80), 250);
+    webinarTracker.track("thank_you_view", { path: "/webinar-medico/obrigado" });
+    webinarTracker.patchMetrics({
+      reached_thank_you: true,
+      thank_you_at: new Date().toISOString(),
+    });
     return () => window.clearTimeout(timer);
   }, []);
+
+  const handleWhatsAppClick = () => {
+    webinarTracker.track("whatsapp_group_click", {});
+    webinarTracker.patchMetrics({ whatsapp_group_clicked: true });
+    webinarTracker.flush();
+  };
 
   return (
     <>
@@ -53,6 +65,7 @@ const WebinarObrigado = () => {
           href={WHATSAPP_GROUP_URL}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleWhatsAppClick}
           className="btn-webinar-cta w-full sm:w-auto"
         >
           <MessageCircle size={20} />
