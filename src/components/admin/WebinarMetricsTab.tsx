@@ -19,8 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Eye, Smartphone, Monitor, Tablet, Download } from "lucide-react";
+import { Search, Eye, Smartphone, Monitor, Tablet, Download, Trash2 } from "lucide-react";
 import { WebinarSessionDetailDrawer } from "./WebinarSessionDetailDrawer";
+import { useToast } from "@/hooks/use-toast";
 
 interface SessionRow {
   id: string;
@@ -83,6 +84,20 @@ const DeviceIcon = ({ d }: { d: string | null }) => {
 
 export function WebinarMetricsTab() {
   const [rows, setRows] = useState<SessionRow[]>([]);
+  const { toast } = useToast();
+
+  const handleDeleteSession = async (e: React.MouseEvent, r: SessionRow) => {
+    e.stopPropagation();
+    if (!confirm("Excluir esta sessão e todos os seus eventos? Esta ação não pode ser desfeita.")) return;
+    const { error: evErr } = await supabase.from("webinar_events" as any).delete().eq("session_id", r.session_id);
+    const { error: ssErr } = await supabase.from("webinar_sessions" as any).delete().eq("id", r.id);
+    if (evErr || ssErr) {
+      toast({ title: "Erro ao excluir", description: (evErr || ssErr)?.message });
+      return;
+    }
+    setRows((prev) => prev.filter((x) => x.id !== r.id));
+    toast({ title: "Sessão excluída" });
+  };
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>("30");
   const [q, setQ] = useState("");
@@ -458,9 +473,14 @@ export function WebinarMetricsTab() {
                       ) : <span className="text-muted-foreground">—</span>}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); setOpenSession(r); }}>
-                        <Eye className="w-4 h-4" />
-                      </Button>
+                      <div className="flex justify-end gap-1">
+                        <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); setOpenSession(r); }}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={(e) => handleDeleteSession(e, r)} aria-label="Excluir">
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
