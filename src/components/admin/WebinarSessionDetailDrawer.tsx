@@ -43,6 +43,7 @@ const eventLabel: Record<string, string> = {
   cta_click: "🟡 Clicou CTA",
   signup_open: "📝 Abriu inscrição",
   signup_step: "📝 Avançou step",
+  signup_answer: "✍️ Respondeu",
   signup_submit: "✅ Submeteu inscrição",
   signup_qualified: "🎯 Qualificado",
   signup_unqualified: "🚫 Não qualificado",
@@ -189,6 +190,36 @@ export function WebinarSessionDetailDrawer({
               <Field label="Entrou no WhatsApp" value={session.whatsapp_group_clicked ? "Sim" : "Não"} />
             </div>
           </section>
+
+          {/* Respostas do formulário */}
+          {(() => {
+            const answers = events.filter((e) => e.event_type === "signup_answer");
+            if (answers.length === 0) return null;
+            const fieldLabel: Record<string, string> = {
+              nome: "Nome",
+              email: "E-mail",
+              whatsapp: "WhatsApp",
+              psiquiatra: "É psiquiatra?",
+              faturamento: "Faturamento",
+            };
+            // dedupe por field, mantendo a última resposta
+            const map = new Map<string, any>();
+            answers.forEach((a) => map.set(a.event_data?.field, a.event_data?.value));
+            return (
+              <section>
+                <h3 className="font-semibold mb-3">Respostas preenchidas</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {Array.from(map.entries()).map(([field, value]) => (
+                    <Field
+                      key={field}
+                      label={fieldLabel[field] ?? field}
+                      value={String(value ?? "—")}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
 
           {/* Timeline */}
           <section>
