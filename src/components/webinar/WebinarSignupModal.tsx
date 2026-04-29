@@ -6,6 +6,7 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { webinarTracker } from "@/lib/webinarTracker";
 
 interface Props {
   open: boolean;
@@ -52,13 +53,20 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
       setStep(1);
       setDone(null);
       setAnswers({ nome: "", email: "", whatsapp: "", psiquiatra: "", faturamento: "" });
+      webinarTracker.patchMetrics({ signup_modal_opened: true, signup_step_reached: 1 });
+      webinarTracker.track("signup_step", { step: 1 });
     }
   }, [open]);
 
   const update = <K extends keyof Answers>(k: K, v: Answers[K]) =>
     setAnswers((s) => ({ ...s, [k]: v }));
 
-  const next = () => setStep((s) => s + 1);
+  const next = () => setStep((s) => {
+    const ns = s + 1;
+    webinarTracker.patchMetrics({ signup_step_reached: ns });
+    webinarTracker.track("signup_step", { step: ns });
+    return ns;
+  });
   const back = () => setStep((s) => Math.max(1, s - 1));
 
   const validateAndNext = () => {
@@ -79,22 +87,42 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
 
   const submit = async (faturamento: string) => {
     setSubmitting(true);
-    const { error } = await supabase.from("webinar_signups").insert([{
-      nome: answers.nome.trim(),
-      email: answers.email.trim(),
-      whatsapp: answers.whatsapp.trim(),
-      especialidade: answers.psiquiatra === "Sim" ? "Psiquiatria" : "Outra",
-      faturamento,
-      source: "webinar-medico",
-    }]);
+    const sessionId = webinarTracker.getSessionId();
+    const { data: inserted, error } = await supabase
+      .from("webinar_signups")
+      .insert([{
+        nome: answers.nome.trim(),
+        email: answers.email.trim(),
+        whatsapp: answers.whatsapp.trim(),
+        especialidade: answers.psiquiatra === "Sim" ? "Psiquiatria" : "Outra",
+        faturamento,
+        source: "webinar-medico",
+        session_id: sessionId,
+      } as any])
+      .select("id")
+      .maybeSingle();
     setSubmitting(false);
 
     if (error) {
       toast.error("Não foi possível concluir. Tente novamente.");
+      webinarTracker.track("signup_error", { message: error.message });
       return;
     }
 
     const qualified = answers.psiquiatra === "Sim" && QUALIFIED_FATURAMENTOS.has(faturamento);
+    webinarTracker.patchMetrics({
+      signup_completed: true,
+      signup_qualified: qualified,
+      signup_id: inserted?.id ?? null,
+    });
+    webinarTracker.track("signup_submit", {
+      qualified,
+      especialidade: answers.psiquiatra,
+      faturamento,
+    });
+    webinarTracker.track(qualified ? "signup_qualified" : "signup_unqualified", {});
+    webinarTracker.flush(false);
+
     if (qualified) {
       onOpenChange(false);
       navigate("/webinar-medico/obrigado");

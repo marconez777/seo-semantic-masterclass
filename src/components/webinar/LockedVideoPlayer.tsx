@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Play, Pause, Volume2, VolumeX, Maximize, Minimize } from "lucide-react";
+import { webinarTracker } from "@/lib/webinarTracker";
 
 interface Props {
   src: string;
@@ -20,6 +21,10 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const maxWatchedRef = useRef(0);
+  const watchAccumRef = useRef(0); // segundos efetivamente assistidos
+  const playStartRef = useRef<number | null>(null);
+  const milestonesRef = useRef<Set<number>>(new Set());
+  const maxSpeedRef = useRef(1);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
@@ -43,11 +48,16 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
   const toggleMute = () => {
     const v = videoRef.current;
     if (!v) return;
+    const willUnmute = v.muted;
     v.muted = !v.muted;
     setIsMuted(v.muted);
     if (!v.muted && v.volume === 0) {
       v.volume = 1;
       setVolume(1);
+    }
+    if (willUnmute) {
+      webinarTracker.patchMetrics({ unmuted: true });
+      webinarTracker.track("video_unmute", { at: v.currentTime });
     }
   };
 
@@ -68,6 +78,8 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     setIsMuted(false);
     v.play().catch(() => {});
     setShowOverlay(false);
+    webinarTracker.patchMetrics({ unmuted: true });
+    webinarTracker.track("video_overlay_start", {});
   };
 
   const toggleFullscreen = () => {
@@ -83,9 +95,9 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
 
     try {
       if (!fsElement) {
-        // iOS Safari: only the <video> element supports fullscreen
+        webinarTracker.patchMetrics({ went_fullscreen: true });
+        webinarTracker.track("video_fullscreen", { at: v?.currentTime ?? 0 });
         if (v && typeof v.webkitEnterFullscreen === "function") {
-          // Needs to be unmuted on iOS to enter fullscreen reliably
           if (v.muted) {
             v.muted = false;
             setIsMuted(false);
@@ -119,6 +131,9 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     if (!v) return;
     v.playbackRate = rate;
     setSpeed(rate);
+    if (rate > maxSpeedRef.current) maxSpeedRef.current = rate;
+    webinarTracker.patchMetrics({ max_speed: rate });
+    webinarTracker.track("video_speed_change", { speed: rate, at: v.currentTime });
   };
 
   useEffect(() => {
@@ -130,21 +145,67 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
       if (v.currentTime > maxWatchedRef.current) {
         maxWatchedRef.current = v.currentTime;
       }
+      // marcos de progresso
+      const dur = v.duration || 0;
+      if (dur > 0) {
+        const pct = (v.currentTime / dur) * 100;
+        for (const m of [25, 50, 75, 95]) {
+          if (pct >= m && !milestonesRef.current.has(m)) {
+            milestonesRef.current.add(m);
+            webinarTracker.track(`video_progress_${m}`, { at: v.currentTime });
+          }
+        }
+        webinarTracker.patchMetrics({
+          video_max_position_seconds: Math.round(maxWatchedRef.current),
+          video_completion_pct: Math.min(100, Math.round(pct)),
+          video_duration_seconds: Math.round(dur),
+        });
+      }
     };
 
     const onSeeking = () => {
       if (v.currentTime > maxWatchedRef.current + 0.5) {
+        webinarTracker.track("video_seek_blocked", {
+          attempted: v.currentTime,
+          allowed: maxWatchedRef.current,
+        });
         v.currentTime = maxWatchedRef.current;
       }
     };
 
-    const onLoaded = () => setDuration(v.duration || 0);
+    const onLoaded = () => {
+      setDuration(v.duration || 0);
+      webinarTracker.patchMetrics({ video_duration_seconds: Math.round(v.duration || 0) });
+    };
+
+    const accumWatch = () => {
+      if (playStartRef.current != null) {
+        watchAccumRef.current += (Date.now() - playStartRef.current) / 1000;
+        playStartRef.current = null;
+        webinarTracker.patchMetrics({
+          video_watch_seconds: Math.round(watchAccumRef.current),
+        });
+      }
+    };
+
     const onPlay = () => {
       setIsPlaying(true);
       setShowOverlay(false);
+      playStartRef.current = Date.now();
+      webinarTracker.patchMetrics({ video_started: true });
+      webinarTracker.track("video_play", { at: v.currentTime });
     };
-    const onPause = () => setIsPlaying(false);
-    const onEnded = () => setIsPlaying(false);
+    const onPause = () => {
+      setIsPlaying(false);
+      accumWatch();
+      webinarTracker.track("video_pause", { at: v.currentTime });
+    };
+    const onEnded = () => {
+      setIsPlaying(false);
+      accumWatch();
+      webinarTracker.patchMetrics({ video_completed: true, video_completion_pct: 100 });
+      webinarTracker.track("video_ended", { at: v.currentTime });
+    };
 
     const onKeyDown = (e: KeyboardEvent) => {
       const blocked = ["ArrowRight", "ArrowLeft", "j", "J", "l", "L"];
@@ -163,6 +224,7 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     v.addEventListener("keydown", onKeyDown);
 
     return () => {
+      accumWatch();
       v.removeEventListener("timeupdate", onTimeUpdate);
       v.removeEventListener("seeking", onSeeking);
       v.removeEventListener("loadedmetadata", onLoaded);

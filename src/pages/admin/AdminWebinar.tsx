@@ -6,6 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Download, Search, Trash2 } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { WebinarMetricsTab } from "@/components/admin/WebinarMetricsTab";
 
 interface WebinarSignup {
   id: string;
@@ -89,97 +91,111 @@ export default function AdminWebinar() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold">Inscrições do Webinar</h1>
-          <p className="text-sm text-muted-foreground">
-            {rows.length} {rows.length === 1 ? "inscrição" : "inscrições"} no total
-          </p>
-        </div>
-        <Button onClick={exportCSV} variant="outline" disabled={!filtered.length}>
-          <Download className="w-4 h-4 mr-2" />
-          Exportar CSV
-        </Button>
+      <div>
+        <h1 className="text-2xl font-bold">Webinar</h1>
+        <p className="text-sm text-muted-foreground">Inscrições e métricas detalhadas</p>
       </div>
 
-      <div className="relative max-w-sm">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-        <Input
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Buscar por nome, email, whatsapp..."
-          className="pl-9"
-        />
-      </div>
+      <Tabs defaultValue="inscricoes">
+        <TabsList>
+          <TabsTrigger value="inscricoes">Inscrições ({rows.length})</TabsTrigger>
+          <TabsTrigger value="metricas">Métricas & Rastreamento</TabsTrigger>
+        </TabsList>
 
-      <div className="rounded-md border bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>WhatsApp</TableHead>
-              <TableHead>Especialidade</TableHead>
-              <TableHead>Faturamento</TableHead>
-              <TableHead>Data</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {loading ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                  Carregando...
-                </TableCell>
-              </TableRow>
-            ) : filtered.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
-                  Nenhuma inscrição encontrada
-                </TableCell>
-              </TableRow>
-            ) : (
-              filtered.map((r) => (
-                <TableRow key={r.id}>
-                  <TableCell className="font-medium">{r.nome}</TableCell>
-                  <TableCell>
-                    <a href={`mailto:${r.email}`} className="text-primary hover:underline">
-                      {r.email}
-                    </a>
-                  </TableCell>
-                  <TableCell>
-                    <a
-                      href={`https://wa.me/${r.whatsapp.replace(/\D/g, "")}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      {r.whatsapp}
-                    </a>
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="secondary">{r.especialidade}</Badge>
-                  </TableCell>
-                  <TableCell>{r.faturamento}</TableCell>
-                  <TableCell className="text-sm text-muted-foreground">
-                    {new Date(r.created_at).toLocaleString("pt-BR")}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleDelete(r.id)}
-                      aria-label="Excluir"
-                    >
-                      <Trash2 className="w-4 h-4 text-destructive" />
-                    </Button>
-                  </TableCell>
+        <TabsContent value="inscricoes" className="mt-6 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              {rows.length} {rows.length === 1 ? "inscrição" : "inscrições"} no total
+            </p>
+            <Button onClick={exportCSV} variant="outline" disabled={!filtered.length}>
+              <Download className="w-4 h-4 mr-2" /> Exportar CSV
+            </Button>
+          </div>
+
+          <div className="relative max-w-sm">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Buscar por nome, email, whatsapp..."
+              className="pl-9"
+            />
+          </div>
+
+          <div className="rounded-md border bg-card">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Nome</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>WhatsApp</TableHead>
+                  <TableHead>Especialidade</TableHead>
+                  <TableHead>Faturamento</TableHead>
+                  <TableHead>Data</TableHead>
+                  <TableHead className="text-right">Ações</TableHead>
                 </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              </TableHeader>
+              <TableBody>
+                {loading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Carregando...
+                    </TableCell>
+                  </TableRow>
+                ) : filtered.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                      Nenhuma inscrição encontrada
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filtered.map((r) => (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-medium">{r.nome}</TableCell>
+                      <TableCell>
+                        <a href={`mailto:${r.email}`} className="text-primary hover:underline">
+                          {r.email}
+                        </a>
+                      </TableCell>
+                      <TableCell>
+                        <a
+                          href={`https://wa.me/${r.whatsapp.replace(/\D/g, "")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          {r.whatsapp}
+                        </a>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary">{r.especialidade}</Badge>
+                      </TableCell>
+                      <TableCell>{r.faturamento}</TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(r.created_at).toLocaleString("pt-BR")}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          onClick={() => handleDelete(r.id)}
+                          aria-label="Excluir"
+                        >
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="metricas" className="mt-6">
+          <WebinarMetricsTab />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

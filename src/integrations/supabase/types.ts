@@ -884,6 +884,168 @@ export type Database = {
         }
         Relationships: []
       }
+      webinar_events: {
+        Row: {
+          created_at: string
+          event_data: Json
+          event_type: string
+          id: string
+          session_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json
+          event_type: string
+          id?: string
+          session_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json
+          event_type?: string
+          id?: string
+          session_id?: string
+        }
+        Relationships: []
+      }
+      webinar_sessions: {
+        Row: {
+          browser: string | null
+          cta_clicks: number
+          cta_final_clicks: number
+          cta_hero_clicks: number
+          cta_learn_clicks: number
+          cta_sticky_clicks: number
+          device_type: string | null
+          first_cta_clicked: string | null
+          first_seen_at: string
+          id: string
+          ip_city: string | null
+          ip_country: string | null
+          landing_url: string | null
+          language: string | null
+          last_seen_at: string
+          max_speed: number
+          os: string | null
+          referrer: string | null
+          screen_size: string | null
+          scroll_depth_pct: number
+          session_id: string
+          signup_completed: boolean
+          signup_id: string | null
+          signup_modal_opened: boolean
+          signup_qualified: boolean
+          signup_step_reached: number
+          timezone: string | null
+          total_time_on_page_seconds: number
+          unmuted: boolean
+          user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          video_completed: boolean
+          video_completion_pct: number
+          video_duration_seconds: number
+          video_max_position_seconds: number
+          video_started: boolean
+          video_watch_seconds: number
+          viewport_size: string | null
+          went_fullscreen: boolean
+        }
+        Insert: {
+          browser?: string | null
+          cta_clicks?: number
+          cta_final_clicks?: number
+          cta_hero_clicks?: number
+          cta_learn_clicks?: number
+          cta_sticky_clicks?: number
+          device_type?: string | null
+          first_cta_clicked?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_city?: string | null
+          ip_country?: string | null
+          landing_url?: string | null
+          language?: string | null
+          last_seen_at?: string
+          max_speed?: number
+          os?: string | null
+          referrer?: string | null
+          screen_size?: string | null
+          scroll_depth_pct?: number
+          session_id: string
+          signup_completed?: boolean
+          signup_id?: string | null
+          signup_modal_opened?: boolean
+          signup_qualified?: boolean
+          signup_step_reached?: number
+          timezone?: string | null
+          total_time_on_page_seconds?: number
+          unmuted?: boolean
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          video_completed?: boolean
+          video_completion_pct?: number
+          video_duration_seconds?: number
+          video_max_position_seconds?: number
+          video_started?: boolean
+          video_watch_seconds?: number
+          viewport_size?: string | null
+          went_fullscreen?: boolean
+        }
+        Update: {
+          browser?: string | null
+          cta_clicks?: number
+          cta_final_clicks?: number
+          cta_hero_clicks?: number
+          cta_learn_clicks?: number
+          cta_sticky_clicks?: number
+          device_type?: string | null
+          first_cta_clicked?: string | null
+          first_seen_at?: string
+          id?: string
+          ip_city?: string | null
+          ip_country?: string | null
+          landing_url?: string | null
+          language?: string | null
+          last_seen_at?: string
+          max_speed?: number
+          os?: string | null
+          referrer?: string | null
+          screen_size?: string | null
+          scroll_depth_pct?: number
+          session_id?: string
+          signup_completed?: boolean
+          signup_id?: string | null
+          signup_modal_opened?: boolean
+          signup_qualified?: boolean
+          signup_step_reached?: number
+          timezone?: string | null
+          total_time_on_page_seconds?: number
+          unmuted?: boolean
+          user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          video_completed?: boolean
+          video_completion_pct?: number
+          video_duration_seconds?: number
+          video_max_position_seconds?: number
+          video_started?: boolean
+          video_watch_seconds?: number
+          viewport_size?: string | null
+          went_fullscreen?: boolean
+        }
+        Relationships: []
+      }
       webinar_signups: {
         Row: {
           created_at: string
@@ -892,6 +1054,7 @@ export type Database = {
           faturamento: string
           id: string
           nome: string
+          session_id: string | null
           source: string
           whatsapp: string
         }
@@ -902,6 +1065,7 @@ export type Database = {
           faturamento: string
           id?: string
           nome: string
+          session_id?: string | null
           source?: string
           whatsapp: string
         }
@@ -912,6 +1076,7 @@ export type Database = {
           faturamento?: string
           id?: string
           nome?: string
+          session_id?: string | null
           source?: string
           whatsapp?: string
         }
