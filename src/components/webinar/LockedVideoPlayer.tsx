@@ -70,14 +70,44 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     setShowOverlay(false);
   };
 
-  const toggleFullscreen = async () => {
-    const el = containerRef.current;
-    if (!el) return;
+  const toggleFullscreen = () => {
+    const el = containerRef.current as any;
+    const v = videoRef.current as any;
+    const doc = document as any;
+
+    const fsElement =
+      doc.fullscreenElement ||
+      doc.webkitFullscreenElement ||
+      doc.webkitCurrentFullScreenElement ||
+      (v && v.webkitDisplayingFullscreen);
+
     try {
-      if (!document.fullscreenElement) {
-        await el.requestFullscreen();
+      if (!fsElement) {
+        // iOS Safari: only the <video> element supports fullscreen
+        if (v && typeof v.webkitEnterFullscreen === "function") {
+          // Needs to be unmuted on iOS to enter fullscreen reliably
+          if (v.muted) {
+            v.muted = false;
+            setIsMuted(false);
+          }
+          v.webkitEnterFullscreen();
+          return;
+        }
+        if (el?.requestFullscreen) {
+          el.requestFullscreen().catch(() => {});
+        } else if (el?.webkitRequestFullscreen) {
+          el.webkitRequestFullscreen();
+        } else if (v?.requestFullscreen) {
+          v.requestFullscreen().catch(() => {});
+        }
       } else {
-        await document.exitFullscreen();
+        if (doc.exitFullscreen) {
+          doc.exitFullscreen().catch(() => {});
+        } else if (doc.webkitExitFullscreen) {
+          doc.webkitExitFullscreen();
+        } else if (v && typeof v.webkitExitFullscreen === "function") {
+          v.webkitExitFullscreen();
+        }
       }
     } catch {
       /* ignore */
@@ -144,9 +174,29 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
   }, []);
 
   useEffect(() => {
-    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    const onFsChange = () =>
+      setIsFullscreen(
+        !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).webkitCurrentFullScreenElement
+        )
+      );
     document.addEventListener("fullscreenchange", onFsChange);
-    return () => document.removeEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
+
+    const v = videoRef.current as any;
+    const onBeginIos = () => setIsFullscreen(true);
+    const onEndIos = () => setIsFullscreen(false);
+    v?.addEventListener?.("webkitbeginfullscreen", onBeginIos);
+    v?.addEventListener?.("webkitendfullscreen", onEndIos);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", onFsChange);
+      document.removeEventListener("webkitfullscreenchange", onFsChange);
+      v?.removeEventListener?.("webkitbeginfullscreen", onBeginIos);
+      v?.removeEventListener?.("webkitendfullscreen", onEndIos);
+    };
   }, []);
 
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
