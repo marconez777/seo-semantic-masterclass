@@ -284,6 +284,8 @@ export function WebinarMetricsTab() {
         <MetricCard label="Modais abertos" value={modalOpened.toString()} sub={`${pct(modalOpened, total)}% dos visitantes`} />
         <MetricCard label="Inscrições" value={signedUp.toString()} sub={`Conv: ${pct(signedUp, total)}%`} />
         <MetricCard label="Qualificados" value={qualified.toString()} sub={`${pct(qualified, signedUp)}% das inscrições`} />
+        <MetricCard label="Chegou na pág. obrigado" value={reachedThankYou.toString()} sub={`${pct(reachedThankYou, signedUp)}% dos inscritos`} />
+        <MetricCard label="Entrou no WhatsApp" value={joinedWhatsApp.toString()} sub={`${pct(joinedWhatsApp, reachedThankYou)}% dos que chegaram`} />
       </div>
 
       {/* Funil */}
