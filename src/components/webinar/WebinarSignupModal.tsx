@@ -87,22 +87,42 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
 
   const submit = async (faturamento: string) => {
     setSubmitting(true);
-    const { error } = await supabase.from("webinar_signups").insert([{
-      nome: answers.nome.trim(),
-      email: answers.email.trim(),
-      whatsapp: answers.whatsapp.trim(),
-      especialidade: answers.psiquiatra === "Sim" ? "Psiquiatria" : "Outra",
-      faturamento,
-      source: "webinar-medico",
-    }]);
+    const sessionId = webinarTracker.getSessionId();
+    const { data: inserted, error } = await supabase
+      .from("webinar_signups")
+      .insert([{
+        nome: answers.nome.trim(),
+        email: answers.email.trim(),
+        whatsapp: answers.whatsapp.trim(),
+        especialidade: answers.psiquiatra === "Sim" ? "Psiquiatria" : "Outra",
+        faturamento,
+        source: "webinar-medico",
+        session_id: sessionId,
+      } as any])
+      .select("id")
+      .maybeSingle();
     setSubmitting(false);
 
     if (error) {
       toast.error("Não foi possível concluir. Tente novamente.");
+      webinarTracker.track("signup_error", { message: error.message });
       return;
     }
 
     const qualified = answers.psiquiatra === "Sim" && QUALIFIED_FATURAMENTOS.has(faturamento);
+    webinarTracker.patchMetrics({
+      signup_completed: true,
+      signup_qualified: qualified,
+      signup_id: inserted?.id ?? null,
+    });
+    webinarTracker.track("signup_submit", {
+      qualified,
+      especialidade: answers.psiquiatra,
+      faturamento,
+    });
+    webinarTracker.track(qualified ? "signup_qualified" : "signup_unqualified", {});
+    webinarTracker.flush(false);
+
     if (qualified) {
       onOpenChange(false);
       navigate("/webinar-medico/obrigado");
