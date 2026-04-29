@@ -6,8 +6,12 @@ export const WebinarHost = () => (
       </p>
 
       <div className="grid lg:grid-cols-[300px_1fr] gap-10 lg:gap-16 items-start">
-        <div className="aspect-[4/5] bg-webinar-border-inverse/40 rounded-md overflow-hidden flex items-center justify-center">
-          <span className="font-serif-display text-7xl text-webinar-accent">MK</span>
+        <div className="aspect-[4/5] bg-webinar-border-inverse/40 rounded-md overflow-hidden">
+          <img
+            src="/lovable-uploads/b120631c-0792-4f41-8951-878c83dd310f.png"
+            alt="Marco Guimarães — MK"
+            className="w-full h-full object-cover object-center"
+          />
         </div>
 
         <div>
