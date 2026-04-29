@@ -47,6 +47,8 @@ const eventLabel: Record<string, string> = {
   signup_qualified: "🎯 Qualificado",
   signup_unqualified: "🚫 Não qualificado",
   signup_error: "❌ Erro inscrição",
+  thank_you_view: "🙏 Página de obrigado",
+  whatsapp_group_click: "💬 Clicou no grupo WhatsApp",
 };
 
 export function WebinarSessionDetailDrawer({
