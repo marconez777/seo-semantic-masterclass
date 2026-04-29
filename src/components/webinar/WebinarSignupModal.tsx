@@ -229,6 +229,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
                         label={opt}
                         onClick={() => {
                           update("psiquiatra", opt);
+                          webinarTracker.track("signup_answer", { step: 4, field: "psiquiatra", value: opt });
                           next();
                         }}
                       />
