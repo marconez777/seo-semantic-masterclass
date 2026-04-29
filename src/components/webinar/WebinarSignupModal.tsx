@@ -53,13 +53,20 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
       setStep(1);
       setDone(null);
       setAnswers({ nome: "", email: "", whatsapp: "", psiquiatra: "", faturamento: "" });
+      webinarTracker.patchMetrics({ signup_modal_opened: true, signup_step_reached: 1 });
+      webinarTracker.track("signup_step", { step: 1 });
     }
   }, [open]);
 
   const update = <K extends keyof Answers>(k: K, v: Answers[K]) =>
     setAnswers((s) => ({ ...s, [k]: v }));
 
-  const next = () => setStep((s) => s + 1);
+  const next = () => setStep((s) => {
+    const ns = s + 1;
+    webinarTracker.patchMetrics({ signup_step_reached: ns });
+    webinarTracker.track("signup_step", { step: ns });
+    return ns;
+  });
   const back = () => setStep((s) => Math.max(1, s - 1));
 
   const validateAndNext = () => {
