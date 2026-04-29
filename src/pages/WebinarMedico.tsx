@@ -13,7 +13,7 @@ import { WebinarStickyCTA } from "@/components/webinar/WebinarStickyCTA";
 import { WebinarSignupModal } from "@/components/webinar/WebinarSignupModal";
 
 // === Configuráveis ===
-const WEBINAR_DATE = "Quinta-feira";
+const WEBINAR_DATE = "Domingo, 17/05";
 // URL pública do vídeo do webinar (faça upload no bucket "webinar-videos" do backend)
 const HERO_VIDEO_URL =
   "https://nxitvhrfloibpwrkskzx.supabase.co/storage/v1/object/public/webinar-videos/hero.mp4";
@@ -50,7 +50,7 @@ const WebinarMedico = () => {
   return (
     <>
       <SEOHead
-        title="Webinar para Donos de Clínica · Quinta, 20h | MK"
+        title="Webinar para Donos de Clínica · Domingo 17/05, 10h | MK"
         description="Como clínicas médicas estão substituindo tráfego pago por SEO, GEO e IA. Webinar gratuito ao vivo para donos de clínica."
         canonicalUrl="https://mkart.com.br/webinar-medico"
       />

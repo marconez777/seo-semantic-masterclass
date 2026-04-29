@@ -77,7 +77,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
         <DialogHeader>
           <DialogTitle className="font-serif-display text-2xl">Confirme sua inscrição</DialogTitle>
           <DialogDescription className="text-webinar-muted">
-            Webinar gratuito · Quinta-feira · 20h
+            Webinar gratuito · Domingo, 17/05 · 10h
           </DialogDescription>
         </DialogHeader>
 
