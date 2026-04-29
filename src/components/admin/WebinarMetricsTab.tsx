@@ -19,8 +19,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Eye, Smartphone, Monitor, Tablet, Download } from "lucide-react";
+import { Search, Eye, Smartphone, Monitor, Tablet, Download, Trash2 } from "lucide-react";
 import { WebinarSessionDetailDrawer } from "./WebinarSessionDetailDrawer";
+import { useToast } from "@/hooks/use-toast";
 
 interface SessionRow {
   id: string;
