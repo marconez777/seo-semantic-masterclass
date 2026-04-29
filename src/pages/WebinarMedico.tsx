@@ -19,7 +19,7 @@ const HERO_VIDEO_URL =
   "https://nxitvhrfloibpwrkskzx.supabase.co/storage/v1/object/public/webinar-videos/hero.mp4";
 const HERO_POSTER_URL: string | undefined = undefined;
 const HERO_VIDEO_ID = "dQw4w9WgXcQ";
-const IVAN_VIDEO_ID = "dQw4w9WgXcQ";
+const IVAN_VIDEO_ID = "28LzmtmItW0";
 const CASE_2_VIDEO_ID = "dQw4w9WgXcQ";
 const CASE_3_VIDEO_ID = "dQw4w9WgXcQ";
 const VAGAS_RESTANTES = "03/10";
