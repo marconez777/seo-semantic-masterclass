@@ -56,7 +56,7 @@ const WebinarMedico = () => {
       />
 
       <main className="font-sans text-[20px]">
-        <WebinarHero onCTAClick={openModal} videoId={HERO_VIDEO_ID} vagas={VAGAS_RESTANTES} />
+        <WebinarHero onCTAClick={openModal} videoUrl={HERO_VIDEO_URL} posterUrl={HERO_POSTER_URL} vagas={VAGAS_RESTANTES} />
         <WebinarCaseIvan videoId={IVAN_VIDEO_ID} />
         <WebinarLearn onCTAClick={openModal} vagas={VAGAS_RESTANTES} />
         <WebinarMoreCases cases={MORE_CASES} />
