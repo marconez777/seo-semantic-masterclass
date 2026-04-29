@@ -111,7 +111,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
     webinarTracker.patchMetrics({
       signup_completed: true,
       signup_qualified: qualified,
-      signup_id: inserted?.id ?? null,
+      
     });
     webinarTracker.track("signup_submit", {
       qualified,
