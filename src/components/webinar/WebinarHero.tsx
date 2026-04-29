@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Stethoscope, ShieldCheck, Radio } from "lucide-react";
 import { LockedVideoPlayer } from "./LockedVideoPlayer";
 
 interface Props {
