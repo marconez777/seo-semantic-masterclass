@@ -473,9 +473,14 @@ export function WebinarMetricsTab() {
                       ) : <span className="text-muted-foreground">—</span>}
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); setOpenSession(r); }}>
-                        <Eye className="w-4 h-4" />
-                      </Button>
+                      <div className="flex justify-end gap-1">
+                        <Button size="icon" variant="ghost" onClick={(e) => { e.stopPropagation(); setOpenSession(r); }}>
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={(e) => handleDeleteSession(e, r)} aria-label="Excluir">
+                          <Trash2 className="w-4 h-4 text-destructive" />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))
