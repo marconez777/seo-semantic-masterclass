@@ -84,6 +84,20 @@ const DeviceIcon = ({ d }: { d: string | null }) => {
 
 export function WebinarMetricsTab() {
   const [rows, setRows] = useState<SessionRow[]>([]);
+  const { toast } = useToast();
+
+  const handleDeleteSession = async (e: React.MouseEvent, r: SessionRow) => {
+    e.stopPropagation();
+    if (!confirm("Excluir esta sessão e todos os seus eventos? Esta ação não pode ser desfeita.")) return;
+    const { error: evErr } = await supabase.from("webinar_events" as any).delete().eq("session_id", r.session_id);
+    const { error: ssErr } = await supabase.from("webinar_sessions" as any).delete().eq("id", r.id);
+    if (evErr || ssErr) {
+      toast({ title: "Erro ao excluir", description: (evErr || ssErr)?.message });
+      return;
+    }
+    setRows((prev) => prev.filter((x) => x.id !== r.id));
+    toast({ title: "Sessão excluída" });
+  };
   const [loading, setLoading] = useState(true);
   const [period, setPeriod] = useState<Period>("30");
   const [q, setQ] = useState("");
