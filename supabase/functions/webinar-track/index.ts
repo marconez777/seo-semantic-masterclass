@@ -45,7 +45,12 @@ const BOOL_FIELDS = new Set([
   "signup_modal_opened",
   "signup_completed",
   "signup_qualified",
+  "reached_thank_you",
+  "whatsapp_group_clicked",
 ]);
+
+// Timestamps que só devem ser definidos na primeira ocorrência
+const ONCE_TIMESTAMP_FIELDS = new Set(["thank_you_at"]);
 
 // Contadores: soma o sufixo _inc
 const COUNTER_FIELDS: Record<string, string> = {
