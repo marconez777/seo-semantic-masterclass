@@ -23,14 +23,8 @@ export const WebinarHero = ({ onCTAClick, videoUrl, posterUrl, vagas }: Props) =
         Na próxima quinta-feira, ao vivo, eu vou abrir o método completo: como clínicas médicas estão substituindo anúncios pagos por SEO, GEO e IA — aparecendo no Google, sendo recomendadas pelo ChatGPT e recebendo pacientes particulares já qualificados, prontos para agendar. Sem influencer. Sem dancinha. Sem fórmula mágica.
       </p>
 
-      <div className="aspect-video w-full max-w-3xl mx-auto mb-10 bg-webinar-navy rounded-md overflow-hidden shadow-2xl">
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}`}
-          title="Webinar — Dr. Ivan"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-          className="w-full h-full"
-        />
+      <div className="w-full max-w-3xl mx-auto mb-10">
+        <LockedVideoPlayer src={videoUrl} poster={posterUrl} />
       </div>
 
       <div className="flex flex-col items-center gap-4 mb-10">
