@@ -427,17 +427,27 @@ export function WebinarMetricsTab() {
                       ) : <span className="text-muted-foreground">—</span>}
                     </TableCell>
                     <TableCell>
-                      {r.signup_completed ? (
-                        r.signup_qualified ? (
-                          <Badge className="bg-emerald-600">Qualificado</Badge>
+                      <div className="flex flex-col gap-0.5">
+                        {r.signup_completed ? (
+                          r.signup_qualified ? (
+                            <Badge className="bg-emerald-600 w-fit">Qualificado</Badge>
+                          ) : (
+                            <Badge variant="secondary" className="w-fit">Inscrito</Badge>
+                          )
+                        ) : r.signup_modal_opened ? (
+                          <Badge variant="outline" className="w-fit">Modal · step {r.signup_step_reached}</Badge>
                         ) : (
-                          <Badge variant="secondary">Inscrito</Badge>
-                        )
-                      ) : r.signup_modal_opened ? (
-                        <Badge variant="outline">Modal · step {r.signup_step_reached}</Badge>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">—</span>
-                      )}
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
+                        <div className="flex gap-1">
+                          {r.reached_thank_you && (
+                            <Badge variant="outline" className="h-4 text-[10px] px-1 border-emerald-500 text-emerald-700">obrigado</Badge>
+                          )}
+                          {r.whatsapp_group_clicked && (
+                            <Badge variant="outline" className="h-4 text-[10px] px-1 border-emerald-500 text-emerald-700">WA</Badge>
+                          )}
+                        </div>
+                      </div>
                     </TableCell>
                     <TableCell className="text-xs">
                       {r.signup_nome ? (
