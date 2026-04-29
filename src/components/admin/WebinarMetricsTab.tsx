@@ -300,6 +300,8 @@ export function WebinarMetricsTab() {
           <FunnelStep label="Abriu o modal de inscrição" value={modalOpened} base={total} />
           <FunnelStep label="Completou inscrição" value={signedUp} base={total} />
           <FunnelStep label="Qualificado (psiquiatra + faturamento)" value={qualified} base={total} />
+          <FunnelStep label="Chegou na página de obrigado" value={reachedThankYou} base={total} />
+          <FunnelStep label="Clicou para entrar no WhatsApp" value={joinedWhatsApp} base={total} />
         </CardContent>
       </Card>
 
