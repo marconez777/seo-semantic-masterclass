@@ -1,4 +1,4 @@
-import { Check } from "lucide-react";
+import { Stethoscope, ShieldCheck, Radio } from "lucide-react";
 import { LockedVideoPlayer } from "./LockedVideoPlayer";
 
 interface Props {
@@ -37,23 +37,19 @@ export const WebinarHero = ({ onCTAClick, videoUrl, posterUrl, vagas }: Props) =
         </p>
       </div>
 
-      <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4 max-w-5xl mx-auto">
+      <ul className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 max-w-4xl mx-auto">
         {[
-          "Somente para psiquiatras",
-          "Dentro da Resolução CFM 2.336/2023",
-          "Método aplicado em dezenas de clínicas",
-          "Ao vivo, com espaço para perguntas",
-          "Sem promessa milagrosa",
-        ].map((t) => (
+          { text: "Somente para psiquiatras", Icon: Stethoscope },
+          { text: "Dentro da Resolução CFM 2.336/2023", Icon: ShieldCheck },
+          { text: "Ao vivo, com espaço para perguntas", Icon: Radio },
+        ].map(({ text, Icon }) => (
           <li
-            key={t}
-            className="flex items-start gap-3 rounded-xl border border-webinar bg-white/70 backdrop-blur-sm px-4 py-3 shadow-sm hover:shadow-md transition-shadow"
+            key={text}
+            className="flex items-center gap-3 rounded-xl border border-webinar bg-white/70 backdrop-blur-sm px-4 py-3 shadow-sm hover:shadow-md transition-shadow"
           >
-            <span className="mt-0.5 shrink-0 inline-flex items-center justify-center size-6 rounded-full bg-webinar-accent/15 ring-1 ring-webinar-accent/30">
-              <Check size={14} strokeWidth={3} className="text-webinar-accent" />
-            </span>
+            <Icon size={32} strokeWidth={1.75} className="shrink-0 text-webinar-accent" />
             <span className="text-[15px] sm:text-[16px] leading-snug font-medium text-webinar-ink">
-              {t}
+              {text}
             </span>
           </li>
         ))}
