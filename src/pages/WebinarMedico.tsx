@@ -31,7 +31,7 @@ const MORE_CASES = [
     name: "Dr. Gabriel",
     specialty: "Psiquiatra",
     city: "Vl. Olímpia",
-    metrics: ["+X agendamentos/mês", "1º lugar no Google", "Recomendada pelo Perplexity"],
+    metrics: [],
   },
   {
     videoId: CASE_3_VIDEO_ID,
@@ -39,7 +39,7 @@ const MORE_CASES = [
     name: "Dr. Diego",
     specialty: "Gastroenterologista",
     city: "Fortaleza",
-    metrics: ["+X agendamentos/mês", "1º lugar no Google", "Recomendada pelo Perplexity"],
+    metrics: [],
   },
 ];
 
