@@ -174,9 +174,29 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
   }, []);
 
   useEffect(() => {
-    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    const onFsChange = () =>
+      setIsFullscreen(
+        !!(
+          document.fullscreenElement ||
+          (document as any).webkitFullscreenElement ||
+          (document as any).webkitCurrentFullScreenElement
+        )
+      );
     document.addEventListener("fullscreenchange", onFsChange);
-    return () => document.removeEventListener("fullscreenchange", onFsChange);
+    document.addEventListener("webkitfullscreenchange", onFsChange);
+
+    const v = videoRef.current as any;
+    const onBeginIos = () => setIsFullscreen(true);
+    const onEndIos = () => setIsFullscreen(false);
+    v?.addEventListener?.("webkitbeginfullscreen", onBeginIos);
+    v?.addEventListener?.("webkitendfullscreen", onEndIos);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", onFsChange);
+      document.removeEventListener("webkitfullscreenchange", onFsChange);
+      v?.removeEventListener?.("webkitbeginfullscreen", onBeginIos);
+      v?.removeEventListener?.("webkitendfullscreen", onEndIos);
+    };
   }, []);
 
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
