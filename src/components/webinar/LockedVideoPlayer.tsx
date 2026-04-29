@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Play, Pause, Volume2, VolumeX } from "lucide-react";
+import { Play, Pause, Volume2, VolumeX, Maximize, Minimize } from "lucide-react";
 
 interface Props {
   src: string;
@@ -14,14 +14,10 @@ const formatTime = (s: number) => {
   return `${m}:${sec.toString().padStart(2, "0")}`;
 };
 
-/**
- * Player de vídeo customizado que:
- * - Permite Play / Pause e controle de volume
- * - Mostra barra de progresso visual NÃO interativa
- * - Bloqueia avanço (seek) além do ponto já assistido
- * - Desativa menu de contexto, download e PiP
- */
+const SPEEDS = [1, 1.5, 2] as const;
+
 export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
+  const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const maxWatchedRef = useRef(0);
 
@@ -31,6 +27,8 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [showOverlay, setShowOverlay] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [speed, setSpeed] = useState<number>(1);
 
   const togglePlay = () => {
     const v = videoRef.current;
@@ -72,7 +70,27 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     setShowOverlay(false);
   };
 
-  // Bloqueia tentativas de seek (clique na timeline nativa, atalhos, etc.)
+  const toggleFullscreen = async () => {
+    const el = containerRef.current;
+    if (!el) return;
+    try {
+      if (!document.fullscreenElement) {
+        await el.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      /* ignore */
+    }
+  };
+
+  const changeSpeed = (rate: number) => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.playbackRate = rate;
+    setSpeed(rate);
+  };
+
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -85,18 +103,19 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     };
 
     const onSeeking = () => {
-      // Se tentou pular para frente, força voltar ao máximo já assistido
       if (v.currentTime > maxWatchedRef.current + 0.5) {
         v.currentTime = maxWatchedRef.current;
       }
     };
 
     const onLoaded = () => setDuration(v.duration || 0);
-    const onPlay = () => setIsPlaying(true);
+    const onPlay = () => {
+      setIsPlaying(true);
+      setShowOverlay(false);
+    };
     const onPause = () => setIsPlaying(false);
     const onEnded = () => setIsPlaying(false);
 
-    // Bloqueia atalhos de teclado de seek quando o vídeo está focado
     const onKeyDown = (e: KeyboardEvent) => {
       const blocked = ["ArrowRight", "ArrowLeft", "j", "J", "l", "L"];
       if (blocked.includes(e.key)) {
@@ -124,10 +143,17 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     };
   }, []);
 
+  useEffect(() => {
+    const onFsChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
 
   return (
     <div
+      ref={containerRef}
       className={`relative w-full aspect-video bg-black rounded-md overflow-hidden shadow-2xl group ${className}`}
       onContextMenu={(e) => e.preventDefault()}
     >
@@ -143,8 +169,8 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
         onClick={togglePlay}
       />
 
-      {/* Overlay inicial — convida a iniciar com som */}
-      {showOverlay && (
+      {/* Overlay inicial — só aparece antes de começar */}
+      {showOverlay && !isPlaying && (
         <button
           type="button"
           onClick={handleStart}
@@ -162,7 +188,6 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
 
       {/* Barra de controles */}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/85 via-black/55 to-transparent px-4 pt-8 pb-3 opacity-100 transition-opacity">
-        {/* Barra de progresso (apenas visual, não clicável) */}
         <div
           className="relative h-1.5 w-full rounded-full bg-white/25 mb-3 overflow-hidden select-none"
           aria-hidden="true"
@@ -173,7 +198,7 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
           />
         </div>
 
-        <div className="flex items-center gap-3 text-white">
+        <div className="flex items-center gap-2 sm:gap-3 text-white">
           <button
             type="button"
             onClick={togglePlay}
@@ -199,13 +224,44 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
               step={0.05}
               value={isMuted ? 0 : volume}
               onChange={onVolumeChange}
-              className="w-20 accent-webinar-accent cursor-pointer"
+              className="w-16 sm:w-20 accent-webinar-accent cursor-pointer"
               aria-label="Volume"
             />
           </div>
 
-          <div className="ml-auto text-xs sm:text-sm tabular-nums text-white/80">
-            {formatTime(currentTime)} / {formatTime(duration)}
+          <div className="ml-auto flex items-center gap-1 sm:gap-2">
+            <div className="hidden xs:flex items-center gap-1 mr-1 text-xs sm:text-sm tabular-nums text-white/80">
+              {formatTime(currentTime)} / {formatTime(duration)}
+            </div>
+
+            {/* Velocidade */}
+            <div className="flex items-center rounded-full bg-white/10 p-0.5">
+              {SPEEDS.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => changeSpeed(s)}
+                  className={`px-2 py-0.5 text-[11px] sm:text-xs font-semibold rounded-full transition ${
+                    speed === s
+                      ? "bg-webinar-accent text-black"
+                      : "text-white/80 hover:text-white"
+                  }`}
+                  aria-label={`Velocidade ${s}x`}
+                >
+                  {s}x
+                </button>
+              ))}
+            </div>
+
+            {/* Tela cheia */}
+            <button
+              type="button"
+              onClick={toggleFullscreen}
+              className="flex items-center justify-center rounded-full p-2 hover:bg-white/15 transition"
+              aria-label={isFullscreen ? "Sair da tela cheia" : "Tela cheia"}
+            >
+              {isFullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
+            </button>
           </div>
         </div>
       </div>
