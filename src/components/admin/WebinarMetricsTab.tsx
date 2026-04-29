@@ -171,6 +171,8 @@ export function WebinarMetricsTab() {
   const modalOpened = rows.filter((r) => r.signup_modal_opened).length;
   const signedUp = rows.filter((r) => r.signup_completed).length;
   const qualified = rows.filter((r) => r.signup_qualified).length;
+  const reachedThankYou = rows.filter((r) => r.reached_thank_you).length;
+  const joinedWhatsApp = rows.filter((r) => r.whatsapp_group_clicked).length;
 
   const avgWatch =
     startedVideo > 0
