@@ -54,7 +54,12 @@ const Footer = () => {
           </div>
         </div>
         
-        <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400 text-sm">
+        <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400 text-sm space-y-3">
+          <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-xs">
+            <Link to="/politica-de-privacidade" className="hover:text-white transition-colors">Política de Privacidade</Link>
+            <Link to="/politica-de-cookies" className="hover:text-white transition-colors">Política de Cookies</Link>
+            <Link to="/termos-de-uso" className="hover:text-white transition-colors">Termos de Uso</Link>
+          </div>
           <p>&copy; {new Date().getFullYear()} MK Art. Todos os direitos reservados.</p>
         </div>
       </div>
