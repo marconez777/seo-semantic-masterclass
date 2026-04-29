@@ -145,21 +145,67 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
       if (v.currentTime > maxWatchedRef.current) {
         maxWatchedRef.current = v.currentTime;
       }
+      // marcos de progresso
+      const dur = v.duration || 0;
+      if (dur > 0) {
+        const pct = (v.currentTime / dur) * 100;
+        for (const m of [25, 50, 75, 95]) {
+          if (pct >= m && !milestonesRef.current.has(m)) {
+            milestonesRef.current.add(m);
+            webinarTracker.track(`video_progress_${m}`, { at: v.currentTime });
+          }
+        }
+        webinarTracker.patchMetrics({
+          video_max_position_seconds: Math.round(maxWatchedRef.current),
+          video_completion_pct: Math.min(100, Math.round(pct)),
+          video_duration_seconds: Math.round(dur),
+        });
+      }
     };
 
     const onSeeking = () => {
       if (v.currentTime > maxWatchedRef.current + 0.5) {
+        webinarTracker.track("video_seek_blocked", {
+          attempted: v.currentTime,
+          allowed: maxWatchedRef.current,
+        });
         v.currentTime = maxWatchedRef.current;
       }
     };
 
-    const onLoaded = () => setDuration(v.duration || 0);
+    const onLoaded = () => {
+      setDuration(v.duration || 0);
+      webinarTracker.patchMetrics({ video_duration_seconds: Math.round(v.duration || 0) });
+    };
+
+    const accumWatch = () => {
+      if (playStartRef.current != null) {
+        watchAccumRef.current += (Date.now() - playStartRef.current) / 1000;
+        playStartRef.current = null;
+        webinarTracker.patchMetrics({
+          video_watch_seconds: Math.round(watchAccumRef.current),
+        });
+      }
+    };
+
     const onPlay = () => {
       setIsPlaying(true);
       setShowOverlay(false);
+      playStartRef.current = Date.now();
+      webinarTracker.patchMetrics({ video_started: true });
+      webinarTracker.track("video_play", { at: v.currentTime });
     };
-    const onPause = () => setIsPlaying(false);
-    const onEnded = () => setIsPlaying(false);
+    const onPause = () => {
+      setIsPlaying(false);
+      accumWatch();
+      webinarTracker.track("video_pause", { at: v.currentTime });
+    };
+    const onEnded = () => {
+      setIsPlaying(false);
+      accumWatch();
+      webinarTracker.patchMetrics({ video_completed: true, video_completion_pct: 100 });
+      webinarTracker.track("video_ended", { at: v.currentTime });
+    };
 
     const onKeyDown = (e: KeyboardEvent) => {
       const blocked = ["ArrowRight", "ArrowLeft", "j", "J", "l", "L"];
@@ -178,6 +224,7 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     v.addEventListener("keydown", onKeyDown);
 
     return () => {
+      accumWatch();
       v.removeEventListener("timeupdate", onTimeUpdate);
       v.removeEventListener("seeking", onSeeking);
       v.removeEventListener("loadedmetadata", onLoaded);
