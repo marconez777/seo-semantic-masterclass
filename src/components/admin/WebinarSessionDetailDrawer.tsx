@@ -191,6 +191,36 @@ export function WebinarSessionDetailDrawer({
             </div>
           </section>
 
+          {/* Respostas do formulário */}
+          {(() => {
+            const answers = events.filter((e) => e.event_type === "signup_answer");
+            if (answers.length === 0) return null;
+            const fieldLabel: Record<string, string> = {
+              nome: "Nome",
+              email: "E-mail",
+              whatsapp: "WhatsApp",
+              psiquiatra: "É psiquiatra?",
+              faturamento: "Faturamento",
+            };
+            // dedupe por field, mantendo a última resposta
+            const map = new Map<string, any>();
+            answers.forEach((a) => map.set(a.event_data?.field, a.event_data?.value));
+            return (
+              <section>
+                <h3 className="font-semibold mb-3">Respostas preenchidas</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {Array.from(map.entries()).map(([field, value]) => (
+                    <Field
+                      key={field}
+                      label={fieldLabel[field] ?? field}
+                      value={String(value ?? "—")}
+                    />
+                  ))}
+                </div>
+              </section>
+            );
+          })()}
+
           {/* Timeline */}
           <section>
             <h3 className="font-semibold mb-3">Timeline de eventos</h3>
