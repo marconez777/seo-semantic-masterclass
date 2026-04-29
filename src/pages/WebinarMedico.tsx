@@ -14,6 +14,10 @@ import { WebinarSignupModal } from "@/components/webinar/WebinarSignupModal";
 
 // === Configuráveis ===
 const WEBINAR_DATE = "Quinta-feira";
+// URL pública do vídeo do webinar (faça upload no bucket "webinar-videos" do backend)
+const HERO_VIDEO_URL =
+  "https://nxitvhrfloibpwrkskzx.supabase.co/storage/v1/object/public/webinar-videos/hero.mp4";
+const HERO_POSTER_URL: string | undefined = undefined;
 const HERO_VIDEO_ID = "dQw4w9WgXcQ";
 const IVAN_VIDEO_ID = "dQw4w9WgXcQ";
 const CASE_2_VIDEO_ID = "dQw4w9WgXcQ";
@@ -52,7 +56,7 @@ const WebinarMedico = () => {
       />
 
       <main className="font-sans text-[20px]">
-        <WebinarHero onCTAClick={openModal} videoId={HERO_VIDEO_ID} vagas={VAGAS_RESTANTES} />
+        <WebinarHero onCTAClick={openModal} videoUrl={HERO_VIDEO_URL} posterUrl={HERO_POSTER_URL} vagas={VAGAS_RESTANTES} />
         <WebinarCaseIvan videoId={IVAN_VIDEO_ID} />
         <WebinarLearn onCTAClick={openModal} vagas={VAGAS_RESTANTES} />
         <WebinarMoreCases cases={MORE_CASES} />
