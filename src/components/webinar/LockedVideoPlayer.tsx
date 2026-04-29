@@ -48,11 +48,16 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
   const toggleMute = () => {
     const v = videoRef.current;
     if (!v) return;
+    const willUnmute = v.muted;
     v.muted = !v.muted;
     setIsMuted(v.muted);
     if (!v.muted && v.volume === 0) {
       v.volume = 1;
       setVolume(1);
+    }
+    if (willUnmute) {
+      webinarTracker.patchMetrics({ unmuted: true });
+      webinarTracker.track("video_unmute", { at: v.currentTime });
     }
   };
 
@@ -73,6 +78,8 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     setIsMuted(false);
     v.play().catch(() => {});
     setShowOverlay(false);
+    webinarTracker.patchMetrics({ unmuted: true });
+    webinarTracker.track("video_overlay_start", {});
   };
 
   const toggleFullscreen = () => {
@@ -88,9 +95,9 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
 
     try {
       if (!fsElement) {
-        // iOS Safari: only the <video> element supports fullscreen
+        webinarTracker.patchMetrics({ went_fullscreen: true });
+        webinarTracker.track("video_fullscreen", { at: v?.currentTime ?? 0 });
         if (v && typeof v.webkitEnterFullscreen === "function") {
-          // Needs to be unmuted on iOS to enter fullscreen reliably
           if (v.muted) {
             v.muted = false;
             setIsMuted(false);
@@ -124,6 +131,9 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
     if (!v) return;
     v.playbackRate = rate;
     setSpeed(rate);
+    if (rate > maxSpeedRef.current) maxSpeedRef.current = rate;
+    webinarTracker.patchMetrics({ max_speed: rate });
+    webinarTracker.track("video_speed_change", { speed: rate, at: v.currentTime });
   };
 
   useEffect(() => {
