@@ -51,6 +51,10 @@ import BlogPost from "./pages/BlogPost";
 import AdminBlogNew from "./pages/AdminBlogNew";
 import WebinarMedico from "./pages/WebinarMedico";
 import WebinarObrigado from "./pages/WebinarObrigado";
+import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
+import PoliticaDeCookies from "./pages/PoliticaDeCookies";
+import TermosDeUso from "./pages/TermosDeUso";
+import CookieBanner from "./components/ui/CookieBanner";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
 import { RequireRole } from "./components/auth/RequireRole";
@@ -123,12 +127,16 @@ const App = () => (
           <Route path="/recibo/:orderId" element={<Recibo />} />
           <Route path="/webinar-medico" element={<WebinarMedico />} />
           <Route path="/webinar-medico/obrigado" element={<WebinarObrigado />} />
+          <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
+          <Route path="/politica-de-cookies" element={<PoliticaDeCookies />} />
+          <Route path="/termos-de-uso" element={<TermosDeUso />} />
           
           {/* Catch-all route for 404 */}
           <Route path="*" element={<NotFound />} />
         </Routes>
       <Toaster />
       <WhatsAppFAB />
+      <CookieBanner />
     </BrowserRouter>
   </CartProvider>
   </QueryClientProvider>
