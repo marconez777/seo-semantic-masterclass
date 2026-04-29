@@ -65,6 +65,7 @@ const WebinarObrigado = () => {
           href={WHATSAPP_GROUP_URL}
           target="_blank"
           rel="noopener noreferrer"
+          onClick={handleWhatsAppClick}
           className="btn-webinar-cta w-full sm:w-auto"
         >
           <MessageCircle size={20} />
