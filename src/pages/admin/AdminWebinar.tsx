@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Search, Trash2 } from "lucide-react";
+import { Download, RefreshCw, Search, Trash2 } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { WebinarMetricsTab } from "@/components/admin/WebinarMetricsTab";
 
@@ -107,9 +107,14 @@ export default function AdminWebinar() {
             <p className="text-sm text-muted-foreground">
               {rows.length} {rows.length === 1 ? "inscrição" : "inscrições"} no total
             </p>
-            <Button onClick={exportCSV} variant="outline" disabled={!filtered.length}>
-              <Download className="w-4 h-4 mr-2" /> Exportar CSV
-            </Button>
+            <div className="flex gap-2">
+              <Button onClick={load} variant="outline" disabled={loading}>
+                <RefreshCw className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`} /> Atualizar
+              </Button>
+              <Button onClick={exportCSV} variant="outline" disabled={!filtered.length}>
+                <Download className="w-4 h-4 mr-2" /> Exportar CSV
+              </Button>
+            </div>
           </div>
 
           <div className="relative max-w-sm">
