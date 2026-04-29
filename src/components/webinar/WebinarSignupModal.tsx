@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { z } from "zod";
 import { ArrowLeft, ArrowRight, CheckCircle2 } from "lucide-react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -88,7 +88,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
   const submit = async (faturamento: string) => {
     setSubmitting(true);
     const sessionId = webinarTracker.getSessionId();
-    const { data: inserted, error } = await supabase
+    const { error } = await supabase
       .from("webinar_signups")
       .insert([{
         nome: answers.nome.trim(),
@@ -98,9 +98,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
         faturamento,
         source: "webinar-medico",
         session_id: sessionId,
-      } as any])
-      .select("id")
-      .maybeSingle();
+      } as any]);
     setSubmitting(false);
 
     if (error) {
@@ -113,7 +111,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
     webinarTracker.patchMetrics({
       signup_completed: true,
       signup_qualified: qualified,
-      signup_id: inserted?.id ?? null,
+      
     });
     webinarTracker.track("signup_submit", {
       qualified,
@@ -134,6 +132,8 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg bg-webinar-cream text-webinar-ink border-webinar p-0 overflow-hidden">
+        <DialogTitle className="sr-only">Inscrição no Webinar</DialogTitle>
+        <DialogDescription className="sr-only">Formulário de inscrição em etapas</DialogDescription>
         <div className="px-6 sm:px-8 py-8 sm:py-10">
           {done === "unqualified" ? (
             <div className="text-center animate-fade-in">
