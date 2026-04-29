@@ -12,7 +12,7 @@ export const WebinarHero = ({ onCTAClick, videoUrl, posterUrl, vagas }: Props) =
   <section className="bg-webinar-cream text-webinar-ink">
     <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-10 sm:pt-16 pb-16 sm:pb-24">
       <p className="text-[20px] tracking-[0.16em] uppercase text-webinar-muted text-center mb-8">
-        Webinar ao vivo · Domingo, 17/05 · 10h · Somente para donos de clínica
+        Webinar ao vivo · Domingo, 17/05 · 10h · Somente para PSIQUIATRAS donos de clínica
       </p>
 
       <h1 className="font-serif-display text-[40px] leading-[1.05] sm:text-6xl md:text-7xl text-center font-medium tracking-tight mb-6">
