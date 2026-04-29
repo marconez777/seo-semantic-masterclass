@@ -88,7 +88,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
   const submit = async (faturamento: string) => {
     setSubmitting(true);
     const sessionId = webinarTracker.getSessionId();
-    const { data: inserted, error } = await supabase
+    const { error } = await supabase
       .from("webinar_signups")
       .insert([{
         nome: answers.nome.trim(),
@@ -98,9 +98,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
         faturamento,
         source: "webinar-medico",
         session_id: sessionId,
-      } as any])
-      .select("id")
-      .maybeSingle();
+      } as any]);
     setSubmitting(false);
 
     if (error) {
