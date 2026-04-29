@@ -21,6 +21,10 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const maxWatchedRef = useRef(0);
+  const watchAccumRef = useRef(0); // segundos efetivamente assistidos
+  const playStartRef = useRef<number | null>(null);
+  const milestonesRef = useRef<Set<number>>(new Set());
+  const maxSpeedRef = useRef(1);
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
