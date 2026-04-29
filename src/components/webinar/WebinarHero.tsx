@@ -1,12 +1,14 @@
 import { Check } from "lucide-react";
+import { LockedVideoPlayer } from "./LockedVideoPlayer";
 
 interface Props {
   onCTAClick: () => void;
-  videoId: string;
+  videoUrl: string;
+  posterUrl?: string;
   vagas: string;
 }
 
-export const WebinarHero = ({ onCTAClick, videoId, vagas }: Props) => (
+export const WebinarHero = ({ onCTAClick, videoUrl, posterUrl, vagas }: Props) => (
   <section className="bg-webinar-cream text-webinar-ink">
     <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-10 sm:pt-16 pb-16 sm:pb-24">
       <p className="text-[20px] tracking-[0.16em] uppercase text-webinar-muted text-center mb-8">
