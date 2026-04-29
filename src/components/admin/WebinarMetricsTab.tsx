@@ -414,7 +414,17 @@ export function WebinarMetricsTab() {
                     </TableCell>
                     <TableCell className="text-xs">
                       {r.utm_source ? (
-                        <Badge variant="secondary">{r.utm_source}</Badge>
+                        (() => {
+                          const src = r.utm_source.toLowerCase();
+                          const isFb = src === "fb" || src.includes("facebook");
+                          const isIg = src === "ig" || src.includes("instagram");
+                          const cls = isFb
+                            ? "bg-blue-600 hover:bg-blue-600 text-white"
+                            : isIg
+                            ? "bg-purple-600 hover:bg-purple-600 text-white"
+                            : "";
+                          return <Badge variant={isFb || isIg ? "default" : "secondary"} className={cls}>{r.utm_source}</Badge>;
+                        })()
                       ) : r.referrer ? (
                         <span className="text-muted-foreground truncate max-w-[140px] inline-block">{new URL(r.referrer).hostname}</span>
                       ) : (
