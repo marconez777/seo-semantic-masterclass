@@ -927,6 +927,7 @@ export type Database = {
           last_seen_at: string
           max_speed: number
           os: string | null
+          reached_thank_you: boolean
           referrer: string | null
           screen_size: string | null
           scroll_depth_pct: number
@@ -936,6 +937,7 @@ export type Database = {
           signup_modal_opened: boolean
           signup_qualified: boolean
           signup_step_reached: number
+          thank_you_at: string | null
           timezone: string | null
           total_time_on_page_seconds: number
           unmuted: boolean
@@ -953,6 +955,7 @@ export type Database = {
           video_watch_seconds: number
           viewport_size: string | null
           went_fullscreen: boolean
+          whatsapp_group_clicked: boolean
         }
         Insert: {
           browser?: string | null
@@ -972,6 +975,7 @@ export type Database = {
           last_seen_at?: string
           max_speed?: number
           os?: string | null
+          reached_thank_you?: boolean
           referrer?: string | null
           screen_size?: string | null
           scroll_depth_pct?: number
@@ -981,6 +985,7 @@ export type Database = {
           signup_modal_opened?: boolean
           signup_qualified?: boolean
           signup_step_reached?: number
+          thank_you_at?: string | null
           timezone?: string | null
           total_time_on_page_seconds?: number
           unmuted?: boolean
@@ -998,6 +1003,7 @@ export type Database = {
           video_watch_seconds?: number
           viewport_size?: string | null
           went_fullscreen?: boolean
+          whatsapp_group_clicked?: boolean
         }
         Update: {
           browser?: string | null
@@ -1017,6 +1023,7 @@ export type Database = {
           last_seen_at?: string
           max_speed?: number
           os?: string | null
+          reached_thank_you?: boolean
           referrer?: string | null
           screen_size?: string | null
           scroll_depth_pct?: number
@@ -1026,6 +1033,7 @@ export type Database = {
           signup_modal_opened?: boolean
           signup_qualified?: boolean
           signup_step_reached?: number
+          thank_you_at?: string | null
           timezone?: string | null
           total_time_on_page_seconds?: number
           unmuted?: boolean
@@ -1043,6 +1051,7 @@ export type Database = {
           video_watch_seconds?: number
           viewport_size?: string | null
           went_fullscreen?: boolean
+          whatsapp_group_clicked?: boolean
         }
         Relationships: []
       }
