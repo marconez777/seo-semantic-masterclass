@@ -143,6 +143,10 @@ Deno.serve(async (req) => {
         update[target] = Number(session[target] ?? 0) + raw;
       } else if (ONCE_FIELDS.has(k)) {
         if (!session[k] && raw) update[k] = raw;
+      } else if (ONCE_TIMESTAMP_FIELDS.has(k)) {
+        if (!session[k] && raw) {
+          update[k] = typeof raw === "string" ? raw : new Date().toISOString();
+        }
       }
     }
 
