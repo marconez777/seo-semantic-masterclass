@@ -218,6 +218,7 @@ export function WebinarMetricsTab() {
       "vídeo_iniciou", "vídeo_assistido_seg", "vídeo_max_seg", "vídeo_completou_pct", "fullscreen", "velocidade_max",
       "cta_total", "cta_hero", "cta_learn", "cta_final", "cta_sticky", "primeiro_cta",
       "abriu_modal", "step_atingido", "completou_inscrição", "qualificado",
+      "chegou_obrigado", "obrigado_em", "clicou_whatsapp",
       "tempo_pagina_seg", "scroll_pct",
       "lead_nome", "lead_email",
     ];
