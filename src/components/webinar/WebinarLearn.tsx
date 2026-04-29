@@ -13,7 +13,7 @@ export const WebinarLearn = ({ onCTAClick, vagas }: Props) => (
   <section className="bg-webinar-cream text-webinar-ink">
     <div className="max-w-5xl mx-auto px-5 sm:px-8 py-16 sm:py-24">
       <h2 className="font-serif-display text-3xl sm:text-5xl leading-[1.1] font-medium tracking-tight max-w-3xl mb-12">
-        Na quinta-feira, 20h, ao vivo, você vai ver:
+        No domingo, 17/05, às 10h, ao vivo, você vai ver:
       </h2>
 
       <div className="grid sm:grid-cols-2 gap-5 sm:gap-6">

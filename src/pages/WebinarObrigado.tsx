@@ -60,7 +60,7 @@ const WebinarObrigado = () => {
         </a>
 
         <p className="text-[20px] text-webinar-muted mt-8">
-          📅 Quinta-feira · 20h · Ao vivo
+          📅 Domingo, 17/05 · 10h · Ao vivo
         </p>
         </div>
       </main>

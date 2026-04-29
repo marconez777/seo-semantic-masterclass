@@ -4,7 +4,7 @@ export const WebinarFinalCTA = ({ onCTAClick }: Props) => (
   <section className="bg-webinar-navy text-webinar-ink-inverse">
     <div className="max-w-3xl mx-auto px-5 sm:px-8 py-20 sm:py-28 text-center">
       <h2 className="font-serif-display text-4xl sm:text-6xl leading-[1.05] font-medium tracking-tight mb-8">
-        Na quinta-feira, 20h, você decide.
+        No domingo, 17/05, às 10h, você decide.
       </h2>
 
       <p className="text-[20px] leading-[1.7] text-webinar-muted-inverse mb-12 max-w-2xl mx-auto">
@@ -12,8 +12,8 @@ export const WebinarFinalCTA = ({ onCTAClick }: Props) => (
       </p>
 
       <div className="space-y-2 text-[20px] text-webinar-muted-inverse mb-12">
-        <p>📅 Quinta-feira</p>
-        <p>⏰ 20h — duração de 40 minutos</p>
+        <p>📅 Domingo, 17/05</p>
+        <p>⏰ 10h — duração de 40 minutos</p>
         <p>💻 Online, ao vivo, com espaço para perguntas</p>
       </div>
 
