@@ -55,6 +55,9 @@ interface SessionRow {
   signup_step_reached: number;
   signup_completed: boolean;
   signup_qualified: boolean;
+  reached_thank_you: boolean;
+  thank_you_at: string | null;
+  whatsapp_group_clicked: boolean;
   total_time_on_page_seconds: number;
   scroll_depth_pct: number;
   // join
