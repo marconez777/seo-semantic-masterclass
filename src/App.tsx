@@ -45,6 +45,7 @@ import AdminAuth from "./pages/admin/AdminAuth";
 import AdminConsultoria from "./pages/admin/AdminConsultoria";
 import AdminConsultoriaClient from "./pages/admin/AdminConsultoriaClient";
 import AdminWebinar from "./pages/admin/AdminWebinar";
+import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -61,14 +62,18 @@ import { RequireRole } from "./components/auth/RequireRole";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
 import ScrollToTop from "./components/layout/ScrollToTop";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const queryClient = new QueryClient();
- 
+
+const AnalyticsBoot = () => { useAnalytics(); return null; };
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
   <CartProvider>
     <BrowserRouter>
       <ScrollToTop />
+      <AnalyticsBoot />
       <CartModal />
       <Routes>
           <Route path="/" element={<Index />} />
@@ -123,6 +128,7 @@ const App = () => (
             <Route path="consultoria" element={<AdminConsultoria />} />
             <Route path="consultoria/:clientId" element={<AdminConsultoriaClient />} />
             <Route path="webinar" element={<AdminWebinar />} />
+            <Route path="analytics" element={<AdminAnalytics />} />
           </Route>
           <Route path="/recibo/:orderId" element={<Recibo />} />
           <Route path="/webinar-medico" element={<WebinarMedico />} />

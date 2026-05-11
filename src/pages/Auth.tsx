@@ -123,6 +123,10 @@ const Auth = () => {
       setError(error.message);
     } else {
       setSuccess("Cadastro realizado com sucesso! Verifique seu e-mail para ativar sua conta.");
+      try {
+        const { analytics } = await import("@/lib/analytics");
+        analytics.track("signup_completed", { label: signup_source || "direct", data: { email } });
+      } catch {}
       toast({
         title: "Cadastro realizado!",
         description: "Verifique seu e-mail para ativar sua conta.",

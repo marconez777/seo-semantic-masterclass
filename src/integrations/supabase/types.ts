@@ -14,6 +14,234 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_data: Json
+          event_label: string | null
+          event_type: string
+          id: number
+          path: string | null
+          session_id: string
+          user_id: string | null
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json
+          event_label?: string | null
+          event_type: string
+          id?: number
+          path?: string | null
+          session_id: string
+          user_id?: string | null
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json
+          event_label?: string | null
+          event_type?: string
+          id?: number
+          path?: string | null
+          session_id?: string
+          user_id?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
+      analytics_pageviews: {
+        Row: {
+          created_at: string
+          duration_seconds: number | null
+          id: number
+          path: string
+          referrer: string | null
+          scroll_depth_pct: number | null
+          session_id: string
+          title: string | null
+          user_id: string | null
+          visitor_id: string
+        }
+        Insert: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: number
+          path: string
+          referrer?: string | null
+          scroll_depth_pct?: number | null
+          session_id: string
+          title?: string | null
+          user_id?: string | null
+          visitor_id: string
+        }
+        Update: {
+          created_at?: string
+          duration_seconds?: number | null
+          id?: number
+          path?: string
+          referrer?: string | null
+          scroll_depth_pct?: number | null
+          session_id?: string
+          title?: string | null
+          user_id?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
+      analytics_sessions: {
+        Row: {
+          browser: string | null
+          channel: string | null
+          clicked_whatsapp: boolean
+          created_order: boolean
+          device_type: string | null
+          duration_seconds: number
+          event_count: number
+          exit_path: string | null
+          id: string
+          ip_city: string | null
+          ip_country: string | null
+          landing_path: string | null
+          language: string | null
+          last_seen_at: string
+          os: string | null
+          pageview_count: number
+          referrer: string | null
+          referrer_host: string | null
+          screen_size: string | null
+          session_id: string
+          signed_up: boolean
+          started_at: string
+          timezone: string | null
+          user_agent: string | null
+          user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
+          viewport_size: string | null
+          visitor_id: string
+        }
+        Insert: {
+          browser?: string | null
+          channel?: string | null
+          clicked_whatsapp?: boolean
+          created_order?: boolean
+          device_type?: string | null
+          duration_seconds?: number
+          event_count?: number
+          exit_path?: string | null
+          id?: string
+          ip_city?: string | null
+          ip_country?: string | null
+          landing_path?: string | null
+          language?: string | null
+          last_seen_at?: string
+          os?: string | null
+          pageview_count?: number
+          referrer?: string | null
+          referrer_host?: string | null
+          screen_size?: string | null
+          session_id: string
+          signed_up?: boolean
+          started_at?: string
+          timezone?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          viewport_size?: string | null
+          visitor_id: string
+        }
+        Update: {
+          browser?: string | null
+          channel?: string | null
+          clicked_whatsapp?: boolean
+          created_order?: boolean
+          device_type?: string | null
+          duration_seconds?: number
+          event_count?: number
+          exit_path?: string | null
+          id?: string
+          ip_city?: string | null
+          ip_country?: string | null
+          landing_path?: string | null
+          language?: string | null
+          last_seen_at?: string
+          os?: string | null
+          pageview_count?: number
+          referrer?: string | null
+          referrer_host?: string | null
+          screen_size?: string | null
+          session_id?: string
+          signed_up?: boolean
+          started_at?: string
+          timezone?: string | null
+          user_agent?: string | null
+          user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
+          viewport_size?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
+      analytics_visitors: {
+        Row: {
+          first_channel: string | null
+          first_landing_path: string | null
+          first_referrer: string | null
+          first_referrer_host: string | null
+          first_seen_at: string
+          first_utm_campaign: string | null
+          first_utm_medium: string | null
+          first_utm_source: string | null
+          last_seen_at: string
+          total_pageviews: number
+          total_sessions: number
+          user_id: string | null
+          visitor_id: string
+        }
+        Insert: {
+          first_channel?: string | null
+          first_landing_path?: string | null
+          first_referrer?: string | null
+          first_referrer_host?: string | null
+          first_seen_at?: string
+          first_utm_campaign?: string | null
+          first_utm_medium?: string | null
+          first_utm_source?: string | null
+          last_seen_at?: string
+          total_pageviews?: number
+          total_sessions?: number
+          user_id?: string | null
+          visitor_id: string
+        }
+        Update: {
+          first_channel?: string | null
+          first_landing_path?: string | null
+          first_referrer?: string | null
+          first_referrer_host?: string | null
+          first_seen_at?: string
+          first_utm_campaign?: string | null
+          first_utm_medium?: string | null
+          first_utm_source?: string | null
+          last_seen_at?: string
+          total_pageviews?: number
+          total_sessions?: number
+          user_id?: string | null
+          visitor_id?: string
+        }
+        Relationships: []
+      }
       backlink_leads: {
         Row: {
           created_at: string

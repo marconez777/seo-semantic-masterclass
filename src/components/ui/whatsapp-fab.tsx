@@ -15,12 +15,18 @@ export function WhatsAppFAB() {
   const handleWhatsAppClick = () => {
     const message = encodeURIComponent("Olá! Gostaria de saber mais sobre os serviços de SEO e backlinks.")
     const whatsappUrl = `https://wa.me/5511989151997?text=${message}`
+    try {
+      import("@/lib/analytics").then(({ analytics }) =>
+        analytics.track("click_whatsapp", { label: "fab", data: { href: whatsappUrl } })
+      );
+    } catch {}
     window.open(whatsappUrl, '_blank')
   }
 
   return (
     <FAB 
       onClick={handleWhatsAppClick}
+      data-track="whatsapp_fab"
       className={cn(
         "bg-green-500 hover:bg-green-600 text-white shadow-lg hover:shadow-xl transition-all duration-300 rounded-full z-[9999]",
         isDashboard && "right-auto left-6"
