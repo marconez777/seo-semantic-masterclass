@@ -21,6 +21,7 @@ const Auth = () => {
 
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
+  const [site, setSite] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -80,7 +81,7 @@ const Auth = () => {
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { name, phone },
+        data: { name, phone, site },
       },
     });
     
@@ -99,7 +100,7 @@ const Auth = () => {
         await supabase.functions.invoke("notify-admin", {
           body: {
             type: "new_customer",
-            data: { name: name.trim(), email: email.trim(), phone: phone.trim() },
+            data: { name: name.trim(), email: email.trim(), phone: phone.trim(), site: site.trim() },
           },
         });
       } catch (notifyErr) {
@@ -210,6 +211,10 @@ const Auth = () => {
                 <Label htmlFor="phone">WhatsApp *</Label>
                 <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="(11) 99999-9999" required />
                 <span className="text-xs text-muted-foreground">Necessário para envio do PIX</span>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="site">Site</Label>
+                <Input id="site" type="url" value={site} onChange={(e) => setSite(e.target.value)} placeholder="https://seusite.com.br" />
               </div>
             </div>
           )}
