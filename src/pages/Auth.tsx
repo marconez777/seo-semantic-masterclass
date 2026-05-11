@@ -39,6 +39,23 @@ const Auth = () => {
 
   useEffect(() => {
     // Keep session in sync and redirect if already logged in
+    // Persist origin page (priority: navigation state > document.referrer)
+    try {
+      const fromState = (location.state as any)?.from;
+      const fromPath =
+        typeof fromState === "string"
+          ? fromState
+          : fromState?.pathname ?? null;
+      if (fromPath && fromPath !== "/auth") {
+        sessionStorage.setItem("mk_signup_source", fromPath);
+      } else if (!sessionStorage.getItem("mk_signup_source") && document.referrer) {
+        const ref = new URL(document.referrer);
+        if (ref.origin === window.location.origin && ref.pathname !== "/auth") {
+          sessionStorage.setItem("mk_signup_source", ref.pathname);
+        }
+      }
+    } catch {}
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
       if (session?.user) {
         navigate(redirectTo, { replace: true });
@@ -50,7 +67,7 @@ const Auth = () => {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate, redirectTo]);
+  }, [navigate, redirectTo, location.state]);
 
   const handleSignup = async () => {
     // Validação obrigatória
