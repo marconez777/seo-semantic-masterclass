@@ -1,47 +1,39 @@
-## Objetivo
+## Melhorias na página Admin → Clientes
 
-Adicionar um aviso de cookies discreto no canto inferior esquerdo (mínimo de texto, expansível) e criar as três páginas legais com o conteúdo enviado.
+Adicionar 4 funcionalidades à tela `/admin/clientes`:
 
-## Componente: CookieBanner (compacto + expansível)
+### 1. Origem do lead (de qual página se cadastrou)
+- Adicionar campo `signup_source` (texto) na tabela `profiles`.
+- Capturar a rota atual no momento do signup (ex.: `/comprar-backlinks`, `/consultoria-seo`, `/webinar-medico`, `/auth`) e enviar em `options.data` no `supabase.auth.signUp`.
+- Atualizar o trigger `handle_new_user()` para gravar esse campo a partir de `raw_user_meta_data->>'signup_source'`.
+- Para usuários antigos, exibir "—".
 
-Criar `src/components/ui/CookieBanner.tsx` baseado no exemplo enviado, mas reduzido:
+### 2. Contagem total
+- Mostrar acima da tabela: `X clientes encontrados` (respeitando filtro de busca).
+- Mostrar também o total geral (sem filtro) entre parênteses quando houver busca.
 
-- Posição: `fixed bottom-4 left-4`, largura `max-w-xs` (≈ 320px), `z-50`
-- Aparece após 800ms; persiste consentimento em `localStorage` (`mk_cookie_consent`) por 12 meses
-- Estado fechado (padrão) — texto curto:
-  > "Usamos cookies para melhorar sua experiência. [Saiba mais ▾]" + botão "OK"
-- Estado expandido (ao clicar em "Saiba mais"): mostra 1–2 linhas extras com links para `/politica-de-privacidade` e `/politica-de-cookies`
-- Botão "OK" fecha e salva consentimento; botão X também aceita (consent simples)
-- Estilo: card branco arredondado, sombra suave, borda neutra, animação fade/slide-in
-- Acessível: `role="dialog"`, `aria-label`, foco gerenciado
+### 3. Paginação
+- Paginação client-side de 20 itens por página (volume baixo de profiles).
+- Controles: « Anterior · Página X de Y · Próxima » + seletor de tamanho (20/50/100).
+- Reset para página 1 quando a busca muda.
 
-Renderizar uma única vez em `src/App.tsx` (dentro do `BrowserRouter`, fora das rotas), assim aparece em todas as páginas.
+### 4. Exportar para Excel
+- Botão "Exportar Excel" no topo, ao lado de "Atualizar".
+- Usa a lib `xlsx` (já instalada).
+- Exporta a lista filtrada atual (não só a página visível) com colunas:
+  Nome, E-mail, WhatsApp, Site, Origem, Pedidos, Total Gasto (R$), Cadastro.
+- Nome do arquivo: `clientes-YYYY-MM-DD.xlsx`.
 
-## Páginas legais
+### Nova coluna na tabela
+Ordem final: Cliente · Contato · Site · **Origem** · Pedidos · Total Gasto · Cadastro · Ações.
 
-Copiar os arquivos enviados para `src/pages/` (com pequenos ajustes para usar `<Link>` do react-router quando referenciarem outras páginas legais, e envolver com `<Header />` + `<Footer />` para consistência visual):
-
-- `src/pages/PoliticaDePrivacidade.tsx` → rota `/politica-de-privacidade`
-- `src/pages/PoliticaDeCookies.tsx` → rota `/politica-de-cookies`
-- `src/pages/TermosDeUso.tsx` → rota `/termos-de-uso`
-
-Adicionar `SEOHead` em cada página (title + description + canonical + `noindex` opcional para páginas legais — manter `index` para LGPD).
-
-## Roteamento
-
-Em `src/App.tsx`:
-- Importar e renderizar `<CookieBanner />` no nível raiz (após `<CartModal />`)
-- Adicionar três `<Route>` para as páginas legais
-
-## Footer (opcional, recomendado)
-
-Adicionar uma linha discreta de links no `Footer.tsx` para Política de Privacidade, Política de Cookies e Termos de Uso (cinza pequeno, abaixo do grid existente).
-
-## Arquivos criados/editados
-
-- criado: `src/components/ui/CookieBanner.tsx`
-- criado: `src/pages/PoliticaDePrivacidade.tsx`
-- criado: `src/pages/PoliticaDeCookies.tsx`
-- criado: `src/pages/TermosDeUso.tsx`
-- editado: `src/App.tsx` (rotas + render do banner)
-- editado: `src/components/layout/Footer.tsx` (links legais)
+### Detalhes técnicos
+- Migration: `ALTER TABLE profiles ADD COLUMN signup_source text;` + atualização de `handle_new_user()` para incluir o campo.
+- `src/pages/Auth.tsx`: ler `location.state?.from` ou `document.referrer` e enviar como `signup_source` no metadata do `signUp`.
+- `src/pages/admin/AdminClientes.tsx`:
+  - Adicionar `signup_source` na interface, no `select` e no map.
+  - Adicionar estado `page` e `pageSize`; derivar `paginatedClientes` via `slice`.
+  - Adicionar handler `exportToExcel()` usando `XLSX.utils.json_to_sheet` + `XLSX.writeFile`.
+  - Adicionar coluna "Origem" na `<table>`.
+  - Mostrar contagem ("X de Y clientes") acima da tabela.
+- Sem mudanças em RLS (admins já têm acesso total a `profiles`).
