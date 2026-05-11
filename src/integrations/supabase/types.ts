@@ -794,6 +794,7 @@ export type Database = {
           full_name: string | null
           id: string
           is_admin: boolean | null
+          signup_source: string | null
           site: string | null
           updated_at: string | null
           user_id: string | null
@@ -806,6 +807,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_admin?: boolean | null
+          signup_source?: string | null
           site?: string | null
           updated_at?: string | null
           user_id?: string | null
@@ -818,6 +820,7 @@ export type Database = {
           full_name?: string | null
           id?: string
           is_admin?: boolean | null
+          signup_source?: string | null
           site?: string | null
           updated_at?: string | null
           user_id?: string | null
