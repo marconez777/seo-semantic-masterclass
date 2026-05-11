@@ -61,14 +61,18 @@ import { RequireRole } from "./components/auth/RequireRole";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
 import ScrollToTop from "./components/layout/ScrollToTop";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 const queryClient = new QueryClient();
- 
+
+const AnalyticsBoot = () => { useAnalytics(); return null; };
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
   <CartProvider>
     <BrowserRouter>
       <ScrollToTop />
+      <AnalyticsBoot />
       <CartModal />
       <Routes>
           <Route path="/" element={<Index />} />
