@@ -19,6 +19,7 @@ interface Cliente {
   email: string | null;
   full_name: string | null;
   whatsapp: string | null;
+  site: string | null;
   created_at: string | null;
   total_orders: number;
   total_spent: number;
@@ -61,7 +62,7 @@ export default function AdminClientes() {
       // Fetch all profiles
       const { data: profiles, error: profilesError } = await supabase
         .from("profiles")
-        .select("user_id, email, full_name, whatsapp, created_at")
+        .select("user_id, email, full_name, whatsapp, site, created_at")
         .order("created_at", { ascending: false });
 
       if (profilesError) throw profilesError;
@@ -87,11 +88,12 @@ export default function AdminClientes() {
       });
 
       // Combine data
-      const clientesData: Cliente[] = (profiles || []).map((profile) => ({
+      const clientesData: Cliente[] = (profiles || []).map((profile: any) => ({
         user_id: profile.user_id || "",
         email: profile.email,
         full_name: profile.full_name,
         whatsapp: profile.whatsapp,
+        site: profile.site ?? null,
         created_at: profile.created_at,
         total_orders: orderStats[profile.user_id!]?.count || 0,
         total_spent: orderStats[profile.user_id!]?.total || 0,
@@ -146,7 +148,8 @@ export default function AdminClientes() {
     return (
       cliente.email?.toLowerCase().includes(query) ||
       cliente.full_name?.toLowerCase().includes(query) ||
-      cliente.whatsapp?.includes(query)
+      cliente.whatsapp?.includes(query) ||
+      cliente.site?.toLowerCase().includes(query)
     );
   });
 
@@ -171,7 +174,7 @@ export default function AdminClientes() {
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Buscar por nome, email ou WhatsApp..."
+            placeholder="Buscar por nome, email, WhatsApp ou site..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -198,6 +201,7 @@ export default function AdminClientes() {
                 <tr className="text-left">
                   <th className="p-3 font-medium">Cliente</th>
                   <th className="p-3 font-medium">Contato</th>
+                  <th className="p-3 font-medium">Site</th>
                   <th className="p-3 font-medium text-center">Pedidos</th>
                   <th className="p-3 font-medium text-right">Total Gasto</th>
                   <th className="p-3 font-medium">Cadastro</th>
@@ -222,6 +226,21 @@ export default function AdminClientes() {
                     </td>
                     <td className="p-3">
                       {cliente.whatsapp || "—"}
+                    </td>
+                    <td className="p-3 max-w-[200px] truncate">
+                      {cliente.site ? (
+                        <a
+                          href={cliente.site.startsWith("http") ? cliente.site : `https://${cliente.site}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                          title={cliente.site}
+                        >
+                          {cliente.site.replace(/^https?:\/\//, "")}
+                        </a>
+                      ) : (
+                        "—"
+                      )}
                     </td>
                     <td className="p-3 text-center">
                       <Badge variant="secondary">{cliente.total_orders}</Badge>
