@@ -74,14 +74,30 @@ const Auth = () => {
     setLoading(true);
     setError(null);
     setSuccess(null);
-    
+
+    // Capture origin page (where user came from before /auth)
+    let signup_source = "direct";
+    try {
+      const stored = sessionStorage.getItem("mk_signup_source");
+      if (stored) {
+        signup_source = stored;
+      } else if (document.referrer) {
+        const ref = new URL(document.referrer);
+        if (ref.origin === window.location.origin) {
+          signup_source = ref.pathname || "/";
+        } else {
+          signup_source = ref.hostname;
+        }
+      }
+    } catch {}
+
     const redirectUrl = `${window.location.origin}/comprar-backlinks`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectUrl,
-        data: { name, phone, site },
+        data: { name, phone, site, signup_source },
       },
     });
     
