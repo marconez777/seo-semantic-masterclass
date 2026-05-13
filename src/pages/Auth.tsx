@@ -137,7 +137,7 @@ const Auth = () => {
         await supabase.functions.invoke("notify-admin", {
           body: {
             type: "new_customer",
-            data: { name: name.trim(), email: email.trim(), phone: phone.trim(), site: site.trim() },
+            data: { name: name.trim(), email: email.trim(), phone: phone.trim(), site: site.trim(), signup_source },
           },
         });
       } catch (notifyErr) {
