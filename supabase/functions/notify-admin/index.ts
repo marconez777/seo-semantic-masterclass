@@ -54,6 +54,8 @@ function buildEmail(type: EventType, data: Record<string, unknown>): { subject: 
             <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Nome</td><td style="padding:8px;border-bottom:1px solid #eee;">${data.name || "N/A"}</td></tr>
             <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">E-mail</td><td style="padding:8px;border-bottom:1px solid #eee;">${data.email || "N/A"}</td></tr>
             <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">WhatsApp</td><td style="padding:8px;border-bottom:1px solid #eee;">${data.phone || "N/A"}</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Site</td><td style="padding:8px;border-bottom:1px solid #eee;">${data.site || "N/A"}</td></tr>
+            <tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:bold;">Origem do Cadastro</td><td style="padding:8px;border-bottom:1px solid #eee;">${data.signup_source || "Direto"}</td></tr>
             <tr><td style="padding:8px;font-weight:bold;">Data</td><td style="padding:8px;">${now}</td></tr>
           </table>
         </div>`,
