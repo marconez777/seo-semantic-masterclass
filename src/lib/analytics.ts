@@ -3,7 +3,7 @@
 // faz buffer de pageviews+events e envia via edge function `track`.
 
 type EventItem = { event_type: string; event_label?: string | null; event_data?: Record<string, any>; path?: string; ts: number };
-type PageviewItem = { path: string; title?: string; referrer?: string; ts: number; duration_seconds?: number; scroll_depth_pct?: number };
+type PageviewItem = { path: string; title?: string; referrer?: string; ts: number; duration_seconds?: number; scroll_depth_pct?: number; ended?: boolean };
 
 const FN_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/track`;
 const VISITOR_KEY = "mk_visitor_id";
@@ -155,10 +155,11 @@ class Analytics {
 
   private endCurrentPageview() {
     if (!this.currentPath) return;
-    const last = [...this.pageviews].reverse().find((p) => p.path === this.currentPath);
+    const last = [...this.pageviews].reverse().find((p) => p.path === this.currentPath && !p.ended);
     if (last) {
       last.duration_seconds = Math.max(0, Math.round((Date.now() - this.currentPathStart) / 1000));
       last.scroll_depth_pct = this.maxScrollPct;
+      last.ended = true;
     }
   }
 
@@ -194,14 +195,30 @@ class Analytics {
 
   async flush(useBeacon = false) {
     if (!this.sessionId || !this.visitorId) return;
-    if (this.events.length === 0 && this.pageviews.length === 0 && !this.initPayload) return;
+
+    // Em flushes periódicos, "fecha" o pageview atual com duração/scroll acumulados
+    // e abre um novo registro em memória pro mesmo path. Assim o backend recebe
+    // o tempo/scroll mesmo que o usuário nunca dispare unload (ex.: troca de aba longa).
+    if (!useBeacon) {
+      this.endCurrentPageview();
+      if (this.currentPath) {
+        this.pageviews.push({ path: this.currentPath, title: document.title, referrer: document.referrer || undefined, ts: Date.now() });
+        this.currentPathStart = Date.now();
+        this.maxScrollPct = 0;
+      }
+    }
+
+    const readyPageviews = this.pageviews.filter((p) => p.ended);
+    this.pageviews = this.pageviews.filter((p) => !p.ended);
+
+    if (this.events.length === 0 && readyPageviews.length === 0 && !this.initPayload) return;
 
     const body: any = {
       session_id: this.sessionId,
       visitor_id: this.visitorId,
       user_id: this.userId,
       events: this.events.splice(0),
-      pageviews: this.pageviews.splice(0),
+      pageviews: readyPageviews,
     };
     if (this.initPayload) {
       body.session_init = this.initPayload;
