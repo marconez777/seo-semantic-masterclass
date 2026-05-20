@@ -49,7 +49,7 @@ export default function CookieBanner() {
       role="dialog"
       aria-live="polite"
       aria-label="Aviso de cookies"
-      className="fixed bottom-4 left-4 z-50 w-[280px] max-w-[calc(100vw-2rem)] animate-in slide-in-from-bottom-4 fade-in duration-300 rounded-xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur-sm"
+      className="fixed bottom-20 sm:bottom-4 left-4 z-50 w-[280px] max-w-[calc(100vw-2rem)] animate-in slide-in-from-bottom-4 fade-in duration-300 rounded-xl border border-border bg-background/95 p-3 shadow-lg backdrop-blur-sm"
     >
       <div className="flex items-start gap-2">
         <div className="flex-1 text-xs leading-snug text-foreground">
