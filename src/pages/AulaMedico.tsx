@@ -7,7 +7,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { analytics } from "@/lib/analytics";
 
 // ⚠️ Troque pelo link real do seu grupo do WhatsApp.
-const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/SEU_GRUPO_AQUI";
+const WHATSAPP_GROUP_URL = "https://chat.whatsapp.com/Eqrg6lc0Lo3GtyYvZbjU7H?mode=gi_t";
 const AULA_QUANDO = "Quinta-feira · 20h";
 const PROXIMA_DATA = "Próxima quinta · 20h (horário de Brasília)";
 
