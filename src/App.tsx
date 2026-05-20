@@ -45,6 +45,7 @@ import AdminAuth from "./pages/admin/AdminAuth";
 import AdminConsultoria from "./pages/admin/AdminConsultoria";
 import AdminConsultoriaClient from "./pages/admin/AdminConsultoriaClient";
 import AdminWebinar from "./pages/admin/AdminWebinar";
+import AdminAula from "./pages/admin/AdminAula";
 import AdminAnalytics from "./pages/admin/AdminAnalytics";
 import Recibo from "./pages/Recibo";
 import Blog from "./pages/Blog";
@@ -129,6 +130,7 @@ const App = () => (
             <Route path="consultoria" element={<AdminConsultoria />} />
             <Route path="consultoria/:clientId" element={<AdminConsultoriaClient />} />
             <Route path="webinar" element={<AdminWebinar />} />
+            <Route path="aula" element={<AdminAula />} />
             <Route path="analytics" element={<AdminAnalytics />} />
           </Route>
           <Route path="/recibo/:orderId" element={<Recibo />} />
