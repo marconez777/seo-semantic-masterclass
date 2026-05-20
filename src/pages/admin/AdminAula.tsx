@@ -96,7 +96,7 @@ export default function AdminAula() {
     // 3. Dados das sessões
     const { data: sessions, error: sErr } = await supabase
       .from("analytics_sessions")
-      .select("session_id, first_seen_at, device_type, os, browser, ip_country, utm_source, utm_medium, utm_campaign, referrer")
+      .select("session_id, started_at, device_type, os, browser, ip_country, utm_source, utm_medium, utm_campaign, referrer")
       .in("session_id", sessionIds);
     if (sErr) {
       toast({ title: "Erro ao carregar sessões", description: sErr.message });
@@ -132,7 +132,7 @@ export default function AdminAula() {
       const ev = evBySession.get(s.session_id) ?? { clicks: 0, hero: 0, learn: 0, final: 0, sticky: 0, first: null, firstAt: 0 };
       return {
         session_id: s.session_id,
-        first_seen_at: s.first_seen_at,
+        first_seen_at: s.started_at,
         device_type: s.device_type,
         os: s.os,
         browser: s.browser,
