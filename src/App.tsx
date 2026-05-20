@@ -51,6 +51,7 @@ import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import AdminBlogNew from "./pages/AdminBlogNew";
 import WebinarMedico from "./pages/WebinarMedico";
+import AulaMedico from "./pages/AulaMedico";
 import WebinarObrigado from "./pages/WebinarObrigado";
 import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
 import PoliticaDeCookies from "./pages/PoliticaDeCookies";
@@ -132,6 +133,7 @@ const App = () => (
           </Route>
           <Route path="/recibo/:orderId" element={<Recibo />} />
           <Route path="/webinar-medico" element={<WebinarMedico />} />
+          <Route path="/aula-medico" element={<AulaMedico />} />
           <Route path="/webinar-medico/obrigado" element={<WebinarObrigado />} />
           <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
           <Route path="/politica-de-cookies" element={<PoliticaDeCookies />} />
