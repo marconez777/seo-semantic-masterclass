@@ -3,7 +3,7 @@
 // faz buffer de pageviews+events e envia via edge function `track`.
 
 type EventItem = { event_type: string; event_label?: string | null; event_data?: Record<string, any>; path?: string; ts: number };
-type PageviewItem = { path: string; title?: string; referrer?: string; ts: number; duration_seconds?: number; scroll_depth_pct?: number };
+type PageviewItem = { path: string; title?: string; referrer?: string; ts: number; duration_seconds?: number; scroll_depth_pct?: number; ended?: boolean };
 
 const FN_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/track`;
 const VISITOR_KEY = "mk_visitor_id";
