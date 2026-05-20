@@ -23,8 +23,20 @@ const trackAndOpen = (source: CTASource) => {
 const Hero = () => (
   <section className="bg-webinar-cream text-webinar-ink">
     <div className="max-w-4xl mx-auto px-5 sm:px-8 pt-10 sm:pt-16 pb-16 sm:pb-24">
-      <p className="text-[20px] tracking-[0.16em] uppercase text-webinar-muted text-center mb-8">
-        Aula ao vivo gratuita · {AULA_QUANDO} · Somente para médicos donos de clínica
+      <div className="flex justify-center mb-4">
+        <span
+          className="inline-block rounded-full border text-[13px] font-medium"
+          style={{ borderColor: "#C9A36A", color: "#2D3F50", padding: "6px 14px" }}
+        >
+          Somente para médicos donos de clínica
+        </span>
+      </div>
+
+      <p
+        className="text-center uppercase font-semibold text-[16px] sm:text-[18px]"
+        style={{ color: "#2D3F50", letterSpacing: "0.1em", marginBottom: "24px" }}
+      >
+        Aula ao vivo gratuita · {AULA_QUANDO}
       </p>
 
       <h1 className="font-serif-display text-[40px] leading-[1.05] sm:text-6xl md:text-7xl text-center font-medium tracking-tight mb-6">
