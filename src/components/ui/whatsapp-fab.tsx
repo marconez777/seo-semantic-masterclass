@@ -7,8 +7,8 @@ export function WhatsAppFAB() {
   const { pathname } = useLocation()
   const { isOpen: cartOpen } = useCart()
 
-  // Hide on admin pages, aula-medico, or when cart modal is open
-  if (pathname.startsWith("/admin") || pathname.startsWith("/aula-medico") || cartOpen) return null
+  // Hide on admin pages, aula-medico, webinar-medico, or when cart modal is open
+  if (pathname.startsWith("/admin") || pathname.startsWith("/aula-medico") || pathname.startsWith("/webinar-medico") || cartOpen) return null
 
   const isDashboard = pathname.startsWith("/painel")
 
