@@ -86,6 +86,18 @@ export default function BacklinkMarketplace({
             <CategoryGrid currentCategory={currentCategorySlug} />
           )}
 
+          {/* Search bar */}
+          <div className="mb-4">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Buscar por nome do site..."
+              aria-label="Buscar por nome do site"
+              className="w-full md:max-w-md px-4 py-2 rounded-md border border-input bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+
           {/* Backlinks Table */}
           <BacklinkTable
             data={filtered}
