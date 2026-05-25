@@ -34,15 +34,22 @@ export default function BacklinkMarketplace({
   const isMobile = useIsMobile();
   const { isAuthenticated } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
   // Modal state for buy action
   const [open, setOpen] = useState(false);
   const [selected, setSelected] = useState<{ id: string; name: string; price_cents: number } | null>(null);
 
-  // Apply client-side filters
+  // Apply client-side filters + search
   const filtered = useMemo(() => {
-    return filterBacklinks(backlinks, filters);
-  }, [backlinks, filters]);
+    const base = filterBacklinks(backlinks, filters);
+    const term = search.trim().toLowerCase();
+    if (!term) return base;
+    return base.filter((b) => {
+      const name = (b.site_name ?? b.site_url ?? "").toLowerCase();
+      return name.includes(term);
+    });
+  }, [backlinks, filters, search]);
 
   const onBuy = (b: BacklinkItem) => {
     setSelected({ 
