@@ -54,6 +54,7 @@ import AdminBlogNew from "./pages/AdminBlogNew";
 import WebinarMedico from "./pages/WebinarMedico";
 import AulaMedico from "./pages/AulaMedico";
 import WebinarObrigado from "./pages/WebinarObrigado";
+import Diagnostico from "./pages/Diagnostico";
 import PoliticaDePrivacidade from "./pages/PoliticaDePrivacidade";
 import PoliticaDeCookies from "./pages/PoliticaDeCookies";
 import TermosDeUso from "./pages/TermosDeUso";
@@ -137,6 +138,7 @@ const App = () => (
           <Route path="/webinar-medico" element={<WebinarMedico />} />
           <Route path="/aula-medico" element={<AulaMedico />} />
           <Route path="/webinar-medico/obrigado" element={<WebinarObrigado />} />
+          <Route path="/diagnostico" element={<Diagnostico />} />
           <Route path="/politica-de-privacidade" element={<PoliticaDePrivacidade />} />
           <Route path="/politica-de-cookies" element={<PoliticaDeCookies />} />
           <Route path="/termos-de-uso" element={<TermosDeUso />} />
