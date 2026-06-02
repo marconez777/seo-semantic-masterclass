@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { X, ChevronDown, ChevronUp } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 
 const STORAGE_KEY = "mk_cookie_consent";
 
 export default function CookieBanner() {
+  const { pathname } = useLocation();
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
 
@@ -42,7 +43,7 @@ export default function CookieBanner() {
     setVisible(false);
   };
 
-  if (!visible) return null;
+  if (!visible || pathname.startsWith("/diagnostico")) return null;
 
   return (
     <div
