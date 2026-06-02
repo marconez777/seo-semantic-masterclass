@@ -126,13 +126,21 @@ Dados:
         noindex
       />
 
-      <main className="min-h-screen bg-slate-900 text-white relative overflow-hidden flex items-center">
+      <main className="min-h-screen bg-slate-900 text-white relative overflow-hidden flex flex-col">
         <div className="absolute inset-0 opacity-20 pointer-events-none">
           <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-purple-500 rounded-full filter blur-3xl" />
           <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-blue-500 rounded-full filter blur-3xl" />
         </div>
 
-        <section className="container mx-auto px-4 py-16 lg:py-20 relative z-10">
+        <div className="relative z-10 w-full flex justify-center pt-8 pb-2">
+          <img
+            src="/images/mkart-logo.png"
+            alt="MK Art"
+            className="h-10 md:h-12 w-auto"
+          />
+        </div>
+
+        <section className="container mx-auto px-4 py-10 lg:py-16 relative z-10 flex-1 flex items-center">
           <div className="grid lg:grid-cols-2 gap-12 items-center max-w-7xl mx-auto">
             {/* Formulário */}
             <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8">
