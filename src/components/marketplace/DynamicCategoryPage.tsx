@@ -5,6 +5,7 @@ import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import StructuredData from "@/components/seo/StructuredData";
 import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import BacklinkMarketplace from "@/components/marketplace/BacklinkMarketplace";
+import PackageCards from "@/components/marketplace/PackageCards";
 import FAQSection from "@/components/seo/FAQSection";
 import { usePageSEOContent } from "@/hooks/usePageSEOContent";
 import { sanitizeHtml } from "@/lib/sanitize";
@@ -73,6 +74,26 @@ export default function DynamicCategoryPage({
           category={categoryName}
           showCategoryGrid={true}
           currentCategorySlug={categorySlug}
+          topSection={
+            <>
+              <Breadcrumbs
+                className="mb-3"
+                items={[
+                  { name: 'Início', url: 'https://mkart.com.br/' },
+                  { name: 'Comprar Backlinks', url: 'https://mkart.com.br/comprar-backlinks' },
+                  { name: categoryName, url: `https://mkart.com.br/${pageSlug}` },
+                ]}
+              />
+              <h1 className="text-4xl font-bold mb-6">{h1Title}</h1>
+              {h2Subtitle && (
+                <h2 className="text-2xl font-semibold mb-6">{h2Subtitle}</h2>
+              )}
+              {introText && (
+                <p className="text-muted-foreground mb-8">{introText}</p>
+              )}
+              <PackageCards />
+            </>
+          }
           seoContent={
             <div className="mt-12 space-y-8">
               {/* Dynamic content from database */}
@@ -95,23 +116,7 @@ export default function DynamicCategoryPage({
               )}
             </div>
           }
-        >
-          <Breadcrumbs
-            className="mb-3"
-            items={[
-              { name: 'Início', url: 'https://mkart.com.br/' },
-              { name: 'Comprar Backlinks', url: 'https://mkart.com.br/comprar-backlinks' },
-              { name: categoryName, url: `https://mkart.com.br/${pageSlug}` },
-            ]}
-          />
-          <h1 className="text-4xl font-bold mb-6">{h1Title}</h1>
-          {h2Subtitle && (
-            <h2 className="text-2xl font-semibold mb-6">{h2Subtitle}</h2>
-          )}
-          {introText && (
-            <p className="text-muted-foreground mb-8">{introText}</p>
-          )}
-        </BacklinkMarketplace>
+        />
       </main>
       <Footer />
     </>

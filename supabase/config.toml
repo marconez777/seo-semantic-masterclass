@@ -18,6 +18,9 @@ verify_jwt = false
 [functions.send-guest-post-list]
 verify_jwt = false
 
+[functions.send-package-order]
+verify_jwt = false
+
 [functions.notify-admin]
 verify_jwt = false
 

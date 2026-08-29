@@ -4,6 +4,7 @@ import Footer from "@/components/layout/Footer";
 import Breadcrumbs from "@/components/seo/Breadcrumbs";
 import CategoryStructuredData from "@/components/seo/CategoryStructuredData";
 import BacklinkMarketplace from "@/components/marketplace/BacklinkMarketplace";
+import PackageCards from "@/components/marketplace/PackageCards";
 import FAQSection from "@/components/seo/FAQSection";
 import { usePageSEOContent } from "@/hooks/usePageSEOContent";
 import { sanitizeHtml } from "@/lib/sanitize";
@@ -61,6 +62,19 @@ export default function ComprarBacklinks() {
       <main className="container mx-auto px-4 py-28">
         <BacklinkMarketplace
           showCategoryGrid={true}
+          topSection={
+            <>
+              <Breadcrumbs
+                className="mb-3"
+                items={[
+                  { name: 'Início', url: 'https://mkart.com.br/' },
+                  { name: 'Comprar Backlinks', url: 'https://mkart.com.br/comprar-backlinks' },
+                ]}
+              />
+              <h1 className="text-4xl font-bold mb-6">{h1Title}</h1>
+              <PackageCards />
+            </>
+          }
           seoContent={
             <div className="mt-12 space-y-8">
               {mainContent ? (
@@ -84,16 +98,7 @@ export default function ComprarBacklinks() {
               />
             </div>
           }
-        >
-          <Breadcrumbs
-            className="mb-3"
-            items={[
-              { name: 'Início', url: 'https://mkart.com.br/' },
-              { name: 'Comprar Backlinks', url: 'https://mkart.com.br/comprar-backlinks' },
-            ]}
-          />
-          <h1 className="text-4xl font-bold mb-6">{h1Title}</h1>
-        </BacklinkMarketplace>
+        />
       </main>
       <Footer />
     </>

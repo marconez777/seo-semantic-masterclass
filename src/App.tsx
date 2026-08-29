@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import ComprarBacklinks from "./pages/ComprarBacklinks";
 import ContinuarComprando from "./pages/ContinuarComprando";
 import ComprarBacklinksCategoria from "./pages/ComprarBacklinksCategoria";
+import PacoteBacklinks from "./pages/PacoteBacklinks";
 import ComprarBacklinksNoticias from "./pages/ComprarBacklinksNoticias";
 import ComprarBacklinksAutomoveis from "./pages/ComprarBacklinksAutomoveis";
 import ComprarBacklinksFinancas from "./pages/ComprarBacklinksFinancas";
@@ -103,6 +104,7 @@ const App = () => (
           <Route path="/comprar-backlinks-imoveis" element={<ComprarBacklinksImoveis />} />
           <Route path="/comprar-backlinks-maternidade" element={<ComprarBacklinksMaternidade />} />
           <Route path="/comprar-backlinks-saude" element={<ComprarBacklinksSaude />} />
+          <Route path="/pacote-backlinks/:slug" element={<PacoteBacklinks />} />
           <Route path="/comprar-backlinks-categoria/:categoria" element={<ComprarBacklinksCategoria />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:slug" element={<BlogPost />} />

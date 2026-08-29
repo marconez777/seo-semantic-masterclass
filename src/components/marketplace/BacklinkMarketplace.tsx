@@ -16,6 +16,8 @@ interface BacklinkMarketplaceProps {
   showCategoryGrid?: boolean;
   /** Current category slug for highlighting in the grid */
   currentCategorySlug?: string;
+  /** Content rendered in full width, above the filters+table grid */
+  topSection?: ReactNode;
   /** SEO content to render below the table */
   seoContent?: ReactNode;
   /** Children content (rendered before the table) */
@@ -26,6 +28,7 @@ export default function BacklinkMarketplace({
   category,
   showCategoryGrid = true,
   currentCategorySlug,
+  topSection,
   seoContent,
   children,
 }: BacklinkMarketplaceProps) {
@@ -62,6 +65,8 @@ export default function BacklinkMarketplace({
 
   return (
     <>
+      {topSection}
+
       <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
         {/* Sidebar Filters */}
         <BacklinkFiltersSidebar
