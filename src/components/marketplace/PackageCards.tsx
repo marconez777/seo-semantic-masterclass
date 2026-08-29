@@ -1,5 +1,13 @@
 import { useNavigate } from "react-router-dom";
-import { Check, Clock, Infinity as InfinityIcon, Pencil, Target, MessageCircle } from "lucide-react";
+import {
+  Check,
+  Clock,
+  Infinity as InfinityIcon,
+  MessageCircle,
+  Pencil,
+  SlidersHorizontal,
+  Target,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   BACKLINK_PACKAGES,
@@ -17,66 +25,76 @@ import {
 const ARC_LENGTH = Math.PI * 32;
 const ARC_PATH = "M 8 44 A 32 32 0 0 1 72 44";
 
-/** Medidor da faixa de DA: a barra mostra onde o pacote cai entre 0 e 100. */
+/**
+ * Medidor da faixa de DA: o arco mostra onde o pacote cai entre 0 e 100.
+ *
+ * O texto vive em HTML sobreposto, e nao dentro do <svg>: texto de SVG nao
+ * quebra linha nem respeita o viewBox, entao rotulo mais longo que a largura
+ * do arco (o caso do pacote Personalizado) era cortado no meio.
+ */
 function DaGauge({ pkg }: { pkg: BacklinkPackage }) {
   const hasRange = pkg.daMin !== null && pkg.daMax !== null;
+  const before = hasRange ? (ARC_LENGTH * (pkg.daMin as number)) / 100 : 0;
+  const band = hasRange
+    ? (ARC_LENGTH * ((pkg.daMax as number) - (pkg.daMin as number))) / 100
+    : 0;
 
-  if (!hasRange) {
-    return (
-      <svg viewBox="0 0 80 56" className="w-full max-w-[110px] mx-auto block" role="img" aria-label="Quantidade e DA definidos por você">
+  return (
+    <div className="relative mx-auto w-[128px]">
+      <svg
+        viewBox="0 0 80 48"
+        className="block w-full"
+        role="img"
+        aria-label={
+          hasRange
+            ? `Faixa de DA de ${pkg.daMin} a ${pkg.daMax}, numa escala de 0 a 100`
+            : "Quantidade e faixa de DA definidas por você"
+        }
+      >
         <path
           d={ARC_PATH}
           fill="none"
           stroke="hsl(var(--border))"
           strokeWidth="7"
           strokeLinecap="round"
-          strokeDasharray="3 6"
+          strokeDasharray={hasRange ? undefined : "3 6"}
         />
-        <text x="40" y="42" textAnchor="middle" fontSize="15" fontWeight="500" fill="hsl(var(--foreground))">
-          {pkg.gaugeLabel}
-        </text>
-        <text x="40" y="53" textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">
-          QUANTIDADE E DA
-        </text>
+        {hasRange && (
+          <>
+            <path
+              d={ARC_PATH}
+              fill="none"
+              stroke="hsl(var(--primary) / 0.25)"
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeDasharray={`${before} ${ARC_LENGTH}`}
+            />
+            <path
+              d={ARC_PATH}
+              fill="none"
+              stroke="hsl(var(--primary))"
+              strokeWidth="7"
+              strokeLinecap="round"
+              strokeDasharray={`${band} ${ARC_LENGTH}`}
+              strokeDashoffset={-before}
+            />
+          </>
+        )}
       </svg>
-    );
-  }
 
-  const before = (ARC_LENGTH * (pkg.daMin as number)) / 100;
-  const band = (ARC_LENGTH * ((pkg.daMax as number) - (pkg.daMin as number))) / 100;
-
-  return (
-    <svg
-      viewBox="0 0 80 56"
-      className="w-full max-w-[110px] mx-auto block"
-      role="img"
-      aria-label={`Faixa de DA de ${pkg.daMin} a ${pkg.daMax}, numa escala de 0 a 100`}
-    >
-      <path d={ARC_PATH} fill="none" stroke="hsl(var(--border))" strokeWidth="7" strokeLinecap="round" />
-      <path
-        d={ARC_PATH}
-        fill="none"
-        stroke="hsl(var(--primary) / 0.25)"
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeDasharray={`${before} ${ARC_LENGTH}`}
-      />
-      <path
-        d={ARC_PATH}
-        fill="none"
-        stroke="hsl(var(--primary))"
-        strokeWidth="7"
-        strokeLinecap="round"
-        strokeDasharray={`${band} ${ARC_LENGTH}`}
-        strokeDashoffset={-before}
-      />
-      <text x="40" y="42" textAnchor="middle" fontSize="19" fontWeight="500" fill="hsl(var(--foreground))">
-        {pkg.daMin}–{pkg.daMax}
-      </text>
-      <text x="40" y="53" textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">
-        DA
-      </text>
-    </svg>
+      <div className="absolute inset-x-0 bottom-0 flex flex-col items-center">
+        {hasRange ? (
+          <span className="text-xl font-bold leading-none">
+            {pkg.daMin}–{pkg.daMax}
+          </span>
+        ) : (
+          <SlidersHorizontal className="size-5 text-foreground" aria-hidden="true" />
+        )}
+        <span className="mt-1 text-[10px] uppercase leading-none tracking-wide text-muted-foreground">
+          {hasRange ? "DA" : "Quantidade e DA"}
+        </span>
+      </div>
+    </div>
   );
 }
 

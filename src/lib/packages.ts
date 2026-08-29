@@ -30,8 +30,6 @@ export interface BacklinkPackage {
   anchorServicePrice: number | null;
   /** Prazo de entrega exibido ao cliente */
   deliveryLabel: string;
-  /** Texto do medidor quando nao ha faixa fixa de DA */
-  gaugeLabel?: string;
   /** Linha abaixo do preco (o preco por link e calculado quando ha preco) */
   priceNote?: string;
   /** Terceiro detalhe do card, quando o padrao nao se aplica */
@@ -79,7 +77,6 @@ export const BACKLINK_PACKAGES: BacklinkPackage[] = [
     price: null,
     anchorServicePrice: null,
     deliveryLabel: "prazo a combinar",
-    gaugeLabel: "você define",
     priceNote: "a partir de 20 links",
     detailNote: "DA acima de 40 ou nicho exato",
     highlight: false,
