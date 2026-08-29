@@ -24,6 +24,9 @@ dist-ssr
 *.sw?
 
 # Env
-.env
-.env.*
-!.env.example
+# O .env fica versionado de proposito: o build do Vite injeta as variaveis
+# VITE_* em tempo de build, e sem elas o app sobe com tela branca.
+# Sao apenas a URL e a chave publicavel (anon) do backend — publicas por
+# natureza, pois vao para o bundle do navegador de qualquer forma.
+.env.local
+.env.*.local
