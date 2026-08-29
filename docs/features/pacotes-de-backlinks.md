@@ -6,7 +6,7 @@ covers: [src/lib/packages.ts, src/lib/package-faqs.ts, src/pages/PacoteBacklinks
 
 # Pacotes de backlinks
 
-**Estado:** entrou no repositório em 2026-08-29. **Não usa banco de dados.**
+**Estado:** em produção desde 2026-08-29, com a edge function publicada e o envio de pedido testado ponta a ponta. **Não usa banco de dados.**
 
 ## O que faz
 
