@@ -26,6 +26,32 @@ function slugify(s: string) {
     .replace(/-+/g, "-");
 }
 
+type PostDraft = {
+  title: string;
+  content: string;
+  seoTitle: string;
+  seoDesc: string;
+  slug: string;
+  featuredUrl: string | null;
+  publishMode: "now" | "schedule";
+  scheduledDate: string | null;
+  scheduledTime: string;
+  savedAt: number;
+};
+
+function isBlankContent(html: string) {
+  return !html.replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ").trim();
+}
+
+function draftAgeLabel(savedAt: number) {
+  const mins = Math.max(0, Math.round((Date.now() - savedAt) / 60000));
+  if (mins < 1) return "agora há pouco";
+  if (mins < 60) return `há ${mins} min`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `há ${hours}h`;
+  return `há ${Math.round(hours / 24)}d`;
+}
+
 export default function AdminBlogNew() {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -45,6 +71,22 @@ export default function AdminBlogNew() {
   const [publishMode, setPublishMode] = useState<"now" | "schedule">("now");
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(undefined);
   const [scheduledTime, setScheduledTime] = useState("09:00");
+
+  // Rascunho local: protege contra fechar o navegador, queda de conexão ou reload acidental.
+  const draftKey = `mk:blog-draft:${id ?? "novo"}`;
+  const [pendingDraft, setPendingDraft] = useState<PostDraft | null>(null);
+  const draftReady = useRef(false);
+
+  const latest = useRef<PostDraft>({
+    title, content, seoTitle, seoDesc, slug, featuredUrl,
+    publishMode, scheduledDate: null, scheduledTime, savedAt: 0,
+  });
+  latest.current = {
+    title, content, seoTitle, seoDesc, slug, featuredUrl, publishMode,
+    scheduledDate: scheduledDate ? scheduledDate.toISOString() : null,
+    scheduledTime,
+    savedAt: 0,
+  };
 
   const currentEditorRef = useRef<Editor | null>(null);
   const hiddenFeaturedInput = useRef<HTMLInputElement | null>(null);
@@ -122,6 +164,92 @@ export default function AdminBlogNew() {
   useEffect(() => {
     if (!slug) setSlug(autoSlug);
   }, [autoSlug]);
+
+  // Procura um rascunho salvo. Em modo edição, espera o post do banco carregar
+  // para poder comparar e só avisar quando o rascunho for realmente diferente.
+  useEffect(() => {
+    if (id && loading) return;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const d = JSON.parse(raw) as PostDraft;
+        const current = latest.current;
+        const meaningful = !!d && (d.title?.trim() || !isBlankContent(d.content || ""));
+        const differs =
+          d?.title !== current.title ||
+          d?.content !== current.content ||
+          d?.seoDesc !== current.seoDesc ||
+          d?.slug !== current.slug ||
+          d?.featuredUrl !== current.featuredUrl;
+        if (meaningful && differs) setPendingDraft(d);
+      }
+    } catch {
+      // localStorage indisponível (aba anônima, storage cheio) — segue sem rascunho
+    }
+    draftReady.current = true;
+  }, [draftKey, id, loading]);
+
+  // Salva o rascunho com debounce a cada alteração.
+  useEffect(() => {
+    if (!draftReady.current) return;
+    if (pendingDraft) return; // não sobrescreve enquanto o usuário decide restaurar ou descartar
+    const timer = setTimeout(() => {
+      try {
+        if (!title.trim() && isBlankContent(content)) localStorage.removeItem(draftKey);
+        else localStorage.setItem(draftKey, JSON.stringify({ ...latest.current, savedAt: Date.now() }));
+      } catch {
+        // storage cheio ou bloqueado — ignora
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [title, content, seoTitle, seoDesc, slug, featuredUrl, publishMode, scheduledDate, scheduledTime, draftKey, pendingDraft]);
+
+  // Grava na hora ao esconder a aba ou fechar a página (o debounce não sobreviveria).
+  useEffect(() => {
+    const flush = () => {
+      if (!draftReady.current || pendingDraft) return;
+      const current = latest.current;
+      try {
+        if (!current.title.trim() && isBlankContent(current.content)) localStorage.removeItem(draftKey);
+        else localStorage.setItem(draftKey, JSON.stringify({ ...current, savedAt: Date.now() }));
+      } catch {
+        // ignora
+      }
+    };
+    const onVisibility = () => { if (document.visibilityState === "hidden") flush(); };
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("pagehide", flush);
+    return () => {
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("pagehide", flush);
+    };
+  }, [draftKey, pendingDraft]);
+
+  const restoreDraft = () => {
+    const d = pendingDraft;
+    if (!d) return;
+    setTitle(d.title ?? "");
+    setContent(d.content ?? "");
+    setSeoTitle(d.seoTitle ?? "");
+    setSeoDesc(d.seoDesc ?? "");
+    setSlug(d.slug ?? "");
+    setFeaturedUrl(d.featuredUrl ?? null);
+    setPublishMode(d.publishMode === "schedule" ? "schedule" : "now");
+    setScheduledDate(d.scheduledDate ? new Date(d.scheduledDate) : undefined);
+    setScheduledTime(d.scheduledTime || "09:00");
+    setPendingDraft(null);
+    toast({ title: "Rascunho restaurado", description: "Continue de onde parou." });
+  };
+
+  const discardDraft = () => {
+    try { localStorage.removeItem(draftKey); } catch { /* ignora */ }
+    setPendingDraft(null);
+  };
+
+  const clearDraft = () => {
+    draftReady.current = false;
+    try { localStorage.removeItem(draftKey); } catch { /* ignora */ }
+  };
 
 
   async function uploadToBucket(file: File): Promise<string> {
@@ -255,6 +383,7 @@ export default function AdminBlogNew() {
           ? `O post será publicado automaticamente na data agendada.`
           : id ? "Seu post foi atualizado com sucesso." : "Seu post foi salvo com sucesso."
       });
+      clearDraft();
       resetForm();
       navigate('/admin/blog');
     } catch (err: any) {
@@ -286,6 +415,22 @@ export default function AdminBlogNew() {
             </Button>
           </div>
         </header>
+
+        {pendingDraft ? (
+          <div className="flex flex-col gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-sm">
+              <p className="font-medium">Rascunho não salvo encontrado</p>
+              <p className="text-muted-foreground">
+                Salvo automaticamente {draftAgeLabel(pendingDraft.savedAt)}
+                {pendingDraft.title ? ` — “${pendingDraft.title}”` : ""}.
+              </p>
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              <Button size="sm" onClick={restoreDraft}>Restaurar</Button>
+              <Button size="sm" variant="outline" onClick={discardDraft}>Descartar</Button>
+            </div>
+          </div>
+        ) : null}
 
         {!isAdmin ? (
           <div className="rounded-md border p-4 text-sm">
