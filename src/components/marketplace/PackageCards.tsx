@@ -1,24 +1,96 @@
 import { useNavigate } from "react-router-dom";
-import { Check, Clock, Zap, Star, Settings2, MessageCircle } from "lucide-react";
+import { Check, Clock, Infinity as InfinityIcon, Pencil, Target, MessageCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   BACKLINK_PACKAGES,
   brl,
+  brlCompact,
   packageCheckoutPath,
   packageWhatsAppUrl,
   type BacklinkPackage,
 } from "@/lib/packages";
 
-const icons: Record<string, typeof Zap> = {
-  basico: Zap,
-  medio: Star,
-  personalizado: Settings2,
-};
+/**
+ * Comprimento do arco de meia-lua abaixo (raio 32) — usado para posicionar a
+ * faixa de DA na escala de 0 a 100 via stroke-dasharray.
+ */
+const ARC_LENGTH = Math.PI * 32;
+const ARC_PATH = "M 8 44 A 32 32 0 0 1 72 44";
+
+/** Medidor da faixa de DA: a barra mostra onde o pacote cai entre 0 e 100. */
+function DaGauge({ pkg }: { pkg: BacklinkPackage }) {
+  const hasRange = pkg.daMin !== null && pkg.daMax !== null;
+
+  if (!hasRange) {
+    return (
+      <svg viewBox="0 0 80 56" className="w-full max-w-[110px] mx-auto block" role="img" aria-label="Quantidade e DA definidos por você">
+        <path
+          d={ARC_PATH}
+          fill="none"
+          stroke="hsl(var(--border))"
+          strokeWidth="7"
+          strokeLinecap="round"
+          strokeDasharray="3 6"
+        />
+        <text x="40" y="42" textAnchor="middle" fontSize="15" fontWeight="500" fill="hsl(var(--foreground))">
+          {pkg.gaugeLabel}
+        </text>
+        <text x="40" y="53" textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">
+          QUANTIDADE E DA
+        </text>
+      </svg>
+    );
+  }
+
+  const before = (ARC_LENGTH * (pkg.daMin as number)) / 100;
+  const band = (ARC_LENGTH * ((pkg.daMax as number) - (pkg.daMin as number))) / 100;
+
+  return (
+    <svg
+      viewBox="0 0 80 56"
+      className="w-full max-w-[110px] mx-auto block"
+      role="img"
+      aria-label={`Faixa de DA de ${pkg.daMin} a ${pkg.daMax}, numa escala de 0 a 100`}
+    >
+      <path d={ARC_PATH} fill="none" stroke="hsl(var(--border))" strokeWidth="7" strokeLinecap="round" />
+      <path
+        d={ARC_PATH}
+        fill="none"
+        stroke="hsl(var(--primary) / 0.25)"
+        strokeWidth="7"
+        strokeLinecap="round"
+        strokeDasharray={`${before} ${ARC_LENGTH}`}
+      />
+      <path
+        d={ARC_PATH}
+        fill="none"
+        stroke="hsl(var(--primary))"
+        strokeWidth="7"
+        strokeLinecap="round"
+        strokeDasharray={`${band} ${ARC_LENGTH}`}
+        strokeDashoffset={-before}
+      />
+      <text x="40" y="42" textAnchor="middle" fontSize="19" fontWeight="500" fill="hsl(var(--foreground))">
+        {pkg.daMin}–{pkg.daMax}
+      </text>
+      <text x="40" y="53" textAnchor="middle" fontSize="9" fill="hsl(var(--muted-foreground))">
+        DA
+      </text>
+    </svg>
+  );
+}
 
 function PackageCard({ pkg }: { pkg: BacklinkPackage }) {
   const navigate = useNavigate();
-  const Icon = icons[pkg.slug] ?? Zap;
   const isCustom = pkg.ctaType === "whatsapp";
+  const anchorPrice = pkg.anchorServicePrice;
+  const anchorsIncluded = anchorPrice === 0;
+
+  const priceNote =
+    pkg.priceNote ??
+    (pkg.price !== null && pkg.quantity
+      ? `${brl(pkg.price / pkg.quantity)} por link`
+      : undefined);
 
   const handleClick = () => {
     try {
@@ -41,68 +113,71 @@ function PackageCard({ pkg }: { pkg: BacklinkPackage }) {
 
   return (
     <div
-      className={`relative flex flex-col rounded-lg border bg-card p-5 transition-shadow hover:shadow-md ${
-        pkg.highlight ? "border-2 border-primary" : "border-border"
+      className={`flex flex-col rounded-lg bg-card p-5 transition-shadow hover:shadow-md ${
+        pkg.highlight ? "border-2 border-primary" : "border border-border"
       }`}
     >
-      {pkg.badge && (
-        <span className="absolute -top-3 left-5 rounded-md bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
-          {pkg.badge}
-        </span>
-      )}
+      <p
+        className={`text-center text-xs font-medium mb-1 ${
+          pkg.highlight ? "text-primary" : "text-muted-foreground"
+        }`}
+      >
+        {pkg.name}
+        {pkg.badge && ` · ${pkg.badge.toLowerCase()}`}
+      </p>
 
-      <div className="mb-3 flex items-center gap-2">
-        <span className="inline-flex size-8 items-center justify-center rounded-md bg-primary/10 text-primary">
-          <Icon className="size-4" aria-hidden="true" />
-        </span>
-        <span className="text-sm font-semibold text-muted-foreground">{pkg.name}</span>
+      <DaGauge pkg={pkg} />
+
+      <div className="text-center mt-2 mb-4">
+        <p className="text-base font-medium">
+          {isCustom ? "Do seu jeito" : `${pkg.quantity} backlinks`}
+        </p>
+        <p className="text-2xl font-bold leading-tight">
+          {pkg.price !== null ? brlCompact(pkg.price) : "Sob consulta"}
+        </p>
+        {priceNote && <p className="text-xs text-muted-foreground">{priceNote}</p>}
       </div>
 
-      {isCustom ? (
-        <>
-          <p className="text-xl font-bold">Do seu jeito</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Volume e faixa de DA a combinar
-          </p>
-          <p className="mt-4 text-2xl font-bold text-muted-foreground">Sob consulta</p>
-        </>
-      ) : (
-        <>
-          <p className="text-xl font-bold">{pkg.quantity} backlinks</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            DA {pkg.daMin} – {pkg.daMax}
-          </p>
-          <p className="mt-4 text-3xl font-bold text-primary">{brl(pkg.price ?? 0)}</p>
-          <p className="text-xs text-muted-foreground">pagamento único, à vista no PIX</p>
-        </>
-      )}
-
-      <ul className="mt-4 flex-1 space-y-2 text-sm">
-        <li className="flex items-start gap-2 text-muted-foreground">
-          <Clock className="mt-0.5 size-4 shrink-0" aria-hidden="true" />
-          <span>Entrega em {pkg.deliveryLabel}</span>
+      <ul className="flex-1 border-t border-border pt-4 space-y-1.5 mb-4">
+        <li className="flex items-start gap-2 text-xs text-muted-foreground">
+          <Clock className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+          <span>{isCustom ? "Prazo a combinar" : `Entrega em ${pkg.deliveryLabel}`}</span>
         </li>
-        {!isCustom && (
-          <li className="flex items-start gap-2">
-            <Check
-              className={`mt-0.5 size-4 shrink-0 ${
-                pkg.anchorServicePrice === 0 ? "text-secondary" : "text-muted-foreground"
-              }`}
-              aria-hidden="true"
-            />
-            <span className={pkg.anchorServicePrice === 0 ? "text-secondary font-medium" : "text-muted-foreground"}>
-              {pkg.anchorServicePrice === 0
-                ? "Âncoras escolhidas pela MK inclusas"
-                : `Âncoras escolhidas pela MK por + ${brl(pkg.anchorServicePrice ?? 0)}`}
+
+        {isCustom ? (
+          <li className="flex items-start gap-2 text-xs text-muted-foreground">
+            <Target className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            <span>{pkg.detailNote}</span>
+          </li>
+        ) : (
+          <li
+            className={`flex items-start gap-2 text-xs ${
+              anchorsIncluded ? "text-secondary font-medium" : "text-muted-foreground"
+            }`}
+          >
+            {anchorsIncluded ? (
+              <Check className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            ) : (
+              <Pencil className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+            )}
+            <span>
+              {anchorsIncluded
+                ? "Âncoras inclusas"
+                : `Âncoras pela MK + ${brlCompact(anchorPrice ?? 0)}`}
             </span>
           </li>
         )}
+
+        <li className="flex items-start gap-2 text-xs text-muted-foreground">
+          <InfinityIcon className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" />
+          <span>Links permanentes</span>
+        </li>
       </ul>
 
       <Button
         onClick={handleClick}
-        variant={pkg.highlight ? "default" : "outline"}
-        className="mt-5 w-full gap-2"
+        variant={pkg.highlight || isCustom ? "default" : "outline"}
+        className="w-full gap-2"
       >
         {isCustom && <MessageCircle className="size-4" aria-hidden="true" />}
         {pkg.ctaLabel}
@@ -124,7 +199,7 @@ export default function PackageCards() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {BACKLINK_PACKAGES.map((pkg) => (
           <PackageCard key={pkg.slug} pkg={pkg} />
         ))}

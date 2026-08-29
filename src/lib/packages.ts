@@ -41,6 +41,12 @@ export interface BacklinkPackage {
   anchorServicePrice: number | null;
   /** Prazo de entrega exibido ao cliente */
   deliveryLabel: string;
+  /** Texto do medidor quando nao ha faixa fixa de DA */
+  gaugeLabel?: string;
+  /** Linha abaixo do preco (o preco por link e calculado quando ha preco) */
+  priceNote?: string;
+  /** Terceiro detalhe do card, quando o padrao nao se aplica */
+  detailNote?: string;
   badge?: string;
   highlight: boolean;
   ctaLabel: string;
@@ -84,6 +90,9 @@ export const BACKLINK_PACKAGES: BacklinkPackage[] = [
     price: null,
     anchorServicePrice: null,
     deliveryLabel: "prazo a combinar",
+    gaugeLabel: "você define",
+    priceNote: "a partir de 20 links",
+    detailNote: "DA acima de 40 ou nicho exato",
     highlight: false,
     ctaLabel: "Falar no WhatsApp",
     ctaType: "whatsapp",
@@ -106,6 +115,18 @@ export function packageCheckoutPath(pkg: BacklinkPackage): string {
 
 export function brl(value: number): string {
   return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
+/**
+ * Igual ao brl, mas sem os centavos quando o valor e redondo: nos cards
+ * "R$ 197" le melhor que "R$ 197,00". Em valor de pagamento use brl.
+ */
+export function brlCompact(value: number): string {
+  return value.toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+    minimumFractionDigits: Number.isInteger(value) ? 0 : 2,
+  });
 }
 
 /** Total do pedido em reais, considerando o opcional de âncoras */
