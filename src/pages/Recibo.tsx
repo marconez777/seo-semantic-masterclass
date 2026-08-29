@@ -77,8 +77,8 @@ export default function Recibo() {
           <div className="grid gap-2 sm:grid-cols-2">
             <p><strong>Nº do pedido:</strong> {order.id}</p>
             <p><strong>Data/hora:</strong> {new Date(order.created_at).toLocaleString('pt-BR')}</p>
-            <p><strong>Cliente:</strong> {pii?.customer_name ?? '—'}</p>
-            <p><strong>E-mail:</strong> {pii?.customer_email ?? '—'}</p>
+            <p><strong>Cliente:</strong> {pii?.customer_name ?? '-'}</p>
+            <p><strong>E-mail:</strong> {pii?.customer_email ?? '-'}</p>
           </div>
         </div>
 
@@ -93,7 +93,7 @@ export default function Recibo() {
             <tbody>
               {items.map((i) => (
                 <tr key={i.id} className="border-t">
-                  <td className="p-3">{siteMap[i.backlink_id]?.name || siteMap[i.backlink_id]?.url || i.backlink_id || '—'}</td>
+                  <td className="p-3">{siteMap[i.backlink_id]?.name || siteMap[i.backlink_id]?.url || i.backlink_id || '-'}</td>
                   <td className="p-3">{(i.price ?? 0).toLocaleString('pt-BR',{ style:'currency', currency:'BRL' })}</td>
                 </tr>
               ))}

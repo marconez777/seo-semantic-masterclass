@@ -184,7 +184,7 @@ export default function AdminBlogNew() {
         if (meaningful && differs) setPendingDraft(d);
       }
     } catch {
-      // localStorage indisponível (aba anônima, storage cheio) — segue sem rascunho
+      // localStorage indisponível (aba anônima, storage cheio): segue sem rascunho
     }
     draftReady.current = true;
   }, [draftKey, id, loading]);
@@ -198,7 +198,7 @@ export default function AdminBlogNew() {
         if (!title.trim() && isBlankContent(content)) localStorage.removeItem(draftKey);
         else localStorage.setItem(draftKey, JSON.stringify({ ...latest.current, savedAt: Date.now() }));
       } catch {
-        // storage cheio ou bloqueado — ignora
+        // storage cheio ou bloqueado: ignora
       }
     }, 800);
     return () => clearTimeout(timer);
@@ -422,7 +422,7 @@ export default function AdminBlogNew() {
               <p className="font-medium">Rascunho não salvo encontrado</p>
               <p className="text-muted-foreground">
                 Salvo automaticamente {draftAgeLabel(pendingDraft.savedAt)}
-                {pendingDraft.title ? ` — “${pendingDraft.title}”` : ""}.
+                {pendingDraft.title ? `, “${pendingDraft.title}”` : ""}.
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2">

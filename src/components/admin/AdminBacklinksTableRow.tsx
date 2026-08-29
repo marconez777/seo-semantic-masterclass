@@ -47,7 +47,7 @@ export default function AdminBacklinksTableRow({
             onChange={(e) => setEditData({ ...editData, category: e.target.value })}
             className="w-full h-8 rounded-md border border-input bg-background px-2 text-xs"
           >
-            <option value="">— Sem categoria —</option>
+            <option value="">Sem categoria</option>
             {OFFICIAL_CATEGORIES.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
@@ -93,19 +93,19 @@ export default function AdminBacklinksTableRow({
     <tr className="border-t align-top">
       <td className="p-3">
         <div className="flex items-center gap-1">
-          <span className="font-medium">{b.domain ?? "—"}</span>
+          <span className="font-medium">{b.domain ?? "-"}</span>
           <a href={b.url} target="_blank" rel="noopener noreferrer" className="text-muted-foreground hover:text-primary">
             <ExternalLink size={14} />
           </a>
         </div>
       </td>
-      <td className="p-3">{b.category ?? "—"}</td>
-      <td className="p-3">{b.da ?? "—"}</td>
-      <td className="p-3">{b.traffic?.toLocaleString("pt-BR") ?? "—"}</td>
+      <td className="p-3">{b.category ?? "-"}</td>
+      <td className="p-3">{b.da ?? "-"}</td>
+      <td className="p-3">{b.traffic?.toLocaleString("pt-BR") ?? "-"}</td>
       <td className="p-3">
         {b.price != null
           ? b.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })
-          : "—"}
+          : "-"}
       </td>
       <td className="p-3">
         {b.status === "ativo" ? (

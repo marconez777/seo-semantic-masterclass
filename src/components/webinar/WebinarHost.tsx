@@ -9,14 +9,14 @@ export const WebinarHost = () => (
         <div className="aspect-[4/5] bg-webinar-border-inverse/40 rounded-md overflow-hidden">
           <img
             src="/lovable-uploads/b120631c-0792-4f41-8951-878c83dd310f.png"
-            alt="Marco Guimarães — MK"
+            alt="Marco Guimarães, MK"
             className="w-full h-full object-cover object-center"
           />
         </div>
 
         <div>
           <h2 className="font-serif-display text-3xl sm:text-5xl font-medium tracking-tight mb-8">
-            Marco Guimarães — MK
+            Marco Guimarães, MK
           </h2>
 
           <div className="space-y-5 text-[20px] leading-[1.7] text-webinar-muted-inverse max-w-2xl">
@@ -24,7 +24,7 @@ export const WebinarHost = () => (
               Especialista em aquisição orgânica para clínicas médicas, com foco em SEO de performance, GEO (otimização para IAs generativas) e integração com agentes de IA para WhatsApp.
             </p>
             <p>
-              Trabalha dentro da Resolução CFM 2.336/2023 e do manual atualizado de publicidade médica, construindo ecossistemas de aquisição que fortalecem o CNPJ da clínica — não o CPF de médicos individuais.
+              Trabalha dentro da Resolução CFM 2.336/2023 e do manual atualizado de publicidade médica, construindo ecossistemas de aquisição que fortalecem o CNPJ da clínica, não o CPF de médicos individuais.
             </p>
             <p>
               Já implementou o método em clínicas de psiquiatria, gastroenterologia, psicologia e muitas outras especialidades. Os resultados vão desde ranqueamento em primeiro lugar no Google e recomendação pelo ChatGPT até redução de mais de 70% no investimento em tráfego pago.

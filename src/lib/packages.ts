@@ -3,7 +3,7 @@
  *
  * Fonte única de verdade: cards, página de finalização, criação do pedido e
  * e-mails leem daqui. A edge function `create-package-order` mantém uma cópia
- * própria deste catálogo para recalcular o total no servidor — se um preço
+ * própria deste catálogo para recalcular o total no servidor: se um preço
  * mudar aqui, ele precisa mudar lá também.
  *
  * Esta modalidade é separada da loja avulsa (/comprar-backlinks): prazo,

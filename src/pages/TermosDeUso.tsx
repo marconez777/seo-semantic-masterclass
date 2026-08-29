@@ -30,7 +30,7 @@ export default function TermosDeUso() {
             <p>
               <strong>Mk Art Tráfego Orgânico Ltda.</strong><br />
               CNPJ: 26.248.684/0001-39<br />
-              Endereço: Rua Caminho do Pilar, 401 — Santo André/SP<br />
+              Endereço: Rua Caminho do Pilar, 401, Santo André/SP<br />
               Contato: <a href="mailto:contato@mkart.com.br" className="text-neutral-900 underline underline-offset-2">contato@mkart.com.br</a>
             </p>
           </section>
@@ -59,7 +59,7 @@ export default function TermosDeUso() {
 
           <section>
             <h2 className="mb-3 text-xl font-semibold text-neutral-900">5. Propriedade intelectual</h2>
-            <p>Todo o conteúdo da Plataforma — textos, imagens, vídeos, marcas, logotipos, layouts, códigos, metodologias, materiais educacionais e demais elementos — é de titularidade exclusiva da Mk Art ou de terceiros que licenciaram seu uso, e está protegido pela legislação brasileira e internacional de propriedade intelectual. É vedada a reprodução, distribuição, modificação ou utilização comercial sem autorização prévia e expressa.</p>
+            <p>Todo o conteúdo da Plataforma (textos, imagens, vídeos, marcas, logotipos, layouts, códigos, metodologias, materiais educacionais e demais elementos) é de titularidade exclusiva da Mk Art ou de terceiros que licenciaram seu uso, e está protegido pela legislação brasileira e internacional de propriedade intelectual. É vedada a reprodução, distribuição, modificação ou utilização comercial sem autorização prévia e expressa.</p>
           </section>
 
           <section>

@@ -5,7 +5,7 @@ import { ShieldCheck } from "lucide-react";
  * os outros prometem **reposição** (você ganha outro link), a MK devolve
  * **dinheiro**.
  *
- * A recusa de prometer prazo de indexação é parte da venda, não uma ressalva —
+ * A recusa de prometer prazo de indexação é parte da venda, não uma ressalva:
  * concorrente que promete "indexação em 30 dias" está prometendo o que não
  * controla. Por isso ela fica em destaque, e nunca em letra miúda.
  */
@@ -25,7 +25,7 @@ const GuaranteeSection = () => {
 
           <p className="mt-5 text-lg text-muted-foreground leading-relaxed">
             Você tem 30 dias. Sem justificativa, sem processo e sem crédito para
-            usar depois — o dinheiro de volta.
+            usar depois: o dinheiro de volta.
           </p>
 
           <div className="mt-8 rounded-xl border border-border bg-card p-6 text-left">
@@ -35,8 +35,9 @@ const GuaranteeSection = () => {
             <p className="mt-3 text-sm text-muted-foreground leading-relaxed">
               Quem decide quando indexar é o Google, e agência que promete o que
               não controla está prometendo o que não pode cumprir. O que está na
-              nossa mão é produzir o conteúdo de um jeito que indexa mais rápido
-              — e é por isso que a nossa garantia é de devolução, não de prazo.
+              nossa mão é produzir o conteúdo de um jeito que indexa mais
+              rápido. É por isso que a nossa garantia é de devolução, não de
+              prazo.
             </p>
           </div>
         </div>

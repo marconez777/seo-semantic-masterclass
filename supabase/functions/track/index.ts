@@ -1,7 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.95.0";
 import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
 
-// Edge function pública (sem JWT) — recebe tracking first-party do site.
+// Edge function pública (sem JWT): recebe tracking first-party do site.
 // Faz upsert em analytics_visitors / analytics_sessions e insere
 // pageviews + events em lote.
 

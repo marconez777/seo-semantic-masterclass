@@ -319,7 +319,7 @@ export function ConsultingKeywords({ clientId, readOnly }: Props) {
                             <Input value={editValues.cpc} onChange={(e) => setEditValues(v => ({ ...v, cpc: e.target.value }))} className="h-8" type="number" step="0.01" />
                           </TableCell>
                           {months.map(m => (
-                            <TableCell key={m} className="text-center text-muted-foreground">—</TableCell>
+                            <TableCell key={m} className="text-center text-muted-foreground">-</TableCell>
                           ))}
                           <TableCell className="flex gap-1">
                             <Button size="icon" variant="ghost" onClick={saveEdit}><Check className="h-4 w-4 text-green-600" /></Button>
@@ -337,7 +337,7 @@ export function ConsultingKeywords({ clientId, readOnly }: Props) {
                             const color = getPositionColor(pos, prevMonthPos);
                             return (
                               <TableCell key={m} className={`text-center tabular-nums ${color}`}>
-                                {pos !== null ? pos : "—"}
+                                {pos !== null ? pos : "-"}
                               </TableCell>
                             );
                           })}

@@ -44,7 +44,7 @@ const Hero = () => (
       </h1>
 
       <p className="text-center text-[20px] leading-[1.6] text-webinar-muted max-w-2xl mx-auto mb-10">
-        Como posicionar sua clínica no topo do Google e ser indicada pelo ChatGPT, Gemini e Perplexity —
+        Como posicionar sua clínica no topo do Google e ser indicada pelo ChatGPT, Gemini e Perplexity,
         sem depender de tráfego pago, sem aparecer em rede social.
       </p>
 
@@ -275,7 +275,7 @@ const AulaMedico = () => {
     <>
       <SEOHead
         title="Aula Grátis para Médicos · Clínica em 1º no Google e nas IAs | MK"
-        description="Aula ao vivo gratuita toda quinta às 20h. Como posicionar sua clínica em 1º no Google e ser indicada por ChatGPT, Gemini e Perplexity — sem tráfego pago."
+        description="Aula ao vivo gratuita toda quinta às 20h. Como posicionar sua clínica em 1º no Google e ser indicada por ChatGPT, Gemini e Perplexity, sem tráfego pago."
         canonicalUrl="https://mkart.com.br/aula-medico"
       />
       <main className="font-sans text-[20px]">

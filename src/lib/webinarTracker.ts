@@ -114,7 +114,7 @@ class WebinarTracker {
         this.pendingPatch[k] = !!this.pendingPatch[k] || v;
       } else if (typeof v === "number") {
         // se já existe um número pendente, mantemos o maior (ex: max_position)
-        // exceto chaves de incremento (com prefix _inc) — tratamos como soma
+        // exceto chaves de incremento (com prefix _inc): tratamos como soma
         if (k.endsWith("_inc")) {
           this.pendingPatch[k] = (this.pendingPatch[k] || 0) + v;
         } else {

@@ -307,10 +307,10 @@ export default function AdminAula() {
             ) : filtered.map((r) => (
               <TableRow key={r.session_id}>
                 <TableCell className="text-sm text-muted-foreground whitespace-nowrap">{new Date(r.first_seen_at).toLocaleString("pt-BR")}</TableCell>
-                <TableCell><div className="flex items-center gap-2"><DeviceIcon d={r.device_type} /><span className="text-sm capitalize">{r.device_type ?? "—"}</span></div></TableCell>
-                <TableCell className="text-sm">{r.os ?? "—"} / {r.browser ?? "—"}</TableCell>
-                <TableCell className="text-sm">{r.ip_country ?? "—"}</TableCell>
-                <TableCell className="text-sm">{r.utm_source ? `${r.utm_source}${r.utm_medium ? "/" + r.utm_medium : ""}` : <span className="text-muted-foreground">—</span>}</TableCell>
+                <TableCell><div className="flex items-center gap-2"><DeviceIcon d={r.device_type} /><span className="text-sm capitalize">{r.device_type ?? "-"}</span></div></TableCell>
+                <TableCell className="text-sm">{r.os ?? "-"} / {r.browser ?? "-"}</TableCell>
+                <TableCell className="text-sm">{r.ip_country ?? "-"}</TableCell>
+                <TableCell className="text-sm">{r.utm_source ? `${r.utm_source}${r.utm_medium ? "/" + r.utm_medium : ""}` : <span className="text-muted-foreground">-</span>}</TableCell>
                 <TableCell className="text-sm max-w-[200px] truncate" title={r.referrer ?? ""}>{r.referrer ?? <span className="text-muted-foreground">direto</span>}</TableCell>
                 <TableCell className="text-right text-sm">{fmtTime(r.time_on_page)}</TableCell>
                 <TableCell className="text-right text-sm">{r.scroll_pct}%</TableCell>

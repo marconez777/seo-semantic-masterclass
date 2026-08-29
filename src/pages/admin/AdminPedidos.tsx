@@ -374,15 +374,15 @@ export default function AdminPedidos() {
                     <div className="mt-3 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
                       <div>
                         <span className="text-muted-foreground">Cliente: </span>
-                        <span className="font-medium">{pii?.customer_name || "—"}</span>
+                        <span className="font-medium">{pii?.customer_name || "-"}</span>
                       </div>
                       <div>
                         <span className="text-muted-foreground">Email: </span>
-                        <span>{pii?.customer_email || "—"}</span>
+                        <span>{pii?.customer_email || "-"}</span>
                       </div>
                       <div>
                         <span className="text-muted-foreground">WhatsApp: </span>
-                        <span>{pii?.customer_phone || "—"}</span>
+                        <span>{pii?.customer_phone || "-"}</span>
                       </div>
                     </div>
                   </div>
@@ -449,13 +449,13 @@ export default function AdminPedidos() {
                               {pedido.items.map((item) => (
                                 <tr key={item.id} className="border-t">
                                   <td className="p-2">
-                                    {item.backlink?.domain || item.backlink?.url || "—"}
+                                    {item.backlink?.domain || item.backlink?.url || "-"}
                                   </td>
                                   <td className="p-2">
                                     {item.mk_will_choose ? (
                                       <span className="italic text-muted-foreground">A definir</span>
                                     ) : (
-                                      item.anchor_text || "—"
+                                      item.anchor_text || "-"
                                     )}
                                   </td>
                                   <td className="p-2">
@@ -473,7 +473,7 @@ export default function AdminPedidos() {
                                         <ExternalLink className="h-3 w-3" />
                                       </a>
                                     ) : (
-                                      "—"
+                                      "-"
                                     )}
                                   </td>
                                   <td className="p-2">

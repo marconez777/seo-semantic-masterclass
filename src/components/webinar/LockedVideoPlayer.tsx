@@ -281,7 +281,7 @@ export const LockedVideoPlayer = ({ src, poster, className = "" }: Props) => {
         onClick={togglePlay}
       />
 
-      {/* Overlay inicial — só aparece antes de começar */}
+      {/* Overlay inicial: só aparece antes de começar */}
       {showOverlay && !isPlaying && (
         <button
           type="button"

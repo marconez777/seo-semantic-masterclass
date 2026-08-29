@@ -267,7 +267,7 @@ export function KeywordTracker({ userId }: Props) {
                                 {kw.current_position}º
                               </Badge>
                             ) : (
-                              <span className="text-muted-foreground">—</span>
+                              <span className="text-muted-foreground">-</span>
                             )}
                           </TableCell>
                           {months.map((m, idx) => {
@@ -279,7 +279,7 @@ export function KeywordTracker({ userId }: Props) {
 
                             return (
                               <TableCell key={m} className={`text-center text-sm ${colorClass}`}>
-                                {pos !== null ? `${pos}º` : "—"}
+                                {pos !== null ? `${pos}º` : "-"}
                               </TableCell>
                             );
                           })}

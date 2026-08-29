@@ -8,7 +8,7 @@ import { useCatalogStats } from "@/hooks/useCatalogStats";
 /**
  * Modalidades de compra.
  *
- * A ordem dos cards é uma progressão real — **quanto a MK faz por você**. No
+ * A ordem dos cards é uma progressão real: **quanto a MK faz por você**. No
  * catálogo o cliente escolhe cada portal; no pacote ele define o volume e a MK
  * escolhe os sites; no mensal a MK escolhe tudo e mantém a cadência. Ordenar por
  * grau de delegação diz algo verdadeiro sobre o produto; ordenar por preço, não.
@@ -21,7 +21,7 @@ import { useCatalogStats } from "@/hooks/useCatalogStats";
  *
  * <important>
  * Enquanto `monthlyLinks` ou `monthlyFrom` forem null, o card mostra "sob
- * consulta". Isso é **temporário e indesejado** — esconder preço é o
+ * consulta". Isso é **temporário e indesejado**, porque esconder preço é o
  * comportamento da concorrência que a home inteira ataca. Preencher assim que a
  * operação definir os três valores.
  * </important>

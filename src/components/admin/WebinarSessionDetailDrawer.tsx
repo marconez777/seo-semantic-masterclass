@@ -84,7 +84,7 @@ export function WebinarSessionDetailDrawer({
     <div>
       <div className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</div>
       <div className="text-sm font-medium break-words">
-        {value === null || value === undefined || value === "" ? "—" : String(value)}
+        {value === null || value === undefined || value === "" ? "-" : String(value)}
       </div>
     </div>
   );
@@ -108,8 +108,8 @@ export function WebinarSessionDetailDrawer({
               <Field label="Scroll" value={`${session.scroll_depth_pct}%`} />
               {session.signup_nome && (
                 <>
-                  <Field label="Lead — Nome" value={session.signup_nome} />
-                  <Field label="Lead — Email" value={session.signup_email} />
+                  <Field label="Nome do lead" value={session.signup_nome} />
+                  <Field label="E-mail do lead" value={session.signup_email} />
                 </>
               )}
             </div>
@@ -213,7 +213,7 @@ export function WebinarSessionDetailDrawer({
                     <Field
                       key={field}
                       label={fieldLabel[field] ?? field}
-                      value={String(value ?? "—")}
+                      value={String(value ?? "-")}
                     />
                   ))}
                 </div>

@@ -72,6 +72,6 @@ export const PACKAGE_FAQS: PackageFaq[] = [
   {
     question: "Os backlinks trazem tráfego?",
     answer:
-      "Não muito. São backlinks focados em DA e em referência de sites com DA alto. Usamos esses mesmos backlinks em vários dos nossos cases de sucesso. Garantimos resultados satisfatórios ou você pode pedir o dinheiro de volta — nesse caso os backlinks são removidos.",
+      "Não muito. São backlinks focados em DA e em referência de sites com DA alto. Usamos esses mesmos backlinks em vários dos nossos cases de sucesso. Garantimos resultados satisfatórios ou você pode pedir o dinheiro de volta, e nesse caso os backlinks são removidos.",
   },
 ];

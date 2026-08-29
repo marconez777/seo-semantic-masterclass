@@ -228,7 +228,7 @@ Dados:
 
               <p className="text-lg text-gray-300 mb-12">
                 Domine as primeiras posições quando um paciente pesquisa pelo seu
-                tipo de atendimento — no Google e nas principais IAs — e seja
+                tipo de atendimento, no Google e nas principais IAs, e seja
                 encontrado na hora que ele mais precisa.
               </p>
 

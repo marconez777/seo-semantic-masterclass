@@ -13,7 +13,7 @@ export const WebinarFinalCTA = ({ onCTAClick }: Props) => (
 
       <div className="space-y-2 text-[20px] text-webinar-muted-inverse mb-12">
         <p>📅 Domingo, 17/05</p>
-        <p>⏰ 10h — duração de 40 minutos</p>
+        <p>⏰ 10h, duração de 40 minutos</p>
         <p>💻 Online, ao vivo, com espaço para perguntas</p>
       </div>
 

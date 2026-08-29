@@ -10,7 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
  * desta categoria procura. Se o catálogo encolher, a home encolhe junto.
  *
  * **A métrica de autoridade aqui é DA.** A coluna `dr` existe no schema e está
- * nula em todas as linhas — ver `docs/GOTCHAS.md`.
+ * nula em todas as linhas. Ver `docs/GOTCHAS.md`.
  */
 export interface CatalogStats {
   /** Total de portais no catálogo (contagem exata, não limitada pela página) */
@@ -23,7 +23,7 @@ export interface CatalogStats {
 
 /**
  * O PostgREST corta em 1.000 linhas por padrão. O catálogo já passou disso, então
- * a média precisa de um range explícito — senão ela é a média das 1.000 primeiras.
+ * a média precisa de um range explícito, senão ela é a média das 1.000 primeiras.
  */
 const MAX_ROWS = 5000;
 
@@ -93,7 +93,7 @@ const SAMPLE_BANDS: Array<{ min: number; max: number; take: number; diversify: b
 /**
  * Quantos candidatos buscar por faixa antes de escolher os `take`.
  *
- * Metade do catálogo é Notícias, e tráfego alto correlaciona com notícia — então
+ * Metade do catálogo é Notícias, e tráfego alto correlaciona com notícia, então
  * ordenar por tráfego dentro da faixa devolve portal de notícia em quase toda
  * linha, o que faz a amostra parecer repetitiva e contradiz a seção de nichos
  * logo abaixo. O excedente precisa ser generoso: com 12 candidatos as faixas
@@ -105,7 +105,7 @@ const CANDIDATES_PER_BAND = 40;
  * TLDs de fora que existem no catálogo (~75 domínios portugueses e espanhóis).
  *
  * A home promete "portais brasileiros" no H1, então a amostra da vitrine não
- * pode exibir um `.pt` ou um `.es` — a primeira linha que contradiz a headline
+ * pode exibir um `.pt` ou um `.es`, porque a primeira linha que contradiz a headline
  * custa mais confiança do que a variedade extra ganha. Isto filtra **só a
  * amostra da home**; o catálogo completo continua mostrando tudo.
  */

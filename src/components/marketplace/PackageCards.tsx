@@ -19,7 +19,7 @@ import {
 } from "@/lib/packages";
 
 /**
- * Comprimento do arco de meia-lua abaixo (raio 32) — usado para posicionar a
+ * Comprimento do arco de meia-lua abaixo (raio 32), usado para posicionar a
  * faixa de DA na escala de 0 a 100 via stroke-dasharray.
  */
 const ARC_LENGTH = Math.PI * 32;
@@ -208,7 +208,7 @@ export default function PackageCards() {
           Pacotes prontos de backlinks
         </h2>
         <p className="text-sm text-muted-foreground">
-          Contrate um volume fechado com entrega rápida — ou escolha site a site na
+          Contrate um volume fechado com entrega rápida, ou escolha site a site na
           lista abaixo.
         </p>
       </div>

@@ -7,7 +7,7 @@ import { Resend } from "npm:resend@4.0.0";
  * NAO grava nada no banco: nesta primeira versao o pedido de pacote vive so no
  * e-mail que chega para a MK. O painel (/admin) continua atendendo apenas a
  * compra avulsa. Quando o pacote for para o painel, esta funcao passa a gravar
- * em orders_new — ate la, se o e-mail falhar, o pedido se perde, e por isso a
+ * em orders_new. Ate la, se o e-mail falhar, o pedido se perde, e por isso a
  * pagina so mostra sucesso quando esta funcao responde 200.
  *
  * Roda com verify_jwt = false porque a compra aceita visitante sem cadastro.
@@ -25,7 +25,7 @@ const ADMIN_EMAIL = "contato@mkart.com.br";
 const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
 
 /**
- * Espelho de src/lib/packages.ts. Se um preco mudar la, muda aqui tambem —
+ * Espelho de src/lib/packages.ts. Se um preco mudar la, muda aqui tambem,
  * o frontend so mostra o valor, quem decide o que sera cobrado e' este arquivo.
  */
 const PACKAGES: Record<
@@ -172,7 +172,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
           <tr><td style="padding:6px 0;width:170px;"><strong>Pacote</strong></td>
-              <td>${pkg.name} — ${pkg.quantity} backlinks, DA ${pkg.daMin} a ${pkg.daMax}</td></tr>
+              <td>${pkg.name}: ${pkg.quantity} backlinks, DA ${pkg.daMin} a ${pkg.daMax}</td></tr>
           <tr><td style="padding:6px 0;"><strong>Ancoras pela MK</strong></td>
               <td>${anchorsByMk ? `sim (${brl(anchorServicePrice)})` : "nao, o cliente informou"}</td></tr>
           <tr><td style="padding:6px 0;"><strong>Total a receber</strong></td>
@@ -194,8 +194,8 @@ const handler = async (req: Request): Promise<Response> => {
         </table>
 
         <p style="margin-top:24px;color:#5f5e5a;font-size:13px;">
-          <strong>Mande a chave PIX para o cliente</strong> — ela nao aparece no site.
-          Este pedido nao esta gravado no banco — ele existe apenas neste e-mail.
+          <strong>Mande a chave PIX para o cliente</strong>, porque ela nao aparece no site.
+          Este pedido nao esta gravado no banco: ele existe apenas neste e-mail.
         </p>
       </div>`;
 
@@ -203,7 +203,7 @@ const handler = async (req: Request): Promise<Response> => {
       from: "MK Art SEO <contato@mkart.com.br>",
       to: [ADMIN_EMAIL],
       replyTo: email,
-      subject: `Novo pedido de pacote ${pkg.name} — ${brl(total)} — ${name}`,
+      subject: `Novo pedido de pacote ${pkg.name}, ${brl(total)}, ${name}`,
       html,
     });
 

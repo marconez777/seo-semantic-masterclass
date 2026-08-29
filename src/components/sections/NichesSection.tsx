@@ -3,7 +3,7 @@ import { OFFICIAL_CATEGORIES } from "@/lib/categories";
 
 /**
  * As 20 páginas de categoria só recebiam link do dropdown do header. Aqui elas
- * ganham link contextual a partir da página de maior autoridade do domínio —
+ * ganham link contextual a partir da página de maior autoridade do domínio:
  * ganho de SEO interno com custo de implementação quase zero, porque o grid já
  * existia para a vitrine.
  */

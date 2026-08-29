@@ -240,10 +240,10 @@ export function ConsultingPages({ clientId, readOnly }: Props) {
                 ) : (
                   <div className="space-y-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-1 text-sm">
-                      <div><span className="text-muted-foreground">Keyword:</span> <strong>{page.main_keyword || "—"}</strong></div>
-                      <div><span className="text-muted-foreground">URL:</span> {page.page_url ? <a href={page.page_url} target="_blank" rel="noopener noreferrer" className="text-primary underline">{page.page_url}</a> : "—"}</div>
-                      <div><span className="text-muted-foreground">Title:</span> {page.seo_title || "—"}</div>
-                      <div><span className="text-muted-foreground">Description:</span> {page.seo_description || "—"}</div>
+                      <div><span className="text-muted-foreground">Keyword:</span> <strong>{page.main_keyword || "-"}</strong></div>
+                      <div><span className="text-muted-foreground">URL:</span> {page.page_url ? <a href={page.page_url} target="_blank" rel="noopener noreferrer" className="text-primary underline">{page.page_url}</a> : "-"}</div>
+                      <div><span className="text-muted-foreground">Title:</span> {page.seo_title || "-"}</div>
+                      <div><span className="text-muted-foreground">Description:</span> {page.seo_description || "-"}</div>
                     </div>
                     {!readOnly && (
                       <Button size="sm" variant="outline" onClick={() => startEditPage(page)}>Editar metadados</Button>

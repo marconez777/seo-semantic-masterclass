@@ -157,7 +157,7 @@ export default function AdminAnalytics() {
           .select("user_id, full_name, email, created_at")
           .order("created_at", { ascending: false })
           .limit(20);
-        setRecentLeads((leads ?? []).map((l) => ({ user_id: l.user_id!, name: l.full_name || "—", email: l.email || "—", created_at: l.created_at! })));
+        setRecentLeads((leads ?? []).map((l) => ({ user_id: l.user_id!, name: l.full_name || "-", email: l.email || "-", created_at: l.created_at! })));
 
         // Realtime: sessions with last_seen in last 5 min
         const fiveMin = new Date(Date.now() - 5 * 60 * 1000).toISOString();
@@ -338,7 +338,7 @@ export default function AdminAnalytics() {
                   {realtime.map((r) => (
                     <TableRow key={r.session_id}>
                       <TableCell className="font-mono text-xs">{r.path}</TableCell>
-                      <TableCell><Badge variant="outline" style={{ borderColor: CHANNEL_COLORS[r.channel || "unknown"] }}>{r.channel || "—"}</Badge></TableCell>
+                      <TableCell><Badge variant="outline" style={{ borderColor: CHANNEL_COLORS[r.channel || "unknown"] }}>{r.channel || "-"}</Badge></TableCell>
                       <TableCell className="text-right text-xs">{new Date(r.last_seen_at).toLocaleTimeString("pt-BR")}</TableCell>
                     </TableRow>
                   ))}

@@ -158,7 +158,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
             </div>
           ) : (
             <div key={step} className="animate-fade-in">
-              {/* STEP 1 — Nome */}
+              {/* STEP 1: Nome */}
               {step === 1 && (
                 <QuestionLayout
                   title="Qual seu nome?"
@@ -177,7 +177,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
                 </QuestionLayout>
               )}
 
-              {/* STEP 2 — Email */}
+              {/* STEP 2: Email */}
               {step === 2 && (
                 <QuestionLayout
                   title="Qual seu e-mail?"
@@ -198,7 +198,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
                 </QuestionLayout>
               )}
 
-              {/* STEP 3 — WhatsApp */}
+              {/* STEP 3: WhatsApp */}
               {step === 3 && (
                 <QuestionLayout
                   title="Qual seu WhatsApp?"
@@ -219,7 +219,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
                 </QuestionLayout>
               )}
 
-              {/* STEP 4 — Psiquiatra? */}
+              {/* STEP 4: Psiquiatra? */}
               {step === 4 && (
                 <QuestionLayout title="Você é psiquiatra?" onBack={back} onNext={null}>
                   <div className="grid grid-cols-2 gap-3">
@@ -238,7 +238,7 @@ export const WebinarSignupModal = ({ open, onOpenChange }: Props) => {
                 </QuestionLayout>
               )}
 
-              {/* STEP 5 — Faturamento */}
+              {/* STEP 5: Faturamento */}
               {step === 5 && (
                 <QuestionLayout
                   title="Qual o seu faturamento mensal hoje?"

@@ -164,7 +164,7 @@ export default function AdminLeads() {
                   <TableRow key={lead.id}>
                     <TableCell className="font-medium">{lead.name}</TableCell>
                     <TableCell>{lead.email}</TableCell>
-                    <TableCell>{lead.whatsapp || "—"}</TableCell>
+                    <TableCell>{lead.whatsapp || "-"}</TableCell>
                     <TableCell>
                       {lead.website ? (
                         (() => {
@@ -186,7 +186,7 @@ export default function AdminLeads() {
                           }
                         })()
                       ) : (
-                        "—"
+                        "-"
                       )}
                     </TableCell>
                     <TableCell>

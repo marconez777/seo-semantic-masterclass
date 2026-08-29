@@ -11,11 +11,11 @@ import { supabase } from "@/integrations/supabase/client";
  *
  * Substitui a antiga isca "30 sites para guest post": um arquivo pronto entrega
  * o que qualquer um poderia montar, a auditoria entrega uma leitura do site
- * *dele* — e abre conversa, que o arquivo não abre. O gancho é a inspeção do
+ * *dele*, e abre conversa, que o arquivo não abre. O gancho é a inspeção do
  * concorrente, não a generosidade.
  *
  * <important>
- * Diferente da isca antiga, **isto não é entrega automática** — cada pedido vira
+ * Diferente da isca antiga, **isto não é entrega automática**: cada pedido vira
  * trabalho de alguém. O lead cai em `contact_submissions` e aparece em
  * `/admin/contatos`, reusando o mesmo caminho de `/contato` (mesma tabela, mesmo
  * trigger de validação, mesma edge function de aviso). Se o volume crescer, o
@@ -25,7 +25,7 @@ import { supabase } from "@/integrations/supabase/client";
 
 /**
  * Prazo de entrega prometido na tela. Enquanto for null, a copy simplesmente não
- * cita prazo — melhor não prometer do que prometer um número inventado.
+ * cita prazo. Melhor não prometer do que prometer um número inventado.
  * Preencher quando a operação definir (ex.: "até 3 dias úteis").
  */
 const AUDIT_DELIVERY_LABEL: string | null = null;
@@ -201,7 +201,7 @@ const AuditSection = () => {
                     placeholder="concorrente.com.br"
                   />
                   <p className="text-sm text-muted-foreground">
-                    Com ele a auditoria fica bem mais útil — é onde aparecem as
+                    Com ele a auditoria fica bem mais útil: é onde aparecem as
                     lacunas.
                   </p>
                 </div>

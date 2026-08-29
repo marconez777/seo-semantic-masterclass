@@ -65,7 +65,7 @@ const getStatusLabel = (status: string) => {
 };
 
 const formatSource = (src: string | null) => {
-  if (!src) return "—";
+  if (!src) return "-";
   if (src === "direct") return "Direto";
   if (src.startsWith("/")) return src;
   return src;
@@ -310,14 +310,14 @@ export default function AdminClientes() {
                             <User className="h-4 w-4 text-primary" />
                           </div>
                           <div>
-                            <div className="font-medium">{cliente.full_name || "—"}</div>
+                            <div className="font-medium">{cliente.full_name || "-"}</div>
                             <div className="text-xs text-muted-foreground">
-                              {cliente.email || "—"}
+                              {cliente.email || "-"}
                             </div>
                           </div>
                         </div>
                       </td>
-                      <td className="p-3">{cliente.whatsapp || "—"}</td>
+                      <td className="p-3">{cliente.whatsapp || "-"}</td>
                       <td className="p-3 max-w-[200px] truncate">
                         {cliente.site ? (
                           <a
@@ -330,7 +330,7 @@ export default function AdminClientes() {
                             {cliente.site.replace(/^https?:\/\//, "")}
                           </a>
                         ) : (
-                          "—"
+                          "-"
                         )}
                       </td>
                       <td className="p-3 max-w-[180px] truncate" title={cliente.signup_source || ""}>
@@ -339,7 +339,7 @@ export default function AdminClientes() {
                             {formatSource(cliente.signup_source)}
                           </Badge>
                         ) : (
-                          <span className="text-muted-foreground">—</span>
+                          <span className="text-muted-foreground">-</span>
                         )}
                       </td>
                       <td className="p-3 text-center">
@@ -349,7 +349,7 @@ export default function AdminClientes() {
                       <td className="p-3 text-muted-foreground">
                         {cliente.created_at
                           ? new Date(cliente.created_at).toLocaleDateString("pt-BR")
-                          : "—"}
+                          : "-"}
                       </td>
                       <td className="p-3">
                         <div className="flex items-center gap-2">

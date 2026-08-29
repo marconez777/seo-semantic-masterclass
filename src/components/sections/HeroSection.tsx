@@ -6,7 +6,7 @@ import { useCatalogStats } from "@/hooks/useCatalogStats";
 /**
  * Os três números ficam dentro do hero, não numa seção abaixo: prova junto da
  * promessa converte melhor do que prova depois dela. Enquanto carregam, mostram
- * um traço — nunca um valor chutado.
+ * um traço, nunca um valor chutado.
  */
 const HeroStat = ({ value, label }: { value: string; label: string }) => (
   <div className="flex flex-col gap-1">
@@ -21,7 +21,7 @@ const HeroSection = () => {
   const { data: stats, isLoading } = useCatalogStats();
 
   const show = (n: number | undefined) =>
-    isLoading || n == null ? "—" : n.toLocaleString("pt-BR");
+    isLoading || n == null ? "-" : n.toLocaleString("pt-BR");
 
   return (
     <section id="home" className="bg-background border-b border-border">

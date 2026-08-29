@@ -384,16 +384,16 @@ async function startImport() {
                   const invalid = !isValidCategory(r.category);
                   return (
                     <tr key={idx} className={`border-t ${invalid ? 'bg-destructive/10' : ''}`}>
-                      <td className="p-2">{r.url || "—"}</td>
-                      <td className="p-2">{r.domain || (r.url ? extractHost(r.url) : "—")}</td>
+                      <td className="p-2">{r.url || "-"}</td>
+                      <td className="p-2">{r.domain || (r.url ? extractHost(r.url) : "-")}</td>
                       <td className="p-2">
-                        {r.category || "—"}
+                        {r.category || "-"}
                         {invalid && <span className="ml-2 text-[10px] text-destructive font-semibold">categoria inválida</span>}
                       </td>
-                      <td className="p-2">{r.da ?? "—"}</td>
-                      <td className="p-2">{r.dr ?? "—"}</td>
-                      <td className="p-2">{r.traffic ?? "—"}</td>
-                      <td className="p-2">{r.price != null ? r.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "—"}</td>
+                      <td className="p-2">{r.da ?? "-"}</td>
+                      <td className="p-2">{r.dr ?? "-"}</td>
+                      <td className="p-2">{r.traffic ?? "-"}</td>
+                      <td className="p-2">{r.price != null ? r.price.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }) : "-"}</td>
                     </tr>
                   );
                 })}
@@ -410,7 +410,7 @@ async function startImport() {
             <ul className="list-disc pl-5 text-sm">
               {invalidCategoryRows.slice(0, 50).map((r, i) => (
                 <li key={i}>
-                  {(r.domain || r.url || '—')} — categoria: "{r.category || '—'}"
+                  {(r.domain || r.url || '-')}, categoria: "{r.category || '-'}"
                 </li>
               ))}
             </ul>

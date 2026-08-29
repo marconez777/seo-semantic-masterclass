@@ -22,7 +22,7 @@ const CatalogPreviewSection = () => {
               </h2>
               <p className="mt-3 text-muted-foreground max-w-2xl">
                 Sem login e sem reunião para ver preço. Confira o DA e o tráfego
-                de cada portal no Ahrefs antes de comprar — os dados abaixo são
+                de cada portal no Ahrefs antes de comprar. Os dados abaixo são
                 os mesmos que você usa para conferir.
               </p>
             </div>

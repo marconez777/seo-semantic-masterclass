@@ -147,7 +147,7 @@ export function ConsultingBlogPosts({ clientId, readOnly }: Props) {
                       {(() => { try { return new URL(p.url).pathname.slice(0, 40); } catch { return (p.url || "").slice(0, 40); } })()}
                       <ExternalLink className="h-3 w-3" />
                     </a>
-                  ) : <span className="text-muted-foreground text-sm">—</span>}
+                  ) : <span className="text-muted-foreground text-sm">-</span>}
                 </TableCell>
                 <TableCell>
                   <Badge variant={p.status === "publicado" ? "success" : "pending"}>

@@ -408,7 +408,7 @@ export function WebinarMetricsTab() {
                     <TableCell>
                       <div className="flex items-center gap-1.5 text-xs">
                         <DeviceIcon d={r.device_type} />
-                        <span>{r.device_type ?? "—"}</span>
+                        <span>{r.device_type ?? "-"}</span>
                         <span className="text-muted-foreground">/ {r.browser ?? "?"}</span>
                       </div>
                     </TableCell>
@@ -447,9 +447,9 @@ export function WebinarMetricsTab() {
                       {r.cta_clicks > 0 ? (
                         <div>
                           <div className="font-medium">{r.cta_clicks} cliques</div>
-                          <div className="text-muted-foreground">1º: {r.first_cta_clicked ?? "—"}</div>
+                          <div className="text-muted-foreground">1º: {r.first_cta_clicked ?? "-"}</div>
                         </div>
-                      ) : <span className="text-muted-foreground">—</span>}
+                      ) : <span className="text-muted-foreground">-</span>}
                     </TableCell>
                     <TableCell>
                       <div className="flex flex-col gap-0.5">
@@ -462,7 +462,7 @@ export function WebinarMetricsTab() {
                         ) : r.signup_modal_opened ? (
                           <Badge variant="outline" className="w-fit">Modal · step {r.signup_step_reached}</Badge>
                         ) : (
-                          <span className="text-xs text-muted-foreground">—</span>
+                          <span className="text-xs text-muted-foreground">-</span>
                         )}
                         <div className="flex gap-1">
                           {r.reached_thank_you && (
@@ -480,7 +480,7 @@ export function WebinarMetricsTab() {
                           <div className="font-medium truncate max-w-[160px]">{r.signup_nome}</div>
                           <div className="text-muted-foreground truncate max-w-[160px]">{r.signup_email}</div>
                         </div>
-                      ) : <span className="text-muted-foreground">—</span>}
+                      ) : <span className="text-muted-foreground">-</span>}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-1">

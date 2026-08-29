@@ -27,7 +27,7 @@ export const WebinarCaseIvan = ({ videoId }: Props) => (
           </p>
           <p>Depois da implementação do Ecossistema de Aquisição Clínica, três coisas mudaram:</p>
           <ul className="space-y-2 pl-4 border-l-2 border-webinar-accent/60">
-            <li><span className="text-webinar-ink-inverse font-medium">Ranqueamento orgânico</span> para palavras de fundo de funil — pacientes prontos para agendar.</li>
+            <li><span className="text-webinar-ink-inverse font-medium">Ranqueamento orgânico</span> para palavras de fundo de funil: pacientes prontos para agendar.</li>
             <li><span className="text-webinar-ink-inverse font-medium">Recomendação pelo ChatGPT e Perplexity</span> quando o paciente pergunta pelo melhor especialista da região.</li>
             <li><span className="text-webinar-ink-inverse font-medium">Agente de IA no WhatsApp</span> qualificando leads 24/7 e ancorando preço antes da recepção.</li>
           </ul>

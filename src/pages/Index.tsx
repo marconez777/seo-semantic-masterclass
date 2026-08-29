@@ -15,12 +15,12 @@ import SEOHead from "@/components/seo/SEOHead";
 import StructuredData from "@/components/seo/StructuredData";
 
 /**
- * Home — agência de backlinks.
+ * Home: agência de backlinks.
  *
  * A palavra-chave desta página é **"comprar backlinks de qualidade"**. A vitrine
  * (`/comprar-backlinks`) fica com a intenção puramente transacional e
  * `/agencia-de-backlinks` com o termo institucional; aqui o trabalho é o
- * qualificador "de qualidade" — ou seja, provar *por que* estes links prestam:
+ * qualificador "de qualidade", ou seja, provar *por que* estes links prestam:
  * catálogo aberto, processo com aprovação, garantia e casos reais.
  *
  * A consultoria de SEO saiu desta página: ela passa a viver em domínio próprio.
@@ -53,13 +53,13 @@ const Index = () => {
       "Compre backlinks de qualidade em portais brasileiros. Você vê o DA, o tráfego e o preço antes de pagar.",
   };
 
-  // As perguntas saem das objeções reais de quem compra link — preço, risco de
-  // penalidade, métrica inflada, link que some — e não do dicionário de SEO.
+  // As perguntas saem das objeções reais de quem compra link (preço, risco de
+  // penalidade, métrica inflada, link que some), e não do dicionário de SEO.
   const faqData = [
     {
       question: "Comprar backlinks é seguro? Posso tomar penalidade do Google?",
       answer:
-        "O risco não está em comprar, está em onde se compra. Nós publicamos artigos únicos, em contexto editorial, em portais brasileiros com tráfego real que você confere antes de pagar. Não trabalhamos com PBN, link farm nem rede privada de sites — que é justamente o que gera penalidade e desvalorização.",
+        "O risco não está em comprar, está em onde se compra. Nós publicamos artigos únicos, em contexto editorial, em portais brasileiros com tráfego real que você confere antes de pagar. Não trabalhamos com PBN, link farm nem rede privada de sites, que é justamente o que gera penalidade e desvalorização.",
     },
     {
       question: "Como eu sei que as métricas dos portais são reais?",
@@ -79,7 +79,7 @@ const Index = () => {
     {
       question: "Em quanto tempo eu vejo resultado no ranqueamento?",
       answer:
-        "Entre 2 e 6 meses, dependendo da concorrência do seu nicho, da autoridade dos portais escolhidos e de como está o SEO on-page do seu site. Backlink acelera e sustenta ganho de posição, mas não substitui conteúdo e estrutura — quem prometer primeira página em 30 dias está vendendo o que não controla.",
+        "Entre 2 e 6 meses, dependendo da concorrência do seu nicho, da autoridade dos portais escolhidos e de como está o SEO on-page do seu site. Backlink acelera e sustenta ganho de posição, mas não substitui conteúdo e estrutura. Quem prometer primeira página em 30 dias está vendendo o que não controla.",
     },
     {
       question: "Quanto custa um backlink?",
@@ -94,7 +94,7 @@ const Index = () => {
     {
       question: "Eu escolho o texto-âncora e o tema do artigo?",
       answer:
-        "Sim. Você aprova a pauta e o texto-âncora antes da publicação. Se preferir, a MK define os dois seguindo uma distribuição de âncoras que não deixa o perfil de links artificial — nos pacotes isso é um serviço à parte.",
+        "Sim. Você aprova a pauta e o texto-âncora antes da publicação. Se preferir, a MK define os dois seguindo uma distribuição de âncoras que não deixa o perfil de links artificial. Nos pacotes isso é um serviço à parte.",
     },
     {
       question: "Preciso ter conta para comprar?",

@@ -31,7 +31,7 @@ export default function PoliticaDePrivacidade() {
               leads e clientes em seus sites, landing pages, webinars e canais
               digitais (em conjunto, "Plataforma"). Este documento está em
               conformidade com a Lei nº 13.709/2018 (Lei Geral de Proteção de
-              Dados Pessoais — LGPD) e com o Marco Civil da Internet (Lei nº
+              Dados Pessoais, LGPD) e com o Marco Civil da Internet (Lei nº
               12.965/2014).
             </p>
           </section>
@@ -41,7 +41,7 @@ export default function PoliticaDePrivacidade() {
             <p>
               <strong>Mk Art Tráfego Orgânico Ltda.</strong><br />
               CNPJ: 26.248.684/0001-39<br />
-              Endereço: Rua Caminho do Pilar, 401 — Santo André/SP<br />
+              Endereço: Rua Caminho do Pilar, 401, Santo André/SP<br />
               Contato do encarregado de proteção de dados (DPO):{" "}
               <a href="mailto:privacidade@mkart.com.br" className="text-neutral-900 underline underline-offset-2">privacidade@mkart.com.br</a>
             </p>
@@ -79,10 +79,10 @@ export default function PoliticaDePrivacidade() {
             <h2 className="mb-3 text-xl font-semibold text-neutral-900">4. Bases legais para o tratamento</h2>
             <p className="mb-3">O tratamento dos seus dados pessoais é fundamentado nas hipóteses previstas pelo art. 7º da LGPD, incluindo:</p>
             <ul className="ml-5 list-disc space-y-2">
-              <li><strong>Consentimento</strong> — para envio de comunicações de marketing e cookies não essenciais.</li>
-              <li><strong>Execução de contrato</strong> — quando você contrata nossos serviços ou se inscreve em um evento.</li>
-              <li><strong>Legítimo interesse</strong> — para análise de desempenho, segurança e melhoria contínua dos nossos serviços, sempre respeitando seus direitos fundamentais.</li>
-              <li><strong>Cumprimento de obrigação legal ou regulatória</strong> — quando exigido por lei.</li>
+              <li><strong>Consentimento</strong>: para envio de comunicações de marketing e cookies não essenciais.</li>
+              <li><strong>Execução de contrato</strong>: quando você contrata nossos serviços ou se inscreve em um evento.</li>
+              <li><strong>Legítimo interesse</strong>: para análise de desempenho, segurança e melhoria contínua dos nossos serviços, sempre respeitando seus direitos fundamentais.</li>
+              <li><strong>Cumprimento de obrigação legal ou regulatória</strong>: quando exigido por lei.</li>
             </ul>
           </section>
 

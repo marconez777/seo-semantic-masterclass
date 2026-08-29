@@ -258,7 +258,7 @@ export default function PacoteBacklinks() {
             <div className="rounded-lg border border-border bg-card p-5 space-y-4">
               <div>
                 <p className="font-semibold">
-                  Pacote {pkg.name} — {quantity} backlinks
+                  Pacote {pkg.name}: {quantity} backlinks
                 </p>
                 <p className="text-sm text-muted-foreground">
                   DA {pkg.daMin} a {pkg.daMax}
@@ -295,7 +295,7 @@ export default function PacoteBacklinks() {
           /* ---------- Formulário ---------- */
           <>
             <h1 className="text-3xl md:text-4xl font-bold mb-2">
-              Pacote {pkg.name} — {quantity} backlinks
+              Pacote {pkg.name}: {quantity} backlinks
             </h1>
             <p className="text-muted-foreground mb-8">
               DA {pkg.daMin} a {pkg.daMax} · entrega em {pkg.deliveryLabel} · pagamento
@@ -383,7 +383,7 @@ export default function PacoteBacklinks() {
                     </div>
                     <p className="text-sm text-muted-foreground mb-4">
                       A âncora é opcional. A página de destino é obrigatória em todas as
-                      linhas — pode repetir a mesma URL.
+                      linhas, pode repetir a mesma URL.
                     </p>
 
                     <div className="flex flex-wrap gap-2 mb-4">

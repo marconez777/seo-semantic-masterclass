@@ -66,12 +66,12 @@ export default function AdminBlog() {
 
       if (missing.length > 0) {
         toast({
-          title: `Sitemap atualizado — ${missing.length} post(s) estavam faltando`,
+          title: `Sitemap atualizado: ${missing.length} post(s) estavam faltando`,
           description: missing.map((p) => p.slug).join(", "),
         });
       } else {
         toast({
-          title: `Sitemap OK — ${postCount} posts indexados`,
+          title: `Sitemap OK: ${postCount} posts indexados`,
         });
       }
     } catch {
@@ -221,7 +221,7 @@ export default function AdminBlog() {
                       {post.category ? (
                         <Badge variant="outline">{post.category}</Badge>
                       ) : (
-                        <span className="text-muted-foreground text-sm">—</span>
+                        <span className="text-muted-foreground text-sm">-</span>
                       )}
                     </TableCell>
                     <TableCell>
@@ -240,7 +240,7 @@ export default function AdminBlog() {
                     <TableCell>
                       {post.published_at
                         ? new Date(post.published_at).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" })
-                        : "—"}
+                        : "-"}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">

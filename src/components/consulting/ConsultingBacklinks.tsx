@@ -135,7 +135,7 @@ export function ConsultingBacklinks({ clientId, readOnly = false }: ConsultingBa
               <Button size="sm"><Plus className="h-4 w-4 mr-1" /> Adicionar</Button>
             </DialogTrigger>
             <DialogContent>
-              <DialogHeader><DialogTitle>Novo Backlink — {selectedLabel}</DialogTitle></DialogHeader>
+              <DialogHeader><DialogTitle>Novo Backlink: {selectedLabel}</DialogTitle></DialogHeader>
               <div className="grid gap-3">
                 <Input placeholder="Domínio do site *" value={newRow.site_domain} onChange={e => setNewRow(p => ({ ...p, site_domain: e.target.value }))} />
                 <Input placeholder="DR" type="number" value={newRow.dr} onChange={e => setNewRow(p => ({ ...p, dr: e.target.value }))} />

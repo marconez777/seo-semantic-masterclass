@@ -4,7 +4,7 @@ import { Instagram, Youtube } from "lucide-react";
 
 /**
  * Numa home de agência de backlinks o fundador é sinal de E-E-A-T, não a história
- * da empresa: quem é, desde quando, quantos clientes. A biografia longa saiu —
+ * da empresa: quem é, desde quando, quantos clientes. A biografia longa saiu.
  * o comprador desta categoria checa se existe gente real por trás, e para na
  * primeira frase que responde isso.
  */
