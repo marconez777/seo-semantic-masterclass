@@ -24,7 +24,7 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Empresa</h4>
             <div className="space-y-2 text-gray-400">
-              <p><Link to="/consultoria-seo" className="hover:text-white transition-colors">Consultoria SEO</Link></p>
+              <p><Link to="/comprar-backlinks" className="hover:text-white transition-colors">Comprar Backlinks</Link></p>
               <p><Link to="/agencia-de-backlinks" className="hover:text-white transition-colors">Sobre Nós</Link></p>
               <p><Link to="/blog" className="hover:text-white transition-colors">Blog</Link></p>
               <p><Link to="/contato" className="hover:text-white transition-colors">Contato</Link></p>

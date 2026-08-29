@@ -74,8 +74,8 @@ export const ResetPasswordEmail = ({ reset_url }: ResetPasswordEmailProps) => (
             Contato
           </Link>
           {' • '}
-          <Link href="https://mkart.com.br/consultoria-seo" style={footerLink}>
-            Consultoria
+          <Link href="https://mkart.com.br/comprar-backlinks" style={footerLink}>
+            Comprar Backlinks
           </Link>
         </Text>
       </Container>

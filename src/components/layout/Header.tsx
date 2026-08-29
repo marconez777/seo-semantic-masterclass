@@ -80,8 +80,6 @@ const Header = () => {
         <div className="hidden md:flex items-center gap-8">
           <Link to="/" className="text-foreground hover:text-primary font-medium transition-colors">Home</Link>
 
-          <Link to="/consultoria-seo" className="text-foreground hover:text-primary transition-colors">Consultoria SEO</Link>
-
           <div
             className="relative"
             onMouseEnter={openBacklinks}

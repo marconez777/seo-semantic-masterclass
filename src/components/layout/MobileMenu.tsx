@@ -74,14 +74,6 @@ export function MobileMenu({ isLoggedIn, userName, isAdmin, onSignOut }: MobileM
                 Home
               </Link>
 
-              <Link 
-                to="/consultoria-seo" 
-                className="block py-2 px-3 rounded-md hover:bg-muted transition-colors"
-                onClick={closeMenu}
-              >
-                Consultoria SEO
-              </Link>
-
               <Collapsible open={backlinksOpen} onOpenChange={setBacklinksOpen}>
                 <CollapsibleTrigger className="flex items-center justify-between w-full py-2 px-3 rounded-md hover:bg-muted transition-colors">
                   <span>Backlinks</span>

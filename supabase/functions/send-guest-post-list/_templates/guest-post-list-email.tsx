@@ -63,9 +63,9 @@ export const GuestPostListEmail = ({
 
         <Section style={footer}>
           <Text style={footerText}>
-            Precisa de ajuda para criar uma estratégia completa de SEO?<br />
-            <Link href="https://mkart.com.br/consultoria-seo" style={footerLink}>
-              Conheça nossa consultoria especializada
+            Quer ver os portais, o DA e o preço de cada um?<br />
+            <Link href="https://mkart.com.br/comprar-backlinks" style={footerLink}>
+              Conheça nosso catálogo de backlinks
             </Link>
           </Text>
           
