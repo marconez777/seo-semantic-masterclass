@@ -1,3 +1,9 @@
+> [!WARNING]
+> **Documento antigo, conferido em 2026-08-28 e parcialmente incorreto.**
+> Ele descreve tabelas e colunas que não existem mais no banco.
+> A documentação viva do projeto é `CLAUDE.md`, `docs/` e `.claude/rules/`.
+> Mantido só como histórico — não use como fonte, e não corrija: leia `docs/`.
+
 # Instruções para Configuração do Resend no Lovable / Supabase
 
 Para que o envio de e-mails funcione corretamente, você precisa adicionar a chave de API do Resend nas variáveis de ambiente do seu projeto no Lovable Cloud (que utiliza o Supabase).

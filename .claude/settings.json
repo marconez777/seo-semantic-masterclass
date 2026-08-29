@@ -1,0 +1,33 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/scripts/check-secrets.mjs"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/scripts/check-rls.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/scripts/check-types.mjs"
+          },
+          {
+            "type": "command",
+            "command": "node .claude/scripts/docs-drift.mjs"
+          }
+        ]
+      }
+    ]
+  }
+}

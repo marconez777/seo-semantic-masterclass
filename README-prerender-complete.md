@@ -1,3 +1,9 @@
+> [!WARNING]
+> **Documento antigo, conferido em 2026-08-28 e parcialmente incorreto.**
+> Ele descreve tabelas e colunas que não existem mais no banco.
+> A documentação viva do projeto é `CLAUDE.md`, `docs/` e `.claude/rules/`.
+> Mantido só como histórico — não use como fonte, e não corrija: leia `docs/`.
+
 # Sistema de Prerendering Completo - MK Art SEO
 
 ## ✅ Status da Implementação FINALIZADA
