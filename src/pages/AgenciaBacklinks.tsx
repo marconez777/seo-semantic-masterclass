@@ -27,12 +27,12 @@ const AgenciaBacklinks = () => {
   const { isAuthenticated } = useAuth();
 
   // Filters
-  const [drRange, setDrRange] = useState<string>('todos');
+  const [daRange, setDaRange] = useState<string>('todos');
   const [trafficRange, setTrafficRange] = useState<string>('todos');
   const [maxPrice, setMaxPrice] = useState<number | "">("");
 
   // Sorting
-  const [sortKey, setSortKey] = useState<'site_name' | 'dr' | 'da' | 'traffic' | 'category' | 'price_cents' | null>(null);
+  const [sortKey, setSortKey] = useState<'site_name' | 'da' | 'traffic' | 'category' | 'price_cents' | null>(null);
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
 
   // Modal state
@@ -50,7 +50,7 @@ const AgenciaBacklinks = () => {
       const { data, error } = await supabase
         .from('backlinks_public')
         .select('*')
-        .order('dr', { ascending: false });
+        .order('da', { ascending: false });
       if (mounted) {
         if (error) console.error('Erro ao buscar backlinks', error);
         // Transform data to include price_cents for BacklinkTableRow compatibility
@@ -87,34 +87,35 @@ const AgenciaBacklinks = () => {
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const dr = params.get('dr');
+    const da = params.get('da') ?? params.get('dr');
     const traffic = params.get('traffic');
-    if (dr) setDrRange(dr);
+    if (da) setDaRange(da);
     if (traffic) setTrafficRange(traffic);
   }, []);
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (drRange && drRange !== 'todos') params.set('dr', drRange); else params.delete('dr');
+    params.delete('dr');
+    if (daRange && daRange !== 'todos') params.set('da', daRange); else params.delete('da');
     if (trafficRange && trafficRange !== 'todos') params.set('traffic', trafficRange); else params.delete('traffic');
     const query = params.toString();
     const url = `${window.location.pathname}${query ? `?${query}` : ''}`;
     window.history.replaceState({}, '', url);
-  }, [drRange, trafficRange]);
+  }, [daRange, trafficRange]);
 
   useEffect(() => {
     setPage(1);
-  }, [drRange, trafficRange, maxPrice, sortKey, sortDir, itemsPerPage]);
+  }, [daRange, trafficRange, maxPrice, sortKey, sortDir, itemsPerPage]);
 
   const filtered = useMemo(() => {
-    const drParsed = parseRange(drRange);
+    const daParsed = parseRange(daRange);
     const trafficParsed = parseRange(trafficRange);
 
     return (backlinks ?? []).filter((b) => {
-      if (drParsed) {
-        const [min, max] = drParsed;
-        if (typeof b.dr !== 'number') return false;
-        if (b.dr < min || b.dr > max) return false;
+      if (daParsed) {
+        const [min, max] = daParsed;
+        if (typeof b.da !== 'number') return false;
+        if (b.da < min || b.da > max) return false;
       }
       if (trafficParsed) {
         const [minT, maxT] = trafficParsed;
@@ -124,7 +125,7 @@ const AgenciaBacklinks = () => {
       if (maxPrice !== "" && typeof b.price_cents === 'number' && b.price_cents > Number(maxPrice)) return false;
       return true;
     });
-  }, [backlinks, drRange, trafficRange, maxPrice]);
+  }, [backlinks, daRange, trafficRange, maxPrice]);
 
   const sorted = useMemo(() => {
     const arr = [...filtered];
@@ -174,10 +175,10 @@ const AgenciaBacklinks = () => {
   return (
     <>
       <SEOHead
-        title="Agência de Backlinks Premium DR ou DA acima de 50 a 90"
-        description="Agencia de backlinks focada em linkbuilding white hat. Enviamos artigos para os principais sites da internet. Artigos únicos e DoFollow para cada site."
+        title="Agência de Backlinks Premium | Portais Brasileiros DA 50 a 95"
+        description="Agência de backlinks focada em link building white hat. Publicamos artigos únicos e DoFollow nos principais portais brasileiros, com DA e tráfego verificáveis."
         canonicalUrl="https://mkart.com.br/agencia-de-backlinks"
-        keywords="agencia backlinks, link building, backlinks premium, DR alto, DA alto"
+        keywords="agencia backlinks, link building, backlinks premium, DA alto, portais brasileiros"
         ogType="website"
       />
 
@@ -192,7 +193,7 @@ const AgenciaBacklinks = () => {
             <h2 className="text-base font-semibold mb-2">Filtros</h2>
 
             <div className="mb-4">
-              <h3 className="text-base font-semibold mb-1">DR</h3>
+              <h3 className="text-base font-semibold mb-1">DA</h3>
               <ul className="text-sm leading-none">
                 {[
                   { v: 'todos', label: 'Todos' },
@@ -208,8 +209,8 @@ const AgenciaBacklinks = () => {
                 ].map(({ v, label }) => (
                   <li key={v}>
                     <button
-                      className={`block text-left w-full py-0.5 ${drRange === v ? 'font-semibold text-primary' : ''}`}
-                      onClick={() => setDrRange(v)}
+                      className={`block text-left w-full py-0.5 ${daRange === v ? 'font-semibold text-primary' : ''}`}
+                      onClick={() => setDaRange(v)}
                     >
                       {label}
                     </button>
@@ -280,7 +281,7 @@ const AgenciaBacklinks = () => {
                       <h2 className="text-base font-semibold mb-2">Filtros</h2>
 
                       <div className="mb-4">
-                        <h3 className="text-base font-semibold mb-1">DR</h3>
+                        <h3 className="text-base font-semibold mb-1">DA</h3>
                         <ul className="text-sm leading-none">
                           {[
                             { v: 'todos', label: 'Todos' },
@@ -296,8 +297,8 @@ const AgenciaBacklinks = () => {
                           ].map(({ v, label }) => (
                             <li key={v}>
                               <button
-                                className={`block text-left w-full py-0.5 ${drRange === v ? 'font-semibold text-primary' : ''}`}
-                                onClick={() => { setDrRange(v); setMobileMenuOpen(false); }}
+                                className={`block text-left w-full py-0.5 ${daRange === v ? 'font-semibold text-primary' : ''}`}
+                                onClick={() => { setDaRange(v); setMobileMenuOpen(false); }}
                               >
                                 {label}
                               </button>
@@ -420,15 +421,6 @@ const AgenciaBacklinks = () => {
                       className="p-4 cursor-pointer select-none"
                       role="button"
                       tabIndex={0}
-                      onClick={() => { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } }}
-                      onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'dr') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('dr'); setSortDir('desc'); } } }}
-                    >
-                      DR
-                    </th>
-                    <th
-                      className="p-4 cursor-pointer select-none"
-                      role="button"
-                      tabIndex={0}
                       onClick={() => { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } }}
                       onKeyDown={(e) => { if (e.key === 'Enter') { if (sortKey === 'da') setSortDir(sortDir === 'asc' ? 'desc' : 'asc'); else { setSortKey('da'); setSortDir('desc'); } } }}
                     >
@@ -466,9 +458,9 @@ const AgenciaBacklinks = () => {
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td className="p-6" colSpan={7}>Carregando...</td></tr>
+                    <tr><td className="p-6" colSpan={6}>Carregando...</td></tr>
                   ) : filtered.length === 0 ? (
-                    <tr><td className="p-6" colSpan={7}>Nenhum resultado encontrado.</td></tr>
+                    <tr><td className="p-6" colSpan={6}>Nenhum resultado encontrado.</td></tr>
                   ) : (
                     visible.map((b) => (
                       <BacklinkTableRow key={b.id} item={b} onBuy={onBuy} shouldBlur={b.shouldBlur} isAuthenticated={isAuthenticated} />

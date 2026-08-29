@@ -1,5 +1,5 @@
 ---
-last_validated: 2026-08-28
+last_validated: 2026-08-29
 review_by: 2027-02-28
 covers: []
 ---
@@ -30,6 +30,9 @@ As entradas abaixo foram levantadas lendo o código em 2026-08-28. Nenhuma veio 
 - **A view não protege nada hoje.** A tabela `backlinks` ainda tem a policy `"Anyone can view backlinks" FOR SELECT USING (true)`, de 2025-08-06, nunca removida. Policies permissivas se somam: basta consultar `backlinks` direto para ler o catálogo inteiro, com `observacoes` e sites inativos. Ao mexer nessa área, remova a policy antes de confiar na view.
 - **Policy só some se alguém der `DROP POLICY`.** `CREATE TABLE IF NOT EXISTS` numa migration nova não recria a tabela nem limpa as policies antigas — elas continuam empilhando. Este projeto tem 9 policies em `favoritos` e 6 em `backlinks`, quase todas duplicatas de gerações diferentes.
 - Antes de confiar numa policy nova, confira se não existe uma antiga mais permissiva na mesma tabela. Em RLS, a mais frouxa é a que vale.
+- **`backlinks.dr` está nulo em 100% das linhas.** A métrica de autoridade que este catálogo tem é **DA**. Filtro, ordenação ou copy escrita em cima de `dr` não dá erro — devolve lista vazia, ordena nada e promete um número que ninguém mede. Foi exatamente o que aconteceu em `/agencia-de-backlinks`, onde as dez faixas de DR do filtro esvaziavam a tabela. Ao mexer em autoridade, use `da`.
+- **O catálogo não é 100% brasileiro.** Cerca de 72% dos domínios são `.br` e a maior parte dos `.com` também é do Brasil, mas há ~75 portais `.pt` e `.es`. Tela que promete "portais brasileiros" precisa filtrar, ou vai contradizer a própria headline — é o que `useCatalogStats` faz na amostra da home.
+- **O PostgREST corta em 1.000 linhas.** O catálogo já passou disso (1.241 em 2026-08-29). Média ou contagem feita sobre o retorno padrão descreve as primeiras 1.000, não o catálogo. Para agregado, use `count: 'exact'` com `head: true`, ou `range()` explícito.
 - `backlinks.price` está em **reais**; a UI trabalha em centavos e a conversão acontece em `useBacklinksQuery` (`price_cents`). Misturar as duas unidades já é o bug mais fácil de cometer nesse fluxo.
 - `profiles.is_admin` **não** decide mais quem é admin — `user_roles` decide. Policy nova escrita com `profiles.is_admin` funciona nos testes e cria uma porta lateral.
 
