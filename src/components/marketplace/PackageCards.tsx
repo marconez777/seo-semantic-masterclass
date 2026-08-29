@@ -192,11 +192,7 @@ function PackageCard({ pkg }: { pkg: BacklinkPackage }) {
         </li>
       </ul>
 
-      <Button
-        onClick={handleClick}
-        variant={pkg.highlight || isCustom ? "default" : "outline"}
-        className="w-full gap-2"
-      >
+      <Button onClick={handleClick} className="w-full gap-2">
         {isCustom && <MessageCircle className="size-4" aria-hidden="true" />}
         {pkg.ctaLabel}
       </Button>
