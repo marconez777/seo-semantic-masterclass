@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, ArrowRight } from "lucide-react";
 
 // Dados dos depoimentos
 const testimonials = [
@@ -15,7 +15,6 @@ const testimonials = [
   },
   {
     client: "kronoos",
-    clientClass: "text-green-700",
     videoUrl: "https://www.youtube.com/embed/B35Poq_3xDM",
     headline: "O Sistema que foi para 1º Página em 3 meses",
     description: "Em 3 meses, o Sistema Kronoos alcançou a 1ª página do Google com uma estratégia focada e assertiva.",
@@ -30,7 +29,6 @@ const testimonials = [
   },
   {
     client: "Soluções em Embalagens",
-    clientClass: "text-cyan-500",
     videoUrl: "https://www.youtube.com/embed/iX7ShYZVxgo",
     headline: "A Loja Soluções em Embalagens foi de R$ 25 Mil a R$ 70 Mil em 3 Meses de SEO.",
     description: "Em apenas 3 meses conseguimos aumentar o faturamento da loja online do cliente Paulo de R$ 25 Mil para R$ 70 Mil reais.",
@@ -46,16 +44,16 @@ const testimonials = [
 
 const CaseStudySection = () => {
   return (
-    <section className="py-20 bg-gray-50">
+    <section className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="max-w-6xl mx-auto space-y-20">
           {testimonials.map((testimonial, index) => (
             <div key={index} className={`grid lg:grid-cols-2 gap-12 items-center ${index % 2 !== 0 ? 'lg:flex-row-reverse' : ''}`}>
               <div className={`space-y-8 ${index % 2 !== 0 ? 'lg:order-2' : ''}`}>
                 <div>
-                  <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                  <h2 className="text-4xl md:text-5xl font-bold text-foreground mb-6 tracking-tight text-balance">
                     {(() => {
-                      const { headline, client, clientClass } = testimonial;
+                      const { headline, client } = testimonial;
                       const i = headline.indexOf(client);
                       if (i >= 0) {
                         const before = headline.slice(0, i);
@@ -63,7 +61,7 @@ const CaseStudySection = () => {
                         return (
                           <>
                             {before}
-                            <span className={clientClass ?? "text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-600"}>
+                            <span className="text-primary">
                               {client}
                             </span>
                             {after}
@@ -73,7 +71,7 @@ const CaseStudySection = () => {
                       return (
                         <>
                           {headline}{" "}
-                          <span className={clientClass ?? "text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-purple-600"}>
+                          <span className="text-primary">
                             do {client}
                           </span>
                         </>
@@ -81,7 +79,7 @@ const CaseStudySection = () => {
                     })()}
                   </h2>
                   
-                  <p className="text-lg text-gray-600 mb-8">
+                  <p className="text-lg text-muted-foreground mb-8">
                     {testimonial.description}
                   </p>
                 </div>
@@ -89,24 +87,31 @@ const CaseStudySection = () => {
                 <div className="space-y-4">
                   {testimonial.keywords.map((keyword, i) => (
                     <div key={i} className="flex items-center space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500" />
-                      <span className="text-gray-700">{keyword}</span>
+                      <CheckCircle className="w-5 h-5 text-secondary shrink-0" aria-hidden="true" />
+                      <span className="text-muted-foreground">{keyword}</span>
                     </div>
                   ))}
                 </div>
                 
-                <div className="grid grid-cols-2 gap-8 pt-8">
+                {/* Backlinks -> tráfego, com a seta: numa agência de backlinks a
+                    leitura é de causa para efeito, não duas métricas soltas. */}
+                <div className="flex items-center gap-6 pt-8">
                   {testimonial.metrics.map((metric, i) => (
-                    <div key={i} className="text-center">
-                      <div className="text-4xl font-bold text-gray-900">{metric.value}</div>
-                      <div className="text-gray-600">{metric.label}</div>
+                    <div key={i} className="flex items-center gap-6">
+                      {i > 0 && (
+                        <ArrowRight className="w-6 h-6 text-primary shrink-0" aria-hidden="true" />
+                      )}
+                      <div>
+                        <div className="text-4xl font-bold text-foreground tabular-nums">{metric.value}</div>
+                        <div className="text-muted-foreground text-sm">{metric.label}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
-                
-                <a href="/consultoria-seo">
-                  <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg">
-                    RECEBER AUDITORIA GRÁTIS
+
+                <a href="#auditoria">
+                  <Button size="lg" className="text-base">
+                    Quero uma auditoria como essa
                   </Button>
                 </a>
               </div>

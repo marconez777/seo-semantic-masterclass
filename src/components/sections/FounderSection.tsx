@@ -1,70 +1,74 @@
-
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Instagram, Youtube } from "lucide-react";
 
+/**
+ * Numa home de agência de backlinks o fundador é sinal de E-E-A-T, não a história
+ * da empresa: quem é, desde quando, quantos clientes. A biografia longa saiu —
+ * o comprador desta categoria checa se existe gente real por trás, e para na
+ * primeira frase que responde isso.
+ */
 const FounderSection = () => {
   return (
-    <section className="py-20 bg-white">
+    <section className="py-16 md:py-20 bg-background">
       <div className="container mx-auto px-4">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             <div className="space-y-6">
-              <h2 className="text-4xl md:text-5xl font-bold text-gray-900">
-                Jornada do{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
-                  CEO
-                </span>{" "}
-                e Fundador
+              <h2 className="text-3xl md:text-4xl font-bold text-foreground tracking-tight text-balance">
+                Quem assina o trabalho
               </h2>
-              
-              <div className="space-y-4 text-gray-600 leading-relaxed">
+
+              <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  Desde os 20 anos de idade, já tinha iniciado como web designer autônomo, criando sites e revendendo planos de hospedagem.
+                  Comecei no SEO em 2016, depois de anos criando sites como web
+                  designer. Desde então venho testando e validando o que funciona
+                  a cada atualização do Google.
                 </p>
-                
                 <p>
-                  Vi no SEO a oportunidade de criar uma recorrência e aumentar os lucros de meus clientes.
-                </p>
-                
-                <p>
-                  Foi então que com 27 anos iniciei minha jornada no SEO e venho aplicando, testando e validando a cada atualização do Google.
-                </p>
-                
-                <p>
-                  Hoje com 34 anos e muita estrada, comemoramos eu e minha equipe mais de 1000 clientes atendidos e a grande maioria muito satisfeita.
+                  Hoje somos uma equipe que prospecta portais de autoridade todos
+                  os dias, com mais de 1.000 clientes atendidos.
                 </p>
               </div>
-              
-              <div className="flex space-x-4 pt-4">
-                <a href="https://www.instagram.com/seosupremo777/" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="icon" className="rounded-full w-12 h-12 bg-purple-600 text-white border-purple-600 hover:bg-purple-700">
-                    <Instagram className="w-5 h-5" />
-                  </Button>
-                </a>
-                <a href="https://www.youtube.com/@mkartseolinkbuilding614" target="_blank" rel="noopener noreferrer">
-                  <Button variant="outline" size="icon" className="rounded-full w-12 h-12 bg-purple-600 text-white border-purple-600 hover:bg-purple-700">
-                    <Youtube className="w-5 h-5" />
-                  </Button>
-                </a>
+
+              <div className="flex items-center gap-3 pt-2">
+                <Button asChild variant="outline" size="icon" className="rounded-full size-11">
+                  <a
+                    href="https://www.instagram.com/seosupremo777/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram da MK Art"
+                  >
+                    <Instagram className="size-5" aria-hidden="true" />
+                  </a>
+                </Button>
+                <Button asChild variant="outline" size="icon" className="rounded-full size-11">
+                  <a
+                    href="https://www.youtube.com/@mkartseolinkbuilding614"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="YouTube da MK Art"
+                  >
+                    <Youtube className="size-5" aria-hidden="true" />
+                  </a>
+                </Button>
               </div>
             </div>
-            
-            <div className="lg:order-last">
-              <Card className="relative border-0 shadow-2xl overflow-hidden">
+
+            <div>
+              <Card className="relative overflow-hidden border-border">
                 <CardContent className="p-0">
-                  <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 flex items-end justify-center relative">
-                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-r from-purple-600 to-purple-800 text-white p-6">
-                      <h3 className="text-2xl font-bold">Marco Guimarães</h3>
-                      <p className="text-purple-100">CEO & Founder</p>
-                    </div>
-                    
-                    {/* Founder image */}
-                    <img 
+                  <div className="aspect-square bg-muted relative">
+                    <img
                       src="/lovable-uploads/b120631c-0792-4f41-8951-878c83dd310f.png"
-                      alt="Marco Guimarães - CEO & Founder da MK Art SEO"
+                      alt="Marco Guimarães, fundador da MK Art"
                       className="w-full h-full object-cover object-center"
+                      loading="lazy"
                     />
+                    <div className="absolute bottom-0 left-0 right-0 bg-primary text-primary-foreground p-5">
+                      <h3 className="text-xl font-bold">Marco Guimarães</h3>
+                      <p className="text-sm opacity-90">Fundador da MK Art</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
