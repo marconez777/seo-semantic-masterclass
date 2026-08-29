@@ -32,7 +32,6 @@ import {
   brl,
   packageTotal,
   packageWhatsAppUrl,
-  PIX_INFO,
   WHATSAPP_NUMBER,
 } from "@/lib/packages";
 
@@ -54,47 +53,6 @@ function isValidUrl(value: string): boolean {
   } catch {
     return false;
   }
-}
-
-/** Bloco da chave PIX, usado antes e depois do envio do pedido. */
-function PixBlock({ total }: { total: number }) {
-  const [copied, setCopied] = useState(false);
-
-  const copyKey = async () => {
-    try {
-      await navigator.clipboard.writeText(PIX_INFO.key);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Navegador sem permissão de área de transferência: a chave está na tela.
-    }
-  };
-
-  return (
-    <div className="rounded-lg border border-border bg-muted/40 p-4">
-      <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
-        Pagamento via PIX
-      </p>
-      <p className="text-xs text-muted-foreground">Chave ({PIX_INFO.keyType})</p>
-      <div className="flex items-center gap-2">
-        <code className="text-sm font-medium">{PIX_INFO.key}</code>
-        <Button
-          type="button"
-          size="icon"
-          variant="ghost"
-          className="size-7"
-          onClick={copyKey}
-          aria-label="Copiar chave PIX"
-        >
-          {copied ? <Check className="size-3.5 text-secondary" /> : <Copy className="size-3.5" />}
-        </Button>
-      </div>
-      <p className="text-xs text-muted-foreground mt-2">Favorecido</p>
-      <p className="text-sm">{PIX_INFO.holder}</p>
-      <p className="text-xs text-muted-foreground mt-2">Valor</p>
-      <p className="text-lg font-bold text-primary">{brl(total)}</p>
-    </div>
-  );
 }
 
 export default function PacoteBacklinks() {
@@ -259,7 +217,7 @@ export default function PacoteBacklinks() {
   };
 
   const comprovanteUrl = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
-    `Olá! Acabei de enviar o pedido do pacote ${pkg.name} (${brl(total)}) e vou mandar o comprovante do PIX.`
+    `Olá! Acabei de enviar o pedido do pacote ${pkg.name} (${brl(total)}) e queria os dados para pagamento.`
   )}`;
 
   return (
@@ -292,7 +250,7 @@ export default function PacoteBacklinks() {
               <div>
                 <h1 className="text-2xl font-bold">Pedido enviado</h1>
                 <p className="text-sm text-muted-foreground">
-                  Recebemos os seus dados. Agora é só fazer o PIX.
+                  Recebemos os seus dados. Já já a gente manda o PIX.
                 </p>
               </div>
             </div>
@@ -308,18 +266,22 @@ export default function PacoteBacklinks() {
                 </p>
               </div>
 
-              <PixBlock total={total} />
+              <div className="flex justify-between items-center border-y border-border py-3">
+                <span className="text-sm text-muted-foreground">Total</span>
+                <span className="text-2xl font-bold text-primary">{brl(total)}</span>
+              </div>
 
               <div>
-                <p className="text-sm font-medium mb-2">Depois de pagar</p>
+                <p className="text-sm font-medium mb-2">O que acontece agora</p>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Mande o comprovante no WhatsApp — é o que libera a produção. A entrega
-                  sai em {pkg.deliveryLabel} a partir da confirmação.
+                  Nossa equipe confere o pedido e manda a chave PIX no seu WhatsApp. Assim
+                  que o pagamento entrar, a produção começa e a entrega sai em{" "}
+                  {pkg.deliveryLabel}.
                 </p>
-                <Button asChild className="gap-2">
+                <Button asChild variant="outline" className="gap-2">
                   <a href={comprovanteUrl} target="_blank" rel="noopener noreferrer">
                     <MessageCircle className="size-4" />
-                    Enviar comprovante no WhatsApp
+                    Adiantar pelo WhatsApp
                   </a>
                 </Button>
               </div>
@@ -560,7 +522,7 @@ export default function PacoteBacklinks() {
               </div>
 
               {/* Resumo */}
-              <aside className="lg:sticky lg:top-24 self-start h-max space-y-4">
+              <aside className="lg:sticky lg:top-24 self-start h-max">
                 <div className="rounded-lg border border-border bg-card p-5">
                   <p className="text-xs uppercase tracking-wide text-muted-foreground mb-2">
                     Resumo
@@ -609,8 +571,6 @@ export default function PacoteBacklinks() {
                     </li>
                   </ul>
                 </div>
-
-                <PixBlock total={total} />
               </aside>
             </div>
           </>

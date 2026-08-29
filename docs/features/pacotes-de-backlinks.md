@@ -24,11 +24,11 @@ Prazo anunciado: 1 a 3 dias úteis nos dois pacotes fechados. A compra avulsa te
 
 1. Os cards aparecem em `/comprar-backlinks` e nas 20 páginas de categoria, pela prop `topSection` do `BacklinkMarketplace` — renderizada **fora** do grid de 12 colunas, para não ficar espremida ao lado da sidebar de filtros.
 2. "Comprar" leva a `/pacote-backlinks/:slug` (`noindex`); "Personalizado" abre o WhatsApp com mensagem pronta.
-3. Na página o cliente informa contato (nome, e-mail, WhatsApp) e escolhe quem define as âncoras: ele mesmo, uma linha por backlink com colagem em massa, ou a MK — o que soma `anchorServicePrice` ao total. **A chave PIX fica visível na tela o tempo todo**, no resumo lateral.
+3. Na página o cliente informa contato (nome, e-mail, WhatsApp) e escolhe quem define as âncoras: ele mesmo, uma linha por backlink com colagem em massa, ou a MK — o que soma `anchorServicePrice` ao total. **A chave PIX não aparece em lugar nenhum do site** — quem manda é a equipe, depois de receber o pedido.
 4. "Enviar pedido" chama a edge function `send-package-order` (pública, aceita visitante).
 5. A function **recalcula o total do zero** a partir da própria cópia do catálogo. O valor que veio do navegador é ignorado.
 6. Ela monta um e-mail com o pedido inteiro — pacote, total, contato, e as 20 linhas de âncora e destino — e manda para `contato@mkart.com.br`, com `replyTo` do cliente.
-7. A página troca para a tela de confirmação: chave PIX de novo, valor, e botão de mandar o comprovante no WhatsApp.
+7. A página troca para a tela de confirmação: resumo, total e o aviso de que a equipe vai mandar o PIX pelo WhatsApp.
 
 ## Por que não passa pelo banco
 
@@ -40,7 +40,7 @@ O custo dessa escolha está em "Casos conhecidos NÃO tratados", e não é peque
 
 | Arquivo | Papel |
 |---|---|
-| `src/lib/packages.ts` | catálogo, preços, dados do PIX e cálculo do total no cliente |
+| `src/lib/packages.ts` | catálogo, preços e cálculo do total no cliente |
 | `src/lib/package-faqs.ts` | os 13 avisos da página de pacote |
 | `src/components/marketplace/PackageCards.tsx` | os três cards |
 | `src/components/marketplace/DynamicCategoryPage.tsx` | injeta os cards nas 20 páginas de categoria |

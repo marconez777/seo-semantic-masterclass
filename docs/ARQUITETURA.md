@@ -36,10 +36,10 @@ O passo 7 é a fronteira mais importante do sistema: **nenhum código confirma p
 Caminho separado, que **não** compartilha carrinho, tabela de itens escolhidos nem exigência de login com o fluxo acima:
 
 1. Os cards de pacote aparecem em `/comprar-backlinks` e em todas as páginas de categoria (`PackageCards`), e levam a `/pacote-backlinks/:slug`.
-2. A página coleta contato, site de destino e as URLs/âncoras — ou o opcional "a MK escolhe as âncoras". A chave PIX fica visível na tela desde o começo.
+2. A página coleta contato, site de destino e as URLs/âncoras — ou o opcional "a MK escolhe as âncoras".
 3. Ela chama a edge function **`send-package-order`**, que **recalcula o total no servidor** a partir da própria cópia do catálogo. Preço adulterado no navegador é ignorado.
 4. A function **não grava nada**: monta um e-mail com o pedido inteiro e manda para `contato@mkart.com.br`, com `replyTo` do cliente.
-5. A página troca para a tela de confirmação, repetindo a chave PIX e o botão de mandar o comprovante no WhatsApp.
+5. A página troca para a tela de confirmação. **A chave PIX não é exibida**: a equipe manda para o cliente pelo WhatsApp depois de receber o e-mail do pedido.
 
 **Este fluxo não passa pelo banco nem pelo `/admin`.** O pedido de pacote existe apenas no e-mail — decisão consciente para colocar a modalidade no ar rápido (ADR-006). Consequência direta: **se o e-mail não sair, o pedido se perde**, e é por isso que a página só mostra sucesso quando a function responde 200.
 

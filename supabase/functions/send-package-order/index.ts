@@ -194,7 +194,7 @@ const handler = async (req: Request): Promise<Response> => {
         </table>
 
         <p style="margin-top:24px;color:#5f5e5a;font-size:13px;">
-          O cliente viu a chave PIX na tela e foi instruido a mandar o comprovante no WhatsApp.
+          <strong>Mande a chave PIX para o cliente</strong> — ela nao aparece no site.
           Este pedido nao esta gravado no banco — ele existe apenas neste e-mail.
         </p>
       </div>`;

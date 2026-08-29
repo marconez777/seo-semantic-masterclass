@@ -12,17 +12,6 @@
 
 export const WHATSAPP_NUMBER = "5511989151997";
 
-/**
- * Dados do PIX exibidos na pagina de finalizacao do pacote.
- * Mesmos dados do e-mail de pagamento da compra avulsa
- * (supabase/functions/send-payment-email/_templates/payment-email.tsx).
- */
-export const PIX_INFO = {
-  keyType: "CNPJ",
-  key: "54.128.027/0001-93",
-  holder: "Keila de Oliveira Castellini",
-};
-
 export type PackageCtaType = "checkout" | "whatsapp";
 
 export interface BacklinkPackage {
