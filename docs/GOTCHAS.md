@@ -42,6 +42,8 @@ As entradas abaixo foram levantadas lendo o código em 2026-08-28. Nenhuma veio 
 
 - Não chame o Supabase de dentro do callback de `onAuthStateChange`: trava. É por isso que `RequireRole` separa em dois `useEffect` — o callback só guarda a sessão, e a checagem de papel roda depois. Os comentários no arquivo marcam isso; não "simplifique" juntando os dois.
 - `RequireRole` protege a tela, não os dados. Tela nova de admin sem policy correspondente é dado exposto para qualquer um que chame a API.
+- **"A confirmação de cadastro não funciona", mas o e-mail sai.** Link de e-mail vencido ou já usado (antivírus e Outlook abrem o link antes do cliente) volta para o `emailRedirectTo` com `#error=access_denied&error_code=otp_expired` no hash, e o auth-js não limpa nem avisa. A vitrine ignorava o hash e o cliente caía nela sem saber de nada. Regra: o erro é lido num ponto só, `AuthLinkErrorRedirect` em `App.tsx` (com `src/lib/authLinkError.ts`), que leva para `/auth?link=…` com o aviso e o botão de reenviar. Página nova não precisa tratar isso; não crie um segundo leitor de hash.
+- **`signUp` com e-mail já cadastrado devolve sucesso e não manda e-mail.** O GoTrue responde 200 com `user.identities` vazio para não revelar que a conta existe. Tratar como sucesso deixa o cliente esperando um e-mail que nunca chega (e dispara o `notify-admin` de cliente novo). Regra: `identities?.length === 0` é "já tem cadastro" → mande entrar ou recuperar a senha. Do mesmo jeito, `resend` responde 200 para e-mail inexistente ou já confirmado: a mensagem de sucesso tem que ser condicional ("se houver um cadastro pendente…").
 
 ## Integrações
 

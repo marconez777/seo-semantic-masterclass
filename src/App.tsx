@@ -63,6 +63,7 @@ import CookieBanner from "./components/ui/CookieBanner";
 import NotFound from "./pages/NotFound";
 import Forbidden from "./pages/Forbidden";
 import { RequireRole } from "./components/auth/RequireRole";
+import { AuthLinkErrorRedirect } from "./components/auth/AuthLinkErrorRedirect";
 import { Toaster } from "@/components/ui/toaster";
 import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
 import ScrollToTop from "./components/layout/ScrollToTop";
@@ -78,6 +79,7 @@ const App = () => (
     <BrowserRouter>
       <ScrollToTop />
       <AnalyticsBoot />
+      <AuthLinkErrorRedirect />
       <CartModal />
       <Routes>
           <Route path="/" element={<Index />} />
