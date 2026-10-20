@@ -4,8 +4,8 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, extname } from "node:path";
 
-const ROOTS = ["src", "supabase/functions", "scripts", "index.html", ".env.example"];
-const EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".html", ".json", ".example"]);
+const ROOTS = ["src", "supabase/functions", "scripts", "ops", "index.html", ".env.example"];
+const EXT = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".html", ".json", ".example", ".sh", ".conf"]);
 const SKIP = new Set(["node_modules", "dist", ".git"]);
 
 const REGRAS = [
@@ -19,7 +19,8 @@ const REGRAS = [
 // Exceção conhecida e conferida em 2026-08-28: scripts/build-prerender.mjs,
 // scripts/generate-redirects.js e scripts/prerender-supabase.js trazem uma chave
 // "anon" (pública por design) de um projeto Supabase ANTIGO (ref lvinoytvsyloccajnrwp),
-// que não é o desta aplicação (nxitvhrfloibpwrkskzx). É código morto — ver ADR-005.
+// que não é o desta aplicação (nxitvhrfloibpwrkskzx no Lovable Cloud até 2026-10-20,
+// hoje a stack da VPS). É código morto — ver ADR-005.
 // Ao apagar scripts/, apague esta exceção junto.
 const REF_PROJETO_MORTO = "eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx2aW5veXR2c3lsb2NjYWpucndw";
 
@@ -47,7 +48,7 @@ for (const r of ROOTS) varrer(r);
 
 if (achados.length) {
   console.error("Segredo exposto:\n" + achados.map((a) => "  - " + a).join("\n"));
-  console.error("\nSegredo de edge function se configura no painel do Supabase. Ver .claude/rules/seguranca.md.");
+  console.error("\nSegredo de edge function se grava na VPS com ops/supabase/definir-segredo.sh. Ver .claude/rules/seguranca.md.");
   process.exit(2);
 }
 console.log("Guarda de segredo ok.");
