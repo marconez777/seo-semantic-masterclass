@@ -22,7 +22,7 @@ covers: [package.json, vite.config.ts, tsconfig.app.json, src/integrations/supab
 - Leitura de dados: hook em `src/hooks/` usando TanStack Query. Já existem `useBacklinksQuery`, `usePageSEOContent`, `useBacklinkFilters`, `useAnalytics`, `useAuth`.
 - Escrita de dados: `supabase.from(...)` direto no componente é o padrão vigente aqui. Não crie uma camada de serviço nova só para uma tela.
 - Estado global: só o carrinho, em `src/contexts/CartContext.tsx`, persistido em `localStorage` nas chaves `mkart_*`.
-- Toast: `useToast` de `@/components/ui/use-toast`. O `sonner` também está instalado — prefira o primeiro, é o que o resto do app usa.
+- Toast: `useToast` de `@/hooks/use-toast` (não existe `@/components/ui/use-toast`). O `sonner` também está instalado — prefira o primeiro, é o que o resto do app usa.
 - Componente de UI novo: veja se o shadcn/ui já tem em `src/components/ui/` antes de escrever.
 
 ## Não use
