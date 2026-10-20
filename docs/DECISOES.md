@@ -1,5 +1,5 @@
 ---
-last_validated: 2026-08-28
+last_validated: 2026-10-20
 review_by: 2027-02-28
 covers: []
 ---
@@ -53,3 +53,10 @@ Estas entradas foram reconstruídas a partir do código e do histórico do git e
 **Escolha:** uma modalidade paralela (`/pacote-backlinks/:slug`) com preço fechado, sem login e **sem banco**. A página mostra a chave PIX e uma edge function pública (`send-package-order`) **recalcula o total no servidor** e manda o pedido inteiro por e-mail para a MK. Nada é gravado; o `/admin` continua atendendo só a compra avulsa.
 **Descartamos:** (a) gravar em `orders_new` com colunas de pacote e de visitante — chegou a ser implementado e foi revertido em 2026-08-29, porque exigia também tela de alocação de site no admin antes de servir para operar; (b) abrir INSERT de `orders_new` para anônimo — deixaria qualquer um gravar pedido com o total que quisesse; (c) obrigar cadastro no pacote — era exatamente o atrito que a modalidade existe para remover.
 **Consequência:** o pedido de pacote **só existe no e-mail**. E-mail que não sai é pedido perdido, não há histórico consultável, não há status, e nem o cliente nem a MK conseguem reabrir o pedido depois. O catálogo de preços passa a existir em dois lugares (cliente e function) e precisa ser mudado nos dois. Levar o pacote para o banco e para o painel é trabalho já previsto — quando acontecer, esta ADR ganha uma sucessora.
+
+## ADR-007 · 2026-10-14 — Banco e site saem do Lovable Cloud para a sfai-vps
+**Status:** aceita (virada feita em 2026-10-20)
+**Contexto:** banco, functions e publicação do site dependiam do Lovable Cloud (projeto `nxitvhrfloibpwrkskzx`), que também commitava direto na branch. Decidido com o Marco em 2026-10-14, no mesmo molde já usado no Just Services.
+**Escolha:** Supabase auto-hospedado em `/opt/supabase/mkart` na `sfai-vps`, API em `https://api.mkart.com.br`, site estático em `/var/www/mkart` atrás do Nginx do host, backup diário às 02:15. Kit e roteiro em `ops/` (`ops/VIRADA.md`).
+**Descartamos:** seguir no Lovable Cloud. Motivo de negócio a confirmar com o Marco.
+**Consequência:** nada mais publica sozinho: site, function, migration e segredo passam pelos scripts de `ops/` (ver `CLAUDE.md`, seção Publicação). O `verify_jwt` agora vive em dois lugares (`supabase/config.toml` e `supabase/functions/_manifesto-verify-jwt.json`) porque o roteador auto-hospedado não lê o `config.toml`. Voltar atrás é DNS mais republicar no Lovable, enquanto o projeto antigo estiver ligado.

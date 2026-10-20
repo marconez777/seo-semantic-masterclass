@@ -31,13 +31,13 @@ A coluna `profiles.is_admin` não é mais fonte da verdade, e a policy de UPDATE
 ## Segredos
 
 - Fica no navegador (e não tem problema): `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`, `VITE_SUPABASE_PROJECT_ID`. Só isso.
-- Fica **só** nas edge functions, configurado no painel do Supabase: `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `SERPBOT_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `FIRECRAWL_API_KEY`, `SEO_HEALTH_SECRET`.
+- Fica **só** nas edge functions, gravado na stack da VPS pelo Marco com `ssh -t sfai-vps /var/www/mkart/repo/ops/supabase/definir-segredo.sh <NOME>` (vai para `/opt/supabase/mkart/functions.env`; o `SMTP_PASS` do auth vai para o `.env` da stack): `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `SERPBOT_API_KEY`, `OPENAI_API_KEY`, `GEMINI_API_KEY`, `FIRECRAWL_API_KEY`, `SEO_HEALTH_SECRET`.
 - `service_role` ignora RLS por definição. Se ela cair no bundle, todo o resto deste arquivo perde o sentido.
 - Nunca prefixe segredo com `VITE_`. O bundler publica tudo que tem esse prefixo — é assim que ele funciona, não é bug.
 
 ## RLS — os cinco fatos que causam vazamento
 
-1. **O SQL Editor do Supabase roda como superusuário e ignora RLS.** "Testei lá e veio certo" não prova nada sobre o que o cliente enxerga. Teste válido passa pela API com um token de verdade, ou pelo app aberto em duas contas.
+1. **O SQL Editor do Supabase (e o `psql` como `supabase_admin` no container `mkart-db`) roda como superusuário e ignora RLS.** "Testei lá e veio certo" não prova nada sobre o que o cliente enxerga. Teste válido passa pela API com um token de verdade, ou pelo app aberto em duas contas.
 2. **RLS falha em silêncio.** Policy errada não dá erro: devolve as linhas erradas, ou zero linha. Não há stack trace.
 3. **Testar como `anon` não basta.** O furo mais comum é o cliente A ver o pedido do cliente B — os dois logados, os dois legítimos. Precisa de dois usuários reais.
 4. **View com `SECURITY DEFINER` fura RLS.** `backlinks_public` foi recriada com `WITH (security_invoker = true)` justamente por isso. View nova nasce assim.

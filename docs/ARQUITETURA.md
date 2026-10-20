@@ -1,5 +1,5 @@
 ---
-last_validated: 2026-08-28
+last_validated: 2026-10-20
 review_by: 2026-11-28
 covers: [src/App.tsx, src/contexts/**, src/hooks/**, src/integrations/supabase/**, src/lib/**, supabase/functions/**, supabase/config.toml, index.html]
 ---
@@ -51,7 +51,7 @@ Caminho separado, que **não** compartilha carrinho, tabela de itens escolhidos 
 | RLS no Postgres | quem lê e escreve o quê | validar regra de negócio complexa |
 | Edge functions | o que precisa de `service_role` ou de chave de terceiro | lógica de tela |
 | `RequireRole` | esconder `/admin` de quem não é admin | impedir acesso à API |
-| Painel do Supabase | segredos, migrations aplicadas | versionar decisão (isso é `docs/`) |
+| Stack `/opt/supabase/mkart` na `sfai-vps` | banco, auth, storage, functions, segredos (`functions.env`) | versionar decisão (isso é `docs/`) |
 | Supabase Storage | arquivos de blog e vídeos de campanha | esconder arquivo — os dois buckets são de leitura pública |
 
 ## Autorização em duas camadas
@@ -94,4 +94,10 @@ Só a segunda protege dado. A primeira melhora a experiência.
 
 ## Publicação
 
-O código é editado em duas frentes — este repositório e o **Lovable**, que commita direto na branch. A publicação sai do Lovable. Em `public/` convivem `netlify.toml`, `vercel.json` e `_redirects`, resíduos de tentativas de hospedagem anteriores: não são a rota atual de deploy.
+Desde 2026-10-20 o mkart roda na `sfai-vps`, fora do Lovable Cloud (roteiro e estado em `ops/VIRADA.md`):
+
+- **Banco, auth, storage e edge functions:** Supabase auto-hospedado em `/opt/supabase/mkart` (container do banco `mkart-db`), exposto em `https://api.mkart.com.br` pelo Nginx do host. Backup diário às 02:15 em `/opt/backups/mkart` (`ops/backup.sh`).
+- **Site:** build estático em `/var/www/mkart/releases/<data>`, servido pelo Nginx a partir do link `/var/www/mkart/atual` (`ops/nginx/regras.conf`: SPA, toda rota que não é arquivo cai no `index.html`). O sitemap é o arquivo estático `public/sitemap.xml`.
+- **Publicar o site:** `ssh sfai-vps /var/www/mkart/repo/ops/publicar.sh`. **Publicar functions:** `ops/supabase/publicar-funcoes.sh`, que lê o `verify_jwt` de `supabase/functions/_manifesto-verify-jwt.json` (o roteador auto-hospedado não lê o `config.toml`; os dois têm de concordar). **Segredos:** `ops/supabase/definir-segredo.sh`.
+
+Push no GitHub não publica nada. Em `public/` sobram `netlify.toml` e `vercel.json`, resíduos de tentativas de hospedagem anteriores que o Nginx ignora; o `_redirects` saiu porque apontava o sitemap para a function do projeto antigo.

@@ -6,7 +6,7 @@ covers: [supabase/migrations/**, src/integrations/supabase/types.ts]
 
 # Modelo de dados
 
-Postgres no Supabase, projeto `nxitvhrfloibpwrkskzx`. 68 migrations em `supabase/migrations/`. As migrations são o histórico e boa parte descreve tabelas que já não existem; `src/integrations/supabase/types.ts` (gerado) é o retrato do schema. Quando os dois discordam, a migration mais recente é que vale — e os tipos precisam ser regerados.
+Postgres no Supabase auto-hospedado da `sfai-vps` (`/opt/supabase/mkart`, container `mkart-db`, API em `https://api.mkart.com.br`). Até 2026-10-20 era o projeto `nxitvhrfloibpwrkskzx` do Lovable Cloud; o banco veio inteiro pelo backup daquele dia (`ops/supabase/carregar-banco.sh`). 68 migrations em `supabase/migrations/`. As migrations são o histórico e boa parte descreve tabelas que já não existem; `src/integrations/supabase/types.ts` (gerado) é o retrato do schema. Quando os dois discordam, a migration mais recente é que vale — e os tipos precisam ser regerados.
 
 **A modalidade de pacote não tem representação no banco.** O pedido de pacote existe apenas no e-mail enviado pela edge function `send-package-order` — veja `docs/features/pacotes-de-backlinks.md` e a ADR-006.
 
@@ -100,7 +100,7 @@ Esta seção é o que as policies têm que cumprir. É contra ela que um teste d
 
 ## Migrations
 
-Vivem em `supabase/migrations/`, nomeadas com timestamp. Na prática são aplicadas pelo Lovable/painel do Supabase.
+Vivem em `supabase/migrations/`, nomeadas com timestamp. São aplicadas à mão na stack da VPS, com o ok do Marco: o arquivo vai para o container `mkart-db` e roda em `psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1`. Não há registro automático de quais já rodaram; as que existiam até 2026-10-20 vieram aplicadas no backup. Depois de aplicar, regere `src/integrations/supabase/types.ts`.
 
 Nunca:
 - Criar tabela sem `enable row level security` na mesma migration.

@@ -3,6 +3,8 @@
 > Ele descreve tabelas e colunas que não existem mais no banco.
 > A documentação viva do projeto é `CLAUDE.md`, `docs/` e `.claude/rules/`.
 > Mantido só como histórico — não use como fonte, e não corrija: leia `docs/`.
+> Desde 2026-10-20 o mkart não está mais no Lovable Cloud: a `RESEND_API_KEY` se grava na VPS
+> com `ssh -t sfai-vps /var/www/mkart/repo/ops/supabase/definir-segredo.sh RESEND_API_KEY`.
 
 # Instruções para Configuração do Resend no Lovable / Supabase
 

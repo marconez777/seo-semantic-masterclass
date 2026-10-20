@@ -1,73 +1,24 @@
-# Welcome to your Lovable project
+# MK Art SEO — mkart.com.br
 
-## Project info
+Site e plataforma da MK Art: venda de backlinks, consultoria de SEO, blog e captação de leads.
+React + Vite + TypeScript, Tailwind + shadcn/ui, Supabase.
 
-**URL**: https://lovable.dev/projects/64be96ec-500e-4bf9-b808-b82d5b5c8def
+O projeto nasceu no Lovable e saiu dele em 2026-10-20: banco, auth e edge functions rodam num
+Supabase auto-hospedado na `sfai-vps` (`https://api.mkart.com.br`), e o site é servido pelo
+Nginx da mesma VPS. Push no GitHub não publica nada.
 
-## How can I edit this code?
-
-There are several ways of editing your application.
-
-**Use Lovable**
-
-Simply visit the [Lovable Project](https://lovable.dev/projects/64be96ec-500e-4bf9-b808-b82d5b5c8def) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Rodar localmente
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+npm ci --legacy-peer-deps
+npm run dev   # porta 8080
 ```
 
-**Edit a file directly in GitHub**
+## Publicar
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- Site: `ssh sfai-vps /var/www/mkart/repo/ops/publicar.sh`
+- Edge functions: `ssh sfai-vps 'bash /var/www/mkart/repo/ops/supabase/publicar-funcoes.sh </dev/null'`
+- Segredo de function: `ssh -t sfai-vps /var/www/mkart/repo/ops/supabase/definir-segredo.sh <NOME>`
 
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/64be96ec-500e-4bf9-b808-b82d5b5c8def) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+Roteiro da migração, estado e como voltar atrás: `ops/VIRADA.md`. Regras para quem mexe no
+código (inclusive agentes): `CLAUDE.md` e `docs/`.

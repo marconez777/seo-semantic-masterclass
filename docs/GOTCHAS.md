@@ -1,5 +1,5 @@
 ---
-last_validated: 2026-08-29
+last_validated: 2026-10-20
 review_by: 2027-02-28
 covers: []
 ---
@@ -15,11 +15,13 @@ As entradas abaixo foram levantadas lendo o código em 2026-08-28. Nenhuma veio 
 - `npm run dev` sobe na porta **8080**, não na 5173 padrão do Vite — está fixo em `vite.config.ts`. Link para `localhost:5173` não abre nada.
 - Não existe `npm test`. Só há `dev`, `build`, `build:dev`, `lint` e `preview`. Comando de teste inventado falha e faz parecer que o projeto está quebrado.
 - **`npm run lint` já sai com 124 erros** (conferido em 2026-08-28), quase todos `no-explicit-any`. "O lint passou" não é sinal de nada aqui; e não adianta ligá-lo como gate sem antes limpar a base. `npx tsc --noEmit`, esse sim, passa limpo — é o sinal confiável.
-- O `.env` esteve versionado no git e foi removido do índice recentemente. As três variáveis são públicas por natureza (URL e chave publicável do Supabase), então não houve vazamento de segredo — mas **não devolva o `.env` para o git**.
-- Edge function não enxerga as variáveis `VITE_*` do frontend. Segredo de function se configura no painel do Supabase.
+- O `.env` é versionado de propósito: o `ops/publicar.sh` builda o site na VPS a partir dele. Só pode ter as três `VITE_SUPABASE_*`, que são públicas (URL `https://api.mkart.com.br` e a chave anon da stack). **Segredo nunca entra no `.env`.** O build aborta se ele ainda apontar para o Lovable Cloud (`nxitvhrfloibpwrkskzx`).
+- Endereço de function ou de storage sai da `VITE_SUPABASE_URL`, nunca de `https://${VITE_SUPABASE_PROJECT_ID}.supabase.co`: no auto-hospedado não existe `<id>.supabase.co` e a chamada some em silêncio (o rastreio usa `sendBeacon`).
+- Edge function não enxerga as variáveis `VITE_*` do frontend. Segredo de function se grava na VPS com `ops/supabase/definir-segredo.sh`.
+- Function nova ou `verify_jwt` mudado: atualize `supabase/config.toml` **e** `supabase/functions/_manifesto-verify-jwt.json`. O roteador da VPS só lê o manifesto, e função fora dele fica fechada: sem JWT, 401 (uma function "pública" nova para de funcionar para o visitante).
 - **`src/integrations/supabase/types.ts` pode estar atrasado em relação ao banco.** Como o `strict` do TypeScript está desligado, coluna que existe no banco e não existe no arquivo não gera erro de compilação: falha em runtime. Regere os tipos depois de toda migration.
-- **O repositório é editado em paralelo pelo Lovable.** Durante a escrita desta documentação, uma feature inteira (pacotes) apareceu no disco. Antes de mexer, confira o que mudou — a foto que você tem do código pode ter minutos de idade.
-- Os scripts em `scripts/` apontam para um projeto Supabase **diferente** deste (`lvinoytvsyloccajnrwp`, contra `nxitvhrfloibpwrkskzx` do app). Se você rodar qualquer um deles esperando efeito no site, não vai acontecer nada.
+- **Commit "Lovable update" na `main` depois de 2026-10-20 é alarme.** O Lovable não edita mais o repo; se ele commitar, a sincronização GitHub ↔ Lovable não foi desligada e o commit pode devolver o `.env` para o banco antigo. Avise o Marco antes de publicar.
+- Os scripts em `scripts/` apontam para um projeto Supabase **diferente** deste (`lvinoytvsyloccajnrwp`, que nunca foi o do app: era `nxitvhrfloibpwrkskzx` no Lovable e hoje é `api.mkart.com.br`). Se você rodar qualquer um deles esperando efeito no site, não vai acontecer nada.
 - As documentações antigas na raiz (`DOCUMENTATION.md`, `ADMIN_IMPORT_DOCUMENTATION.md`, os `README-prerender*`) descrevem tabelas e colunas que não existem mais. Estão marcadas com aviso no topo. A fonte é `docs/`.
 
 ## Banco / RLS

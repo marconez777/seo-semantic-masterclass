@@ -5,7 +5,7 @@ Site e plataforma da MK Art: venda de backlinks (guest posts), consultoria de SE
 ## Contrato
 
 <important if="escrevendo qualquer código neste repo">
-- Stack: React 18 + Vite 5 + TypeScript, Tailwind + shadcn/ui, Supabase (banco, auth, edge functions), publicado pelo Lovable. Não introduza dependência nova sem perguntar.
+- Stack: React 18 + Vite 5 + TypeScript, Tailwind + shadcn/ui, Supabase auto-hospedado na `sfai-vps` (banco, auth, edge functions em `/opt/supabase/mkart`, API em `https://api.mkart.com.br`), site estático servido pelo Nginx da VPS. Saiu do Lovable Cloud em 2026-10-20. Não introduza dependência nova sem perguntar.
 - **Toda tabela nova nasce com RLS habilitada, na mesma migration.** Sem exceção — o banco tem dado de cliente pagante.
 - **`service_role` nunca sai de edge function.** Nada de `VITE_*` com segredo: variável `VITE_` vai para o navegador por definição do bundler.
 - HTML vindo do banco (post de blog, conteúdo SEO) **passa por `sanitizeHtml`** de `src/lib/sanitize.ts` antes de ir para `dangerouslySetInnerHTML`.
@@ -14,6 +14,18 @@ Site e plataforma da MK Art: venda de backlinks (guest posts), consultoria de SE
 - Antes de criar página, componente ou hook novo, **procure o existente**. Este repo tem 20 páginas `ComprarBacklinks*` quase idênticas — duplicar mais é o modo de falha nº 1 aqui.
 - Antes de implementar, leia `docs/GOTCHAS.md`.
 - Comandos: `npm run dev` (porta 8080) · `npm run build` · `npm run lint`. **Não existe suíte de testes** — não invente `npm test`.
+</important>
+
+## Publicação (VPS, não Lovable)
+
+<important if="aplicando migration, publicando function ou site, ou mexendo em segredo">
+Tudo passa pelo kit em `ops/` (roteiro e estado em `ops/VIRADA.md`). Nada disso é automático: o push no GitHub não publica nada, e o Lovable não publica mais o mkart.
+
+- **Site:** `ssh sfai-vps /var/www/mkart/repo/ops/publicar.sh`. Faz build e só troca `/var/www/mkart/atual` se passar.
+- **Edge function:** `ssh sfai-vps 'bash /var/www/mkart/repo/ops/supabase/publicar-funcoes.sh </dev/null'`. Publica todas. Function nova ou `verify_jwt` mudado: atualize `supabase/config.toml` **e** `supabase/functions/_manifesto-verify-jwt.json` (função fora do manifesto fica fechada).
+- **Migration:** aplicada na stack `/opt/supabase/mkart`, no container `mkart-db` (`psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1`), a partir do arquivo em `supabase/migrations/`. Depois, regere `types.ts`.
+- **Segredo:** o Marco grava de um terminal dele, `ssh -t sfai-vps /var/www/mkart/repo/ops/supabase/definir-segredo.sh <NOME>`. O valor nunca passa pela conversa.
+- Mudança que mexe no banco, na function ou no site de produção pede o ok do Marco antes de rodar.
 </important>
 
 ## Onde está o quê
@@ -25,12 +37,13 @@ Site e plataforma da MK Art: venda de backlinks (guest posts), consultoria de SE
 - `docs/features/` — uma doc por feature. Leia só a da feature em que você vai mexer.
   - `marketplace-e-pedidos.md` · `pacotes-de-backlinks.md` · `consultoria.md` · `blog-e-conteudo-seo.md` · `analytics.md` · `captacao-de-leads.md`
 - `.claude/rules/` — convenções por domínio: `stack.md`, `seguranca.md`, `ui.md`.
+- `ops/` — kit da VPS (stack Supabase, Nginx, publicação, backup diário às 02:15). `ops/VIRADA.md` tem o roteiro da saída do Lovable e como voltar atrás.
 
 ## Como trabalhamos
 
 - Plano antes de editar em tarefa não-trivial. Fatias verticais (migration → hook → tela), não fases horizontais.
 - Um commit por unidade lógica. Feature, correção e bump de dependência são três commits.
-- O código também é editado pelo Lovable, que commita direto na branch. Antes de mexer, confira se não há commit novo: um `git pull` esquecido vira conflito na interface do Lovable.
+- O Lovable não edita mais este repo. Se ainda aparecer commit "Lovable update" na `main`, a sincronização GitHub ↔ Lovable não foi desligada: avise o Marco, porque ele pode reescrever o `.env` para o banco antigo.
 - Página nova precisa de `SEOHead`, entrada em `public/sitemap.xml` e, se for de campanha paga, `noindex`.
 
 ## Manutenção automática da documentação

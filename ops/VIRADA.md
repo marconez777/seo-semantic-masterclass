@@ -96,7 +96,12 @@ exportação nova, em vez de mesclar.
   um commit do Lovable na `main` pode reescrever o `.env`.
 - **[Claude]** Atualizar a documentação do repo: a regra "banco via Lovable"
   (`docs/PENDENTE-BANCO-LOVABLE.md`, o `bash-guard`, o `CLAUDE.md`) deixa de valer, e o
-  deploy de function passa a ser `ops/supabase/publicar-funcoes.sh`.
+  deploy de function passa a ser `ops/supabase/publicar-funcoes.sh`. **Feito em 2026-10-20
+  nesta branch** (`CLAUDE.md`, `docs/`, `.claude/rules/seguranca.md`, `README.md`; saiu o
+  `public/_redirects`). Falta o que só existe na branch `feat/pacote-checkout-asaas`
+  (`docs/PENDENTE-BANCO-LOVABLE.md`, `docs/referencia/37-env-e-secrets.md`,
+  `scripts/gates/bash-guard.mjs` e os docs renomeados para `docs/0x-*`/`docs/dominios/`):
+  ajustar quando ela for juntada a esta.
 - **[Claude]** Retomar o Asaas na stack nova: migration `package_orders`, as 4 functions no
   manifesto, os segredos `ASAAS_*` e `HEARTH_*`, o webhook no Asaas apontando para
   `https://api.mkart.com.br/functions/v1/asaas-webhook` e o `MKART_CALLBACK_URL` do
