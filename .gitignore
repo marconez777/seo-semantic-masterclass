@@ -24,9 +24,11 @@ dist-ssr
 *.sw?
 
 # Env
-# O .env fica versionado de proposito: o build do Vite injeta as variaveis
-# VITE_* em tempo de build, e sem elas o app sobe com tela branca.
-# Sao apenas a URL e a chave publicavel (anon) do backend — publicas por
-# natureza, pois vao para o bundle do navegador de qualquer forma.
+# O .env NAO e versionado: na VPS o ops/publicar.sh gera a cada build a partir
+# da stack (ops/gerar-env.sh); no dev local, gere com
+#   ssh sfai-vps /var/www/mkart/repo/ops/gerar-env.sh > .env
+# Versionado, um commit antigo (o Lovable fazia isso) devolvia o build ao banco antigo.
+.env
+.env.novo
 .env.local
 .env.*.local

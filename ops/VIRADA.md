@@ -60,7 +60,8 @@ exportação nova, em vez de mesclar.
    o `api.sfai`. **[Claude]** instala o Nginx da API (`ops/instalar-nginx.sh api`), emite o
    certificado e roda a bateria de testes abaixo **contra a API nova, com o site ainda no
    Lovable**.
-10. **[Claude]** Trocar o `.env` do repo pela URL e pela chave publicável da stack nova, e
+10. **[Claude]** Trocar o `.env` do repo pela URL e pela chave publicável da stack nova (desde
+    2026-10-20 ele não é versionado: o `publicar.sh` o gera com `ops/gerar-env.sh`), e
     `ops/publicar.sh` (o build aborta se ainda apontar para `nxitvhrfloibpwrkskzx`).
 
 ## A virada (janela curta, de preferência à noite)
@@ -93,7 +94,8 @@ exportação nova, em vez de mesclar.
 
 - **[Claude]** `ops/instalar-backup.sh` (diário às 02:15, em `/opt/backups/mkart`).
 - **[Marco]** Despublicar no Lovable e desligar a sincronização GitHub ↔ Lovable. Até lá,
-  um commit do Lovable na `main` pode reescrever o `.env`.
+  um commit do Lovable na `main` pode desfazer mudanças da saída (o `.env` já não
+  é risco: o build o gera a partir da stack).
 - **[Claude]** Atualizar a documentação do repo: a regra "banco via Lovable"
   (`docs/PENDENTE-BANCO-LOVABLE.md`, o `bash-guard`, o `CLAUDE.md`) deixa de valer, e o
   deploy de function passa a ser `ops/supabase/publicar-funcoes.sh`. **Feito em 2026-10-20

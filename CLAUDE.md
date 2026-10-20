@@ -21,7 +21,8 @@ Site e plataforma da MK Art: venda de backlinks (guest posts), consultoria de SE
 <important if="aplicando migration, publicando function ou site, ou mexendo em segredo">
 Tudo passa pelo kit em `ops/` (roteiro e estado em `ops/VIRADA.md`). Nada disso é automático: o push no GitHub não publica nada, e o Lovable não publica mais o mkart.
 
-- **Site:** `ssh sfai-vps /var/www/mkart/repo/ops/publicar.sh`. Faz build e só troca `/var/www/mkart/atual` se passar.
+- **Site:** `ssh sfai-vps /var/www/mkart/repo/ops/publicar.sh`. Gera o `.env` a partir da stack (`ops/gerar-env.sh`), faz build e só troca `/var/www/mkart/atual` se passar.
+- **`.env` não é versionado.** Para o dev local: `ssh sfai-vps /var/www/mkart/repo/ops/gerar-env.sh > .env`. Não faça `git add .env`.
 - **Edge function:** `ssh sfai-vps 'bash /var/www/mkart/repo/ops/supabase/publicar-funcoes.sh </dev/null'`. Publica todas. Function nova ou `verify_jwt` mudado: atualize `supabase/config.toml` **e** `supabase/functions/_manifesto-verify-jwt.json` (função fora do manifesto fica fechada).
 - **Migration:** aplicada na stack `/opt/supabase/mkart`, no container `mkart-db` (`psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1`), a partir do arquivo em `supabase/migrations/`. Depois, regere `types.ts`.
 - **Segredo:** o Marco grava de um terminal dele, `ssh -t sfai-vps /var/www/mkart/repo/ops/supabase/definir-segredo.sh <NOME>`. O valor nunca passa pela conversa.
@@ -43,7 +44,7 @@ Tudo passa pelo kit em `ops/` (roteiro e estado em `ops/VIRADA.md`). Nada disso 
 
 - Plano antes de editar em tarefa não-trivial. Fatias verticais (migration → hook → tela), não fases horizontais.
 - Um commit por unidade lógica. Feature, correção e bump de dependência são três commits.
-- O Lovable não edita mais este repo. Se ainda aparecer commit "Lovable update" na `main`, a sincronização GitHub ↔ Lovable não foi desligada: avise o Marco, porque ele pode reescrever o `.env` para o banco antigo.
+- O Lovable não edita mais este repo. Se ainda aparecer commit "Lovable update" na `main`, a sincronização GitHub ↔ Lovable não foi desligada: avise o Marco antes de publicar.
 - Página nova precisa de `SEOHead`, entrada em `public/sitemap.xml` e, se for de campanha paga, `noindex`.
 
 ## Manutenção automática da documentação

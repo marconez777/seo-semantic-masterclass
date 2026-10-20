@@ -10,6 +10,7 @@ Nginx da mesma VPS. Push no GitHub não publica nada.
 ## Rodar localmente
 
 ```sh
+ssh sfai-vps /var/www/mkart/repo/ops/gerar-env.sh > .env   # .env não é versionado
 npm ci --legacy-peer-deps
 npm run dev   # porta 8080
 ```
