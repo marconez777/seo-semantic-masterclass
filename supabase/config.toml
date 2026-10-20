@@ -44,3 +44,7 @@ verify_jwt = true
 
 [functions.webinar-track]
 verify_jwt = false
+
+# Publica: src/lib/analytics.ts chama por sendBeacon/fetch sem Authorization.
+[functions.track]
+verify_jwt = false

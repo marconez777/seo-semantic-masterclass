@@ -1,0 +1,22 @@
+{
+  "_comentario": "verify_jwt de cada edge function no auto-hospedado (/opt/supabase/mkart), cujo roteador de fabrica nao confere por funcao. true = so entra com JWT valido; false = publica. Funcao fora desta lista e tratada como FECHADA. Espelha supabase/config.toml: mudou um, mude o outro. track entrou como publica em 2026-10-14 porque o site a chama sem Authorization e o config.toml nao a declarava.",
+  "extraido_em": "2026-10-14",
+  "funcoes": {
+    "categorize-backlinks": false,
+    "generate-sitemap": false,
+    "get-pii-data": true,
+    "notify-admin": false,
+    "publish-scheduled-posts": false,
+    "send-activation-email": false,
+    "send-contact-email": false,
+    "send-guest-post-list": false,
+    "send-order-status-email": false,
+    "send-package-order": false,
+    "send-payment-email": false,
+    "send-reset-password-email": false,
+    "seo-health-check": false,
+    "serpbot-proxy": false,
+    "track": false,
+    "webinar-track": false
+  }
+}
