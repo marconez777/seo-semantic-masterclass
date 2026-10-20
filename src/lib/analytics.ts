@@ -5,7 +5,9 @@
 type EventItem = { event_type: string; event_label?: string | null; event_data?: Record<string, any>; path?: string; ts: number };
 type PageviewItem = { path: string; title?: string; referrer?: string; ts: number; duration_seconds?: number; scroll_depth_pct?: number; ended?: boolean };
 
-const FN_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/track`;
+// Pela URL do Supabase, não pelo id do projeto: o banco auto-hospedado (api.mkart.com.br)
+// não tem endereço <id>.supabase.co.
+const FN_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/track`;
 const VISITOR_KEY = "mk_visitor_id";
 const SESSION_KEY = "mk_session_id";
 const SESSION_TS_KEY = "mk_session_last_ts";

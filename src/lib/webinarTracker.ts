@@ -6,7 +6,8 @@ type EventPayload = { type: string; data?: Record<string, any>; ts: number };
 type MetricsPatch = Record<string, any>;
 
 const STORAGE_KEY = "webinar_session_id";
-const FUNCTIONS_URL = `https://${import.meta.env.VITE_SUPABASE_PROJECT_ID}.supabase.co/functions/v1/webinar-track`;
+// Pela URL do Supabase, não pelo id do projeto: ver src/lib/analytics.ts.
+const FUNCTIONS_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/webinar-track`;
 
 function uuid() {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();

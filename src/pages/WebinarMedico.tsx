@@ -16,7 +16,7 @@ import { webinarTracker } from "@/lib/webinarTracker";
 // === Configuráveis ===
 const WEBINAR_DATE = "Domingo, 17/05";
 const HERO_VIDEO_URL =
-  "https://nxitvhrfloibpwrkskzx.supabase.co/storage/v1/object/public/webinar-videos/hero.mp4";
+  `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/webinar-videos/hero.mp4`;
 const HERO_POSTER_URL: string | undefined = undefined;
 const HERO_VIDEO_ID = "dQw4w9WgXcQ";
 const IVAN_VIDEO_ID = "28LzmtmItW0";
