@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import SEOHead from "@/components/seo/SEOHead";
@@ -20,47 +21,31 @@ interface PostDb {
 const PAGE_SIZE = 15;
 
 const Blog = () => {
-  const [posts, setPosts] = useState<PostDb[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [total, setTotal] = useState(0);
 
-  useEffect(() => {
-    const controller = new AbortController();
-    
-    const fetchPosts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const from = (page - 1) * PAGE_SIZE;
-        const to = from + PAGE_SIZE - 1;
+  // useQuery, e não useEffect: o build estático executa a consulta e o HTML da
+  // primeira página da lista sai pronto.
+  const { data, isLoading: loading, error: queryError } = useQuery({
+    queryKey: ["blog-posts", page],
+    queryFn: async () => {
+      const from = (page - 1) * PAGE_SIZE;
+      const to = from + PAGE_SIZE - 1;
 
-        const { data, error: queryError, count } = await supabase
-          .from("posts")
-          .select("id,title,slug,cover_image,excerpt,created_at", { count: "exact" })
-          .eq("published", true)
-          .order("created_at", { ascending: false })
-          .range(from, to)
-          .abortSignal(controller.signal);
-        
-        if (queryError) {
-          setError(queryError.message);
-        } else {
-          setPosts(data || []);
-          setTotal(count ?? 0);
-        }
-      } catch (err: any) {
-        if (err?.name !== 'AbortError') {
-          setError('Erro inesperado ao carregar posts');
-        }
-      }
-      setLoading(false);
-    };
+      const { data, error, count } = await supabase
+        .from("posts")
+        .select("id,title,slug,cover_image,excerpt,created_at", { count: "exact" })
+        .eq("published", true)
+        .order("created_at", { ascending: false })
+        .range(from, to);
 
-    fetchPosts();
-    return () => controller.abort();
-  }, [page]);
+      if (error) throw error;
+      return { posts: (data || []) as PostDb[], total: count ?? 0 };
+    },
+    placeholderData: keepPreviousData,
+  });
+  const posts = data?.posts ?? [];
+  const total = data?.total ?? 0;
+  const error = queryError ? (queryError as Error).message : null;
 
   const handlePageChange = (newPage: number) => {
     setPage(newPage);

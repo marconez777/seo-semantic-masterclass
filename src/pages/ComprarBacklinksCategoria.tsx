@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
 import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
@@ -52,8 +53,6 @@ const toCanonicalCategory = (cat?: string): string | undefined => {
 
 export default function ComprarBacklinksCategoria() {
   const { categoria } = useParams();
-  const [backlinks, setBacklinks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
 
   const [minDR, setMinDR] = useState<number | "">("");
@@ -69,31 +68,28 @@ export default function ComprarBacklinksCategoria() {
   const canonicalCategory = useMemo(() => toCanonicalCategory(normalized), [normalized]);
   const categoryLabel = canonicalCategory ?? rawSlug.replace(/-/g, " ");
 
-  useEffect(() => {
-    let mounted = true;
-    const filterName = canonicalCategory ?? rawSlug.replace(/-/g, ' ');
-    (async () => {
+  // useQuery, e não useEffect: o build estático executa a consulta e a tabela sai
+  // no HTML.
+  const { data: backlinks = [], isLoading: loading } = useQuery({
+    queryKey: ['categoria-backlinks', canonicalCategory ?? rawSlug],
+    queryFn: async () => {
+      const filterName = canonicalCategory ?? rawSlug.replace(/-/g, ' ');
       const q = supabase
         .from('backlinks_public')
         .select('*');
       const { data, error } = canonicalCategory
         ? await q.eq('category', filterName)
         : await q.ilike('category', filterName);
-      if (mounted) {
-        if (error) console.error('Erro ao buscar categoria', error);
-        // Adapter: mapear campos do backend para formato da UI
-        const adapted = (data ?? []).map((row: any) => ({
-          ...row,
-          site_name: row.domain ?? null,
-          site_url: row.url ?? null,
-          price_cents: Math.round(Number(row.price || 0) * 100),
-        }));
-        setBacklinks(adapted);
-        setLoading(false);
-      }
-    })();
-    return () => { mounted = false; };
-  }, [canonicalCategory, rawSlug]);
+      if (error) throw error;
+      // Adapter: mapear campos do backend para formato da UI
+      return (data ?? []).map((row: any) => ({
+        ...row,
+        site_name: row.domain ?? null,
+        site_url: row.url ?? null,
+        price_cents: Math.round(Number(row.price || 0) * 100),
+      }));
+    },
+  });
 
   const categories = useMemo(() => {
     const set = new Set<string>();

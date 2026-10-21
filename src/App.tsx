@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { HelmetProvider } from "react-helmet-async";
+import { queryClient } from "@/lib/queryClient";
 import { CartProvider } from "./contexts/CartContext";
 import { CartModal } from "./components/cart/CartModal";
 import Index from "./pages/Index";
@@ -69,14 +71,12 @@ import { WhatsAppFAB } from "@/components/ui/whatsapp-fab";
 import ScrollToTop from "./components/layout/ScrollToTop";
 import { useAnalytics } from "@/hooks/useAnalytics";
 
-const queryClient = new QueryClient();
-
 const AnalyticsBoot = () => { useAnalytics(); return null; };
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-  <CartProvider>
-    <BrowserRouter>
+// Só as rotas e o que depende do roteador. Fica separado porque o roteador muda:
+// BrowserRouter no navegador, StaticRouter no build estático (src/entry-server.tsx).
+export const AppRoutes = () => (
+  <>
       <ScrollToTop />
       <AnalyticsBoot />
       <AuthLinkErrorRedirect />
@@ -153,9 +153,33 @@ const App = () => (
       <Toaster />
       <WhatsAppFAB />
       <CookieBanner />
-    </BrowserRouter>
-  </CartProvider>
+  </>
+);
+
+// Provedores compartilhados pelo navegador e pelo build estático. O roteador entra
+// como children.
+export const AppProviders = ({
+  client = queryClient,
+  helmetContext,
+  children,
+}: {
+  client?: QueryClient;
+  helmetContext?: object;
+  children: React.ReactNode;
+}) => (
+  <QueryClientProvider client={client}>
+    <HelmetProvider context={helmetContext}>
+      <CartProvider>{children}</CartProvider>
+    </HelmetProvider>
   </QueryClientProvider>
+);
+
+const App = () => (
+  <AppProviders>
+    <BrowserRouter>
+      <AppRoutes />
+    </BrowserRouter>
+  </AppProviders>
 );
  
 export default App;

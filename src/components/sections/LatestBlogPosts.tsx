@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -25,23 +25,21 @@ const cardColors = [
 ];
 
 const LatestBlogPosts = () => {
-  const [posts, setPosts] = useState<PostDb[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchLatest = async () => {
-      const { data } = await supabase
+  // useQuery, e não useEffect: o build estático executa a consulta e os posts saem
+  // no HTML da home.
+  const { data: posts = [], isLoading: loading } = useQuery({
+    queryKey: ["latest-posts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
         .from("posts")
         .select("id,title,slug,cover_image,excerpt,created_at")
         .eq("published", true)
         .order("created_at", { ascending: false })
         .limit(3);
-
-      setPosts(data || []);
-      setLoading(false);
-    };
-    fetchLatest();
-  }, []);
+      if (error) throw error;
+      return (data || []) as PostDb[];
+    },
+  });
 
   if (loading || posts.length === 0) return null;
 

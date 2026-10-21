@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import SEOHead from "@/components/seo/SEOHead";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -21,8 +22,6 @@ const brl = (v: number) => (v / 100).toLocaleString("pt-BR", { style: "currency"
 // Ícones por categoria (mesmo mapeamento do dropdown do Header)
 
 const AgenciaBacklinks = () => {
-  const [backlinks, setBacklinks] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
   const { isAuthenticated } = useAuth();
 
@@ -44,29 +43,26 @@ const AgenciaBacklinks = () => {
   const [page, setPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState<number>(20);
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
+  // useQuery, e não useEffect: o build estático executa a consulta e a tabela sai
+  // no HTML.
+  const { data: backlinks = [], isLoading: loading } = useQuery({
+    queryKey: ['agencia-backlinks'],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from('backlinks_public')
         .select('*')
         .order('da', { ascending: false });
-      if (mounted) {
-        if (error) console.error('Erro ao buscar backlinks', error);
-        // Transform data to include price_cents for BacklinkTableRow compatibility
-        const transformed = (data ?? []).map((row) => ({
-          ...row,
-          id: row.id,
-          site_name: row.domain ?? null,
-          site_url: row.url ?? null,
-          price_cents: Math.round(Number(row.price || 0) * 100),
-        }));
-        setBacklinks(transformed);
-        setLoading(false);
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
+      if (error) throw error;
+      // Transform data to include price_cents for BacklinkTableRow compatibility
+      return (data ?? []).map((row) => ({
+        ...row,
+        id: row.id,
+        site_name: row.domain ?? null,
+        site_url: row.url ?? null,
+        price_cents: Math.round(Number(row.price || 0) * 100),
+      }));
+    },
+  });
 
   const categories = useMemo(() => {
     const set = new Set<string>();

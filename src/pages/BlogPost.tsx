@@ -1,5 +1,5 @@
 import { useParams } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Header from "@/components/layout/Header";
@@ -25,28 +25,25 @@ interface DbPost {
   category: string | null;
 }
 
+// useQuery, e não useEffect: o build estático executa a consulta e o post sai
+// inteiro no HTML.
 function usePost(slug?: string) {
-  const [post, setPost] = useState<DbPost | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!slug) return;
-    (async () => {
-      setLoading(true);
+  const { data, isLoading, error } = useQuery({
+    queryKey: ["post", slug],
+    queryFn: async () => {
       const { data, error } = await supabase
         .from("posts")
         .select("id,title,slug,content,cover_image,excerpt,created_at,updated_at,category")
         .eq("slug", slug)
         .eq("published", true)
         .maybeSingle();
-      if (error) setError(error.message);
-      setPost(data ?? null);
-      setLoading(false);
-    })();
-  }, [slug]);
+      if (error) throw error;
+      return (data ?? null) as DbPost | null;
+    },
+    enabled: !!slug,
+  });
 
-  return { post, loading, error };
+  return { post: data ?? null, loading: isLoading, error: error ? (error as Error).message : null };
 }
 
 export default function BlogPost() {

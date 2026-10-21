@@ -8,7 +8,10 @@
     "build": "vite build",
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "build:ssg": "vite build && vite build --ssr src/entry-server.tsx --outDir dist-ssr && node scripts/prerender.mjs",
+    "preview:ssg": "node scripts/servir-dist.mjs",
+    "nginx:gerar": "node scripts/gerar-nginx.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.9.0",

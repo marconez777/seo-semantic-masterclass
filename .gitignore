@@ -32,3 +32,6 @@ dist-ssr
 .env.novo
 .env.local
 .env.*.local
+
+# build estático
+.prerender-urls.json
