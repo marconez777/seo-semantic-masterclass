@@ -58,7 +58,8 @@ As entradas abaixo foram levantadas lendo o código em 2026-08-28. Nenhuma veio 
 
 ## SEO
 
-- Existem **duas** fontes de sitemap: o arquivo estático `public/sitemap.xml` (46 URLs, `lastmod` de 2026-02-16) e a edge function `generate-sitemap`. Página nova precisa entrar no arquivo estático — é ele que está no ar.
+- O sitemap no ar é o que o `npm run build:ssg` gera (rotas fixas de `scripts/rotas.mjs` + posts publicados). A edge function `generate-sitemap` sobrou e não é usada. Página fora do sitemap de propósito: `FORA_DO_SITEMAP` em `scripts/rotas.mjs`.
+- Página pública que busca dado em `useEffect` sai vazia no HTML, sem erro nenhum: o build só executa consulta de `useQuery`. E o que o HTML traz fica congelado até a próxima geração — tabela nova que aparece em página pública entra em `VIGIAR` (`scripts/site.mjs`), senão o cron não regera quando ela muda.
 - Página de campanha paga (`/diagnostico`, `/webinar-medico`) leva `noindex` e **fica fora do sitemap**, de propósito.
 - Data do webinar, vagas restantes, IDs de vídeo do YouTube, número e link de grupo do WhatsApp e a chave PIX (CNPJ, no template do e-mail) estão **escritos no código**. Mudar qualquer um exige publicar de novo. Em `WebinarMedico.tsx` há ainda um `HERO_VIDEO_ID` declarado e nunca usado, com o ID do vídeo do rickroll — resto de placeholder.
 - O FAB do WhatsApp e o banner de cookies são globais (montados em `App.tsx`) e se escondem por **lista de rotas dentro deles** — `whatsapp-fab.tsx` e `CookieBanner.tsx`. Página de dobra única nova precisa entrar nas duas listas, senão o banner empurra o CTA para fora da tela. Header e Footer não têm esse mecanismo: cada página decide se importa os dois.

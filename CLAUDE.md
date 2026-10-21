@@ -13,7 +13,7 @@ Site e plataforma da MK Art: venda de backlinks (guest posts), consultoria de SE
 - Depois de toda migration, **regere `src/integrations/supabase/types.ts`**. Com o `strict` desligado, tipo atrasado não dá erro — quebra em produção.
 - Antes de criar página, componente ou hook novo, **procure o existente**. Este repo tem 20 páginas `ComprarBacklinks*` quase idênticas — duplicar mais é o modo de falha nº 1 aqui.
 - Antes de implementar, leia `docs/GOTCHAS.md`.
-- Comandos: `npm run dev` (porta 8080) · `npm run build` · `npm run lint`. **Não existe suíte de testes** — não invente `npm test`.
+- Comandos: `npm run dev` (porta 8080) · `npm run build:ssg` (o build que vai ao ar: HTML pronto por URL) · `npm run preview:ssg` (porta 4173, com as regras do Nginx) · `npm run lint`. **Não existe suíte de testes** — não invente `npm test`.
 </important>
 
 ## Publicação (VPS, não Lovable)
@@ -21,7 +21,7 @@ Site e plataforma da MK Art: venda de backlinks (guest posts), consultoria de SE
 <important if="aplicando migration, publicando function ou site, ou mexendo em segredo">
 Tudo passa pelo kit em `ops/` (roteiro e estado em `ops/VIRADA.md`). Nada disso é automático: o push no GitHub não publica nada, e o Lovable não publica mais o mkart.
 
-- **Site:** `ssh sfai-vps /var/www/mkart/repo/ops/publicar.sh`. Gera o `.env` a partir da stack (`ops/gerar-env.sh`), faz build e só troca `/var/www/mkart/atual` se passar.
+- **Site:** `ssh sfai-vps /var/www/mkart/repo/ops/publicar.sh`. Gera o `.env` a partir da stack (`ops/gerar-env.sh`), roda `npm run build:ssg` e só troca `/var/www/mkart/atual` se passar. O código chega em `/var/www/mkart/repo` por rsync (lá não há `.git`). Rota só-app ou redirect novo: `npm run nginx:gerar`, commit, publicar e `ops/instalar-nginx.sh site`.
 - **`.env` não é versionado.** Para o dev local: `ssh sfai-vps /var/www/mkart/repo/ops/gerar-env.sh > .env`. Não faça `git add .env`.
 - **Edge function:** `ssh sfai-vps 'bash /var/www/mkart/repo/ops/supabase/publicar-funcoes.sh </dev/null'`. Publica todas. Function nova ou `verify_jwt` mudado: atualize `supabase/config.toml` **e** `supabase/functions/_manifesto-verify-jwt.json` (função fora do manifesto fica fechada).
 - **Migration:** aplicada na stack `/opt/supabase/mkart`, no container `mkart-db` (`psql -U supabase_admin -d postgres -v ON_ERROR_STOP=1`), a partir do arquivo em `supabase/migrations/`. Depois, regere `types.ts`.
@@ -45,7 +45,7 @@ Tudo passa pelo kit em `ops/` (roteiro e estado em `ops/VIRADA.md`). Nada disso 
 - Plano antes de editar em tarefa não-trivial. Fatias verticais (migration → hook → tela), não fases horizontais.
 - Um commit por unidade lógica. Feature, correção e bump de dependência são três commits.
 - O Lovable não edita mais este repo. Se ainda aparecer commit "Lovable update" na `main`, a sincronização GitHub ↔ Lovable não foi desligada: avise o Marco antes de publicar.
-- Página nova precisa de `SEOHead`, entrada em `public/sitemap.xml` e, se for de campanha paga, `noindex`.
+- Página nova precisa de `SEOHead`, um `<h1>`, a rota em `scripts/rotas.mjs` (`ROTAS_FIXAS` vira HTML; `ROTAS_SO_APP` recebe o shell com noindex; o build falha sem) e, se for de campanha paga, `noindex`. Dado do banco que aparece em página pública vem de `useQuery` (o build não roda `useEffect`). O sitemap sai do build: `public/sitemap.xml` não existe mais.
 
 ## Manutenção automática da documentação
 

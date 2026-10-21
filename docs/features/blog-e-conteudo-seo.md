@@ -1,7 +1,7 @@
 ---
-last_validated: 2026-08-28
+last_validated: 2026-10-21
 review_by: 2026-11-28
-covers: [src/pages/Blog.tsx, src/pages/BlogPost.tsx, src/pages/AdminBlogNew.tsx, src/pages/admin/AdminBlog.tsx, src/pages/admin/AdminConteudoSEO.tsx, src/components/blog/**, src/components/seo/**, src/components/admin/SEOContentEditor.tsx, src/components/admin/AdminBlogPublisher.tsx, src/hooks/usePageSEOContent.ts, src/lib/sanitize.ts, supabase/functions/publish-scheduled-posts/index.ts, supabase/functions/generate-sitemap/index.ts, public/sitemap.xml, public/robots.txt]
+covers: [src/pages/Blog.tsx, src/pages/BlogPost.tsx, src/pages/AdminBlogNew.tsx, src/pages/admin/AdminBlog.tsx, src/pages/admin/AdminConteudoSEO.tsx, src/components/blog/**, src/components/seo/**, src/components/admin/SEOContentEditor.tsx, src/components/admin/AdminBlogPublisher.tsx, src/hooks/usePageSEOContent.ts, src/lib/sanitize.ts, supabase/functions/publish-scheduled-posts/index.ts, supabase/functions/generate-sitemap/index.ts, scripts/site.mjs, scripts/rotas.mjs, public/robots.txt]
 ---
 
 # Blog e conteúdo SEO
@@ -52,7 +52,7 @@ Todo o SEO é feito com meta tags no cliente (`react-helmet-async`); o site não
 ## Casos conhecidos NÃO tratados
 
 - **`publish-scheduled-posts` não tem agendador confirmado.** A função existe e funciona quando chamada, mas nada no repositório garante que ela é chamada de hora em hora. Post agendado pode simplesmente não sair.
-- **Duas fontes de sitemap.** `public/sitemap.xml` é estático, com 46 URLs e `lastmod` congelado em 2026-02-16; a função `generate-sitemap` monta outro a partir do banco. O que está no ar é o estático — **página nova precisa ser adicionada à mão**.
+- **Post novo entra no ar pelo cron, não na hora.** O blog é HTML pronto gerado no build; `ops/regerar-se-mudou.sh` confere a cada 5 minutos se algum post publicado mudou e regera (sitemap junto). Sem o cron instalado na VPS, post novo só aparece na próxima publicação. A função `generate-sitemap` sobrou e não é usada.
 - Post não tem prévia, versionamento nem rascunho separado de agendado: `published = false` significa as duas coisas.
 - Imagem enviada para o Storage não é redimensionada nem comprimida.
 - O bucket `blog` é de **leitura pública**: a imagem de um post ainda não publicado já está acessível para quem tiver a URL.

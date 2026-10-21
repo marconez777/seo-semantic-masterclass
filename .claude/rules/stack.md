@@ -12,7 +12,8 @@ covers: [package.json, vite.config.ts, tsconfig.app.json, src/integrations/supab
 - **React 18.3** + **react-router-dom 6**. Todas as rotas ficam em `src/App.tsx`, sem lazy loading.
 - **TypeScript 5.5** com `strict` desligado e `noImplicitAny: false` (`tsconfig.app.json`). O compilador não vai te salvar — confira os tipos à mão.
 - **Supabase JS 2.93**. Tipos do banco gerados em `src/integrations/supabase/types.ts` — **arquivo gerado, não edite à mão**; regenere pelo CLI do Supabase.
-- **TanStack Query 5** para leitura de dados do servidor. `QueryClient` único, criado em `src/App.tsx`.
+- **TanStack Query 5** para leitura de dados do servidor. `QueryClient` único do navegador em `src/lib/queryClient.ts` (o `main.tsx` carrega nele o cache que o build embute no HTML).
+- **HTML pronto por URL:** `npm run build:ssg` renderiza o app em Node (`src/entry-server.tsx`, `scripts/prerender.mjs`). Em página pública: dado do banco só por `useQuery`, `window`/`document`/`localStorage` só dentro de `useEffect`, e nenhum "Carregando" sobrando — o build falha.
 - **Tiptap 3** é o editor do blog e do conteúdo SEO.
 - **Deno** nas edge functions (`supabase/functions/`) — não é Node. Import por URL, `Deno.env.get()` para segredo.
 
@@ -31,4 +32,4 @@ covers: [package.json, vite.config.ts, tsconfig.app.json, src/integrations/supab
 - `fetch` cru para o Supabase — use o client de `@/integrations/supabase/client`.
 - Editar `src/integrations/supabase/types.ts` à mão — é gerado e será sobrescrito.
 - Criar mais uma página `ComprarBacklinks<Categoria>.tsx`. Já são 20 quase idênticas; categoria nova entra pela rota dinâmica `/comprar-backlinks-categoria/:categoria` (`ComprarBacklinksCategoria.tsx`) e pela lista em `src/lib/categories.ts`.
-- Os scripts em `scripts/` (prerender, pipeline, QA de SEO) — **não estão ligados a nenhum comando do `package.json`** e ninguém no time sabe dizer se ainda rodam. Não imite esse código e não construa em cima dele sem confirmar. Ver `docs/DECISOES.md` (ADR-004).
+- Os scripts antigos em `scripts/` (`*.js`, `build-prerender.mjs`, `lovable-pipeline.mjs`, `qa-seo.mjs`, `cron-seo-check.mjs`) — **não estão ligados a nenhum comando do `package.json`** e ninguém no time sabe dizer se ainda rodam. Não imite esse código e não construa em cima dele sem confirmar. Ver `docs/DECISOES.md` (ADR-004). Os que valem são os do build estático, chamados pelo `package.json`: `site.mjs`, `rotas.mjs`, `redirects.mjs`, `prerender.mjs`, `gerar-nginx.mjs`, `servir-dist.mjs`, `impressao-do-conteudo.mjs`.
