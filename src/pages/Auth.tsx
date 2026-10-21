@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import SEOHead from "@/components/seo/SEOHead";
@@ -12,12 +12,15 @@ import { CheckCircle, Mail, ArrowLeft, AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 import { authLinkErrorMessage, type AuthLinkKind } from "@/lib/authLinkError";
 
-type AuthMode = "login" | "signup" | "forgot-password" | "resend-confirmation";
+type AuthMode = "login" | "signup" | "forgot-password" | "resend-confirmation" | "reset-password";
 
 // O GoTrue limita um e-mail por usuário a cada 60 s (SMTP_MAX_FREQUENCY).
 const RESEND_COOLDOWN_SECONDS = 60;
 
 const confirmationRedirectUrl = () => `${window.location.origin}/comprar-backlinks`;
+
+// O link do e-mail de recuperação abre /auth?mode=reset-password já com sessão.
+const isRecoveryUrl = () => new URLSearchParams(window.location.search).get("mode") === "reset-password";
 
 const Auth = () => {
   const [searchParams] = useSearchParams();
@@ -28,7 +31,13 @@ const Auth = () => {
   const linkErrorMode: AuthMode | null = linkErrorCode
     ? linkErrorKind === "recuperacao" ? "forgot-password" : "resend-confirmation"
     : null;
-  const [mode, setMode] = useState<AuthMode>(linkErrorMode ?? "login");
+  const [mode, setMode] = useState<AuthMode>(
+    linkErrorMode ?? (searchParams.get("mode") === "reset-password" ? "reset-password" : "login"),
+  );
+  const [recoveryReady, setRecoveryReady] = useState(false);
+  const recoveringRef = useRef(false);
+  const [newPassword, setNewPassword] = useState("");
+  const [newPasswordRepeat, setNewPasswordRepeat] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -77,14 +86,29 @@ const Auth = () => {
       }
     } catch {}
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_, session) => {
-      if (session?.user) {
-        navigate(redirectTo, { replace: true });
-      }
+    // Quem chega pelo link de recuperação já está logado: em vez de mandar para o
+    // painel, fica aqui até gravar a senha nova.
+    const recovering = () => recoveringRef.current || isRecoveryUrl();
+    const showResetForm = () => {
+      setMode("reset-password");
+      setRecoveryReady(true);
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") recoveringRef.current = true;
+      if (!session?.user) return;
+      if (recovering()) showResetForm();
+      else navigate(redirectTo, { replace: true });
     });
 
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session?.user) navigate(redirectTo, { replace: true });
+      if (data.session?.user) {
+        if (recovering()) showResetForm();
+        else navigate(redirectTo, { replace: true });
+      } else if (isRecoveryUrl()) {
+        setMode("forgot-password");
+        setError("Este link de redefinição de senha não é mais válido. Peça um novo abaixo.");
+      }
     });
 
     return () => subscription.unsubscribe();
@@ -271,6 +295,42 @@ const Auth = () => {
     }
   };
 
+  const handleResetPassword = async () => {
+    if (newPassword.length < 6) {
+      setError("A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    if (newPassword !== newPasswordRepeat) {
+      setError("As duas senhas não são iguais.");
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
+
+    setLoading(false);
+
+    if (error) {
+      if (error.code === "same_password") {
+        setError("A nova senha precisa ser diferente da atual.");
+      } else if (error.code === "weak_password") {
+        setError("Essa senha é fraca demais. Use uma senha mais longa.");
+      } else if (error.code === "session_not_found" || error.status === 401) {
+        setMode("forgot-password");
+        setError("O link de redefinição expirou. Peça um novo abaixo.");
+      } else {
+        setError("Não foi possível salvar a nova senha. Tente de novo em instantes.");
+      }
+      return;
+    }
+
+    recoveringRef.current = false;
+    toast({ title: "Senha alterada!", description: "Você já está logado com a nova senha." });
+    navigate(redirectTo, { replace: true });
+  };
+
   const handleForgotPassword = async () => {
     if (!email) {
       setError("Por favor, digite seu e-mail primeiro.");
@@ -322,7 +382,9 @@ const Auth = () => {
                 ? "Cadastrar"
                 : mode === "resend-confirmation"
                   ? "Confirmar cadastro"
-                  : "Recuperar Senha"}
+                  : mode === "reset-password"
+                    ? "Nova senha"
+                    : "Recuperar Senha"}
           </h1>
 
           {linkErrorText && (
@@ -403,7 +465,39 @@ const Auth = () => {
             </div>
           )}
 
-          {!success && (
+          {mode === "reset-password" && !recoveryReady && (
+            <p className="text-sm text-muted-foreground">Validando o link...</p>
+          )}
+
+          {mode === "reset-password" && recoveryReady && (
+            <div className="space-y-4">
+              <p className="text-sm text-muted-foreground">Escolha a senha que você vai usar para entrar daqui em diante.</p>
+              <div className="grid gap-2">
+                <Label htmlFor="new-password">Nova senha</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  autoComplete="new-password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  placeholder="Mínimo de 6 caracteres"
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="new-password-repeat">Repita a nova senha</Label>
+                <Input
+                  id="new-password-repeat"
+                  type="password"
+                  autoComplete="new-password"
+                  value={newPasswordRepeat}
+                  onChange={(e) => setNewPasswordRepeat(e.target.value)}
+                  placeholder="Digite de novo"
+                />
+              </div>
+            </div>
+          )}
+
+          {!success && mode !== "reset-password" && (
             <div className="space-y-4">
               <div className="grid gap-2">
                 <Label htmlFor="email">E-mail</Label>
@@ -465,6 +559,12 @@ const Auth = () => {
 
               {mode === "resend-confirmation" && resendButton("default")}
               
+              {mode === "reset-password" && recoveryReady && (
+                <Button className="w-full" onClick={handleResetPassword} disabled={loading}>
+                  {loading ? "Salvando..." : "Salvar nova senha"}
+                </Button>
+              )}
+
               {mode === "forgot-password" && (
                 <Button className="w-full" onClick={handleForgotPassword} disabled={loading}>
                   {loading ? "Enviando..." : "Enviar link de recuperação"}
