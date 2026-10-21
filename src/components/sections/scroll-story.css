@@ -1,0 +1,169 @@
+/*
+ * Topo da home com o vídeo ligado à rolagem (ScrollStorySection).
+ *
+ * É escuro por desenho, em qualquer tema, como as páginas de campanha: o vídeo é
+ * preto e roxo. Por isso as cores são tokens próprios, no formato HSL dos de
+ * src/index.css, presos a `.story`. Botão e destaque forte usam o --primary do site.
+ */
+.story {
+  --story-bg: 260 30% 2%;
+  --story-text: 270 40% 97%;
+  --story-muted: 265 15% 76%;
+  --story-accent: 268 80% 76%;
+  --story-header: 5rem; /* o Header fixo do site */
+  position: relative;
+  height: 800vh;
+  background: hsl(var(--story-bg));
+  color: hsl(var(--story-text));
+}
+
+.story-stage {
+  position: sticky;
+  top: var(--story-header);
+  height: calc(100vh - var(--story-header));
+  overflow: hidden;
+}
+
+.story-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+
+/* Escurece as laterais, onde fica o texto; o centro (ferreiro, corrente, logo) fica limpo. */
+.story-vignette {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg,
+    hsl(var(--story-bg) / .78) 0%, hsl(var(--story-bg) / .25) 34%, hsl(var(--story-bg) / 0) 45%,
+    hsl(var(--story-bg) / 0) 55%, hsl(var(--story-bg) / .25) 66%, hsl(var(--story-bg) / .78) 100%);
+}
+.story-overlay { position: absolute; inset: 0; pointer-events: none; background: hsl(var(--story-bg)); opacity: 0; }
+
+.story-marquee {
+  position: absolute; top: 50%; left: 0; pointer-events: none;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  opacity: 0; transition: opacity .6s ease;
+}
+.story-marquee.is-active { opacity: 1; }
+.story-marquee-text {
+  font-weight: 800; font-size: 12vw; line-height: 1; letter-spacing: -.04em; text-transform: uppercase;
+  color: transparent; -webkit-text-stroke: 1px hsl(var(--story-accent) / .22);
+  padding-left: 20vw;
+}
+
+/* ---------- Topo, sobre a forja ---------- */
+.story-hero {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column; justify-content: center;
+  padding: 0 5vw;
+  background: linear-gradient(90deg, hsl(var(--story-bg) / .9) 0%, hsl(var(--story-bg) / .6) 38%, hsl(var(--story-bg) / 0) 62%);
+}
+.story-hero-title {
+  font-weight: 800; font-size: clamp(3.5rem, 8vw, 10rem); line-height: .95; letter-spacing: -.05em;
+  margin: 18px 0 26px; max-width: 12ch;
+}
+.story-hero-title em { font-style: normal; color: hsl(var(--story-accent)); }
+.story-hero-tagline { max-width: 34rem; font-size: 1.2rem; line-height: 1.55; color: hsl(var(--story-muted)); }
+.story-hint {
+  position: absolute; bottom: 36px; left: 5vw;
+  display: flex; align-items: center; gap: 14px;
+  font-size: 14px; letter-spacing: .14em; text-transform: uppercase; color: hsl(var(--story-muted));
+}
+.story-hint i { width: 1px; height: 46px; background: hsl(var(--story-accent)); animation: story-hint 2.2s ease-in-out infinite; transform-origin: top; }
+@keyframes story-hint { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+
+.story-label {
+  display: inline-block;
+  font-size: 14px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; line-height: 1.4;
+  color: hsl(var(--story-accent));
+}
+
+/* ---------- Etapas: paradas no meio da tela, entram e saem pela transição ---------- */
+.story-step {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  pointer-events: none;
+}
+.story-step.is-active { pointer-events: auto; }
+.story-left { left: 5vw; width: 36vw; }
+.story-right { right: 5vw; width: 35vw; }
+.story-center { left: 5vw; right: 5vw; text-align: center; }
+/* O disco do logo ocupa ~29–71% da largura no fim: a chamada fica mais estreita. */
+.story-cta { width: 22vw; }
+
+.story-title {
+  display: block;
+  font-weight: 700; font-size: clamp(2.6rem, 4.2vw, 5rem); line-height: 1.03; letter-spacing: -.04em;
+  margin: 14px 0 20px;
+  text-shadow: 0 2px 30px hsl(var(--story-bg) / .6);
+}
+.story-cta .story-title { font-size: clamp(2.2rem, 3.2vw, 4rem); }
+.story-body { font-size: 1.15rem; line-height: 1.55; max-width: 30rem; opacity: .9; text-shadow: 0 1px 18px hsl(var(--story-bg) / .7); }
+.story-body strong { color: hsl(var(--story-text)); font-weight: 700; }
+.story-link {
+  display: inline-block; margin-top: 22px;
+  font-weight: 600; color: hsl(var(--story-accent));
+  border-bottom: 1px solid hsl(var(--story-accent) / .5); padding-bottom: 3px;
+}
+.story-link:hover { color: hsl(var(--story-text)); border-color: hsl(var(--story-text)); }
+
+.story-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 26px; }
+.story-button {
+  display: inline-block; padding: 16px 28px; border-radius: 999px;
+  font-weight: 600; font-size: 16px;
+  background: hsl(var(--primary)); color: hsl(var(--primary-foreground));
+  transition: filter .3s ease, box-shadow .3s ease;
+}
+.story-button:hover { filter: brightness(1.12); box-shadow: 0 10px 34px hsl(var(--primary) / .45); }
+.story-button-ghost { background: transparent; color: hsl(var(--story-text)); box-shadow: inset 0 0 0 1px hsl(var(--story-text) / .45); }
+.story-button-ghost:hover { filter: none; box-shadow: inset 0 0 0 1px hsl(var(--story-text)); }
+
+/* Números: o único texto que vai ao centro, sobre o fundo escuro. */
+.story-stats { display: flex; justify-content: center; gap: 7vw; flex-wrap: wrap; }
+.story-stat { display: flex; flex-direction: column; align-items: center; }
+.story-stat-number { font-weight: 300; font-size: clamp(4.5rem, 9vw, 9rem); line-height: 1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
+.story-stat-label { margin-top: 12px; font-size: 15px; color: hsl(var(--story-muted)); }
+
+/* Entradas: uma por etapa, nunca a mesma em duas seguidas. Itens em sequência. */
+.story-item {
+  opacity: 0;
+  transition: opacity .6s cubic-bezier(.2,.7,.2,1), transform .8s cubic-bezier(.2,.7,.2,1), clip-path .9s cubic-bezier(.6,0,.2,1);
+}
+.story-step[data-anim="fade-up"] .story-item { transform: translateY(44px); }
+.story-step[data-anim="slide-left"] .story-item { transform: translateX(-70px); }
+.story-step[data-anim="slide-right"] .story-item { transform: translateX(70px); }
+.story-step[data-anim="scale-up"] .story-item { transform: scale(.86); }
+.story-step[data-anim="rotate-in"] .story-item { transform: translateY(36px) rotate(2.5deg); }
+.story-step[data-anim="stagger-up"] .story-item { transform: translateY(56px); }
+.story-step[data-anim="clip-reveal"] .story-item { clip-path: inset(100% 0 0 0); }
+.story-step.is-active .story-item { opacity: 1; transform: none; clip-path: inset(0 0 0 0); }
+.story-step.is-active .story-item:nth-child(2) { transition-delay: .1s; }
+.story-step.is-active .story-item:nth-child(3) { transition-delay: .2s; }
+.story-step.is-active .story-item:nth-child(4) { transition-delay: .3s; }
+
+/* ---------- Celular ---------- */
+@media (max-width: 767px) {
+  .story { height: 600vh; }
+  .story-stage { height: calc(100svh - var(--story-header)); }
+  .story-vignette { background: linear-gradient(to bottom, hsl(var(--story-bg) / .35), hsl(var(--story-bg) / 0) 30%, hsl(var(--story-bg) / 0) 70%, hsl(var(--story-bg) / .35)); }
+  .story-hero {
+    justify-content: flex-end; padding: 0 20px 110px;
+    background: linear-gradient(to top, hsl(var(--story-bg) / .92) 0%, hsl(var(--story-bg) / .55) 45%, hsl(var(--story-bg) / .1) 75%);
+  }
+  .story-hero-title { font-size: clamp(3rem, 14vw, 4.6rem); }
+  .story-hero-tagline { font-size: 1rem; }
+  .story-hint { left: 20px; bottom: 32px; }
+  .story-left, .story-right, .story-cta { left: 16px; right: 16px; width: auto; padding: 26px 22px; border-radius: 8px; background: hsl(var(--story-bg) / 0); transition: background .5s ease; }
+  /* A caixa escura só aparece com o texto, senão sobra um retângulo vazio. */
+  .story-step.is-active.story-left, .story-step.is-active.story-right, .story-step.is-active.story-cta { background: hsl(var(--story-bg) / .78); }
+  /* Chamada final presa embaixo, para o logo aparecer em cima, e acima do botão fixo do
+     WhatsApp (WhatsAppFAB), que senão cobre os dois botões. */
+  .story-cta { top: auto; bottom: 88px; transform: none; }
+  .story-title { font-size: clamp(2.2rem, 10vw, 3rem); }
+  .story-cta .story-title { font-size: clamp(2rem, 8.5vw, 2.6rem); }
+  .story-body { font-size: 1rem; }
+  .story-stats { flex-direction: column; gap: 28px; }
+  .story-stat-number { font-size: 4.5rem; }
+  .story-marquee-text { font-size: 22vw; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-item { transition-duration: .01s; transition-delay: 0s !important; }
+  .story-hint i { animation: none; }
+}

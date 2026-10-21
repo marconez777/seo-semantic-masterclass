@@ -1,4 +1,4 @@
-import HeroSection from "@/components/sections/HeroSection";
+import ScrollStorySection from "@/components/sections/ScrollStorySection";
 import CatalogPreviewSection from "@/components/sections/CatalogPreviewSection";
 import HowItWorksSection from "@/components/sections/HowItWorksSection";
 import GuaranteeSection from "@/components/sections/GuaranteeSection";
@@ -117,7 +117,7 @@ const Index = () => {
       <Header />
 
       <main className="pt-20">
-        <HeroSection />
+        <ScrollStorySection />
         <CatalogPreviewSection />
         <HowItWorksSection />
         <GuaranteeSection />
