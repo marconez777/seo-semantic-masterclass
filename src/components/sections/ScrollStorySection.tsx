@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import { useCatalogStats } from "@/hooks/useCatalogStats";
 import "./scroll-story.css";
 
 /**
@@ -18,8 +17,44 @@ import "./scroll-story.css";
  * com o `h1` da palavra-chave da página; o vídeo é só decoração (`aria-hidden`).
  */
 
-/** O vídeo anda a página quase inteira e o logo fecha por volta de 93% da rolagem. */
-const FRAME_SPEED = 1.08;
+/**
+ * A rolagem não anda o vídeo numa velocidade só: cada trecho diz quanto de rolagem
+ * (em vh) gasta e de que segundo a que segundo do vídeo vai. Trecho com o mesmo
+ * segundo nas duas pontas é uma pausa, para o texto daquela faixa ficar na tela.
+ * Segundos medidos em `mkart-scroll-v01` (39,33 s). Ajustes do Marco em 2026-10-21:
+ * marteladas mais lentas, pausas no elo, nos dois elos, no cromo, no ouro e no
+ * começo do último vídeo.
+ *
+ * [fim do trecho em vh, segundo inicial, segundo final]
+ */
+const LINHA: [number, number, number][] = [
+  [105, 0, 3.5], //      marteladas, com o título na tela
+  [240, 3.5, 8], //      marteladas, "Cada link num portal real"
+  [340, 8, 11.5], //     a fábrica explode, o texto continua
+  [380, 11.5, 13], //    o elo aparece no meio das partículas
+  [430, 13, 13], //      pausa: o elo
+  [470, 13, 14.75], //   o elo gira até os dois elos
+  [530, 14.75, 14.75], // pausa: os dois elos, sem texto
+  [555, 14.75, 15.5], // vira um elo só
+  [615, 15.5, 16.2], //  o elo se mexe devagar, entra o Pacote Básico
+  [685, 16.2, 18.5], //  a corrente se forma
+  [795, 18.5, 23.6], //  a corrente vira cromo, entra o Pacote Médio
+  [875, 23.6, 23.6], //  pausa: corrente cromada
+  [955, 23.6, 27.5], //  clarão roxo, o elo do meio vira ouro
+  [1000, 27.5, 29.5], // ouro
+  [1080, 29.5, 29.5], // pausa: ouro, "Os portais mais disputados"
+  [1135, 29.5, 32.3], // começa o último vídeo
+  [1215, 32.3, 32.3], // pausa: "Portal a portal"
+  [1335, 32.3, 38.2], // explode e vira o logo
+  [1360, 38.2, 39.33],
+  [1420, 39.33, 39.33], // pausa final: a chamada
+];
+const TOTAL = LINHA[LINHA.length - 1][0];
+/** Posição na rolagem, em %, de um ponto da LINHA (para data-enter/data-leave). */
+const em = (vh: number) => ((vh / TOTAL) * 100).toFixed(2);
+/** O título do topo fica até aqui (vh) e some nos 15 vh seguintes. */
+const TOPO_ATE = 95;
+
 /** Quadros carregados antes dos outros, para a primeira imagem aparecer logo. */
 const FIRST_BATCH = 8;
 /** Downloads de quadro em paralelo depois do primeiro lote. */
@@ -28,6 +63,16 @@ const WHATSAPP = "https://wa.me/5511989151997";
 
 const clamp = (n: number, min = 0, max = 1) => Math.min(max, Math.max(min, n));
 
+/** Segundo do vídeo para um ponto da rolagem (em vh), seguindo a LINHA. */
+const segundoEm = (vh: number) => {
+  let inicio = 0;
+  for (const [fim, de, ate] of LINHA) {
+    if (vh <= fim) return de + (ate - de) * clamp((vh - inicio) / (fim - inicio));
+    inicio = fim;
+  }
+  return LINHA[LINHA.length - 1][2];
+};
+
 type Faixa = { enter: number; leave: number };
 const faixa = (el: HTMLElement): Faixa => ({
   enter: parseFloat(el.dataset.enter ?? "0") / 100,
@@ -35,7 +80,6 @@ const faixa = (el: HTMLElement): Faixa => ({
 });
 
 const ScrollStorySection = () => {
-  const { data: stats } = useCatalogStats();
   const rootRef = useRef<HTMLElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -52,21 +96,19 @@ const ScrollStorySection = () => {
     const pasta = `/home-rolagem/${emPe ? "m" : "d"}`;
 
     const hero = stage.querySelector<HTMLElement>(".story-hero");
-    const overlay = stage.querySelector<HTMLElement>(".story-overlay");
     const marquee = stage.querySelector<HTMLElement>(".story-marquee");
     const marqueeText = stage.querySelector<HTMLElement>(".story-marquee-text");
     const steps = Array.from(stage.querySelectorAll<HTMLElement>(".story-step"));
-    const statsStep = stage.querySelector<HTMLElement>(".story-step-stats");
 
     let frames: HTMLImageElement[] = [];
     let count = 0;
+    let duracao = 1;
     let drawn = -1;
     let alvo = 0;
     let suave = 0;
     let raf = 0;
     let visivel = true;
     let cancelado = false;
-    const contadores: number[] = [];
 
     // ---------- Canvas ----------
     const desenhar = (indice: number) => {
@@ -108,6 +150,7 @@ const ScrollStorySection = () => {
         const info = await fetch(`${pasta}/info.json`).then((r) => r.json());
         if (cancelado) return;
         count = info.count;
+        duracao = info.duration || 1;
         frames = new Array(count);
         await Promise.all(Array.from({ length: Math.min(FIRST_BATCH, count) }, (_, i) => carregar(i)));
         if (cancelado) return;
@@ -122,24 +165,6 @@ const ScrollStorySection = () => {
       }
     })();
 
-    // ---------- Contadores ----------
-    const contar = () => {
-      statsStep?.querySelectorAll<HTMLElement>(".story-stat-number").forEach((el, k) => {
-        const valor = parseFloat(el.dataset.value ?? "");
-        if (Number.isNaN(valor)) return;
-        cancelAnimationFrame(contadores[k]);
-        const inicio = performance.now();
-        const dur = reduceMotion ? 0 : 1600;
-        const passo = (agora: number) => {
-          const t = dur ? clamp((agora - inicio) / dur) : 1;
-          const e = 1 - Math.pow(1 - t, 3);
-          el.textContent = Math.round(valor * e).toLocaleString("pt-BR");
-          if (t < 1) contadores[k] = requestAnimationFrame(passo);
-        };
-        contadores[k] = requestAnimationFrame(passo);
-      });
-    };
-
     // ---------- Laço da rolagem ----------
     const progresso = () => {
       const topo = parseFloat(getComputedStyle(stage).top) || 0;
@@ -148,40 +173,32 @@ const ScrollStorySection = () => {
     };
 
     const aplicar = (p: number) => {
-      if (count) desenhar(Math.min(Math.floor(clamp(p * FRAME_SPEED) * count), count - 1));
-      if (hero) hero.style.opacity = String(clamp(1 - p * 14));
+      const vh = p * TOTAL;
+      if (count) {
+        const t = segundoEm(vh);
+        desenhar(Math.min(Math.floor((t / duracao) * count), count - 1));
+      }
+      if (hero) hero.style.opacity = String(clamp(1 - (vh - TOPO_ATE) / 15));
 
       steps.forEach((el) => {
         const { enter, leave } = faixa(el);
         const fica = el.dataset.persist === "true" && p > enter;
         const ativo = (p >= enter && p <= leave) || fica;
-        if (ativo !== el.classList.contains("is-active")) {
-          el.classList.toggle("is-active", ativo);
-          if (ativo && el === statsStep) contar();
-        }
+        if (ativo !== el.classList.contains("is-active")) el.classList.toggle("is-active", ativo);
       });
 
-      if (overlay && statsStep) {
-        const { enter, leave } = faixa(statsStep);
-        const f = 0.03;
-        let o = 0;
-        if (p >= enter - f && p <= enter) o = ((p - (enter - f)) / f) * 0.9;
-        else if (p > enter && p < leave) o = 0.9;
-        else if (p >= leave && p <= leave + f) o = 0.9 * (1 - (p - leave) / f);
-        overlay.style.opacity = String(o);
-      }
-
       if (marquee && marqueeText) {
+        // O letreiro corre só dentro da própria faixa.
         const { enter, leave } = faixa(marquee);
         marquee.classList.toggle("is-active", p >= enter && p <= leave);
-        marqueeText.style.transform = `translateX(${-p * 30}%)`;
+        marqueeText.style.transform = `translateX(${-clamp((p - enter) / (leave - enter)) * 28}%)`;
       }
     };
 
     const laco = () => {
       alvo = progresso();
       suave = reduceMotion ? alvo : suave + (alvo - suave) * 0.14;
-      if (Math.abs(alvo - suave) < 0.0005) suave = alvo;
+      if (Math.abs(alvo - suave) < 0.0002) suave = alvo;
       aplicar(suave);
       raf = visivel ? requestAnimationFrame(laco) : 0;
     };
@@ -197,7 +214,6 @@ const ScrollStorySection = () => {
     return () => {
       cancelado = true;
       cancelAnimationFrame(raf);
-      contadores.forEach((c) => cancelAnimationFrame(c));
       io.disconnect();
       ro.disconnect();
     };
@@ -208,8 +224,7 @@ const ScrollStorySection = () => {
       <div ref={stageRef} className="story-stage">
         <canvas ref={canvasRef} className="story-canvas" aria-hidden="true" />
         <div className="story-vignette" aria-hidden="true" />
-        <div className="story-overlay" aria-hidden="true" />
-        <div className="story-marquee" data-enter="18" data-leave="34" aria-hidden="true">
+        <div className="story-marquee" data-enter={em(345)} data-leave={em(428)} aria-hidden="true">
           <div className="story-marquee-text">
             do primeiro link ao portal premium — do primeiro link ao portal premium —
           </div>
@@ -230,7 +245,7 @@ const ScrollStorySection = () => {
           </div>
         </div>
 
-        <div className="story-step story-left" data-enter="8" data-leave="19" data-anim="slide-left">
+        <div className="story-step story-left" data-enter={em(110)} data-leave={em(338)} data-anim="slide-left">
           <span className="story-item story-label">001 / Link de verdade</span>
           <h2 className="story-item story-title">Cada link num portal real.</h2>
           <p className="story-item story-body">
@@ -239,7 +254,7 @@ const ScrollStorySection = () => {
           </p>
         </div>
 
-        <div className="story-step story-right" data-enter="34" data-leave="43" data-anim="fade-up">
+        <div className="story-step story-right" data-enter={em(560)} data-leave={em(722)} data-anim="fade-up">
           <span className="story-item story-label">002 / Para começar</span>
           <h2 className="story-item story-title">Pacote Básico</h2>
           <p className="story-item story-body">
@@ -250,7 +265,7 @@ const ScrollStorySection = () => {
           </Link>
         </div>
 
-        <div className="story-step story-left" data-enter="44" data-leave="55" data-anim="clip-reveal">
+        <div className="story-step story-left" data-enter={em(738)} data-leave={em(878)} data-anim="clip-reveal">
           <span className="story-item story-label">003 / Para crescer</span>
           <h2 className="story-item story-title">Pacote Médio</h2>
           <p className="story-item story-body">
@@ -261,24 +276,7 @@ const ScrollStorySection = () => {
           </Link>
         </div>
 
-        <div className="story-step story-center story-step-stats" data-enter="56" data-leave="62" data-anim="stagger-up">
-          <div className="story-stats">
-            <div className="story-item story-stat">
-              <span className="story-stat-number" data-value={stats?.total ?? ""}>-</span>
-              <span className="story-stat-label">portais no catálogo</span>
-            </div>
-            <div className="story-item story-stat">
-              <span className="story-stat-number" data-value={stats?.maxDa ?? ""}>-</span>
-              <span className="story-stat-label">de DA no portal mais forte</span>
-            </div>
-            <div className="story-item story-stat">
-              <span className="story-stat-number" data-value="30">30</span>
-              <span className="story-stat-label">dias de garantia com devolução</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="story-step story-right" data-enter="63" data-leave="70" data-anim="scale-up">
+        <div className="story-step story-right" data-enter={em(968)} data-leave={em(1084)} data-anim="scale-up">
           <span className="story-item story-label">004 / Premium</span>
           <h2 className="story-item story-title">Os portais mais disputados.</h2>
           <p className="story-item story-body">
@@ -290,7 +288,7 @@ const ScrollStorySection = () => {
           </a>
         </div>
 
-        <div className="story-step story-left" data-enter="71" data-leave="76.5" data-anim="slide-right">
+        <div className="story-step story-left" data-enter={em(1100)} data-leave={em(1218)} data-anim="slide-right">
           <span className="story-item story-label">005 / Do seu jeito</span>
           <h2 className="story-item story-title">Portal a portal.</h2>
           <p className="story-item story-body">
@@ -299,7 +297,7 @@ const ScrollStorySection = () => {
           </p>
         </div>
 
-        <div className="story-step story-left story-cta" data-enter="89" data-leave="100" data-anim="rotate-in" data-persist="true">
+        <div className="story-step story-left story-cta" data-enter={em(1338)} data-leave="100" data-anim="rotate-in" data-persist="true">
           <span className="story-item story-label">006 / Próximo passo</span>
           <h2 className="story-item story-title">Escolha onde seu site vai aparecer.</h2>
           <p className="story-item story-body">

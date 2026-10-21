@@ -12,7 +12,8 @@
   --story-accent: 268 80% 76%;
   --story-header: 5rem; /* o Header fixo do site */
   position: relative;
-  height: 800vh;
+  /* 1420 vh de rolagem (a LINHA do componente) + a altura do palco. */
+  height: 1520vh;
   background: hsl(var(--story-bg));
   color: hsl(var(--story-text));
 }
@@ -33,7 +34,6 @@
     hsl(var(--story-bg) / .78) 0%, hsl(var(--story-bg) / .25) 34%, hsl(var(--story-bg) / 0) 45%,
     hsl(var(--story-bg) / 0) 55%, hsl(var(--story-bg) / .25) 66%, hsl(var(--story-bg) / .78) 100%);
 }
-.story-overlay { position: absolute; inset: 0; pointer-events: none; background: hsl(var(--story-bg)); opacity: 0; }
 
 .story-marquee {
   position: absolute; top: 50%; left: 0; pointer-events: none;
@@ -42,10 +42,12 @@
   opacity: 0; transition: opacity .6s ease;
 }
 .story-marquee.is-active { opacity: 1; }
+/* Letreiro cheio e claro: em contorno fino ele sumia nas partículas (pedido do Marco, 2026-10-21). */
 .story-marquee-text {
-  font-weight: 800; font-size: 12vw; line-height: 1; letter-spacing: -.04em; text-transform: uppercase;
-  color: transparent; -webkit-text-stroke: 1px hsl(var(--story-accent) / .22);
-  padding-left: 20vw;
+  font-weight: 800; font-size: 10vw; line-height: 1; letter-spacing: -.04em; text-transform: uppercase;
+  color: hsl(var(--story-text) / .92);
+  text-shadow: 0 0 40px hsl(var(--story-bg) / .9), 0 4px 24px hsl(var(--story-accent) / .45);
+  padding-left: 10vw;
 }
 
 /* ---------- Topo, sobre a forja ---------- */
@@ -83,7 +85,6 @@
 .story-step.is-active { pointer-events: auto; }
 .story-left { left: 5vw; width: 36vw; }
 .story-right { right: 5vw; width: 35vw; }
-.story-center { left: 5vw; right: 5vw; text-align: center; }
 /* O disco do logo ocupa ~29–71% da largura no fim: a chamada fica mais estreita. */
 .story-cta { width: 22vw; }
 
@@ -114,12 +115,6 @@
 .story-button-ghost { background: transparent; color: hsl(var(--story-text)); box-shadow: inset 0 0 0 1px hsl(var(--story-text) / .45); }
 .story-button-ghost:hover { filter: none; box-shadow: inset 0 0 0 1px hsl(var(--story-text)); }
 
-/* Números: o único texto que vai ao centro, sobre o fundo escuro. */
-.story-stats { display: flex; justify-content: center; gap: 7vw; flex-wrap: wrap; }
-.story-stat { display: flex; flex-direction: column; align-items: center; }
-.story-stat-number { font-weight: 300; font-size: clamp(4.5rem, 9vw, 9rem); line-height: 1; letter-spacing: -.05em; font-variant-numeric: tabular-nums; }
-.story-stat-label { margin-top: 12px; font-size: 15px; color: hsl(var(--story-muted)); }
-
 /* Entradas: uma por etapa, nunca a mesma em duas seguidas. Itens em sequência. */
 .story-item {
   opacity: 0;
@@ -139,7 +134,7 @@
 
 /* ---------- Celular ---------- */
 @media (max-width: 767px) {
-  .story { height: 600vh; }
+  .story { height: 1300vh; }
   .story-stage { height: calc(100svh - var(--story-header)); }
   .story-vignette { background: linear-gradient(to bottom, hsl(var(--story-bg) / .35), hsl(var(--story-bg) / 0) 30%, hsl(var(--story-bg) / 0) 70%, hsl(var(--story-bg) / .35)); }
   .story-hero {
@@ -158,9 +153,7 @@
   .story-title { font-size: clamp(2.2rem, 10vw, 3rem); }
   .story-cta .story-title { font-size: clamp(2rem, 8.5vw, 2.6rem); }
   .story-body { font-size: 1rem; }
-  .story-stats { flex-direction: column; gap: 28px; }
-  .story-stat-number { font-size: 4.5rem; }
-  .story-marquee-text { font-size: 22vw; }
+  .story-marquee-text { font-size: 18vw; }
 }
 
 @media (prefers-reduced-motion: reduce) {
