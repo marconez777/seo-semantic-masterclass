@@ -55,6 +55,16 @@ const em = (vh: number) => ((vh / TOTAL) * 100).toFixed(2);
 /** O título do topo fica até aqui (vh) e some nos 15 vh seguintes. */
 const TOPO_ATE = 95;
 
+/**
+ * Velocidade máxima do vídeo, em segundos de vídeo por segundo real. 1 = o ritmo
+ * de quando se dá play. As marteladas e a explosão (até 11,5 s) andam no ritmo
+ * real; o resto pode ir um pouco mais rápido. Para trás, mais rápido ainda.
+ */
+const RITMO = (segundo: number) => (segundo < 11.5 ? 1 : 1.6);
+const RITMO_VOLTA = 3;
+/** Rolagem máxima percorrida por segundo onde o vídeo está parado (pausas), em vh. */
+const PAUSA_VH_S = 300;
+
 /** Quadros carregados antes dos outros, para a primeira imagem aparecer logo. */
 const FIRST_BATCH = 8;
 /** Downloads de quadro em paralelo depois do primeiro lote. */
@@ -177,6 +187,8 @@ const ScrollStorySection = () => {
       if (count) {
         const t = segundoEm(vh);
         desenhar(Math.min(Math.floor((t / duracao) * count), count - 1));
+        // O segundo em que o vídeo está, para conferir o ritmo no navegador.
+        root.dataset.segundo = t.toFixed(1);
       }
       if (hero) hero.style.opacity = String(clamp(1 - (vh - TOPO_ATE) / 15));
 
@@ -195,10 +207,33 @@ const ScrollStorySection = () => {
       }
     };
 
-    const laco = () => {
+    // A rolagem diz até onde o vídeo deve ir; o vídeo anda até lá no próprio ritmo,
+    // como se tivesse dado play. Rolada de rodinha pula ~300 px de uma vez: seguindo
+    // a rolagem na hora, 1–2 s de marteladas passavam num instante e parecia acelerado.
+    let ultimo = 0;
+    const laco = (agora: number) => {
+      const dt = ultimo ? Math.min((agora - ultimo) / 1000, 0.1) : 1 / 60;
+      ultimo = agora;
       alvo = progresso();
-      suave = reduceMotion ? alvo : suave + (alvo - suave) * 0.14;
-      if (Math.abs(alvo - suave) < 0.0002) suave = alvo;
+      if (reduceMotion) {
+        suave = alvo;
+      } else {
+        const atual = suave * TOTAL;
+        const falta = alvo * TOTAL - atual;
+        if (Math.abs(falta) < 0.05) {
+          suave = alvo;
+        } else {
+          // Nas pausas o vídeo não anda: a posição avança no máximo PAUSA_VH_S.
+          let passo = Math.sign(falta) * Math.min(Math.abs(falta), PAUSA_VH_S * dt);
+          const t0 = segundoEm(atual);
+          const dtVideo = Math.abs(segundoEm(atual + passo) - t0);
+          // Atraso grande (rolou muito de uma vez): o vídeo acelera aos poucos para alcançar.
+          const atraso = Math.abs(segundoEm(alvo * TOTAL) - t0);
+          const ritmo = (falta > 0 ? RITMO(t0) : RITMO_VOLTA) * clamp(1 + (atraso - 1.5) / 2, 1, 4);
+          if (dtVideo > ritmo * dt) passo *= (ritmo * dt) / dtVideo;
+          suave = (atual + passo) / TOTAL;
+        }
+      }
       aplicar(suave);
       raf = visivel ? requestAnimationFrame(laco) : 0;
     };
