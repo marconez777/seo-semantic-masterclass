@@ -117,7 +117,7 @@ export default function Dashboard() {
             <SidebarHeader className="p-4">
               <a href="/" className="flex items-center gap-2">
                 <img
-                  src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png"
+                  src="/mkart-logo.svg"
                   alt="Logo MK Art SEO"
                   className="h-8 w-auto"
                   loading="lazy"

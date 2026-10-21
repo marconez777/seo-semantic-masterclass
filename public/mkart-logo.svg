@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <title>MK Art</title>
+  <defs>
+    <!-- Roxo da marca: #6519CD. As variações são o mesmo matiz, só mais claro ou mais escuro. -->
+    <radialGradient id="bola" cx="50%" cy="42%" r="62%">
+      <stop offset="0" stop-color="#7A2EE0"/>
+      <stop offset="0.6" stop-color="#6519CD"/>
+      <stop offset="1" stop-color="#4E10A6"/>
+    </radialGradient>
+    <linearGradient id="brilho-cima" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.42"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="brilho-baixo" x1="0" y1="1" x2="0" y2="0">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="letra" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFFFFF"/>
+      <stop offset="1" stop-color="#F1EAFB"/>
+    </linearGradient>
+    <clipPath id="circulo"><circle cx="256" cy="256" r="240"/></clipPath>
+    <filter id="sombra" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="7" flood-color="#2E0670" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <!-- Bola -->
+  <circle cx="256" cy="256" r="240" fill="url(#bola)"/>
+
+  <!-- Reflexos: um arco largo em cima e uma luz de borda embaixo -->
+  <g clip-path="url(#circulo)">
+    <ellipse cx="256" cy="92" rx="196" ry="104" fill="url(#brilho-cima)"/>
+    <ellipse cx="256" cy="520" rx="230" ry="96" fill="url(#brilho-baixo)"/>
+  </g>
+  <circle cx="256" cy="256" r="236" fill="none" stroke="#FFFFFF" stroke-opacity="0.18" stroke-width="3"/>
+
+  <!-- MK: desenhado em formas, não depende de fonte -->
+  <g transform="translate(-17 0)" fill="url(#letra)" stroke="url(#letra)" stroke-width="8" stroke-linejoin="round" filter="url(#sombra)">
+    <path d="M106 346 V166 H152 L186 236 L220 166 H266 V346 H224 V250 L200 298 H172 L148 250 V346 Z"/>
+    <path transform="translate(6 0)" d="M288 166 H332 V238 L378 166 H430 L370 252 L434 346 H382 L342 284 L332 296 V346 H288 Z"/>
+  </g>
+</svg>

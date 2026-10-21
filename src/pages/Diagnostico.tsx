@@ -134,7 +134,7 @@ Dados:
 
         <div className="relative z-10 w-full flex justify-center pt-8 pb-2">
           <img
-            src="/images/mkart-logo.png"
+            src="/mkart-logo.svg"
             alt="MK Art"
             className="h-10 md:h-12 w-auto"
           />

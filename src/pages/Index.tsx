@@ -31,7 +31,7 @@ const Index = () => {
     url: "https://mkart.com.br",
     description:
       "Agência de backlinks especializada em guest posts editoriais em portais brasileiros, com catálogo aberto e garantia de 30 dias.",
-    logo: "https://mkart.com.br/LOGOMK.png",
+    logo: "https://mkart.com.br/mkart-logo-512.png",
     contactPoint: {
       "@type": "ContactPoint",
       telephone: "+55 11 98915-1997",

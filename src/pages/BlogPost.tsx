@@ -120,7 +120,7 @@ export default function BlogPost() {
           dateModified: post.updated_at,
           image: post.cover_image,
           publisher: "MK Art SEO",
-          publisherLogo: "https://mkart.com.br/LOGOMK.png"
+          publisherLogo: "https://mkart.com.br/mkart-logo-512.png"
         }}
       />
 

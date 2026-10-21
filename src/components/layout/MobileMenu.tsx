@@ -55,7 +55,7 @@ export function MobileMenu({ isLoggedIn, userName, isAdmin, onSignOut }: MobileM
           <div className="p-4 border-b">
             <div className="flex items-center space-x-2">
               <img 
-                src="/lovable-uploads/cf1b72dd-c973-4cdf-a2f6-fd7ce7ed8d4d.png" 
+                src="/mkart-logo.svg" 
                 alt="Logo MK Art" 
                 className="w-8 h-8" 
               />
